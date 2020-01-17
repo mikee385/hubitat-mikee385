@@ -20,6 +20,8 @@ metadata {
         capability "Switch"
 
         attribute "state", "enum", ["running", "finished", "unstarted"]
+        attribute "stateColor", "enum", ["running-blue", "running-orange", "running-gray", "finished-blue", "finished-orange", "finished-gray", "unstarted-blue", "unstarted-orange", "unstarted-gray"]
+
         attribute "running", "boolean"
         attribute "finished", "boolean"
         attribute "unstarted", "boolean"
@@ -28,50 +30,38 @@ metadata {
         command "finish"
         command "reset"
     }
+    
+    preferences {
+        input name: "stateColorRunning", type: "enum", title: "What color should be shown for 'Running'?", options: ["Blue", "Orange", "Gray"], defaultValue: "Blue", required: true, displayDuringSetup: false
+        input name: "stateColorFinished", type: "enum", title: "What color should be shown for 'Finished'?", options: ["Blue", "Orange", "Gray"], defaultValue: "Orange", required: true, displayDuringSetup: false
+        input name: "stateColorUnstarted", type: "enum", title: "What color should be shown for 'Unstarted'?", options: ["Blue", "Orange", "Gray"], defaultValue: "Gray", required: true, displayDuringSetup: false
+    }
 }
 
 def installed() {
-    log.debug "Executing 'installed'"
-    
     initialize()
 }
 
 def updated() {
-    log.debug "Executing 'updated'"
-    
     unschedule()
     initialize()
 }
 
 def initialize() {
-    log.debug "Executing 'initialize'"
-    
     if (!device.currentValue("state")) {
         reset()
     }
 }
 
-// parse events into attributes
-def parse(String description) {
-    log.debug "Parsing '${description}'"
-}
-
-// handle commands
 def on() {
-    log.debug "Executing 'on'"
-    
     start()
 }
 
 def off() {
-    log.debug "Executing 'off'"
-    
     finish()
 }
 
 def start() {
-    log.debug "Executing 'start'"    
-    
     sendEvent(name: "state", value: "running", descriptionText: "$device.displayName changed to running", displayed: true)
     
     sendEvent(name: "running", value: true, displayed: false)
@@ -79,11 +69,19 @@ def start() {
     sendEvent(name: "unstarted", value: false, displayed: false)
     
     sendEvent(name: "switch", value: "on", displayed: false)
+    
+    if (stateColorRunning == "Blue") {
+        sendEvent(name: "stateColor", value: "running-blue", displayed: false)
+    } else if (stateColorRunning == "Orange") {
+        sendEvent(name: "stateColor", value: "running-orange", displayed: false)
+    } else if (stateColorRunning == "Gray") {
+        sendEvent(name: "stateColor", value: "running-gray", displayed: false)
+    } else {
+        sendEvent(name: "stateColor", value: "running-blue", displayed: false)
+    }
 }
 
 def finish() {
-    log.debug "Executing 'finish'"
-    
     sendEvent(name: "state", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)
     
     sendEvent(name: "running", value: false, displayed: false)
@@ -91,11 +89,19 @@ def finish() {
     sendEvent(name: "unstarted", value: false, displayed: false)
     
     sendEvent(name: "switch", value: "off", displayed: false)
+    
+    if (stateColorFinished == "Blue") {
+        sendEvent(name: "stateColor", value: "finished-blue", displayed: false)
+    } else if (stateColorFinished == "Orange") {
+        sendEvent(name: "stateColor", value: "finished-orange", displayed: false)
+    } else if (stateColorFinished == "Gray") {
+        sendEvent(name: "stateColor", value: "finished-gray", displayed: false)
+    } else {
+        sendEvent(name: "stateColor", value: "finished-orange", displayed: false)
+    }
 }
 
 def reset() {
-    log.debug "Executing 'reset'"
-    
     sendEvent(name: "state", value: "unstarted", descriptionText: "$device.displayName changed to unstarted", displayed: true)
     
     sendEvent(name: "running", value: false, displayed: false)
@@ -103,4 +109,14 @@ def reset() {
     sendEvent(name: "unstarted", value: true, displayed: false)
     
     sendEvent(name: "switch", value: "off", displayed: false)
+    
+    if (stateColorUnstarted == "Blue") {
+        sendEvent(name: "stateColor", value: "unstarted-blue", displayed: false)
+    } else if (stateColorUnstarted == "Orange") {
+        sendEvent(name: "stateColor", value: "unstarted-orange", displayed: false)
+    } else if (stateColorUnstarted == "Gray") {
+        sendEvent(name: "stateColor", value: "unstarted-gray", displayed: false)
+    } else {
+        sendEvent(name: "stateColor", value: "unstarted-gray", displayed: false)
+    }
 }
