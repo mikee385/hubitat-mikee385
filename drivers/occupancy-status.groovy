@@ -16,7 +16,6 @@
 metadata {
     definition (name: "Occupancy Status", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.groovy") {
         capability "Actuator"
-        capability "Occupancy Sensor"
         capability "Sensor"
 
         attribute "state", "enum", ["occupied", "vacant", "checking", "blind"]
@@ -94,8 +93,6 @@ private def setStateToOccupied() {
     sendEvent(name: "checking", value: false, displayed: false)
     sendEvent(name: "blind", value: false, displayed: false)
     
-    sendEvent(name: "occupancy", value: 'occupied', displayed: false)
-    
     unschedule()
 }
 
@@ -107,8 +104,6 @@ private def setStateToVacant() {
     sendEvent(name: "checking", value: false, displayed: false)
     sendEvent(name: "blind", value: false, displayed: false)
     
-    sendEvent(name: "occupancy", value: 'unoccupied', displayed: false)
-    
     unschedule()
 }
 
@@ -119,8 +114,6 @@ private def setStateToChecking() {
     sendEvent(name: "vacant", value: false, displayed: false)
     sendEvent(name: "checking", value: true, displayed: false)
     sendEvent(name: "blind", value: false, displayed: false)
-
-    sendEvent(name: "occupancy", value: 'occupied', displayed: false)
 }
 
 private def setStateToBlind() {
@@ -130,6 +123,4 @@ private def setStateToBlind() {
     sendEvent(name: "vacant", value: false, displayed: false)
     sendEvent(name: "checking", value: true, displayed: false)
     sendEvent(name: "blind", value: true, displayed: false)
-
-    sendEvent(name: "occupancy", value: 'occupied', displayed: false)
 }
