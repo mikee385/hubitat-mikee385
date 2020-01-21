@@ -14,7 +14,7 @@
  *
  */
 metadata {
-    definition (name: "Occupancy Status", namespace: "mikee385", author: "Michael Pierce") {
+    definition (name: "Occupancy Status", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.groovy") {
         capability "Actuator"
         capability "Occupancy Sensor"
         capability "Sensor"
