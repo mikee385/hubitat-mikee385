@@ -42,7 +42,7 @@ preferences {
 def settings() {
     dynamicPage(name: "settings", title: "Ecobee Home/Away", install: true, uninstall: true, submitOnChange: true) {
         section("Ecobee Thermostats") {
-            input "thermostats", "device.ecobeeSuiteThermostat", title: "Which thermostats should be controlled?", required: true, submitOnChange: true
+            input "thermostats", "device.ecobeeSuiteThermostat", title: "Which thermostats should be controlled?", multiple: true, required: true, submitOnChange: true
         }
         if (thermostats) {
 			section("Pause Switch") {
