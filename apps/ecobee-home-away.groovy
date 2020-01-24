@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() 		{ return "1.0.0-beta6" }
+String getVersionNum() 		{ return "1.0.0-beta7" }
 String getVersionLabel() 	{ return "Ecobee Home/Away Controller, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -47,8 +47,8 @@ def settings() {
         if (thermostats) {
 			section("Pause Switch") {
 				input "pauseSwitch", "capability.switch", title: "Which switch should pause and resume the automation? (optional)", required: false, submitOnChange: true
-				if (pauseSwitch) input "pauseSwitchStatus", "enum", title: "Pause automation when switch is:", options: [turnedOn, turnedOff], required: true, submitOnChange: true
-				if (pauseSwitch && pauseSwitchStatus) {
+				if (pauseSwitch) input "pauseStatus", "enum", title: "Pause automation when switch is:", options: [turnedOn, turnedOff], required: true, submitOnChange: true
+				if (pauseSwitch && pauseStatus) {
 					if (reminderPause == turnedOn) {
 						paragraph "Automation will pause when ${pauseSwitch} is turned on and will resume when ${pauseSwitch} is turned off."
 					} else {
@@ -66,12 +66,23 @@ def settings() {
     }
 }
 
+def getIsPaused() {
+	if (pauseSwitch && pauseStatus) {
+		def currentStatus = pauseSwitch.currentValue("switch")
+		if ((currentStatus == "on" && pauseStatus == turnedOn) || (currentStatus == "off" && pauseStatus == turnedOff)) {
+			return true
+		}
+	}
+	return false
+}
+
 def installed() {
     initialize()
 }
 
 def updated() {
     unsubscribe()
+	unschedule()
     initialize()
 
 	if (logEnable) {
@@ -103,26 +114,60 @@ def initialize() {
 		subscribe(thermostat, "currentProgram", currentHandler)
 		subscribe(thermostat, "currentProgramName", currentHandler)
 	}
+	
+	if (pauseSwitch && pauseStatus) {
+		subscribe(pauseSwitch, "switch", switchHandler)
+	}
 }
 
 def modeHandler(evt) {
 	logDebug("EHA: Mode changed to ${evt.value}")
+	
+    if (!isPaused) {
+		for (thermostat in thermostats) {
+			updateThermostat(thermostat, evt.value, false)
+		}
 
-	for (thermostat in thermostats) {
-		updateThermostat(thermostat, evt.value, false)
+	} else {
+		logDebug("EHA: Automation is paused")
 	}
 }
 
 def scheduleHandler(evt) {
 	logDebug("EHA: ${evt.device} schedule changed to ${evt.value}")
+	
+    if (!isPaused) {
+		updateThermostat(evt.device, location.mode, true)
 
-	updateThermostat(evt.device, location.mode, true)
+	} else {
+		logDebug("EHA: Automation is paused")
+	}
 }
 
 def currentHandler(evt) {
 	logDebug("EHA: ${evt.device} current changed to ${evt.value}")
+	
+    if (!isPaused) {
+		updateThermostat(evt.device, location.mode, false)
 
-	updateThermostat(evt.device, location.mode, false)
+	} else {
+		logDebug("EHA: Automation is paused")
+	}
+}
+
+def switchHandler(evt) {
+	logDebug("EHA: ${evt.device} current changed to ${evt.value}, with pausing when ${pauseStatus}")
+    
+    if (!isPaused) {
+		logDebug("EHA: ${evt.device} is active, so automations will resume")
+
+		for (thermostat in thermostats) {
+			updateThermostat(thermostat, location.mode, false)
+		}
+
+	} else {
+		logDebug("EHA: ${evt.device} is inactive, so automations will be paused")
+	}
 }
 
 private def updateThermostat(thermostat, mode, scheduleChanged) {
