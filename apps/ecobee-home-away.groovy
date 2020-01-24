@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() 		{ return "1.0.0-beta4" }
+String getVersionNum() 		{ return "1.0.0-beta5" }
 String getVersionLabel() 	{ return "Ecobee Home/Away Controller, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -56,6 +56,9 @@ def settings() {
 					}
 				}
 			}
+			section("Notification") {
+				input "sendPushMessage", "capability.notification", title: "Notification Devices:", multiple: true, required: false, submitOnChange: true
+			}
 		}
     }
 }
@@ -80,36 +83,63 @@ def initialize() {
 }
 
 def modeHandler(evt) {
+	if (sendPushMessage)
+		sendPushMessage.deviceNotification("EHA: Mode changed to ${evt.value}")
+
 	for (thermostat in thermostats) {
 		updateThermostat(thermostat, evt.value, false)
 	}
 }
 
 def scheduleHandler(evt) {
+	if (sendPushMessage)
+		sendPushMessage.deviceNotification("EHA: ${evt.device} schedule changed to ${evt.value}")
+
 	updateThermostat(evt.device, location.mode, true)
 }
 
 def currentHandler(evt) {
+	if (sendPushMessage)
+		sendPushMessage.deviceNotification("EHA: ${evt.device} current changed to ${evt.value}")
+
 	updateThermostat(evt.device, location.mode, false)
 }
 
 private def updateThermostat(thermostat, mode, scheduleChanged) {
+	if (sendPushMessage)
+		sendPushMessage.deviceNotification("EHA: Updating ${thermostat}")
+
 	def scheduleId = thermostat.currentValue("scheduledProgram")
 	def currentId = thermostat.currentValue("currentProgram")
 	def currentName = thermostat.currentValue("currentProgramName")
     
 	if (mode == "Away") {
 		if (scheduleId == "Away") {
+			if (sendPushMessage)
+				sendPushMessage.deviceNotification("EHA: Setting schedule away for ${thermostat}")
+
 			setScheduleAway(thermostat, currentId, currentName)
 		} else if (scheduleChanged) {
+			if (sendPushMessage)
+				sendPushMessage.deviceNotification("EHA: Setting schedule home for ${thermostat}")
+
 			setScheduleHome(thermostat, currentId, currentName)
 		} else {
+			if (sendPushMessage)
+				sendPushMessage.deviceNotification("EHA: Setting hold away for ${thermostat}")
+
 			setHoldAway(thermostat, currentId, currentName)
 		}
 	} else {
 		if (scheduleId == "Away") {
+			if (sendPushMessage)
+				sendPushMessage.deviceNotification("EHA: Setting hold home for ${thermostat}")
+
 			setHoldHome(thermostat, currentId, currentName)
 		} else {
+			if (sendPushMessage)
+				sendPushMessage.deviceNotification("EHA: Setting schedule home for ${thermostat}")
+
 			setScheduleHome(thermostat, currentId, currentName)
 		}
 	}
@@ -117,28 +147,46 @@ private def updateThermostat(thermostat, mode, scheduleChanged) {
 
 private def setScheduleAway(thermostat, currentId, currentName) {
 	if (currentName == "Hold: Away") {
+		if (sendPushMessage)
+			sendPushMessage.deviceNotification("EHA: Resuming program for ${thermostat} (Hold: Away)")
+
 		thermostat.resumeProgram()
 	} else if (currentId != "Away") {
+		if (sendPushMessage)
+			sendPushMessage.deviceNotification("EHA: Resuming program for ${thermostat} (Home)")
+
 		thermostat.resumeProgram()
 	}
 }
 
 private def setHoldAway(thermostat, currentId, currentName) {
 	if (currentId != "Away") {
+		if (sendPushMessage)
+			sendPushMessage.deviceNotification("EHA: Setting Hold: Away for ${thermostat}")
+
 		thermostat.away()
 	}
 }
 
 private def setScheduleHome(thermostat, currentId, currentName) {
 	if (currentName == "Hold: Home") {
+		if (sendPushMessage)
+			sendPushMessage.deviceNotification("EHA: Resuming program for ${thermostat} (Hold: Home)")
+
 		thermostat.resumeProgram()
 	} else if (currentId == "Away") {
+		if (sendPushMessage)
+			sendPushMessage.deviceNotification("EHA: Resuming program for ${thermostat} (Away)")
+
 		thermostat.resumeProgram()
 	}
 }
 
 private def setHoldHome(thermostat, currentId, currentName) {
 	if (currentId == "Away") {
+		if (sendPushMessage)
+			sendPushMessage.deviceNotification("EHA: Setting Hold: Home for ${thermostat}")
+
 		thermostat.present()
 	}
 }
