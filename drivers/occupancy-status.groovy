@@ -19,11 +19,6 @@ metadata {
         capability "Sensor"
 
         attribute "state", "enum", ["occupied", "vacant", "checking", "blind"]
-        
-        attribute "occupied", "boolean"
-        attribute "vacant", "boolean"
-        attribute "checking", "boolean"
-        attribute "blind", "boolean"
 
         command "occupied"
         command "vacant"
@@ -86,41 +81,19 @@ def resumeFromChecking() {
 }
 
 private def setStateToOccupied() {
-    sendEvent(name: "state", value: "occupied", descriptionText: "$device.displayName changed to occupied", displayed: true)
-    
-    sendEvent(name: "occupied", value: true, displayed: false)
-    sendEvent(name: "vacant", value: false, displayed: false)
-    sendEvent(name: "checking", value: false, displayed: false)
-    sendEvent(name: "blind", value: false, displayed: false)
-    
+    sendEvent(name: "state", value: "occupied", descriptionText: "$device.displayName changed to occupied", displayed: true)    
     unschedule()
 }
 
 private def setStateToVacant() {
-    sendEvent(name: "state", value: "vacant", descriptionText: "$device.displayName changed to vacant", displayed: true)
-    
-    sendEvent(name: "occupied", value: false, displayed: false)
-    sendEvent(name: "vacant", value: true, displayed: false)
-    sendEvent(name: "checking", value: false, displayed: false)
-    sendEvent(name: "blind", value: false, displayed: false)
-    
+    sendEvent(name: "state", value: "vacant", descriptionText: "$device.displayName changed to vacant", displayed: true)    
     unschedule()
 }
 
 private def setStateToChecking() {
     sendEvent(name: "state", value: "checking", descriptionText: "$device.displayName changed to checking", displayed: true)
-
-    sendEvent(name: "occupied", value: true, displayed: false)
-    sendEvent(name: "vacant", value: false, displayed: false)
-    sendEvent(name: "checking", value: true, displayed: false)
-    sendEvent(name: "blind", value: false, displayed: false)
 }
 
 private def setStateToBlind() {
     sendEvent(name: "state", value: "blind", descriptionText: "$device.displayName changed to blind", displayed: true)
-
-    sendEvent(name: "occupied", value: true, displayed: false)
-    sendEvent(name: "vacant", value: false, displayed: false)
-    sendEvent(name: "checking", value: true, displayed: false)
-    sendEvent(name: "blind", value: true, displayed: false)
 }

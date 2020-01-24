@@ -22,10 +22,6 @@ metadata {
         attribute "state", "enum", ["running", "finished", "unstarted"]
         attribute "stateColor", "enum", ["running-blue", "running-orange", "running-gray", "finished-blue", "finished-orange", "finished-gray", "unstarted-blue", "unstarted-orange", "unstarted-gray"]
 
-        attribute "running", "boolean"
-        attribute "finished", "boolean"
-        attribute "unstarted", "boolean"
-
         command "start"
         command "finish"
         command "reset"
@@ -62,12 +58,7 @@ def off() {
 }
 
 def start() {
-    sendEvent(name: "state", value: "running", descriptionText: "$device.displayName changed to running", displayed: true)
-    
-    sendEvent(name: "running", value: true, displayed: false)
-    sendEvent(name: "finished", value: false, displayed: false)
-    sendEvent(name: "unstarted", value: false, displayed: false)
-    
+    sendEvent(name: "state", value: "running", descriptionText: "$device.displayName changed to running", displayed: true)    
     sendEvent(name: "switch", value: "on", displayed: false)
     
     if (stateColorRunning == "Blue") {
@@ -82,12 +73,7 @@ def start() {
 }
 
 def finish() {
-    sendEvent(name: "state", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)
-    
-    sendEvent(name: "running", value: false, displayed: false)
-    sendEvent(name: "finished", value: true, displayed: false)
-    sendEvent(name: "unstarted", value: false, displayed: false)
-    
+    sendEvent(name: "state", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)    
     sendEvent(name: "switch", value: "off", displayed: false)
     
     if (stateColorFinished == "Blue") {
@@ -102,12 +88,7 @@ def finish() {
 }
 
 def reset() {
-    sendEvent(name: "state", value: "unstarted", descriptionText: "$device.displayName changed to unstarted", displayed: true)
-    
-    sendEvent(name: "running", value: false, displayed: false)
-    sendEvent(name: "finished", value: false, displayed: false)
-    sendEvent(name: "unstarted", value: true, displayed: false)
-    
+    sendEvent(name: "state", value: "unstarted", descriptionText: "$device.displayName changed to unstarted", displayed: true)    
     sendEvent(name: "switch", value: "off", displayed: false)
     
     if (stateColorUnstarted == "Blue") {
