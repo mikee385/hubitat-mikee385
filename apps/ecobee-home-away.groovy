@@ -57,7 +57,7 @@ def settings() {
 				}
 			}
 			section("Debugging") {
-				input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+				input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, submitOnChange: true
 				if (logEnable) {
 					input "sendPushMessage", "capability.notification", title: "Notification Devices (optional)", multiple: true, required: false, submitOnChange: true
 				}
@@ -85,10 +85,10 @@ def updated() {
 	unschedule()
     initialize()
 
-	if (logEnable) {
-		log.warn "Debug logging enabled for 30 minutes"
-		runIn(1800, logsOff)
-	}
+	//if (logEnable) {
+	//	log.warn "Debug logging enabled for 30 minutes"
+	//	runIn(1800, logsOff)
+	//}
 }
 
 def logsOff(){
