@@ -21,7 +21,22 @@
         capability "PushableButton"
 		capability "Sensor"
 		capability "Switch"
+		
+		command "push", ["number"]
 	}
+}
+
+def installed() {
+    initialize()
+}
+
+def updated() {
+    unschedule()
+    initialize()
+}
+
+def initialize() {
+    sendEvent(name: "numberOfButtons", value: 1)
 }
 
 def toggleOff() {
