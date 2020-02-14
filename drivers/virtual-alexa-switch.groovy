@@ -14,20 +14,20 @@
  *
  */
  metadata {
-	definition (name: "Virtual Alexa Switch", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-switch.groovy") {
-		capability "Actuator"
-		capability "Contact Sensor"
-		capability "Sensor"
-		capability "Switch"
-	}
+    definition (name: "Virtual Alexa Switch", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-switch.groovy") {
+        capability "Actuator"
+        capability "Contact Sensor"
+        capability "Sensor"
+        capability "Switch"
+    }
 }
 
 def on() {
-	sendEvent(name: "switch", value: "on")
-	sendEvent(name: "contact", value: "open")
+    sendEvent(name: "switch", value: "on")
+    sendEvent(name: "contact", value: "open")
 }
 
 def off() {
-	sendEvent(name: "switch", value: "off")
-	sendEvent(name: "contact", value: "closed")
+    sendEvent(name: "switch", value: "off")
+    sendEvent(name: "contact", value: "closed")
 }
