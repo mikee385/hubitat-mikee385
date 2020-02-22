@@ -17,11 +17,11 @@ metadata {
     definition (name: "Person Status", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy") {
         capability "Actuator"
         capability "Presence Sensor"
-		capability "Sensor"
+        capability "Sensor"
         capability "Sleep Sensor"
 
         attribute "state", "enum", ["home", "away", "sleep"]
-		
+        
         command "awake"
         command "asleep"
         command "arrived"

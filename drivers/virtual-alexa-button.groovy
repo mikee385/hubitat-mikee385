@@ -14,16 +14,16 @@
  *
  */
  metadata {
-	definition (name: "Virtual Alexa Button", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-button.groovy") {
-		capability "Actuator"
-		capability "Contact Sensor"
-		capability "Momentary"
+    definition (name: "Virtual Alexa Button", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-button.groovy") {
+        capability "Actuator"
+        capability "Contact Sensor"
+        capability "Momentary"
         capability "PushableButton"
-		capability "Sensor"
-		capability "Switch"
-		
-		command "push", ["number"]
-	}
+        capability "Sensor"
+        capability "Switch"
+        
+        command "push", ["number"]
+    }
 }
 
 def installed() {
@@ -40,28 +40,28 @@ def initialize() {
 }
 
 def toggleOff() {
-	sendEvent(name: "switch", value: "off", isStateChange: true)
-	sendEvent(name: "contact", value: "closed", isStateChange: true)
+    sendEvent(name: "switch", value: "off", isStateChange: true)
+    sendEvent(name: "contact", value: "closed", isStateChange: true)
 }
 
 def push(button) {
-	sendEvent(name: "switch", value: "on", isStateChange: true)
-	sendEvent(name: "contact", value: "open", isStateChange: true)
+    sendEvent(name: "switch", value: "on", isStateChange: true)
+    sendEvent(name: "contact", value: "open", isStateChange: true)
 
-	sendEvent(name: "momentary", value: "pushed", isStateChange: true)	
+    sendEvent(name: "momentary", value: "pushed", isStateChange: true)    
     sendEvent(name: "pushed", value: "${button}", isStateChange: true, type: "digital")
-	
+    
     runIn(1, toggleOff)
 }
 
 def push() {
-	push(1)
+    push(1)
 }
 
 def on() {
-	push()
+    push()
 }
 
 def off() {
-	push()
+    push()
 }
