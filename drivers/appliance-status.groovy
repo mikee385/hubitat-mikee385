@@ -21,6 +21,10 @@ metadata {
 
         attribute "state", "enum", ["running", "finished", "unstarted"]
         attribute "stateColor", "enum", ["running-blue", "running-orange", "running-gray", "finished-blue", "finished-orange", "finished-gray", "unstarted-blue", "unstarted-orange", "unstarted-gray"]
+        
+        attribute "startTime", "string"
+        attribute "finishTime", "string"
+        attribute "resetTime", "string"
 
         command "start"
         command "finish"
@@ -60,6 +64,7 @@ def off() {
 def start() {
     sendEvent(name: "state", value: "running", descriptionText: "$device.displayName changed to running", displayed: true)    
     sendEvent(name: "switch", value: "on", displayed: false)
+    sendEvent(name: "startTime", value: new Date(), displayed: false)
     
     if (stateColorRunning == "Blue") {
         sendEvent(name: "stateColor", value: "running-blue", displayed: false)
@@ -75,6 +80,7 @@ def start() {
 def finish() {
     sendEvent(name: "state", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)    
     sendEvent(name: "switch", value: "off", displayed: false)
+    sendEvent(name: "finishTime", value: new Date(), displayed: false)
     
     if (stateColorFinished == "Blue") {
         sendEvent(name: "stateColor", value: "finished-blue", displayed: false)
@@ -90,6 +96,7 @@ def finish() {
 def reset() {
     sendEvent(name: "state", value: "unstarted", descriptionText: "$device.displayName changed to unstarted", displayed: true)    
     sendEvent(name: "switch", value: "off", displayed: false)
+    sendEvent(name: "resetTime", value: new Date(), displayed: false)
     
     if (stateColorUnstarted == "Blue") {
         sendEvent(name: "stateColor", value: "unstarted-blue", displayed: false)
