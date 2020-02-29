@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta8" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Ecobee Home/Away Controller, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -85,10 +85,10 @@ def updated() {
     unschedule()
     initialize()
 
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
+    if (logEnable) {
+        log.warn "Debug logging enabled for 30 minutes"
+        runIn(1800, logsOff)
+    }
 }
 
 def logsOff(){
