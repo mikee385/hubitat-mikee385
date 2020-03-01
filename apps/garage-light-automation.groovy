@@ -92,7 +92,7 @@ def overheadDoorHandler(evt) {
     
     if (overheadDoor.currentValue("contact") == "open") {
         def sunRiseSet = getSunriseAndSunset()
-        if (timeOfDayIsBetween(sunRiseSet.sunset.time, sunRiseSet.sunrise.time, new Date(), location.timeZone)) {
+        if (timeOfDayIsBetween(sunRiseSet.sunset, sunRiseSet.sunrise, new Date(), location.timeZone)) {
             light.on()
         } else {
             light.off()
