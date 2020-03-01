@@ -31,9 +31,9 @@ preferences {
     page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
         section("Devices") {
             input "occupancy", "capability.actuator", title: "Occupancy Status", multiple: false, required: true
-            input "overheadDoor", "capability.contact", title: "Overhead Door", multiple: false, required: true
-            input "entryDoor", "capability.contact", title: "Entry Door", multiple: false, required: true
-            input "sideDoor", "capability.contact", title: "Side Door", multiple: false, required: true
+            input "overheadDoor", "capability.contactSensor", title: "Overhead Door", multiple: false, required: true
+            input "entryDoor", "capability.contactSensor", title: "Entry Door", multiple: false, required: true
+            input "sideDoor", "capability.contactSensor", title: "Side Door", multiple: false, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
             input "light", "capability.switch", title: "Light", multiple: false, required: true
         }
