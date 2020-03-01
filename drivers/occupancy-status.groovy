@@ -19,6 +19,7 @@ metadata {
         capability "Sensor"
 
         attribute "state", "enum", ["occupied", "vacant", "checking", "blind"]
+        attribute "occupancy", "enum", ["occupied", "unoccupied"]
 
         command "occupied"
         command "vacant"
@@ -81,19 +82,23 @@ def resumeFromChecking() {
 }
 
 private def setStateToOccupied() {
-    sendEvent(name: "state", value: "occupied", descriptionText: "$device.displayName changed to occupied", displayed: true)    
+    sendEvent(name: "state", value: "occupied", descriptionText: "$device.displayName changed to occupied", displayed: true)
+    sendEvent(name: "occupancy", value: "occupied", displayed: false)
     unschedule()
 }
 
 private def setStateToVacant() {
-    sendEvent(name: "state", value: "vacant", descriptionText: "$device.displayName changed to vacant", displayed: true)    
+    sendEvent(name: "state", value: "vacant", descriptionText: "$device.displayName changed to vacant", displayed: true)
+    sendEvent(name: "occupancy", value: "unoccupied", displayed: false)
     unschedule()
 }
 
 private def setStateToChecking() {
     sendEvent(name: "state", value: "checking", descriptionText: "$device.displayName changed to checking", displayed: true)
+    sendEvent(name: "occupancy", value: "occupied", displayed: false)
 }
 
 private def setStateToBlind() {
     sendEvent(name: "state", value: "blind", descriptionText: "$device.displayName changed to blind", displayed: true)
+    sendEvent(name: "occupancy", value: "occupied", displayed: false)
 }
