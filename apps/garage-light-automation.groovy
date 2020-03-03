@@ -52,10 +52,10 @@ def updated() {
     unschedule()
     initialize()
 
-    if (logEnable) {
-        log.warn "Debug logging enabled for 30 minutes"
-        runIn(1800, logsOff)
-    }
+    //if (logEnable) {
+    //    log.warn "Debug logging enabled for 30 minutes"
+    //    runIn(1800, logsOff)
+    //}
 }
 
 def logsOff(){
@@ -77,6 +77,48 @@ def initialize() {
     subscribe(sideDoor, "contact", sideDoorHandler)
     
     subscribe(motionSensor, "motion.active", activeHandler)
+    
+    subscribe(location, "sunriseTime", sunriseTimeHandler)
+            scheduleTime(location.currentValue("sunriseTime"), sunriseHandler)
+
+            subscribe(location, "sunsetTime", sunsetTimeHandler)
+            scheduleTime(location.currentValue("sunsetTime"), sunsetHandler)
+}
+
+def sunriseTimeHandler(evt) {
+    logDebug("Received sunrise time event")
+    
+    scheduleTime(evt.value, sunriseHandler)
+}
+
+def sunsetTimeHandler(evt) {
+    logDebug("Recieved sunset time event")
+        
+    scheduleTime(evt.value, sunsetHandler)
+}
+
+def scheduleTime(timeString, handler) {
+    def timeValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timeString)
+
+    logDebug("Scheduling for: $timeValue")
+
+    runOnce(timeValue, handler, [overwrite: false])
+}
+
+def sunriseHandler(evt) {
+    logDebug("Received sunrise event")
+    
+    if (overheadDoor.currentValue("contact") == "open") {
+        light.off()
+    }
+}
+
+def sunsetHandler(evt) {
+    logDebug("Received sunset event")
+    
+    if (overheadDoor.currentValue("contact") == "open") {
+        light.on()
+    }
 }
 
 def vacantHandler(evt) {
