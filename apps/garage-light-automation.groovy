@@ -79,27 +79,28 @@ def initialize() {
     subscribe(motionSensor, "motion.active", activeHandler)
     
     subscribe(location, "sunriseTime", sunriseTimeHandler)
-            scheduleTime(location.currentValue("sunriseTime"), sunriseHandler)
-
-            subscribe(location, "sunsetTime", sunsetTimeHandler)
-            scheduleTime(location.currentValue("sunsetTime"), sunsetHandler)
+    subscribe(location, "sunsetTime", sunsetTimeHandler)
+    
+    def sunRiseSet = getSunriseAndSunset()
+    scheduleTime(sunRiseSet.sunrise, sunriseHandler)
+    scheduleTime(sunRiseSet.sunset, sunsetHandler)
 }
 
 def sunriseTimeHandler(evt) {
     logDebug("Received sunrise time event")
     
-    scheduleTime(evt.value, sunriseHandler)
+    def timeValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", evt.value)
+    scheduleTime(timeValue, sunriseHandler)
 }
 
 def sunsetTimeHandler(evt) {
     logDebug("Recieved sunset time event")
-        
-    scheduleTime(evt.value, sunsetHandler)
+    
+    def timeValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", evt.value)
+    scheduleTime(timeValue, sunsetHandler)
 }
 
-def scheduleTime(timeString, handler) {
-    def timeValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timeString)
-
+def scheduleTime(timeValue, handler) {
     logDebug("Scheduling for: $timeValue")
 
     runOnce(timeValue, handler, [overwrite: false])
