@@ -35,7 +35,7 @@ preferences {
             input "frontDoor", "capability.contactSensor", title: "Front Door", multiple: false, required: true
             input "primaryPerson", "capability.presenceSensor", title: "Primary Person", multiple: false, required: true
             input "otherPeople", "capability.presenceSensor", title: "Other People", multiple: true, required: true
-            input "notifier", "capability.notification", multiple: false, required: true
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, submitOnChange: true
         }
     }
@@ -91,7 +91,7 @@ def bedroomDoorHandler(evt) {
     
     if (frontDoor.currentValue("contact") == "open") {
         sendAlert()
-    } else if (state.waitingForBedroomDoor) {
+    } else if (state.waitForBedroomDoor) {
         sendAlert()
     } else {
         state.waitForFrontDoor = true
@@ -108,7 +108,7 @@ def frontDoorHandler(evt) {
     
     if (bedroomDoor.currentValue("contact") == "open") {
         sendAlert()
-    } else if (state.waitingForFrontDoor) {
+    } else if (state.waitForFrontDoor) {
         sendAlert()
     } else {
         state.waitForBedroomDoor = true
