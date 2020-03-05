@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta4" }
+String getVersionNum() { return "1.0.0-beta5" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -127,7 +127,7 @@ def personHandler(evt) {
             }
         }
         if (everyoneLeft) {
-            notifier.notification("Do you still have guests?")
+            notifier.deviceNotification("Do you still have guests?")
         }
     }
 }
@@ -141,9 +141,9 @@ def sendAlert() {
     state.waitForFrontDoor = false
     
     if (guest.currentValue("presence") == "present") {
-        notifier.notification("Are guests leaving?")
+        notifier.deviceNotification("Are guests leaving?")
     } else {
-        notifier.notification("Have guests arrived?")
+        notifier.deviceNotification("Have guests arrived?")
     }
 }
 
