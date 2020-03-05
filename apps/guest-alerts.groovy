@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta5" }
+String getVersionNum() { return "1.0.0-beta6" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -88,6 +88,9 @@ def bedroomDoorHandler(evt) {
     if (now() < state.lockoutTime) {
         return
     }
+    if (guest.currentValue("presence") == "not present" && primaryPerson.currentValue("state") == "sleep") {
+        return
+    }
     
     if (frontDoor.currentValue("contact") == "open") {
         sendAlert()
@@ -103,6 +106,9 @@ def frontDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (now() < state.lockoutTime) {
+        return
+    }
+    if (guest.currentValue("presence") == "not present" && primaryPerson.currentValue("state") == "sleep") {
         return
     }
     
