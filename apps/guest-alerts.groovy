@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -77,7 +77,7 @@ def initialize() {
     subscribe(frontDoor, "contact.open", frontDoorHandler)
     
     subscribe(primaryPerson, "presence.not present", personHandler)
-    foreach (person in otherPeople) {
+    for (person in otherPeople) {
         subscribe(person, "presence.not present", personHandler)
     }
 }
@@ -121,7 +121,7 @@ def personHandler(evt) {
     
     if (guest.currentValue("presence") == "present") {
         def everyoneLeft = primaryPerson.currentValue("presence") == "not present"
-        foreach (person in otherPeople) {
+        for (person in otherPeople) {
             if (person.currentValue("presence") != "not present") {
                 everyoneLeft = false
             }
