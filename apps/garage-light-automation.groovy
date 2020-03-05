@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta7" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -52,10 +52,10 @@ def updated() {
     unschedule()
     initialize()
 
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
+    if (logEnable) {
+        log.warn "Debug logging enabled for 30 minutes"
+        runIn(1800, logsOff)
+    }
 }
 
 def logsOff(){
