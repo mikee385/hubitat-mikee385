@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -111,7 +111,7 @@ def powerMeterHandler(evt) {
             state.wakingUp = false
             notifier.deviceNotification("$person went back to sleep.")
         }
-        if (timeOfDayIsBetween(new Date.parse("hh:mm aa", "8:00 PM"), new Date.parse("hh:mm aa", "11:59 PM"), new Date(), location.timeZone) && person.currentValue("state") == "home") {
+        if (timeOfDayIsBetween(Date.parse("hh:mm aa", "8:00 PM"), Date.parse("hh:mm aa", "11:59 PM"), new Date(), location.timeZone) && person.currentValue("state") == "home") {
             person.asleep()
         }
     }
