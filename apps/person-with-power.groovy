@@ -111,7 +111,7 @@ def powerMeterHandler(evt) {
             state.wakingUp = false
             notifier.deviceNotification("$person went back to sleep.")
         }
-        if (timeOfDayIsBetween(new Date("8:00 PM"), new Date("11:59 PM", new Date(), location.timeZone) && person.currentValue("state") == "home") {
+        if (timeOfDayIsBetween(new Date.parse("hh:mm aa", "8:00 PM"), new Date.parse("hh:mm aa", "11:59 PM"), new Date(), location.timeZone) && person.currentValue("state") == "home") {
             person.asleep()
         }
     }
