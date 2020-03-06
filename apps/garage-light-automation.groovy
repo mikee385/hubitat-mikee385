@@ -29,15 +29,19 @@ definition(
 
 preferences {
     page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
-        section("Devices") {
+        section("") {
             input "occupancy", "capability.actuator", title: "Occupancy Status", multiple: false, required: true
+            
             input "overheadDoor", "capability.contactSensor", title: "Overhead Door", multiple: false, required: true
+            
             input "entryDoor", "capability.contactSensor", title: "Entry Door", multiple: false, required: true
+            
             input "sideDoor", "capability.contactSensor", title: "Side Door", multiple: false, required: true
+            
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
+            
             input "light", "capability.switch", title: "Light", multiple: false, required: true
-        }
-        section("Debugging") {
+            
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, submitOnChange: true
         }
     }
@@ -51,22 +55,6 @@ def updated() {
     unsubscribe()
     unschedule()
     initialize()
-
-    if (logEnable) {
-        log.warn "Debug logging enabled for 30 minutes"
-        runIn(1800, logsOff)
-    }
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
-}
-
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
 }
 
 def initialize() {
@@ -84,6 +72,22 @@ def initialize() {
     def sunRiseSet = getSunriseAndSunset()
     scheduleTime(sunRiseSet.sunrise, sunriseHandler)
     scheduleTime(sunRiseSet.sunset, sunsetHandler)
+    
+    if (logEnable) {
+        log.warn "Debug logging enabled for 30 minutes"
+        runIn(1800, logsOff)
+    }
+}
+
+def logsOff(){
+    log.warn "Debug logging disabled"
+    app.updateSetting("logEnable", [value: "false", type: "bool"])
+}
+
+def logDebug(msg) {
+    if (logEnable) {
+        log.debug msg
+    }
 }
 
 def sunriseTimeHandler(evt) {
