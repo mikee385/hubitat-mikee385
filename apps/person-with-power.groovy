@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta3" }
+String getVersionNum() { return "1.0.0-beta4" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -45,6 +45,8 @@ preferences {
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            
+            label title: "Assign a name", required: true
         }
     }
 }
