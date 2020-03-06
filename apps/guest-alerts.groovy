@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta6" }
+String getVersionNum() { return "1.0.0-beta7" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,11 +31,15 @@ preferences {
     page(name: "settings", title: "Guest Alerts", install: true, uninstall: true) {
         section("") {
             input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
+            
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: true
             input "frontDoor", "capability.contactSensor", title: "Front Door", multiple: false, required: true
+            
             input "primaryPerson", "capability.presenceSensor", title: "Primary Person", multiple: false, required: true
             input "otherPeople", "capability.presenceSensor", title: "Other People", multiple: true, required: true
+            
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+            
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, submitOnChange: true
         }
     }
@@ -49,6 +53,21 @@ def updated() {
     unsubscribe()
     unschedule()
     initialize()
+}
+
+def initialize() {
+    state.lockoutTime = now()
+    state.lockoutString = new Date(state.lockoutTime)
+    state.waitForBedroomDoor = false
+    state.waitForFrontDoor = false
+    
+    subscribe(bedroomDoor, "contact.open", bedroomDoorHandler)
+    subscribe(frontDoor, "contact.open", frontDoorHandler)
+    
+    subscribe(primaryPerson, "presence.not present", personHandler)
+    for (person in otherPeople) {
+        subscribe(person, "presence.not present", personHandler)
+    }
 
     //if (logEnable) {
     //    log.warn "Debug logging enabled for 30 minutes"
@@ -64,21 +83,6 @@ def logsOff(){
 def logDebug(msg) {
     if (logEnable) {
         log.debug msg
-    }
-}
-
-def initialize() {
-    state.lockoutTime = now()
-    state.lockoutString = new Date(state.lockoutTime)
-    state.waitForBedroomDoor = false
-    state.waitForFrontDoor = false
-    
-    subscribe(bedroomDoor, "contact.open", bedroomDoorHandler)
-    subscribe(frontDoor, "contact.open", frontDoorHandler)
-    
-    subscribe(primaryPerson, "presence.not present", personHandler)
-    for (person in otherPeople) {
-        subscribe(person, "presence.not present", personHandler)
     }
 }
 
