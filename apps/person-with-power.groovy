@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta4" }
+String getVersionNum() { return "1.0.0-beta5" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -64,7 +64,7 @@ def updated() {
 def initialize() {
     state.wakingUp = false
 
-    subscribe(presenceSensor, "presence", presentHandler)
+    subscribe(presenceSensor, "presence", presenceHandler)
     
     subscribe(powerMeter, "power", powerMeterHandler)
     
