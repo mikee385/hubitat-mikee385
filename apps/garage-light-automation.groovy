@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.0.2" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -42,7 +42,9 @@ preferences {
             
             input "light", "capability.switch", title: "Light", multiple: false, required: true
             
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, submitOnChange: true
+            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            
+            label title: "Assign a name", required: true
         }
     }
 }
