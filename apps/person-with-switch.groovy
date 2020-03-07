@@ -34,7 +34,7 @@ preferences {
             
             input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: true
             
-            input "switch", "capability.switch", title: "Switch", multiple: false, required: true
+            input "switchSensor", "capability.switch", title: "Switch", multiple: false, required: true
             
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             
@@ -58,7 +58,7 @@ def updated() {
 def initialize() {
     subscribe(presenceSensor, "presence", presenceHandler)
     
-    subscribe(switch, "switch", switchHandler)
+    subscribe(switchSensor, "switch", switchHandler)
 
     //if (logEnable) {
     //    log.warn "Debug logging enabled for 30 minutes"
@@ -96,7 +96,7 @@ def presenceHandler(evt) {
 def switchHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (switch.currentValue("switch") == "on") {
+    if (switchSensor.currentValue("switch") == "on") {
         if (person.currentValue("state") == "home") {
             person.asleep()
             notifier.deviceNotification("$person is asleep!")
