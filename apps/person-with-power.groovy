@@ -117,6 +117,9 @@ def powerMeterHandler(evt) {
             person.asleep()
         } else if (!timeOfDayIsBetween(Date.parse("hh:mm aa", "8:00 PM"), Date.parse("hh:mm aa", "11:59 PM"), new Date(), location.timeZone)) {
             logDebug("Not in time window")
+            logDebug(Date.parse("hh:mm aa", "8:00 PM"))
+            logDebug(Date.parse("hh:mm aa", "11:59 PM"))
+            logDebug(new Date())
         } else if (person.currentValue("state") != "home") {
             logDebug("Not home")
         }
