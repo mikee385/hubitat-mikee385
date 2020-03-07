@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta10" }
+String getVersionNum() { return "1.0.0-beta11" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -136,7 +136,7 @@ def powerMeterHandler(evt) {
         } else if (state.wakingUp == true) {
             state.wakingUp = false
             if (alertAsleep) {
-                notifier.deviceNotification("$person went back to sleep!")
+                notifier.deviceNotification("$person went back to bed!")
             }
         }
     }
@@ -145,17 +145,31 @@ def powerMeterHandler(evt) {
 def bedroomDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (guest.currentValue("presence") == "not present" && person.currentValue("state") == "sleep") {
-        state.wakingUp = true
+    if (guest.currentValue("presence") == "not present") {
+        if (powerMeter.currentValue("power") < powerLevelForSleep && person.currentValue("state") == "sleep") {
+            state.wakingUp = true
+            if (alertAwake) {
+                notifier.deviceNotification("$person is out of bed!")
+            }
+        }
     }
 }
 
 def exteriorDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (state.wakingUp == true) {
-        state.wakingUp = false
-        if (person.currentValue("state") == "sleep") {
+    if (guest.currentValue("presence") == "not present") {
+        if (state.wakingUp == true) {
+            state.wakingUp = false
+            if (person.currentValue("state") == "sleep") {
+                person.awake()
+                if (alertAwake) {
+                    notifier.deviceNotification("$person is awake!")
+                }
+            }
+        }
+    } else {
+        if (powerMeter.currentValue("power") < powerLevelForSleep && person.currentValue("state") == "sleep") {
             person.awake()
             if (alertAwake) {
                 notifier.deviceNotification("$person is awake!")
