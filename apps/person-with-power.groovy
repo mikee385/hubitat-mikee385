@@ -118,18 +118,8 @@ def powerMeterHandler(evt) {
             notifier.deviceNotification("$person went back to sleep.")
         }
         
-        def startTime = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", bedtimeStart)
-        def endTime = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", bedtimeEnd)
-        
-        if (timeOfDayIsBetween(startTime, endTims, new Date(), location.timeZone) && person.currentValue("state") == "home") {
+        if (timeOfDayIsBetween(timeToday(bedtimeStart), timeToday(bedtimeEnd), new Date(), location.timeZone) && person.currentValue("state") == "home") {
             person.asleep()
-        } else if (!timeOfDayIsBetween(startTime, endTime, new Date(), location.timeZone)) {
-            logDebug("Not in time window")
-            logDebug(bedtimeStart)
-            logDebug(bedtimeEnd)
-            logDebug(new Date())
-        } else if (person.currentValue("state") != "home") {
-            logDebug("Not home")
         }
     }
 }
