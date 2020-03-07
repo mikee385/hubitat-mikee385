@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta9" }
+String getVersionNum() { return "1.0.0-beta10" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -43,9 +43,20 @@ preferences {
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: true
             
             input "exteriorDoors", "capability.contactSensor", title: "Exterior Doors", multiple: true, required: true
+        }
+        section("Notifications") {
+        
+            input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
+            
+            input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
+            
+            input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
+            
+            input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
             
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-            
+        }
+        section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
@@ -99,10 +110,16 @@ def presenceHandler(evt) {
     if (presenceSensor.currentValue("presence") == "present") {
         if (person.currentValue("presence") == "not present") {
             person.arrived()
+            if (alertArrived) {
+                notifier.deviceNotification("$person is home!")
+            }
         }
     } else {
         if (person.currentValue("presence") == "present") {
             person.departed()
+            if (alertDeparted) {
+                notifier.deviceNotification("$person has left!")
+            }
         }
     }
 }
@@ -113,9 +130,14 @@ def powerMeterHandler(evt) {
     if (powerMeter.currentValue("power") >= powerLevelForSleep) {
         if (person.currentValue("state") == "home") {
             person.asleep()
+            if (alertAsleep) {
+                notifier.deviceNotification("$person is asleep!")
+            }
         } else if (state.wakingUp == true) {
             state.wakingUp = false
-            notifier.deviceNotification("$person went back to sleep.")
+            if (alertAsleep) {
+                notifier.deviceNotification("$person went back to sleep!")
+            }
         }
     }
 }
@@ -135,6 +157,9 @@ def exteriorDoorHandler(evt) {
         state.wakingUp = false
         if (person.currentValue("state") == "sleep") {
             person.awake()
+            if (alertAwake) {
+                notifier.deviceNotification("$person is awake!")
+            }
         }
     }
 }
