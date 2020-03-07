@@ -1,0 +1,111 @@
+/**
+ *  Person Automation with Switch
+ *
+ *  Copyright 2020 Michael Pierce
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ */
+ 
+String getVersionNum() { return "1.0.0-beta1" }
+String getVersionLabel() { return "Person Automation with Switch, version ${getVersionNum()} on ${getPlatform()}" }
+
+definition(
+    name: "Person Automation with Switch",
+    namespace: "mikee385",
+    author: "Michael Pierce",
+    description: "Updates the state of a Person Status device using a presence sensor and a switch.",
+    category: "My Apps",
+    iconUrl: "",
+    iconX2Url: "",
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-switch.groovy")
+
+preferences {
+    page(name: "settings", title: "Person Automation with Switch", install: true, uninstall: true) {
+        section("") {
+            input "person", "capability.presenceSensor", title: "Person Status", multiple: false, required: true
+            
+            input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: true
+            
+            input "switch", "capability.switch", title: "Switch", multiple: false, required: true
+            
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+            
+            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            
+            label title: "Assign a name", required: true
+        }
+    }
+}
+
+def installed() {
+    initialize()
+}
+
+def updated() {
+    unsubscribe()
+    unschedule()
+    initialize()
+}
+
+def initialize() {
+    subscribe(presenceSensor, "presence", presenceHandler)
+    
+    subscribe(switch, "switch", switchHandler)
+
+    //if (logEnable) {
+    //    log.warn "Debug logging enabled for 30 minutes"
+    //    runIn(1800, logsOff)
+    //}
+}
+
+def logsOff(){
+    log.warn "Debug logging disabled"
+    app.updateSetting("logEnable", [value: "false", type: "bool"])
+}
+
+def logDebug(msg) {
+    if (logEnable) {
+        log.debug msg
+    }
+}
+
+def presenceHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+
+    if (presenceSensor.currentValue("presence") == "present") {
+        if (person.currentValue("presence") == "not present") {
+            person.arrived()
+            notifier.deviceNotification("$person is home!")
+        }
+    } else {
+        if (person.currentValue("presence") == "present") {
+            person.departed()
+            notifier.deviceNotification("$person has left!")
+        }
+    }
+}
+
+def switchHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (switch.currentValue("switch") == "on") {
+        if (person.currentValue("state") == "home") {
+            person.asleep()
+            notifier.deviceNotification("$person is asleep!")
+            
+        }
+    } else {
+        if (person.currentValue("state") == "sleep") {
+            person.awake()
+            notifier.deviceNotification("$person is awake!")
+        }
+    }
+}
