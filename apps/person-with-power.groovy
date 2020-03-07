@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta8" }
+String getVersionNum() { return "1.0.0-beta9" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -29,18 +29,16 @@ definition(
 
 preferences {
     page(name: "settings", title: "Person Automation with Power Meter", install: true, uninstall: true) {
-        section("") {
+        section {
             input "person", "capability.presenceSensor", title: "Person Status", multiple: false, required: true
             
             input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: true
             
             input "powerMeter", "capability.powerMeter", title: "Power Meter", multiple: false, required: true
             
-            input "bedtimeStart", "time", title: "Bedtime Start", required: true
+            input "powerLevelForSleep", "decimal", title: "Power Level for Sleep", required: true
             
-            input "bedtimeEnd", "time", title: "Bedtime End", required: true
-            
-             input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
+            input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
             
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: true
             
@@ -112,14 +110,12 @@ def presenceHandler(evt) {
 def powerMeterHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (powerMeter.currentValue("power") >= 1) {
-        if (state.wakingUp == true) {
+    if (powerMeter.currentValue("power") >= powerLevelForSleep) {
+        if (person.currentValue("state") == "home") {
+            person.asleep()
+        } else if (state.wakingUp == true) {
             state.wakingUp = false
             notifier.deviceNotification("$person went back to sleep.")
-        }
-        
-        if (timeOfDayIsBetween(timeToday(bedtimeStart), timeToday(bedtimeEnd), new Date(), location.timeZone) && person.currentValue("state") == "home") {
-            person.asleep()
         }
     }
 }
