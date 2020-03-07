@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta5" }
+String getVersionNum() { return "1.0.0-beta6" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,6 +35,10 @@ preferences {
             input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: true
             
             input "powerMeter", "capability.powerMeter", title: "Power Meter", multiple: false, required: true
+            
+            input "bedtimeStart", "time", title: "Bedtime Start", required: true
+            
+            input "bedtimeEnd", "time", title: "Bedtime End", required: true
             
              input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
             
@@ -113,12 +117,12 @@ def powerMeterHandler(evt) {
             state.wakingUp = false
             notifier.deviceNotification("$person went back to sleep.")
         }
-        if (timeOfDayIsBetween(Date.parse("hh:mm aa", "8:00 PM"), Date.parse("hh:mm aa", "11:59 PM"), new Date(), location.timeZone) && person.currentValue("state") == "home") {
+        if (timeOfDayIsBetween(bedtimeStart, bedtimeEnd, new Date(), location.timeZone) && person.currentValue("state") == "home") {
             person.asleep()
-        } else if (!timeOfDayIsBetween(Date.parse("hh:mm aa", "8:00 PM"), Date.parse("hh:mm aa", "11:59 PM"), new Date(), location.timeZone)) {
+        } else if (!timeOfDayIsBetween(bedtimeStart, bedtimeEnd, new Date(), location.timeZone)) {
             logDebug("Not in time window")
-            logDebug(Date.parse("hh:mm aa", "8:00 PM"))
-            logDebug(Date.parse("hh:mm aa", "11:59 PM"))
+            logDebug(bedtimeStart)
+            logDebug(bedtimeEnd)
             logDebug(new Date())
         } else if (person.currentValue("state") != "home") {
             logDebug("Not home")
