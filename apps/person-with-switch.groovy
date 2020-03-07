@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Person Automation with Switch, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -29,15 +29,28 @@ definition(
 
 preferences {
     page(name: "settings", title: "Person Automation with Switch", install: true, uninstall: true) {
-        section("") {
+        section {
             input "person", "capability.presenceSensor", title: "Person Status", multiple: false, required: true
             
             input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: true
             
             input "switchSensor", "capability.switch", title: "Switch", multiple: false, required: true
             
+        }
+        section("Notifications") {
+        
+            input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
+            
+            input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
+            
+            input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
+            
+            input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
+            
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             
+        }
+        section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
@@ -83,12 +96,16 @@ def presenceHandler(evt) {
     if (presenceSensor.currentValue("presence") == "present") {
         if (person.currentValue("presence") == "not present") {
             person.arrived()
-            notifier.deviceNotification("$person is home!")
+            if (alertArrived) {
+                notifier.deviceNotification("$person is home!")
+            }
         }
     } else {
         if (person.currentValue("presence") == "present") {
             person.departed()
-            notifier.deviceNotification("$person has left!")
+            if (alertDeparted) {
+                notifier.deviceNotification("$person has left!")
+            }
         }
     }
 }
@@ -99,13 +116,16 @@ def switchHandler(evt) {
     if (switchSensor.currentValue("switch") == "on") {
         if (person.currentValue("state") == "home") {
             person.asleep()
-            notifier.deviceNotification("$person is asleep!")
-            
+            if (alertAsleep) {
+                notifier.deviceNotification("$person is asleep!")
+            }
         }
     } else {
         if (person.currentValue("state") == "sleep") {
             person.awake()
-            notifier.deviceNotification("$person is awake!")
+            if (alertAwake) {
+                notifier.deviceNotification("$person is awake!")
+            }
         }
     }
 }
