@@ -1,5 +1,5 @@
 /**
- *  Camera Reminder Triggers
+ *  Camera Reminder
  *
  *  Copyright 2020 Michael Pierce
  *
@@ -14,30 +14,33 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
-String getVersionLabel() { return "Camera Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "1.0.0-beta2" }
+String getVersionLabel() { return "Camera Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
-    name: "Camera Reminder Triggers",
+    name: "Camera Reminder",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Triggers to turn on/off the reminder to turn off the cameras.",
+    description: "Reminder to turn off the cameras.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-reminder-triggers.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-reminder.groovy")
 
 preferences {
-    page(name: "settings", title: "Camera Reminder Triggers", install: true, uninstall: true) {
+    page(name: "settings", title: "Camera Reminder", install: true, uninstall: true) {
         section {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
-        
+        }
+        section("Turn On") {
             input "person", "capability.sleepSensor", title: "Person", multiple: false, required: true
-            
+        }
+        section("Turn Off") {
             input "contactSensor", "capability.contactSensor", title: "Contact Sensor", multiple: false, required: false
             
             input "button", "capability.pushableButton", title: "Button", multiple: false, required: false
-            
+        }
+        section {
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -58,6 +61,8 @@ def updated() {
 }
 
 def initialize() {
+    subscribe(reminderSwitch, "switch", switchHandler)
+
     subscribe(person, "sleeping.not sleeping", awakeHandler)
     subscribe(person, "state", stateHandler)
     
@@ -79,6 +84,26 @@ def logDebug(msg) {
     if (logEnable) {
         log.debug msg
     }
+}
+
+def switchHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        runIn(60*5, startReminder)
+    } else {
+        unschedule()
+        notifier.deviceNotification("Camera Reminder is off.")
+    }
+}
+
+def startReminder() {
+    sendAlert()
+    runEvery5Minutes(sendAlert)
+}
+
+def sendAlert() {
+    notifier.deviceNotification("Turn off the cameras!")
 }
 
 def awakeHandler(evt) {
