@@ -99,7 +99,7 @@ def switchHandler(evt) {
 
 def startReminder() {
     sendAlert()
-    runEvery5Minutes(sendAlert)
+    schedule("*/5 * * * *", sendAlert)
 }
 
 def sendAlert() {
