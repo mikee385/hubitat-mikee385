@@ -47,6 +47,10 @@ preferences {
             
             input "asleep", "capability.switch", title: "Asleep", multiple: false, required: true
         }
+        section("Backup Times") {
+            input "awakeTime", "time", title: "Awake Time", required: false
+            input "asleepTime", "time", title: "Asleep Time", required: false
+        }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
@@ -76,6 +80,13 @@ def initialize() {
     for (sensor in presenceSensors) {
         subscribe(sensor, "presence.present", arrivedHandler)
         subscribe(sensor, "presence.not present", departedHandler)
+    }
+    
+    if (awakeTime) {
+        schedule(awakeTime, awakeTimeHandler)
+    }
+    if (asleepTime) {
+        schedule(asleepTime, asleepTimeHandler)
     }
 
     //if (logEnable) {
@@ -159,5 +170,21 @@ def awakeHandler(evt) {
         if (location.mode == "Sleep") {
             awake.on()
         }
+    }
+}
+
+def awakeTimeHandler(evt) {
+    logDebug("Received awake time event")
+    
+    if (location.mode == "Sleep") {
+        awake.on()
+    }
+}
+
+def asleepTimeHandler(evt) {
+    logDebug("Received asleep time event")
+    
+    if (location.mode == "Home") {
+        asleep.on()
     }
 }
