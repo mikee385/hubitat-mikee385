@@ -14,30 +14,33 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
-String getVersionLabel() { return "Trash Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "1.0.0-beta2" }
+String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
-    name: "Trash Reminder Triggers",
+    name: "Trash Reminder",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Triggers to turn on/off the reminder to take out the trash.",
+    description: "Reminder to take out the trash.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder-triggers.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder.groovy")
 
 preferences {
-    page(name: "settings", title: "Trash Reminder Triggers", install: true, uninstall: true) {
+    page(name: "settings", title: "Trash Reminder", install: true, uninstall: true) {
         section {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
-        
+        }
+        section("Turn On") {
             input "person", "capability.sleepSensor", title: "Person", multiple: false, required: true
-            
+        }
+        section("Turn Off") {
             input "overheadDoor", "capability.contactSensor", title: "Garage Door", multiple: false, required: true
             
             input "trashDays", "enum", title: "Trash Days", multiple: true, required: true, options: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-            
+        }
+        section {
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -58,6 +61,8 @@ def updated() {
 }
 
 def initialize() {
+    subscribe(reminderSwitch, "switch", switchHandler)
+    
     subscribe(person, "sleeping.not sleeping", awakeHandler)
     subscribe(person, "state", stateHandler)
     
@@ -78,6 +83,22 @@ def logDebug(msg) {
     if (logEnable) {
         log.debug msg
     }
+}
+
+def switchHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        def d = new Date()
+        schedule("$d.seconds $d.minutes/5 * * * ? *", sendAlert)
+    } else {
+        unschedule()
+        notifier.deviceNotification("$reminderSwitch is off.")
+    }
+}
+
+def sendAlert() {
+    notifier.deviceNotification("Take out the trash!")
 }
 
 def awakeHandler(evt) {
