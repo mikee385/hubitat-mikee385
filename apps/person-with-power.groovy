@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta11" }
+String getVersionNum() { return "1.0.0-beta12" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -43,6 +43,8 @@ preferences {
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: true
             
             input "exteriorDoors", "capability.contactSensor", title: "Exterior Doors", multiple: true, required: true
+            
+            input "backupButton", "capability.pushableButton", title: "Backup Button", multiple: false, required: false
         }
         section("Notifications") {
         
@@ -84,6 +86,10 @@ def initialize() {
     subscribe(bedroomDoor, "contact.open", bedroomDoorHandler)
     for (door in exteriorDoors) {
         subscribe(door, "contact.open", exteriorDoorHandler)
+    }
+    
+    if (backupButton) {
+        subscribe(backupButton, "pushed", exteriorDoorHandler)
     }
 
     //if (logEnable) {
