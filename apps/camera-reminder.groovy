@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta4" }
+String getVersionNum() { return "1.0.0-beta5" }
 String getVersionLabel() { return "Camera Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -99,7 +99,7 @@ def switchHandler(evt) {
 
 def startReminder() {
     sendAlert()
-    schedule("* */5 * * * ? *", sendAlert)
+    runEvery5Minutes(sendAlert)
 }
 
 def sendAlert() {
