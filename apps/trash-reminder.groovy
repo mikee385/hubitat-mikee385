@@ -1,5 +1,5 @@
 /**
- *  Trash Reminder Triggers
+ *  Trash Reminder
  *
  *  Copyright 2020 Michael Pierce
  *
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
