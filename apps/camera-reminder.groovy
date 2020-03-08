@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta6" }
+String getVersionNum() { return "1.0.0-beta7" }
 String getVersionLabel() { return "Camera Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -90,15 +90,12 @@ def switchHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        runIn(60*5, startReminder)
+        def d = new Date()
+        schedule("$d.seconds $d.minutes/5 * * * ? *", sendAlert)
     } else {
         unschedule()
         notifier.deviceNotification("Camera Reminder is off.")
     }
-}
-
-def startReminder() {
-    runEvery5Minutes(sendAlert)
 }
 
 def sendAlert() {
