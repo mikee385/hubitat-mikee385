@@ -1,5 +1,5 @@
 /**
- *  Camera Reminder
+ *  Camera Reminder Triggers
  *
  *  Copyright 2020 Michael Pierce
  *
@@ -14,21 +14,21 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta9" }
-String getVersionLabel() { return "Camera Reminder, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "1.0.0-beta10" }
+String getVersionLabel() { return "Camera Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
-    name: "Camera Reminder",
+    name: "Camera Reminder Triggers",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Reminder to turn off the cameras.",
+    description: "Triggers to turn on/off the reminder to turn off the cameras.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-reminder.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-reminder-triggers.groovy")
 
 preferences {
-    page(name: "settings", title: "Camera Reminder", install: true, uninstall: true) {
+    page(name: "settings", title: "Camera Reminder Triggers", install: true, uninstall: true) {
         section {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
         }
@@ -41,8 +41,6 @@ preferences {
             input "button", "capability.pushableButton", title: "Button", multiple: false, required: false
         }
         section {
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-            
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
@@ -61,8 +59,6 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(reminderSwitch, "switch", switchHandler)
-
     subscribe(person, "sleeping.not sleeping", awakeHandler)
     subscribe(person, "state", stateHandler)
     
@@ -86,30 +82,6 @@ def logDebug(msg) {
     }
 }
 
-def switchHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "on") {
-        runIn(60*5, scheduleAlert)
-    } else {
-        unschedule()
-        notifier.deviceNotification("Camera Reminder is off.")
-    }
-}
-
-def scheduleAlert() {
-    def d = new Date()
-    schedule("$d.seconds $d.minutes/5 * * * ? *", sendAlert)
-}
-
-def sendAlert() {
-    if (reminderSwitch.currentValue("switch") == "on") {
-        notifier.deviceNotification("Turn off the cameras!")
-    } else {
-        unschedule()
-    }
-}
-
 def awakeHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
@@ -123,7 +95,6 @@ def stateHandler(evt) {
     
     if (person.currentValue("state") != "home") {
         if (reminderSwitch.currentValue("switch") == "on") {
-            notifier.deviceNotification("Camera Reminder canceled!")
             reminderSwitch.off()
         }
     }
