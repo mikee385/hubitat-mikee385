@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta8" }
+String getVersionNum() { return "1.0.0-beta9" }
 String getVersionLabel() { return "Camera Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -103,7 +103,11 @@ def scheduleAlert() {
 }
 
 def sendAlert() {
-    notifier.deviceNotification("Turn off the cameras!")
+    if (reminderSwitch.currentValue("switch") == "on") {
+        notifier.deviceNotification("Turn off the cameras!")
+    } else {
+        unschedule()
+    }
 }
 
 def awakeHandler(evt) {
