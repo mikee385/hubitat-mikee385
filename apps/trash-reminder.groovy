@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta3" }
+String getVersionNum() { return "1.0.0-beta4" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -98,7 +98,11 @@ def switchHandler(evt) {
 }
 
 def sendAlert() {
-    notifier.deviceNotification("Take out the trash!")
+    if (reminderSwitch.currentValue("switch") == "on") {
+        notifier.deviceNotification("Take out the trash!")
+    } else {
+        unschedule()
+    }
 }
 
 def awakeHandler(evt) {
