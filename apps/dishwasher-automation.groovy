@@ -14,14 +14,14 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
     name: "Dishwasher Automation",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Updates the state of a Appliance Status device representing a dishwasher.",
+    description: "Updates the state of an Appliance Status device representing a dishwasher.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
@@ -48,8 +48,6 @@ preferences {
             input "resetTime", "time", title: "Reset Time", required: true
         }
         section {
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-            
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
