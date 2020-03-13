@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Routine Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,6 +33,7 @@ preferences {
             input "routine", "capability.switch", title: "Routine", multiple: false, required: true
         }
         section {
+            input "mode", "mode", title: "Set Mode To", multiple: false, required: false
             input "switchOn", "capability.switch", title: "Switches to Turn On", multiple: true, required: false
             input "switchOff", "capability.switch", title: "Switches to Turn Off", multiple: true, required: false
         }
@@ -81,6 +82,9 @@ def logDebug(msg) {
 def routineHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
+    if (mode) {
+        location.setMode(mode)
+    }
     for (device in switchOn) {
         device.on()
     }
