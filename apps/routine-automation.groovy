@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Routine Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -34,6 +34,8 @@ preferences {
         }
         section {
             input "mode", "mode", title: "Set Mode To", multiple: false, required: false
+        }
+        section {
             input "switchOn", "capability.switch", title: "Switches to Turn On", multiple: true, required: false
             input "switchOff", "capability.switch", title: "Switches to Turn Off", multiple: true, required: false
         }
