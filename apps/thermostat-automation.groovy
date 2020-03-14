@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta3" }
+String getVersionNum() { return "1.0.0-beta4" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -104,8 +104,12 @@ def logDebug(msg) {
 def awayHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    for (thermostat in thermostats) {
-        thermostat.setAway()
+    def currentTime = new Date()
+    def sleepToday = timeToday(sleepTime)
+    if (currentTime < sleepToday) {
+        for (thermostat in thermostats) {
+            thermostat.setAway()
+        }
     }
 }
 
