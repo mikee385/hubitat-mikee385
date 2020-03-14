@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Bedtime Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -29,6 +29,13 @@ definition(
 
 preferences {
     page(name: "settings", title: "Bedtime Triggers", install: true, uninstall: true) {
+        section("Kid Wake Up") {
+            input "kidWakeUpButton", "capability.pushableButton", title: "Button Device", multiple: false, required: true
+            input "kidWakeUpNumber", "number", title: "Button Number", required: true
+            input "kidWakeUpStartTime", "time", title: "Start Time", required: true
+            input "kidWakeUpEndTime", "time", title: "End Time", required: true
+            input "kidWakeUpRoutine", "capability.switch", title: "Routine", multiple: false, required: true
+        }
         section("Kid Bedtime Soon") {
             input "kidBedtimeSoonButton", "capability.pushableButton", title: "Button Device", multiple: false, required: true
             input "kidBedtimeSoonNumber", "number", title: "Button Number", required: true
@@ -68,6 +75,8 @@ def updated() {
 }
 
 def initialize() {
+    subscribe(kidWakeUpButton, "pushed.$kidWakeUpNumber", kidWakeUpHandler)
+    
     subscribe(kidBedtimeSoonButton, "pushed.$kidBedtimeSoonNumber", kidBedtimeSoonHandler)
     
     subscribe(kidBedtimeNowButton, "pushed.$kidBedtimeNowNumber", kidBedtimeNowHandler)
@@ -88,6 +97,17 @@ def logsOff(){
 def logDebug(msg) {
     if (logEnable) {
         log.debug msg
+    }
+}
+
+def kidWakeUpHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    def startToday = timeToday(kidWakeUpStartTime)
+    def endToday = timeToday(kidWakeUpEndTime)
+    
+    if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
+        kidWakeUpRoutine.on()
     }
 }
 
