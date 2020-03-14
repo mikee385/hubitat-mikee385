@@ -64,6 +64,7 @@ def initialize() {
         for (routine in awayRoutines) {
             subscribe(routine, "switch.on", awayHandler)
         }
+    }
         
     if (resumeRoutines) {
         for (routine in resumeRoutines) {
