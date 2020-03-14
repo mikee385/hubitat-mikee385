@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta10" }
+String getVersionNum() { return "1.0.0-beta11" }
 String getVersionLabel() { return "Camera Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -32,13 +32,10 @@ preferences {
         section {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
         }
-        section("Turn On") {
+        section {
             input "person", "capability.sleepSensor", title: "Person", multiple: false, required: true
-        }
-        section("Turn Off") {
-            input "contactSensor", "capability.contactSensor", title: "Contact Sensor", multiple: false, required: false
             
-            input "button", "capability.pushableButton", title: "Button", multiple: false, required: false
+            input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -59,11 +56,11 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(person, "sleeping.not sleeping", awakeHandler)
     subscribe(person, "state", stateHandler)
-    
-    subscribe(contactSensor, "contact", offHandler)
-    subscribe(button, "pushed", offHandler)
+
+    for (camera in cameras) {
+        subscribe(camera, "switch", cameraHandler)
+    }
     
     //if (logEnable) {
     //    log.warn "Debug logging enabled for 30 minutes"
@@ -82,26 +79,42 @@ def logDebug(msg) {
     }
 }
 
-def awakeHandler(evt) {
+def stateHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (person.currentValue("state") == "home") {
-        reminderSwitch.on()
+
+    if (evt.value == "home") {
+        def anyCameraOn = false
+        for (camera in cameras) {
+            if (camera.currentValue("switch") == "on") {
+                anyCameraOn = true
+                break
+            }
+        }
+        if (anyCameraOn == true) {
+            reminderSwitch.on()
+        }
+    } else {
+        reminderSwitch.off()
     }
 }
 
-def stateHandler(evt) {
+def cameraHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("state") != "home") {
-        if (reminderSwitch.currentValue("switch") == "on") {
+    if (evt.value == "on") {
+        if (person.currentValue("state") == "home") {
+            reminderSwitch.on()
+        }
+    } else {
+        def allCameraOff = true
+        for (camera in cameras) {
+            if (camera.currentValue("switch") == "on") {
+                allCameraOff = false
+                break
+            }
+        }
+        if (allCameraOff == true) {
             reminderSwitch.off()
         }
     }
-}
-
-def offHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    reminderSwitch.off()
 }
