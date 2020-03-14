@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -76,7 +76,7 @@ def initialize() {
     
     if (workdayTime) {
         def workdayToday = timeToday(workdayTime)
-        schedule("$currentTime.seconds $workdayToday.minutes $workdayToday.hours ? * 1-5 *", resumeForWorkday)
+        schedule("$currentTime.seconds $workdayToday.minutes $workdayToday.hours ? * 2-6 *", resumeForWorkday)
     }
     
     if (sleepTime) {
