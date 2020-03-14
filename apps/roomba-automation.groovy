@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -106,7 +106,7 @@ def finishedHandler(evt) {
     state.runningEndTime = now()
     
     def duration = state.runningEndTime - state.runningStartTime
-    if (duration < (minimumDuration*60*1000) {
+    if (duration < (minimumDuration*60*1000)) {
         appliance.reset()
     }
 }
