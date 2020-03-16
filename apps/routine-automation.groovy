@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta3" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Routine Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -63,16 +63,6 @@ def updated() {
 
 def initialize() {
     subscribe(routine, "switch.on", routineHandler)
-    
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
 }
 
 def logDebug(msg) {

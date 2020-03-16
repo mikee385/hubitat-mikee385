@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta4" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -83,16 +83,6 @@ def initialize() {
         def sleepToday = timeToday(sleepTime)
         schedule("$currentTime.seconds $sleepToday.minutes $sleepToday.hours * * ? *", resumeForSleep)
     }
-    
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
 }
 
 def logDebug(msg) {

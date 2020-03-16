@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Dishwasher Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -60,16 +60,6 @@ def initialize() {
     subscribe(routine, "switch.on", routineHandler)
     
     subscribe(appliance, "state.running", runningHandler)
-    
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
 }
 
 def logDebug(msg) {

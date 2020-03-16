@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -76,16 +76,6 @@ def initialize() {
     
     def resetToday = timeToday(resetTime)
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
-
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
 }
 
 def logDebug(msg) {

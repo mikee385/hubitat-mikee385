@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta11" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Camera Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -61,16 +61,6 @@ def initialize() {
     for (camera in cameras) {
         subscribe(camera, "switch", cameraHandler)
     }
-    
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
 }
 
 def logDebug(msg) {

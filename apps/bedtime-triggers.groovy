@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Bedtime Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -82,16 +82,6 @@ def initialize() {
     subscribe(kidBedtimeNowButton, "pushed.$kidBedtimeNowNumber", kidBedtimeNowHandler)
     
     subscribe(adultBedtimeDoor, "contact.closed", adultBedtimeHandler)
-    
-    //if (logEnable) {
-    //    log.warn "Debug logging enabled for 30 minutes"
-    //    runIn(1800, logsOff)
-    //}
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
 }
 
 def logDebug(msg) {

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.2" }
+String getVersionNum() { return "1.0.3" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -74,16 +74,6 @@ def initialize() {
     def sunRiseSet = getSunriseAndSunset()
     scheduleTime(sunRiseSet.sunrise, sunriseHandler)
     scheduleTime(sunRiseSet.sunset, sunsetHandler)
-    
-    if (logEnable) {
-        log.warn "Debug logging enabled for 30 minutes"
-        runIn(1800, logsOff)
-    }
-}
-
-def logsOff(){
-    log.warn "Debug logging disabled"
-    app.updateSetting("logEnable", [value: "false", type: "bool"])
 }
 
 def logDebug(msg) {
