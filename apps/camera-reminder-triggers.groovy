@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Camera Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -73,18 +73,22 @@ def stateHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
 
     if (evt.value == "home") {
-        def anyCameraOn = false
-        for (camera in cameras) {
-            if (camera.currentValue("switch") == "on") {
-                anyCameraOn = true
-                break
-            }
-        }
-        if (anyCameraOn == true) {
-            reminderSwitch.on()
-        }
+        runIn(5, checkCameras)
     } else {
         reminderSwitch.off()
+    }
+}
+
+def checkCameras() {
+    def anyCameraOn = false
+    for (camera in cameras) {
+        if (camera.currentValue("switch") == "on") {
+            anyCameraOn = true
+            break
+        }
+    }
+    if (anyCameraOn == true) {
+        reminderSwitch.on()
     }
 }
 
