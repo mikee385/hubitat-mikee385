@@ -38,7 +38,7 @@ preferences {
         }
         section {
             input "homeRoutine", "capability.switch", title: "Routine for Finish", multiple: false, required: true
-            input "runDuration", "number", title: "Minimum Duration (in minutes)", required: true
+            input "minimumDuration", "number", title: "Minimum Duration (in minutes)", required: true
         }
         section {
             input "resetTime", "time", title: "Reset Time", required: true
