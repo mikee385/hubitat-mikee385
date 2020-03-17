@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -92,6 +92,7 @@ def openHandler(evt) {
 def runningHandler(evt) {
     logDebug("Received running event")
     
+    state.runningStartTime = now()
     runIn(60*runDuration, durationComplete)
 }
 
@@ -108,5 +109,11 @@ def dailyReset() {
     
     if (appliance.currentValue("state") == "finished") {
         appliance.reset()
+    } else if (appliance.currentValue("state") == "running") {
+        def currentDuration = now() - state.runningStartTime
+        if (currentDuration > 2*runDuration*60*1000) {
+            logDebug("Ran too long. Resetting...")
+            appliance.reset()
+        }
     }
 }
