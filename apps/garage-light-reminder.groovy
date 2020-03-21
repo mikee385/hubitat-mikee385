@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Garage Light Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -77,15 +77,11 @@ def handler(evt) {
     
     unschedule()
     if (light.currentValue("switch") == "on") {
-            runIn(60*initialDuration, initialReminder)
+            runIn(60*initialDuration, reminder)
     }
 }
 
-def initialReminder() {
-    def currentTime = new Date()
-    schedule("$currentTime.seconds $currentTime.minutes/$repeatDuration * * * ? *", repeatReminder)
-}
-
-def repeatReminder() {
+def reminder() {
     notifier.deviceNotification(message)
+    runIn(60*repeatDuration, reminder)
 }
