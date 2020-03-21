@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Daily Notification, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,7 +38,7 @@ preferences {
         }
         section {
             input "daysToNotify", "enum", title: "Only on certain days of the week", multiple: true, required: false, options: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-            input "modesToNotify" "mode", title: "Only when mode is", multiple: true, required: false
+            input "modesToNotify", "mode", title: "Only when mode is", multiple: true, required: false
         }
         section {
             label title: "Assign a name", required: true
@@ -65,10 +65,10 @@ def initialize() {
     
     def timeToNotifyToday = timeToday(timeToNotify)
     def currentTime = new Date()
-    schedule("$currentTime.seconds $timeToNotifyToday.minutes $timeToNotifyToday.hours ? * $daysFilter *", notify)
+    schedule("$currentTime.seconds $timeToNotifyToday.minutes $timeToNotifyToday.hours ? * $daysFilter *", sendMessage)
 }
 
-def notify() {
+def sendMessage() {
     if (location.mode in modesToNotify) {
         notifier.deviceNotification(message)
     } else {
