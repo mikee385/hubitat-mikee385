@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Garage Light Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -82,8 +82,6 @@ def handler(evt) {
 }
 
 def initialReminder() {
-    notifier.deviceNotification(message)
-    
     def currentTime = new Date()
     schedule("$currentTime.seconds $currentTime.minutes/$repeatDuration * * * ? *", repeatReminder)
 }
