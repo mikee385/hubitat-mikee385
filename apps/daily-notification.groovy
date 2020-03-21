@@ -14,8 +14,10 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Daily Notification, version ${getVersionNum()} on ${getPlatform()}" }
+
+def getDaysOfWeek() { ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] }
 
 definition(
     name: "Daily Notification",
@@ -37,7 +39,7 @@ preferences {
             input "timeToNotify", "time", title: "Time", required: true
         }
         section {
-            input "daysToNotify", "enum", title: "Only on certain days of the week", multiple: true, required: false, options: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+            input "daysToNotify", "enum", title: "Only on certain days of the week", multiple: true, required: false, options: daysOfWeek
             input "modesToNotify", "mode", title: "Only when mode is", multiple: true, required: false
         }
         section {
@@ -59,7 +61,7 @@ def updated() {
 def initialize() {
     def daysFilter = '*'
     if (daysToNotify) {
-        daysFilter = daysToNotify.collect { it.getValue().toString() }.join(",")
+        daysFilter = daysToNotify.collect { daysOfWeek.indexOf(it).toString() }.join(",")
         notifier.deviceNotification(daysFilter)
     }
     
