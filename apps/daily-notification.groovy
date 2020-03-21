@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta3" }
+String getVersionNum() { return "1.0.0-beta4" }
 String getVersionLabel() { return "Daily Notification, version ${getVersionNum()} on ${getPlatform()}" }
 
 def getDaysOfWeek() { ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] }
@@ -61,7 +61,7 @@ def updated() {
 def initialize() {
     def daysFilter = '*'
     if (daysToNotify) {
-        daysFilter = daysToNotify.collect { daysOfWeek.indexOf(it).toString() }.join(",")
+        daysFilter = daysToNotify.collect { (daysOfWeek.indexOf(it)+1).toString() }.join(",")
         notifier.deviceNotification(daysFilter)
     }
     
