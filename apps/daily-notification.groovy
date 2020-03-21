@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta4" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Daily Notification, version ${getVersionNum()} on ${getPlatform()}" }
 
 def getDaysOfWeek() { ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] }
@@ -62,7 +62,6 @@ def initialize() {
     def daysFilter = '*'
     if (daysToNotify) {
         daysFilter = daysToNotify.collect { (daysOfWeek.indexOf(it)+1).toString() }.join(",")
-        notifier.deviceNotification(daysFilter)
     }
     
     def timeToNotifyToday = timeToday(timeToNotify)
@@ -73,7 +72,5 @@ def initialize() {
 def sendMessage() {
     if (location.mode in modesToNotify) {
         notifier.deviceNotification(message)
-    } else {
-        notifier.deviceNotification("Not correct mode")
     }
 }
