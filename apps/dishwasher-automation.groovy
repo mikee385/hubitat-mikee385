@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.0.2" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -70,9 +70,9 @@ def initialize() {
     
     subscribe(appliance, "state.running", runningHandler)
     
-    def resetDateTime = timeToday(resetTime)
+    def resetToday = timeToday(resetTime)
     def currentTime = new Date()
-    schedule("$currentTime.seconds $resetDateTime.minutes $resetDateTime.hours * * ? *", dailyReset)
+    schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
 }
 
 def logDebug(msg) {
