@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Daily Notification, version ${getVersionNum()} on ${getPlatform()}" }
 
 def getDaysOfWeek() { ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] }
@@ -40,7 +40,7 @@ preferences {
         }
         section {
             input "daysToNotify", "enum", title: "Only on certain days of the week", multiple: true, required: false, options: daysOfWeek
-            input "modesToNotify", "mode", title: "Only when mode is", multiple: true, required: false
+            input "people", "capability.presenceSensor", title: "Only when present", multiple: false, required: false
         }
         section {
             label title: "Assign a name", required: true
@@ -70,7 +70,7 @@ def initialize() {
 }
 
 def sendMessage() {
-    if (location.mode in modesToNotify) {
+    if (people.currentValue("presence") == "present") {
         notifier.deviceNotification(message)
     }
 }
