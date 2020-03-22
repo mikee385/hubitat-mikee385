@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Bedtime Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -49,6 +49,13 @@ preferences {
             input "kidBedtimeNowStartTime", "time", title: "Start Time", required: true
             input "kidBedtimeNowEndTime", "time", title: "End Time", required: true
             input "kidBedtimeNowRoutine", "capability.switch", title: "Routine", multiple: false, required: true
+        }
+        section("Kid Light Off") {
+            input "kidLightOffButton", "capability.pushableButton", title: "Button Device", multiple: false, required: true
+            input "kidLightOffNumber", "number", title: "Button Number", required: true
+            input "kidLightOffStartTime", "time", title: "Start Time", required: true
+            input "kidLightOffEndTime", "time", title: "End Time", required: true
+            input "kidLightOffRoutine", "capability.switch", title: "Routine", multiple: false, required: true
         }
         section("Adult Bedtime") {
             input "adultBedtimeDoor", "capability.contactSensor", title: "Door", multiple: false, required: true
@@ -120,6 +127,17 @@ def kidBedtimeNowHandler(evt) {
     
     if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
         kidBedtimeNowRoutine.on()
+    }
+}
+
+def kidLightOffHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    def startToday = timeToday(kidLightOffStartTime)
+    def endToday = timeToday(kidLightOffEndTime)
+    
+    if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
+        kidLightOffRoutine.on()
     }
 }
 
