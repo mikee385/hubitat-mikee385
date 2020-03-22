@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Reboot Notification, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -50,9 +50,9 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(location, "systemStart", handler)
+    subscribe(location, "systemStart", rebootHandler)
 }
 
-def handler() {
+def rebootHandler(evt) {
     notifier.deviceNotification(message)
 }
