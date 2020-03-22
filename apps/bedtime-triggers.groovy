@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.1.1" }
 String getVersionLabel() { return "Bedtime Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -87,6 +87,8 @@ def initialize() {
     subscribe(kidBedtimeSoonButton, "pushed.$kidBedtimeSoonNumber", kidBedtimeSoonHandler)
     
     subscribe(kidBedtimeNowButton, "pushed.$kidBedtimeNowNumber", kidBedtimeNowHandler)
+    
+    subscribe(kidLightOffButton, "pushed.$kidLightOffNumber", kidLightOffHandler)
     
     subscribe(adultBedtimeDoor, "contact.closed", adultBedtimeHandler)
 }
