@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.3" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
         section("") {
-            input "occupancy", "capability.actuator", title: "Occupancy Status", multiple: false, required: true
+            input "occupancy", "device.OccupancyStatus", title: "Occupancy Status", multiple: false, required: true
             
             input "overheadDoor", "capability.contactSensor", title: "Overhead Door", multiple: false, required: true
             
