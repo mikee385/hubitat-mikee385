@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Roomba Automation", install: true, uninstall: true) {
         section {
-            input "appliance", "capability.actuator", title: "Roomba Status", multiple: false, required: true
+            input "appliance", "device.ApplianceStatus", title: "Roomba Status", multiple: false, required: true
         }
         section {
             input "awayRoutine", "capability.switch", title: "Routine for Start", multiple: false, required: true

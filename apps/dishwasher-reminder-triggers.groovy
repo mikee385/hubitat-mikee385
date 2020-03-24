@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Dishwasher Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -36,7 +36,7 @@ preferences {
             input "routine", "capability.switch", title: "Routine", multiple: false, required: true
         }
         section("Turn Off") {
-            input "appliance", "capability.actuator", title: "Appliance", multiple: false, required: true
+            input "appliance", "device.ApplianceStatus", title: "Appliance", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false

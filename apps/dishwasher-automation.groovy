@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.2" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Dishwasher Automation", install: true, uninstall: true) {
         section {
-            input "appliance", "capability.actuator", title: "Dishwasher Status", multiple: false, required: true
+            input "appliance", "device.ApplianceStatus", title: "Dishwasher Status", multiple: false, required: true
         }
         section("Start") {
             input "contactSensor", "capability.contactSensor", title: "Contact Sensor", multiple: false, required: true

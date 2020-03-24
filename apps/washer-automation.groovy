@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Washer Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Washer Automation", install: true, uninstall: true) {
         section {
-            input "appliance", "capability.actuator", title: "Washer Status", multiple: false, required: true
+            input "appliance", "device.ApplianceStatus", title: "Washer Status", multiple: false, required: true
         }
         section {
             input "powerMeter", "capability.powerMeter", title: "Power Meter", multiple: false, required: true
