@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,7 +35,7 @@ preferences {
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: true
             input "frontDoor", "capability.contactSensor", title: "Front Door", multiple: false, required: true
             
-            input "primaryPerson", "capability.presenceSensor", title: "Primary Person", multiple: false, required: true
+            input "primaryPerson", "device.PersonStatus", title: "Primary Person", multiple: false, required: true
             input "otherPeople", "capability.presenceSensor", title: "Other People", multiple: true, required: true
             
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true

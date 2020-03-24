@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Trash Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,7 +33,7 @@ preferences {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
         }
         section("Turn On") {
-            input "person", "capability.sleepSensor", title: "Person", multiple: false, required: true
+            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
         }
         section("Turn Off") {
             input "overheadDoor", "capability.contactSensor", title: "Garage Door", multiple: false, required: true

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Person Automation with Power Meter", install: true, uninstall: true) {
         section {
-            input "person", "capability.presenceSensor", title: "Person Status", multiple: false, required: true
+            input "person", "device.PersonStatus", title: "Person Status", multiple: false, required: true
             
             input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: true
             

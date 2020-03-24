@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Camera Reminder Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,7 +33,7 @@ preferences {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
         }
         section {
-            input "person", "capability.sleepSensor", title: "Person", multiple: false, required: true
+            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
             
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
         }
