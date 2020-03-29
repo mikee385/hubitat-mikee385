@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -68,38 +68,14 @@ def initialize() {
     
     subscribe(motionSensor, "motion.active", activeHandler)
     
-    subscribe(location, "sunriseTime", sunriseTimeHandler)
-    subscribe(location, "sunsetTime", sunsetTimeHandler)
-    
-    def sunRiseSet = getSunriseAndSunset()
-    scheduleTime(sunRiseSet.sunrise, sunriseHandler)
-    scheduleTime(sunRiseSet.sunset, sunsetHandler)
+    subscribe(location, "sunrise", sunriseHandler)
+    subscribe(location, "sunset", sunsetHandler)
 }
 
 def logDebug(msg) {
     if (logEnable) {
         log.debug msg
     }
-}
-
-def sunriseTimeHandler(evt) {
-    logDebug("Received sunrise time event")
-    
-    def timeValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", evt.value)
-    scheduleTime(timeValue, sunriseHandler)
-}
-
-def sunsetTimeHandler(evt) {
-    logDebug("Recieved sunset time event")
-    
-    def timeValue = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", evt.value)
-    scheduleTime(timeValue, sunsetHandler)
-}
-
-def scheduleTime(timeValue, handler) {
-    logDebug("Scheduling for: $timeValue")
-
-    runOnce(timeValue, handler, [overwrite: false])
 }
 
 def sunriseHandler(evt) {
