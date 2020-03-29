@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -104,9 +104,8 @@ def finishedHandler(evt) {
 def awayRoutineHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    def sunRiseSet = getSunriseAndSunset()
     def startToday = timeToday(startTime)
-    def endToday = sunRiseSet.sunset
+    def endToday = location.sunset
     
     if (appliance.currentValue("state") == "unstarted" && timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
         appliance.start()

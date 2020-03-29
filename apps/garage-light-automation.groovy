@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.0.2" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -106,8 +106,7 @@ def overheadDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (overheadDoor.currentValue("contact") == "open") {
-        def sunRiseSet = getSunriseAndSunset()
-        if (timeOfDayIsBetween(sunRiseSet.sunrise, sunRiseSet.sunset, new Date(), location.timeZone)) {
+        if (timeOfDayIsBetween(location.sunrise, location.sunset, new Date(), location.timeZone)) {
             light.off()
         } else {
             light.on()
