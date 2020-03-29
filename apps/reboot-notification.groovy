@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Reboot Notification, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
