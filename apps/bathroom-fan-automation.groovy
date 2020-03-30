@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta1" }
+String getVersionNum() { return "1.0.0-beta2" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Bathroom Fan Automation", install: true, uninstall: true) {
         section {
-            input "fanSwitch", "capability.switch", title: "Bathroom Fan", multiple: false, required: true
+            input "bathroomFan", "capability.switch", title: "Bathroom Fan", multiple: false, required: true
             input "manualRuntime", "number", title: "Manual Runtime (in minutes)", required: true
         }
         section {
@@ -85,6 +85,7 @@ def humidityHandler(evt) {
         }
     } else {
         if (atomicState.running == "humidity") {
+            unschedule("finishHumidity")
             finishHumidity()
         }
     }
@@ -148,10 +149,8 @@ def cancelHumidity() {
 
 def startManual() {
     logDebug("Turning manual fan on")
-
-    unschedule()
     
-    aromicState.running = "manual"
+    atomicState.running = "manual"
     runIn(60*manualRuntime, finishManual)
 }
 
