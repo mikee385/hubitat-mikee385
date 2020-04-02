@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta2" }
+String getVersionNum() { return "1.0.0-beta3" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,16 +30,30 @@ definition(
 preferences {
     page(name: "settings", title: "Bathroom Fan Automation", install: true, uninstall: true) {
         section {
+            input "bathroomSensor", "capability.relativeHumidityMeasurement", title: "Bathroom Humidity Sensor", multiple: false, required: true
+        }
+        section {
             input "bathroomFan", "capability.switch", title: "Bathroom Fan", multiple: false, required: true
-            input "manualRuntime", "number", title: "Manual Runtime (in minutes)", required: true
+            input "manualRuntime", "number", title: "Manual runtime (in minutes)", required: true
+            input "maximumRuntime", "number", title: "Maximum runtime (in minutes)", required: true
         }
-        section {
-            input "bathroomHumidity", "capability.relativeHumidityMeasurement", title: "Bathroom Humidity Sensor", multiple: false, required: true
-            input "maximumRuntime", "number", title: "Maximum Runtime (in minutes)", required: true
+        section("Rapid Change") {
+            input "rapidIncrease", "number", title: "Humidity increase for shower start", required: true
+            input "rapidDecrease", "number", title: "Humidity decrease for shower end", required: true
+            input "rapidRuntime", "number", title: "Time to run fan after shower end (in minutes)", required: true
         }
-        section {
-            input "baselineHumidity", "capability.relativeHumidityMeasurement", title: "Baseline Humidity Sensor", multiple: false, required: true
-            input "baselineOffset", "number", title: "Offset from Baseline", required: true
+        section("Baseline") {
+            input "baselineSensor", "capability.relativeHumidityMeasurement", title: "Baseline Humidity Sensor", multiple: false, required: true
+            input "baselineIncrease", "number", title: "Humidity above baseline for fan on", required: true
+            input "baselineDecrease", "number", title: "Humidity above baseline for fan off", required: true
+        }
+        section("Threshold") {
+            input "thresholdIncrease", "number", title: "Humidity threshold for fan on", required: true
+            input "thresholdDecrease", "number", title: "Humidity threshold for fan off", required: true
+        }
+        section ("Notifications") {
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+            input "prefix", "text", title: "Message Prefix", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -60,13 +74,17 @@ def updated() {
 }
 
 def initialize() {
-    atomicState.running = "off"
-    atomicState.humidityActive = true
-
-    subscribe(bathroomHumidity, "humidity", humidityHandler)
-    subscribe(baselineHumidity, "humidity", humidityHandler)
+    state.runningState = "off"
     
-    subscribe(bathroomFan, "switch", switchHandler)
+    state.rapidState = "off"
+    state.baselineState = "below"
+    state.thresholdState = "below"
+
+    state.previousHumidity = bathroomSensor.currentValue("humidity")
+    state.currentHumidity = bathroomSensor.currentValue("humidity")
+
+    subscribe(bathroomSensor, "humidity", humidityHandler)
+    subscribe(baselineSensor, "humidity", baselineHandler)
 }
 
 def logDebug(msg) {
@@ -78,92 +96,106 @@ def logDebug(msg) {
 def humidityHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (humidityTooHigh() == true) {
-        if (atomicState.humidityActive == true) {
-            startHumidity()
-            bathroomFan.on()
-        }
-    } else {
-        if (atomicState.running == "humidity") {
-            unschedule("finishHumidity")
-            finishHumidity()
-        }
-    }
+    state.previousHumidity = state.currentHumidity
+    state.currentHumidity = bathroomSensor.currentValue("humidity")
+    
+    checkRapidChange()
+    checkBaseline()
+    checkThreshold()
 }
 
-def switchHandler(evt) {
+def baselineHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "on") {
-        if (atomicState.running == "off") {
-            if (humidityTooHigh() == true) {
-                startHumidity()
-            } else {
-                startManual()
-            }
+    state.baselineHumidity = baselineSensor.currentValue("humidity")
+    
+    checkBaseline()
+}   
+
+def checkRapidChange() {
+    lodDebug("Checking rapid change...")
+
+    if (state.currentHumidity >= state.previousHumidity + rapidIncrease) {
+        if (state.rapidState != "rising") {
+            state.rapidState = "rising"
+            notifier.deviceNotification(prefix + " - Rapid Increase")
+            logDebug("Rapid Increase")
+            
+            turnHumidityOn()
+        }
+    } else if (state.currentHumidity <= state.previousHumidity - rapidDecrease) {
+        if (state.rapidState == "rising") {
+            state.rapidState = "falling"
+            notifier.deviceNotification(prefix + " - Rapid Decrease")
+            logDebug("Rapid Decrease")
         }
     } else {
-        if (atomicState.running == "humidity") {
-            cancelHumidity()
-        } else if (atomicState.running == "manual") {
-            cancelManual()
+        if (state.rapidState == "falling") {
+            state.rapidState = "off"
+            notifier.deviceNotification(prefix + " - Rapid Finished")
+            logDebug("Rapid Finished")
+            
+            turnHumidityOff()
         }
     }
 }
 
-def humidityTooHigh() {
-    return (bathroomHumidity.currentValue("humidity") > baselineHumidity.currentValue("humidity") + baselineOffset)
-}
-
-def startHumidity() {
-    logDebug("Turning humidity fan on")
-
-    unschedule()
-
-    atomicState.running = "humidity"
-    runIn(60*maximumRuntime, finishHumidity)
+def checkBaseline() {
+    logDebug("Checking baseline...")
     
-    atomicState.humidityActive = false
-    runIn(60*maximumRuntime, resetHumidity)
+    if (state.currentHumidity >= state.baselineHumidity + baselineIncrease) {
+        if (state.baselineState == "below") {
+            state.baselineState = "above"
+            notifier.deviceNotification(prefix + " - Baseline Increase")
+            logDebug("Baseline Increase")
+            
+            turnHumidityOn()
+        }
+    } else if (state.currentHumidity <= state.baselineHumidity + baselineDecrease) {
+        if (state.baselineState == "above") {
+            state.baselineState = "below"
+            notifier.deviceNotification(prefix + " - Baseline Decrease")
+            logDebug("Baseline Decrease")
+            
+            turnHumidityOff()
+        }
+    }
 }
 
-def finishHumidity() {
-    logDebug("Turning humidity fan off")
+def checkThreshold() {
+    logDebug("Checking threshold...")
 
-    atomicState.running = "off"
-    bathroomFan.off()
+    if (state.currentHumidity >= thresholdIncrease) {
+        if (state.thresholdState == "below") {
+            state.thresholdState = "above"
+            notifier.deviceNotification(prefix + " - Threshold Increase")
+            logDebug("Threshold Increase")
+            
+            turnHumidityOn()
+        }
+    } else if (state.currentHumidity <= thresholdDecrease) {
+        if (state.thresholdState == "above") {
+            state.thresholdState = "below"
+            notifier.deviceNotification(prefix + " - Threshold Decrease")
+            logDebug("Threshold Decrease")
+            
+            turnHumidityOff()
+        }
+    }
 }
 
-def resetHumidity() {
-    logDebug("Resetting humidity fan")
-
-    atomicState.humidityActive = true
+def turnOnHumidity() {
+    if (state.runningState != "humidity") {
+        state.runningState = "humidity"
+        notifier.deviceNotification(prefix + " - Fan Turned On")
+        logDebug("Fan Turned On")
+    }
 }
 
-def cancelHumidity() {
-    logDebug("Turning humidity fan off from switch")
-
-    atomicState.running = "off"
-    unschedule("finishHumidity")
-}
-
-def startManual() {
-    logDebug("Turning manual fan on")
-    
-    atomicState.running = "manual"
-    runIn(60*manualRuntime, finishManual)
-}
-
-def finishManual() {
-    logDebug("Turning manual fan off due to timeout")
-
-    atomicState.running = "off"
-    bathroomFan.off()
-}
-
-def cancelManual() {
-    logDebug("Turning manual fan off from switch")
-
-    atomicState.running = "off"
-    unschedule("finishManual")
-}
+def turnOffHumidity() {
+    if (state.runningState == "humidity") {
+        state.runningState = "off"
+        notifier.deviceNotification(prefix + " - Fan Turned Off")
+        logDebug("Fan Turned Off")
+    }
+}   
