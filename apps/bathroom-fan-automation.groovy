@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta3" }
+String getVersionNum() { return "1.0.0-beta4" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -113,7 +113,7 @@ def baselineHandler(evt) {
 }   
 
 def checkRapidChange() {
-    lodDebug("Checking rapid change...")
+    logDebug("Checking rapid change...")
 
     if (state.currentHumidity >= state.previousHumidity + rapidIncrease) {
         if (state.rapidState != "rising") {
@@ -121,7 +121,7 @@ def checkRapidChange() {
             notifier.deviceNotification(prefix + " - Rapid Increase")
             logDebug("Rapid Increase")
             
-            turnHumidityOn()
+            turnOnHumidity()
         }
     } else if (state.currentHumidity <= state.previousHumidity - rapidDecrease) {
         if (state.rapidState == "rising") {
@@ -135,7 +135,7 @@ def checkRapidChange() {
             notifier.deviceNotification(prefix + " - Rapid Finished")
             logDebug("Rapid Finished")
             
-            turnHumidityOff()
+            turnOffHumidity()
         }
     }
 }
@@ -149,7 +149,7 @@ def checkBaseline() {
             notifier.deviceNotification(prefix + " - Baseline Increase")
             logDebug("Baseline Increase")
             
-            turnHumidityOn()
+            turnOnHumidity()
         }
     } else if (state.currentHumidity <= state.baselineHumidity + baselineDecrease) {
         if (state.baselineState == "above") {
@@ -157,7 +157,7 @@ def checkBaseline() {
             notifier.deviceNotification(prefix + " - Baseline Decrease")
             logDebug("Baseline Decrease")
             
-            turnHumidityOff()
+            turnOffHumidity()
         }
     }
 }
@@ -171,7 +171,7 @@ def checkThreshold() {
             notifier.deviceNotification(prefix + " - Threshold Increase")
             logDebug("Threshold Increase")
             
-            turnHumidityOn()
+            turnOnHumidity()
         }
     } else if (state.currentHumidity <= thresholdDecrease) {
         if (state.thresholdState == "above") {
@@ -179,7 +179,7 @@ def checkThreshold() {
             notifier.deviceNotification(prefix + " - Threshold Decrease")
             logDebug("Threshold Decrease")
             
-            turnHumidityOff()
+            turnOffHumidity()
         }
     }
 }
