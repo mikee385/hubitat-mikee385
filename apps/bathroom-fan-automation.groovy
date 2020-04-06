@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta4" }
+String getVersionNum() { return "1.0.0-beta5" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -40,7 +40,7 @@ preferences {
         section("Rapid Change") {
             input "rapidIncrease", "number", title: "Humidity increase for shower start", required: true
             input "rapidDecrease", "number", title: "Humidity decrease for shower end", required: true
-            input "rapidRuntime", "number", title: "Time to run fan after shower end (in minutes)", required: true
+            input "rapidTime", "number", title: "Time period to check for rapid change (in minutes)", required: true
         }
         section("Baseline") {
             input "baselineSensor", "capability.relativeHumidityMeasurement", title: "Baseline Humidity Sensor", multiple: false, required: true
@@ -84,7 +84,6 @@ def initialize() {
     state.currentHumidity = bathroomSensor.currentValue("humidity")
 
     subscribe(bathroomSensor, "humidity", humidityHandler)
-    subscribe(baselineSensor, "humidity", baselineHandler)
 }
 
 def logDebug(msg) {
@@ -104,17 +103,7 @@ def humidityHandler(evt) {
     checkThreshold()
 }
 
-def baselineHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    state.baselineHumidity = baselineSensor.currentValue("humidity")
-    
-    checkBaseline()
-}   
-
 def checkRapidChange() {
-    logDebug("Checking rapid change...")
-
     if (state.currentHumidity >= state.previousHumidity + rapidIncrease) {
         if (state.rapidState != "rising") {
             state.rapidState = "rising"
@@ -141,9 +130,9 @@ def checkRapidChange() {
 }
 
 def checkBaseline() {
-    logDebug("Checking baseline...")
-    
-    if (state.currentHumidity >= state.baselineHumidity + baselineIncrease) {
+    def baselineHumidity = baselineSensor.currentValue("humidity")
+
+    if (state.currentHumidity >= baselineHumidity + baselineIncrease) {
         if (state.baselineState == "below") {
             state.baselineState = "above"
             notifier.deviceNotification(prefix + " - Baseline Increase")
@@ -151,7 +140,7 @@ def checkBaseline() {
             
             turnOnHumidity()
         }
-    } else if (state.currentHumidity <= state.baselineHumidity + baselineDecrease) {
+    } else if (state.currentHumidity <= baselineHumidity + baselineDecrease) {
         if (state.baselineState == "above") {
             state.baselineState = "below"
             notifier.deviceNotification(prefix + " - Baseline Decrease")
@@ -163,8 +152,6 @@ def checkBaseline() {
 }
 
 def checkThreshold() {
-    logDebug("Checking threshold...")
-
     if (state.currentHumidity >= thresholdIncrease) {
         if (state.thresholdState == "below") {
             state.thresholdState = "above"
