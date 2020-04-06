@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta6" }
+String getVersionNum() { return "1.0.0-beta7" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -203,6 +203,7 @@ def turnOffHumidity() {
         
         bathroomFan.off()
         turnOff()
+    }
 }
 
 def turnOn() {
