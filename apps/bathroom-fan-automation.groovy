@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta9" }
+String getVersionNum() { return "1.0.0-beta10" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -123,7 +123,7 @@ def checkRapidChange() {
             
             turnOnHumidity()
         }
-    } else if (atomicState.currentHumidity < atomicState.previousHumidity - rapidDecrease) {
+    } else if (atomicState.currentHumidity <= atomicState.previousHumidity - rapidDecrease) {
         if (atomicState.rapidState == "rising") {
             atomicState.rapidState = "falling"
             
@@ -145,7 +145,7 @@ def checkRapidChange() {
 def checkBaseline() {
     def baselineHumidity = baselineSensor.currentValue("humidity")
 
-    if (atomicState.currentHumidity > baselineHumidity + baselineIncrease) {
+    if (atomicState.currentHumidity >= baselineHumidity + baselineIncrease) {
         if (atomicState.baselineState == "below") {
             atomicState.baselineState = "above"
             
@@ -154,7 +154,7 @@ def checkBaseline() {
             
             turnOnHumidity()
         }
-    } else if (atomicState.currentHumidity < baselineHumidity + baselineDecrease) {
+    } else if (atomicState.currentHumidity <= baselineHumidity + baselineDecrease) {
         if (atomicState.baselineState == "above") {
             atomicState.baselineState = "below"
             
@@ -167,7 +167,7 @@ def checkBaseline() {
 }
 
 def checkThreshold() {
-    if (atomicState.currentHumidity > thresholdIncrease) {
+    if (atomicState.currentHumidity >= thresholdIncrease) {
         if (atomicState.thresholdState == "below") {
             atomicState.thresholdState = "above"
             
@@ -176,7 +176,7 @@ def checkThreshold() {
             
             turnOnHumidity()
         }
-    } else if (atomicState.currentHumidity < thresholdDecrease) {
+    } else if (atomicState.currentHumidity <= thresholdDecrease) {
         if (atomicState.thresholdState == "above") {
             atomicState.thresholdState = "below"
             
