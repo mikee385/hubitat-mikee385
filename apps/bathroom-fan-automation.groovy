@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta10" }
+String getVersionNum() { return "1.0.0-beta11" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -74,15 +74,15 @@ def updated() {
 }
 
 def initialize() {
-    atomicState.runningState = "off"
+    state.runningState = "off"
     
-    atomicState.humidityActive =  false
-    atomicState.rapidState = "off"
-    atomicState.baselineState = "below"
-    atomicState.thresholdState = "below"
+    state.humidityActive =  false
+    state.rapidState = "off"
+    state.baselineState = "below"
+    state.thresholdState = "below"
 
-    atomicState.previousHumidity = bathroomSensor.currentValue("humidity")
-    atomicState.currentHumidity = bathroomSensor.currentValue("humidity")
+    state.previousHumidity = bathroomSensor.currentValue("humidity")
+    state.currentHumidity = bathroomSensor.currentValue("humidity")
 
     subscribe(bathroomSensor, "humidity", humidityHandler)
     subscribe(bathroomFan, "switch", switchHandler)
@@ -105,8 +105,8 @@ def switchHandler(evt) {
 def humidityHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    atomicState.previousHumidity = atomicState.currentHumidity
-    atomicState.currentHumidity = bathroomSensor.currentValue("humidity")
+    state.previousHumidity = state.currentHumidity
+    state.currentHumidity = bathroomSensor.currentValue("humidity")
     
     checkRapidChange()
     checkBaseline()
@@ -114,25 +114,25 @@ def humidityHandler(evt) {
 }
 
 def checkRapidChange() {
-    if (atomicState.currentHumidity >= atomicState.previousHumidity + rapidIncrease) {
-        if (atomicState.rapidState != "rising") {
-            atomicState.rapidState = "rising"
+    if (state.currentHumidity >= state.previousHumidity + rapidIncrease) {
+        if (state.rapidState != "rising") {
+            state.rapidState = "rising"
             
             notifier.deviceNotification(prefix + " - Rapid Increase")
             logDebug("Rapid Increase")
             
             turnOnHumidity()
         }
-    } else if (atomicState.currentHumidity <= atomicState.previousHumidity - rapidDecrease) {
-        if (atomicState.rapidState == "rising") {
-            atomicState.rapidState = "falling"
+    } else if (state.currentHumidity <= state.previousHumidity - rapidDecrease) {
+        if (state.rapidState == "rising") {
+            state.rapidState = "falling"
             
             notifier.deviceNotification(prefix + " - Rapid Decrease")
             logDebug("Rapid Decrease")
         }
     } else {
-        if (atomicState.rapidState == "falling") {
-            atomicState.rapidState = "off"
+        if (state.rapidState == "falling") {
+            state.rapidState = "off"
             
             notifier.deviceNotification(prefix + " - Rapid Finished")
             logDebug("Rapid Finished")
@@ -145,18 +145,18 @@ def checkRapidChange() {
 def checkBaseline() {
     def baselineHumidity = baselineSensor.currentValue("humidity")
 
-    if (atomicState.currentHumidity >= baselineHumidity + baselineIncrease) {
-        if (atomicState.baselineState == "below") {
-            atomicState.baselineState = "above"
+    if (state.currentHumidity >= baselineHumidity + baselineIncrease) {
+        if (state.baselineState == "below") {
+            state.baselineState = "above"
             
             notifier.deviceNotification(prefix + " - Baseline Increase")
             logDebug("Baseline Increase")
             
             turnOnHumidity()
         }
-    } else if (atomicState.currentHumidity <= baselineHumidity + baselineDecrease) {
-        if (atomicState.baselineState == "above") {
-            atomicState.baselineState = "below"
+    } else if (state.currentHumidity <= baselineHumidity + baselineDecrease) {
+        if (state.baselineState == "above") {
+            state.baselineState = "below"
             
             notifier.deviceNotification(prefix + " - Baseline Decrease")
             logDebug("Baseline Decrease")
@@ -167,18 +167,18 @@ def checkBaseline() {
 }
 
 def checkThreshold() {
-    if (atomicState.currentHumidity >= thresholdIncrease) {
-        if (atomicState.thresholdState == "below") {
-            atomicState.thresholdState = "above"
+    if (state.currentHumidity >= thresholdIncrease) {
+        if (state.thresholdState == "below") {
+            state.thresholdState = "above"
             
             notifier.deviceNotification(prefix + " - Threshold Increase")
             logDebug("Threshold Increase")
             
             turnOnHumidity()
         }
-    } else if (atomicState.currentHumidity <= thresholdDecrease) {
-        if (atomicState.thresholdState == "above") {
-            atomicState.thresholdState = "below"
+    } else if (state.currentHumidity <= thresholdDecrease) {
+        if (state.thresholdState == "above") {
+            state.thresholdState = "below"
             
             notifier.deviceNotification(prefix + " - Threshold Decrease")
             logDebug("Threshold Decrease")
@@ -189,36 +189,42 @@ def checkThreshold() {
 }
 
 def turnOnHumidity() {
-    if (atomicState.humidityActive == false) {
-        atomicState.humidityActive = true
+    if (state.humidityActive == false) {
+        state.humidityActive = true
         
-        bathroomFan.on()
-        turnOn()
+        if (bathroomFan.currentValue("switch") == "off") {
+            bathroomFan.on()
+        } else {
+            turnOn()
+        }
     }
 }
 
 def turnOffHumidity() {
-    if (atomicState.humidityActive == true) {
-        atomicState.humidityActive = false
+    if (state.humidityActive == true) {
+        state.humidityActive = false
         
-        bathroomFan.off()
-        turnOff()
+        if (bathroomFan.currentValue("switch") == " on") {
+            bathroomFan.off()
+        } else {
+            turnOff()
+        }
     }
 }
 
 def turnOn() {
-    if (atomicState.humidityActive == true) {
-        if (atomicState.runningState != "humidity") {
+    if (state.humidityActive == true) {
+        if (state.runningState != "humidity") {
             unschedule("turnOff")
-            atomicState.runningState = "humidity"
+            state.runningState = "humidity"
             runIn(60*maximumRuntime, turnOff)
             
             notifier.deviceNotification(prefix + " - Fan Turned On - Humidity")
             logDebug("Fan Turned On - Humidity")
         }
     } else {
-        if (atomicState.runningState == "off") {
-            atomicState.runningState = "manual"
+        if (state.runningState == "off") {
+            state.runningState = "manual"
             runIn(60*manualRuntime, turnOff)
             
             notifier.deviceNotification(prefix + " - Fan Turned On - Manual")
@@ -228,9 +234,9 @@ def turnOn() {
 }
 
 def turnOff() {
-    if (atomicState.runningState != "off") {
+    if (state.runningState != "off") {
         unschedule("turnOff")
-        atomicState.runningState = "off"
+        state.runningState = "off"
     
         notifier.deviceNotification(prefix + " - Fan Turned Off")
         logDebug("Fan Turned Off")
