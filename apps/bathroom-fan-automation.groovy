@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta11" }
+String getVersionNum() { return "1.0.0-beta12" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,18 +38,18 @@ preferences {
             input "maximumRuntime", "number", title: "Maximum runtime (in minutes)", required: true
         }
         section("Rapid Change") {
-            input "rapidIncrease", "number", title: "Humidity increase for shower start", required: true
-            input "rapidDecrease", "number", title: "Humidity decrease for shower end", required: true
+            input "rapidIncrease", "decimal", title: "Humidity increase for shower start", required: true
+            input "rapidDecrease", "decimal", title: "Humidity decrease for shower end", required: true
             input "rapidTime", "number", title: "Time period to check for rapid change (in minutes)", required: true
         }
         section("Baseline") {
             input "baselineSensor", "capability.relativeHumidityMeasurement", title: "Baseline Humidity Sensor", multiple: false, required: true
-            input "baselineIncrease", "number", title: "Humidity above baseline for fan on", required: true
-            input "baselineDecrease", "number", title: "Humidity above baseline for fan off", required: true
+            input "baselineIncrease", "decimal", title: "Humidity above baseline for fan on", required: true
+            input "baselineDecrease", "decimal", title: "Humidity above baseline for fan off", required: true
         }
         section("Threshold") {
-            input "thresholdIncrease", "number", title: "Humidity threshold for fan on", required: true
-            input "thresholdDecrease", "number", title: "Humidity threshold for fan off", required: true
+            input "thresholdIncrease", "decimal", title: "Humidity threshold for fan on", required: true
+            input "thresholdDecrease", "decimal", title: "Humidity threshold for fan off", required: true
         }
         section ("Notifications") {
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
