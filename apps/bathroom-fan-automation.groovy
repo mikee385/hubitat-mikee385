@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta12" }
+String getVersionNum() { return "1.0.0-beta13" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -204,7 +204,7 @@ def turnOffHumidity() {
     if (state.humidityActive == true) {
         state.humidityActive = false
         
-        if (bathroomFan.currentValue("switch") == " on") {
+        if (bathroomFan.currentValue("switch") == "on") {
             bathroomFan.off()
         } else {
             turnOff()
