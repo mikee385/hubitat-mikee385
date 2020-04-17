@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.2" }
+String getVersionNum() { return "2.1.0-beta1" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -60,16 +60,16 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(occupancy, "state.vacant", vacantHandler)
+    subscribe(location, "sunrise", sunriseHandler)
+    subscribe(location, "sunset", sunsetHandler)
+
+    subscribe(occupancy, "occupancy", occupancyHandler)
     
     subscribe(overheadDoor, "contact", overheadDoorHandler)
     subscribe(entryDoor, "contact", entryDoorHandler)
     subscribe(sideDoor, "contact", sideDoorHandler)
     
     subscribe(motionSensor, "motion.active", activeHandler)
-    
-    subscribe(location, "sunrise", sunriseHandler)
-    subscribe(location, "sunset", sunsetHandler)
 }
 
 def logDebug(msg) {
@@ -94,18 +94,22 @@ def sunsetHandler(evt) {
     }
 }
 
-def vacantHandler(evt) {
+def occupancyHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (overheadDoor.currentValue("contact") == "closed") {
-        light.off()
+        if (evt.value == "occupied") {
+            light.on()
+        } else {
+            light.off()
+        }
     }
 }
 
 def overheadDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (overheadDoor.currentValue("contact") == "open") {
+    if (evt.value == "open") {
         if (timeOfDayIsBetween(location.sunrise, location.sunset, new Date(), location.timeZone)) {
             light.off()
         } else {
@@ -123,10 +127,7 @@ def overheadDoorHandler(evt) {
 def entryDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (entryDoor.currentValue("contact") == "open") {
-        if (occupancy.currentValue("state") == "vacant") {
-            light.on()
-        }
+    if (evt.value == "open") {
         occupancy.occupied()
     } else {
         if (overheadDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
@@ -142,10 +143,7 @@ def entryDoorHandler(evt) {
 def sideDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (sideDoor.currentValue("contact") == "open") {
-        if (occupancy.currentValue("state") == "vacant") {
-            light.on()
-        }
+    if (evt.value == "open") {
         occupancy.occupied()
     } else {
         if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed") {
@@ -164,7 +162,6 @@ def activeHandler(evt) {
     if (occupancy.currentValue("state") == "checking") {
         occupancy.occupied()
     } else if (occupancy.currentValue("state") == "vacant") {
-        light.on()
         occupancy.checking()
     }
 }
