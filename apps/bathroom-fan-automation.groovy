@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta13" }
+String getVersionNum() { return "1.0.0-beta14" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -217,7 +217,7 @@ def turnOn() {
         if (state.runningState != "humidity") {
             unschedule("turnOff")
             state.runningState = "humidity"
-            runIn(60*maximumRuntime, turnOff)
+            runIn(60*maximumRuntime, turnOffHumidity)
             
             notifier.deviceNotification(prefix + " - Fan Turned On - Humidity")
             logDebug("Fan Turned On - Humidity")
