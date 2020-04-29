@@ -13,8 +13,17 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+ 
+String getVersionNum() { return "1.1.1" }
+String getVersionLabel() { return "Virtual Alexa Button, version ${getVersionNum()} on ${getPlatform()}" }
+
  metadata {
-    definition (name: "Virtual Alexa Button", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-button.groovy") {
+    definition (
+		name: "Virtual Alexa Button", 
+		namespace: "mikee385", 
+		author: "Michael Pierce", 
+		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-button.groovy"
+	) {
         capability "Actuator"
         capability "Contact Sensor"
         capability "Momentary"

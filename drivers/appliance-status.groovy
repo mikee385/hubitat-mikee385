@@ -13,8 +13,17 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+ 
+String getVersionNum() { return "2.1.0" }
+String getVersionLabel() { return "Appliance Status, version ${getVersionNum()} on ${getPlatform()}" }
+
 metadata {
-    definition (name: "Appliance Status", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.groovy") {
+    definition (
+		name: "Appliance Status", 
+		namespace: "mikee385", 
+		author: "Michael Pierce", 
+		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.groovy"
+	) {
         capability "Actuator"
         capability "Sensor"
         capability "Switch"

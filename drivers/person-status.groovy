@@ -13,8 +13,17 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+ 
+String getVersionNum() { return "1.0.1" }
+String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
+
 metadata {
-    definition (name: "Person Status", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy") {
+    definition (
+		name: "Person Status", 
+		namespace: "mikee385", 
+		author: "Michael Pierce", 
+		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy"
+	) {
         capability "Actuator"
         capability "Presence Sensor"
         capability "Sensor"

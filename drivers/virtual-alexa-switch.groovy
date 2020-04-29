@@ -13,8 +13,17 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
+ 
+String getVersionNum() { return "1.0.1" }
+String getVersionLabel() { return "Virtual Alexa Switch, version ${getVersionNum()} on ${getPlatform()}" }
+
  metadata {
-    definition (name: "Virtual Alexa Switch", namespace: "mikee385", author: "Michael Pierce", importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-switch.groovy") {
+    definition (
+		name: "Virtual Alexa Switch", 
+		namespace: "mikee385", 
+		author: "Michael Pierce", 
+		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-switch.groovy"
+	) {
         capability "Actuator"
         capability "Contact Sensor"
         capability "Sensor"
