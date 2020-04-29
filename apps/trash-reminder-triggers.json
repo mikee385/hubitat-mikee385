@@ -1,0 +1,26 @@
+{
+    "packageName": "Trash Reminder Triggers",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-24",
+    "apps": [
+        {
+            "id": "3e93f882-30fc-479a-8d14-b58038db394b",
+            "name": "Trash Reminder Triggers",
+            "namespace": "mikee385",
+            "version": "2.0.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder-triggers.groovy",
+            "required": true
+        }
+    ],
+    "drivers": [
+        {
+            "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",
+            "name": "Person Status",
+            "namespace": "mikee385",
+            "version": "1.0.1",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy",
+            "required": true
+        }
+    ]
+}

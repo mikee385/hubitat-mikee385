@@ -1,0 +1,16 @@
+{
+    "packageName": "Person Status",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-02-14",
+    "drivers": [
+        {
+            "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",
+            "name": "Person Status",
+            "namespace": "mikee385",
+            "version": "1.0.1",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy",
+            "required": true
+        }
+    ]
+}

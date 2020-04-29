@@ -1,0 +1,16 @@
+{
+    "packageName": "Garage Light Reminder",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-29",
+    "apps": [
+        {
+            "id": "e0b93a4e-fc38-40a3-ab13-b81b05986e27",
+            "name": "Garage Light Reminder",
+            "namespace": "mikee385",
+            "version": "1.0.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-reminder.groovy",
+            "required": true
+        }
+    ]
+}

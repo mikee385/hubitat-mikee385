@@ -1,0 +1,16 @@
+{
+    "packageName": "Camera Reminder Triggers",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-24",
+    "apps": [
+        {
+            "id": "42ef472f-7655-46e4-815a-41391f9a3697",
+            "name": "Camera Reminder Triggers",
+            "namespace": "mikee385",
+            "version": "2.0.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-reminder-triggers.groovy",
+            "required": true
+        }
+    ]
+}

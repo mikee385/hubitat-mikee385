@@ -1,0 +1,16 @@
+{
+    "packageName": "Daily Notification",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-21",
+    "apps": [
+        {
+            "id": "cdbcadb3-d0d1-426f-adf4-dfd20522146e",
+            "name": "Daily Notification",
+            "namespace": "mikee385",
+            "version": "1.1.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/daily-notification.groovy",
+            "required": true
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "packageName": "Washer Automation",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-24",
+    "apps": [
+        {
+            "id": "b5ffb81f-f3c5-48db-8f0f-1ef3775eb2f6",
+            "name": "Washer Automation",
+            "namespace": "mikee385",
+            "version": "2.0.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/washer-automation.groovy",
+            "required": true
+        }
+    ],
+    "drivers": [
+        {
+            "id": "06b05cc8-6ccd-429a-a47d-5412a22d8228",
+            "name": "Appliance Status",
+            "namespace": "mikee385",
+            "version": "2.1.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.groovy",
+            "required": true
+        }
+    ]
+}

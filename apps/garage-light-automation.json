@@ -1,0 +1,26 @@
+{
+    "packageName": "Garage Light Automation",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-04-17",
+    "apps": [
+        {
+            "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
+            "name": "Garage Light Automation",
+            "namespace": "mikee385",
+            "version": "2.1.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.groovy",
+            "required": true
+        }
+    ],
+    "drivers": [
+        {
+            "id": "9a0311c1-63d2-4d93-aee3-61aaf22dbe93",
+            "name": "Occupancy Status",
+            "namespace": "mikee385",
+            "version": "2.1.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.groovy",
+            "required": true
+        }
+    ]
+}

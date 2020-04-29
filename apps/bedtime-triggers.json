@@ -1,0 +1,16 @@
+{
+    "packageName": "Bedtime Triggers",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-22",
+    "apps": [
+        {
+            "id": "06f9db9f-5cc4-4387-8289-8593c81cadb8",
+            "name": "Bedtime Triggers",
+            "namespace": "mikee385",
+            "version": "1.1.1",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-triggers.groovy",
+            "required": true
+        }
+    ]
+}

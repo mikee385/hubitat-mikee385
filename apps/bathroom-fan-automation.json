@@ -3,7 +3,8 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
     "dateReleased": "2020-04-17",
-    "apps": [{
+    "apps": [
+        {
             "id": "64ca754d-52af-47a3-9e44-74a6844439a7",
             "name": "Bathroom Fan Automation",
             "namespace": "mikee385",

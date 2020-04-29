@@ -1,0 +1,16 @@
+{
+    "packageName": "Routine Triggers",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-15",
+    "apps": [
+        {
+            "id": "39241e22-af11-4e7a-be82-f5c973fc5d79",
+            "name": "Routine Triggers",
+            "namespace": "mikee385",
+            "version": "1.0.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/routine-triggers.groovy",
+            "required": true
+        }
+    ]
+}

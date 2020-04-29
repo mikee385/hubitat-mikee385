@@ -1,0 +1,16 @@
+{
+    "packageName": "Routine Automation",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-15",
+    "apps": [
+        {
+            "id": "67d1cedd-0248-4fce-90d0-724dd8b0fdc9",
+            "name": "Routine Automation",
+            "namespace": "mikee385",
+            "version": "1.0.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/routine-automation.groovy",
+            "required": true
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{
+    "packageName": "Ecobee Home/Away",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-03-24",
+    "apps": [
+        {
+            "id": "c17524ac-2a17-496e-beaf-3b179bad9764",
+            "name": "Ecobee Home/Away",
+            "namespace": "mikee385",
+            "version": "1.0.0",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/ecobee-home-away.groovy",
+            "required": true
+        }
+    ]
+}

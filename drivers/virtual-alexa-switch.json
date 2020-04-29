@@ -1,0 +1,16 @@
+{
+    "packageName": "Virtual Alexa Switch",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2020-02-14",
+    "drivers": [
+        {
+            "id": "2859d152-26c6-4621-9a98-7a85b0dd23a7",
+            "name": "Virtual Alexa Switch",
+            "namespace": "mikee385",
+            "version": "1.0.1",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-switch.groovy",
+            "required": true
+        }
+    ]
+}
