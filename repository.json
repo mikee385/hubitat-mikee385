@@ -1,0 +1,11 @@
+{
+    "author": "Michael Pierce",
+    "gitHubUrl": "https://github.com/mikee385/hubitat-mikee385",
+    "packages": [{
+            "name": "Bathroom Fan Automation",
+            "category": "Convenience",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.json",
+            "description": "Turns a bathroom exhaust fan on/off using a nearby humidity sensor."
+        }
+    ]
+}
