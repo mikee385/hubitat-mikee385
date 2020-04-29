@@ -1,5 +1,5 @@
 /**
- *  Ecobee Home/Away Controller
+ *  Ecobee Home/Away
  *
  *  Copyright 2019 Michael Pierce
  *
@@ -15,7 +15,7 @@
  */
  
 String getVersionNum() { return "1.0.0" }
-String getVersionLabel() { return "Ecobee Home/Away Controller, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionLabel() { return "Ecobee Home/Away, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
     name: "Ecobee Home/Away",
