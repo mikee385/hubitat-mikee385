@@ -8,7 +8,7 @@
             "id": "f5a4bd65-b948-499a-a7f3-544f9cf8a2c8",
             "name": "Person Automation with Power Meter",
             "namespace": "mikee385",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-power.groovy",
             "required": true
         }
