@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
