@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.1.1" }
 String getVersionLabel() { return "Person Automation with Power Meter, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -130,7 +130,7 @@ def bedroomDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (guest.currentValue("presence") == "not present") {
-        if (powerMeter.currentValue("power") < powerLevelForSleep && person.currentValue("state") == "sleep" && state.wakingUp = false) {
+        if (powerMeter.currentValue("power") < powerLevelForSleep && person.currentValue("state") == "sleep" && state.wakingUp == false) {
             state.wakingUp = true
             if (alertAwake) {
                 notifier.deviceNotification("$person is out of bed!")
