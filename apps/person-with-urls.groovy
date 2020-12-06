@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Person Automation with URLs, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -81,6 +81,10 @@ def updated() {
 
 def initialize() {
     subscribe(presenceSensor, "presence", presenceHandler)
+    
+    if(!state.accessToken) {
+        createAccessToken()
+    }
 }
 
 def logDebug(msg) {
