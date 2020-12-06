@@ -81,6 +81,12 @@
             "description": "Updates the state of a Person Status device using a presence sensor and a switch."
         },
         {
+            "name": "Person Automation with URLs",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-urls.json",
+            "description": "Updates the state of a Person Status device using a presence sensor and URLs."
+        },
+        {
             "name": "Reboot Notification",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.json",
