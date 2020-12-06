@@ -8,7 +8,7 @@
             "id": "e49a5909-5e66-4e5f-8f02-b8e56e9a1b4f",
             "name": "Person Automation with URLs",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
+            "version": "1.0.0-beta.3",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-urls.groovy",
             "required": true
         }

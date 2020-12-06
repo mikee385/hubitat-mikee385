@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Person Automation with URLs, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -84,6 +84,9 @@ def initialize() {
     
     if(!state.accessToken) {
         createAccessToken()
+    } else {
+        state.awakeUrl = "${getFullLocalApiServerUrl()}/awake?access_token=$state.accessToken"
+        state.asleepUrl = "${getFullLocalApiServerUrl()}/asleep?access_token=$state.accessToken"
     }
 }
 
