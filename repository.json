@@ -69,6 +69,12 @@
             "description": "Updates the state of a Person Status device using a presence sensor and a power meter."
         },
         {
+            "name": "Person Automation with Presence",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-presence.json",
+            "description": "Updates the state of a Person Status device using a presence sensor."
+        },
+        {
             "name": "Person Automation with Switch",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-switch.json",
