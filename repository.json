@@ -63,6 +63,12 @@
             "description": "Sends alerts when guests may have arrived or departed."
         },
         {
+            "name": "Holiday Lights Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/holiday-lights-automation.json",
+            "description": "Turns the holiday light on and off based on the time of day and mode."
+        },
+        {
             "name": "Person Automation with Power Meter",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-power.json",
