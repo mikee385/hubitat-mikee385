@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Person Automation with Presence, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -37,8 +37,6 @@ preferences {
         
             input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
             input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
-            input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
-            input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {

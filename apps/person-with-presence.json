@@ -8,7 +8,7 @@
             "id": "457fa1d4-1211-44d2-9171-c64c02a12f3e",
             "name": "Person Automation with Presence",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.1",
+            "version": "1.0.0-beta.2",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-presence.groovy",
             "required": true
         }
