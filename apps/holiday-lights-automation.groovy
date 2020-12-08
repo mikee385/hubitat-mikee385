@@ -14,14 +14,14 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
     name: "Holiday Lights Automation",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Turns the holiday light on and off based on the time of day and mode.",
+    description: "Turns the holiday light on and off based on routines and sunrise/sunset.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
@@ -33,10 +33,34 @@ preferences {
             
             input "holidayLights", "capability.switch", title: "Holiday Lights", multiple: true, required: true
 
+            input "onRoutines", "capability.switch", title: "On Routines", multiple: true, required: false
+            
+            input name: "onlyAfterSunset", type: "bool", title: "Only on after sunset?", defaultValue: false
+
+            input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
+
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
         }
+    }
+}
+
+mappings {
+    path("/on") {
+        action: [
+            GET: "onUrlHandler"
+        ]
+    }
+    path("/off") {
+        action: [
+            GET: "offUrlHandler"
+        ]
+    }
+    path("/toggle") {
+        action: [
+            GET: "toggleUrlHandler"
+        ]
     }
 }
 
@@ -51,31 +75,23 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(location, "mode", modeHandler)
+    if (onlyOnAfterSunset) {
+        subscribe(location, "sunrise", sunriseHandler)
+        subscribe(location, "sunset", sunsetHandler)
+    }
+
+    for (routine in onRoutines) {
+        subscribe(routine, "switch.on", onRoutineHandler)
+    }
     
-    subscribe(location, "sunrise", sunriseHandler)
-    subscribe(location, "sunset", sunsetHandler)
+    for (routine in offRoutines) {
+        subscribe(routine, "switch.on", offRoutineHandler)
+    }
 }
 
 def logDebug(msg) {
     if (logEnable) {
         log.debug msg
-    }
-}
-
-def modeHandler(evt) {
-    logDebug("Mode changed to ${evt.value}")
-    
-    if (evt.value == "Home") {
-        if (timeOfDayIsBetween(location.sunset, timeToday("23:59"), new Date(), location.timeZone)) {
-            for (light in holidayLights) {
-                light.on()
-            }
-        }
-    } else if (evt.value == "Sleep") {
-        for (light in holidayLights) {
-            light.off()
-        }
     }
 }
 
@@ -90,7 +106,62 @@ def sunriseHandler(evt) {
 def sunsetHandler(evt) {
     logDebug("Received sunset event")
     
-    if (evt.value == "Home") {
+    if (location.mode == "Home") {
+        for (light in holidayLights) {
+            light.on()
+        }
+    }
+}
+
+def onRoutineHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+
+    if (!onlyOnAfterSunset || !timeOfDayIsBetween(location.sunrise, location.sunset, new Date(), location.timeZone)) {
+        for (light in holidayLights) {
+            light.on()
+        }
+    }
+}
+
+def offRoutineHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+
+    for (light in holidayLights) {
+        light.off()
+    }
+}
+
+def onUrlHandler() {
+    logDebug("On URL called")
+    
+    for (light in holidayLights) {
+        light.on()
+    }
+}
+
+def offUrlHandler() {
+    logDebug("Off URL called")
+    
+    for (light in holidayLights) {
+        light.off()
+    }
+}
+
+def toggleUrlHandler() {
+    logDebug("Toggle URL called")
+    
+    def anyLightOn = false
+    for (light in holidayLights) {
+        if (light.value == "on") {
+            anyLightOn = true
+            break 
+        }
+    }
+    if (anyLightOn) {
+        for (light in holidayLights) {
+            light.off()
+        }
+    } else {
         for (light in holidayLights) {
             light.on()
         }
