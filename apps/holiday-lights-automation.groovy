@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.4" }
+String getVersionNum() { return "1.0.0-beta.5" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -159,7 +159,7 @@ def toggleUrlHandler() {
     
     def anyLightOn = false
     for (light in holidayLights) {
-        if (light.value == "on") {
+        if (light.switch == "on") {
             anyLightOn = true
             break 
         }
