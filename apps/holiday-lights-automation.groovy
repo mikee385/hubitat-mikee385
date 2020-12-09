@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.6" }
+String getVersionNum() { return "1.0.0-beta.7" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -123,7 +123,7 @@ def sunsetHandler(evt) {
 def onRoutineHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
 
-    if (!onlyOnAfterSunset || !timeOfDayIsBetween(location.sunrise, location.sunset, new Date(), location.timeZone)) {
+    if (!onlyOnAfterSunset || timeOfDayIsBetween(location.sunset, timeToday("23:59"), new Date(), location.timeZone)) {
         for (light in holidayLights) {
             light.on()
         }
