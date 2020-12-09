@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -86,6 +86,14 @@ def initialize() {
     
     for (routine in offRoutines) {
         subscribe(routine, "switch.on", offRoutineHandler)
+    }
+    
+    if(!state.accessToken) {
+        createAccessToken()
+    } else {
+        state.onUrl = "${getFullLocalApiServerUrl()}/on?access_token=$state.accessToken"
+        state.offUrl = "${getFullLocalApiServerUrl()}/off?access_token=$state.accessToken"
+        state.toggleUrl = "${getFullLocalApiServerUrl()}/toggle?access_token=$state.accessToken"
     }
 }
 
