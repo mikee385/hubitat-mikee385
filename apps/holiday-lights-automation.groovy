@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.8" }
+String getVersionNum() { return "1.0.0-beta.9" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,7 +35,7 @@ preferences {
 
             input "onRoutines", "capability.switch", title: "On Routines", multiple: true, required: false
             
-            input name: "onlyAfterSunset", type: "bool", title: "Only on after sunset?", defaultValue: false
+            input name: "onlyOnAfterSunset", type: "bool", title: "Only on after sunset?", defaultValue: false
 
             input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
 
