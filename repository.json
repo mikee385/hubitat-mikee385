@@ -45,6 +45,12 @@
             "description": "Updates the home/away status of Ecobee thermostats based on the Hubitat mode and the current Ecobee schedule."
         },
         {
+            "name": "Exterior Light Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/exterior-light-automation.json",
+            "description": "Turns on an exterior light when a door opens, depending on the time of day."
+        },
+        {
             "name": "Garage Light Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.json",
