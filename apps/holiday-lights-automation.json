@@ -8,7 +8,7 @@
             "id": "2c6a175b-4cf6-4336-ba71-eddbedc538a4",
             "name": "Holiday Lights Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.9",
+            "version": "1.0.0-beta.10",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/holiday-lights-automation.groovy",
             "required": true
         }
