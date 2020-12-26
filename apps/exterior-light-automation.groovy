@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Exterior Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,7 +33,7 @@ preferences {
             
             input "exteriorLights", "capability.switch", title: "Exterior Lights", multiple: true, required: true
 
-            input "exteriorDoors", "capability.contact", title: "Exterior Doors", multiple: true, required: true
+            input "exteriorDoors", "capability.contactSensor", title: "Exterior Doors", multiple: true, required: true
             
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
 
