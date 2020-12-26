@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Routine Triggers, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -130,7 +130,7 @@ def departedHandler(evt) {
         }
     } else if (anyoneAwake == false) {
         if (location.mode != "Sleep") {
-            departedWhenSleep.on()
+            departedWhenAsleep.on()
         }
     }
 }
