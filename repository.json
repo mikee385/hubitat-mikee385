@@ -117,6 +117,12 @@
             "description": "Trigger routines based on presence sensors and sleep sensors."
         },
         {
+            "name": "Sunlight Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.json",
+            "description": "Updates a switch based on time of day and illuminance."
+        },
+        {
             "name": "Thermostat Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/thermostat-automation.json",
