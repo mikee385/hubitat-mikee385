@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.3" }
+String getVersionNum() { return "1.0.0-beta.4" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -104,7 +104,7 @@ def lightHandler(evt) {
     
     if (timeOfDayIsBetween(location.sunrise, location.sunset, new Date(), location.timeZone)) {
         logDebug("Daytime!")
-        if (evt.value <= lightLevelForOff) {
+        if (lightSensor.currentValue("illuminance") <= lightLevelForOff) {
             logDebug("Dark!")
             if (sunlightSwitch.currentValue("switch") == "on") {
                 logDebug("Turn off!")
@@ -113,7 +113,7 @@ def lightHandler(evt) {
                     notifier.deviceNotification("It's dark! (${evt.value})")
                 }
             }
-        } else if (evt.value >= lightLevelForOn) {
+        } else if (lightSensor.currentValue("illuminance") >= lightLevelForOn) {
             logDebug("Light!")
             if (sunlightSwitch.currentValue("switch") == "off") {
                 logDebug("Turn on!")

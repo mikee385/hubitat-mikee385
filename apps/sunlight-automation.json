@@ -8,7 +8,7 @@
             "id": "920bad1a-1cad-4ff6-af30-fa7a910e6197",
             "name": "Sunlight Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.3",
+            "version": "1.0.0-beta.4",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.groovy",
             "required": true
         }
