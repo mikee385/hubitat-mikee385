@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -63,7 +63,7 @@ def initialize() {
     subscribe(location, "sunrise", sunriseHandler)
     subscribe(location, "sunset", sunsetHandler)
     
-    subscribe(lightSensor, "value", lightHandler)
+    subscribe(lightSensor, "illuminance", lightHandler)
 }
 
 def logDebug(msg) {
@@ -76,7 +76,7 @@ def sunriseHandler(evt) {
     logDebug("Received sunrise event")
     
     if (alertSunrise) {
-        def lightValue = lightSensor.currentValue("value")
+        def lightValue = lightSensor.currentValue("illuminance")
         notifier.deviceNotification("Sunrise! ($lightValue)")
     }
 }
@@ -84,11 +84,11 @@ def sunriseHandler(evt) {
 def sunsetHandler(evt) {
     logDebug("Received sunset event")
     
-    if (sunlightSwitch.currentValue("value") == "on") {
+    if (sunlightSwitch.currentValue("switch") == "on") {
         sunlightSwitch.off()
     }
     if (alertSunset) {
-        def lightValue = lightSensor.currentValue("value")
+        def lightValue = lightSensor.currentValue("illuminance")
         notifier.deviceNotification("Sunset! ($lightValue)")
     }
 }
@@ -98,14 +98,14 @@ def lightHandler(evt) {
     
     if (timeOfDayIsBetween(location.sunrise, location.sunset, new Date(), location.timeZone)) {
         if (evt.value <= lightLevelForOff) {
-            if (sunlightSwitch.currentValue("value") == "on") {
+            if (sunlightSwitch.currentValue("switch") == "on") {
                 sunlightSwitch.off()
                 if (alertOff) {
                     notifier.deviceNotification("It's dark! (${evt.value})")
                 }
             }
         } else if (evt.value >= lightLevelForOn) {
-            if (sunlightSwitch.currentValue("value") == "off") {
+            if (sunlightSwitch.currentValue("switch") == "off") {
                 sunlightSwitch.on()
                 if (alertOn) {
                     notifier.deviceNotification("It's light! (${evt.value})")
