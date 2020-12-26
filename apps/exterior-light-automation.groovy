@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Exterior Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -58,6 +58,8 @@ def initialize() {
     for (door in exteriorDoors) {
         subscribe(door, "contact.open", exteriorDoorHandler)
     }
+    
+    subscribe(sunlight, "switch.on", sunlightHandler)
 }
 
 def logDebug(msg) {
@@ -73,5 +75,13 @@ def exteriorDoorHandler(evt) {
         for (light in exteriorLights) {
             light.on()
         }
+    }
+}
+
+def sunlightHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    for (light in exteriorLights) {
+        light.off()
     }
 }
