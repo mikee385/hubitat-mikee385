@@ -63,6 +63,12 @@
             "description": "Sends reminders if the garage light is left on."
         },
         {
+            "name": "Glows Automatio ",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/glows-automation.json",
+            "description": "Triggers Alexa virtual buttons using various mechanisms."
+        },
+        {
             "name": "Guest Alerts",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/guest-alerts.json",
