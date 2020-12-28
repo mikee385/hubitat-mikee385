@@ -2,13 +2,13 @@
     "packageName": "Glows Automation",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-12-27",
+    "dateReleased": "2020-12-28",
     "apps": [
         {
             "id": "e337ed56-f332-45c8-9fe0-1c663b8c82c0",
             "name": "Glows Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.1",
+            "version": "1.0.0-beta.2",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/glows-automation.groovy",
             "required": true
         }

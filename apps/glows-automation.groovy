@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Glows Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -54,12 +54,12 @@ preferences {
 }
 
 mappings {
-    path("/bedtimeNow") {
+    path("/bedtimeSoon") {
         action: [
             GET: "bedtimeSoonUrlHandler"
         ]
     }
-    path("/bedtimeSoon") {
+    path("/bedtimeNow") {
         action: [
             GET: "bedtimeNowUrlHandler"
         ]
