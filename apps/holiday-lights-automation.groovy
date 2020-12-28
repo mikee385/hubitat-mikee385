@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.10" }
+String getVersionNum() { return "1.1.0-beta.1" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -32,10 +32,10 @@ preferences {
         section("") {
             
             input "holidayLights", "capability.switch", title: "Holiday Lights", multiple: true, required: true
+            
+            input name: "outdoors", type: "bool", title: "Outdoors?", defaultValue: false
 
             input "onRoutines", "capability.switch", title: "On Routines", multiple: true, required: false
-            
-            input name: "onlyOnAfterSunset", type: "bool", title: "Only on after sunset?", defaultValue: false
 
             input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
 
@@ -75,7 +75,7 @@ def updated() {
 }
 
 def initialize() {
-    if (onlyOnAfterSunset) {
+    if (outdoors) {
         subscribe(location, "sunrise", sunriseHandler)
         subscribe(location, "sunset", sunsetHandler)
     }
@@ -87,6 +87,8 @@ def initialize() {
     for (routine in offRoutines) {
         subscribe(routine, "switch.on", offRoutineHandler)
     }
+    
+    subscribe(location, "mode", modeHandler)
     
     if(!state.accessToken) {
         createAccessToken()
@@ -123,10 +125,8 @@ def sunsetHandler(evt) {
 def onRoutineHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
 
-    if (!onlyOnAfterSunset || timeOfDayIsBetween(location.sunset, timeToday("23:59"), new Date(), location.timeZone)) {
-        for (light in holidayLights) {
-            light.on()
-        }
+    for (light in holidayLights) {
+        light.on()
     }
 }
 
@@ -135,6 +135,28 @@ def offRoutineHandler(evt) {
 
     for (light in holidayLights) {
         light.off()
+    }
+}
+
+def modeHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "Home") {
+        if (outdoors && timeOfDayIsBetween(location.sunset, timeToday("23:59"), new Date(), location.timeZone)) {
+            for (light in holidayLights) {
+                light.on()
+            }
+        }
+    } else if (evt.value == "Away") {
+        if (!outdoors) {
+            for (light in holidayLights) {
+                light.off()
+            }
+        }
+    } else if (evt.value == "Sleep") {
+        for (light in holidayLights) {
+            light.off()
+        }
     }
 }
 
