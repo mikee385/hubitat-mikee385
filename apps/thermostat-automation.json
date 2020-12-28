@@ -2,13 +2,13 @@
     "packageName": "Thermostat Automation",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-03-15",
+    "dateReleased": "2020-12-28",
     "apps": [
         {
             "id": "a53151e5-9ddf-43c4-af86-440edf88ba24",
             "name": "Thermostat Automation",
             "namespace": "mikee385",
-            "version": "1.0.0",
+            "version": "2.0.0-beta.1",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/thermostat-automation.groovy",
             "required": true
         }

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0-beta.1" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,10 +31,6 @@ preferences {
     page(name: "settings", title: "Thermostat Automation", install: true, uninstall: true) {
         section {
             input "thermostats", "capability.thermostat", title: "Thermostats", multiple: true, required: true
-        }
-        section {
-            input "awayRoutines", "capability.switch", title: "Routines for Away", multiple: true, required: false
-            input "resumeRoutines", "capability.switch", title: "Routines for Resume", multiple: true, required: false
         }
         section {
             input "workdayTime", "time", title: "Workday Resume Time", required: false
@@ -60,17 +56,9 @@ def updated() {
 }
 
 def initialize() {
-    if (awayRoutines) {
-        for (routine in awayRoutines) {
-            subscribe(routine, "switch.on", awayHandler)
-        }
-    }
-        
-    if (resumeRoutines) {
-        for (routine in resumeRoutines) {
-            subscribe(routine, "switch.on", resumeHandler)
-        }
-    }
+    state.mode = location.mode
+    
+    subscribe(location, "mode", modeHandler)
     
     def currentTime = new Date()
     
@@ -91,24 +79,23 @@ def logDebug(msg) {
     }
 }
 
-def awayHandler(evt) {
+def modeHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    def currentTime = new Date()
-    def sleepToday = timeToday(sleepTime)
-    if (currentTime < sleepToday) {
+    if (evt.value == "Away") {
+        def currentTime = new Date()
+        def sleepToday = timeToday(sleepTime)
+        if (currentTime < sleepToday) {
+            for (thermostat in thermostats) {
+                thermostat.setAway()
+            }
+        }
+    } else if (state.mode == "Away") {
         for (thermostat in thermostats) {
-            thermostat.setAway()
+            thermostat.resumeProgram()
         }
     }
-}
-
-def resumeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    for (thermostat in thermostats) {
-        thermostat.resumeProgram()
-    }
+    state.mode = evt.value
 }
 
 def resumeForWorkday(evt) {
