@@ -2,13 +2,13 @@
     "packageName": "Exterior Light Automation",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-12-26",
+    "dateReleased": "2020-12-27",
     "apps": [
         {
             "id": "fcfbb113-40fc-49dd-8a10-dc99db3b044d",
             "name": "Exterior Light Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.3",
+            "version": "1.0.0-beta.4",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/exterior-light-automation.groovy",
             "required": true
         }

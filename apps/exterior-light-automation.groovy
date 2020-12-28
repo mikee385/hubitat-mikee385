@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.3" }
+String getVersionNum() { return "1.0.0-beta.4" }
 String getVersionLabel() { return "Exterior Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -60,6 +60,8 @@ def initialize() {
     }
     
     subscribe(sunlight, "switch.on", sunlightHandler)
+    
+    subscribe(location, "mode", modeHandler)
 }
 
 def logDebug(msg) {
@@ -83,5 +85,15 @@ def sunlightHandler(evt) {
     
     for (light in exteriorLights) {
         light.off()
+    }
+}
+
+def modeHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "Sleep") {
+        for (light in exteriorLights) {
+            light.off()
+        }
     }
 }
