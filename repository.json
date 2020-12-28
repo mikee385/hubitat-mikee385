@@ -63,7 +63,7 @@
             "description": "Sends reminders if the garage light is left on."
         },
         {
-            "name": "Glows Automatio ",
+            "name": "Glows Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/glows-automation.json",
             "description": "Triggers Alexa virtual buttons using various mechanisms."
@@ -79,6 +79,12 @@
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/holiday-lights-automation.json",
             "description": "Turns the holiday light on and off based on the time of day and mode."
+        },
+        {
+            "name": "Mode Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/mode-automation.json",
+            "description": "Changes mode based on presence sensors and sleep sensors."
         },
         {
             "name": "Person Automation with Power Meter",
