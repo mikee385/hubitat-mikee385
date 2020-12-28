@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0-beta.1" }
 String getVersionLabel() { return "Person Automation with Switch, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -72,6 +72,8 @@ def initialize() {
     subscribe(presenceSensor, "presence", presenceHandler)
     
     subscribe(switchSensor, "switch", switchHandler)
+    
+    subscribe(location, "mode", modeHandler)
 }
 
 def logDebug(msg) {
@@ -117,5 +119,13 @@ def switchHandler(evt) {
                 notifier.deviceNotification("$person is awake!")
             }
         }
+    }
+}
+
+def modeHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "Away") {
+        switchSensor.off()
     }
 }

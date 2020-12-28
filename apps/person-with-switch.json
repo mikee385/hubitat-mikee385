@@ -2,13 +2,13 @@
     "packageName": "Person Automation with Switch",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-03-24",
+    "dateReleased": "2020-12-28",
     "apps": [
         {
             "id": "0d7b2919-7847-43f1-b989-edab7622fae0",
             "name": "Person Automation with Switch",
             "namespace": "mikee385",
-            "version": "2.0.0",
+            "version": "2.1.0-beta.1",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-switch.groovy",
             "required": true
         }
