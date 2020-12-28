@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.1" }
+String getVersionNum() { return "3.1.0-beta.1" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -71,6 +71,8 @@ def initialize() {
     subscribe(motionSensor, "motion.active", activeHandler)
     
     subscribe(sunlight, "switch", sunlightHandler)
+    
+    subscribe(location, "mode", modeHandler)
 }
 
 def logDebug(msg) {
@@ -160,5 +162,13 @@ def activeHandler(evt) {
         occupancy.occupied()
     } else if (occupancy.currentValue("state") == "vacant") {
         occupancy.checking()
+    }
+}
+
+def modeHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value != "Home") {
+        garageLight.off()
     }
 }

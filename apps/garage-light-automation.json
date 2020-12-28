@@ -8,7 +8,7 @@
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
             "name": "Garage Light Automation",
             "namespace": "mikee385",
-            "version": "3.0.0-beta.1",
+            "version": "3.1.0-beta.1",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.groovy",
             "required": true
         }
