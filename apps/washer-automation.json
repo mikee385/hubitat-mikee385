@@ -12,15 +12,5 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/washer-automation.groovy",
             "required": true
         }
-    ],
-    "drivers": [
-        {
-            "id": "06b05cc8-6ccd-429a-a47d-5412a22d8228",
-            "name": "Appliance Status",
-            "namespace": "mikee385",
-            "version": "2.1.0",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.groovy",
-            "required": true
-        }
     ]
 }
