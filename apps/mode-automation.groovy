@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Mode Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -45,6 +45,10 @@ preferences {
             input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
             
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+        }
+        section("Backup Times") {
+            input "awakeTime", "time", title: "Awake Time", required: false
+            input "asleepTime", "time", title: "Asleep Time", required: false
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
