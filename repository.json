@@ -15,6 +15,12 @@
             "description": "Trigger routines for various bedtime actions."
         },
         {
+            "name": "Camera Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.json",
+            "description": "Turns on/off the cameras and reminders based on modes and other devices."
+        },
+        {
             "name": "Camera Reminder Triggers",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-reminder-triggers.json",
