@@ -153,6 +153,12 @@
             "description": "Sets thermostats to home/away based on the mode."
         },
         {
+            "name": "Trash Reminder",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder.json",
+            "description": "Reminder to take out the trash on specific days."
+        },
+        {
             "name": "Trash Reminder Triggers",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder-triggers.json",
