@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Person Automation with Presence, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(

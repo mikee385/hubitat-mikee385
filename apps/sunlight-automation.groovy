@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.5" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(

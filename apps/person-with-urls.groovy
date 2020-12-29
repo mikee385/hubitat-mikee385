@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.4" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Person Automation with URLs, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(

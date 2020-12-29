@@ -2,13 +2,13 @@
     "packageName": "Person Automation with Presence",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-12-06",
+    "dateReleased": "2020-12-28",
     "apps": [
         {
             "id": "457fa1d4-1211-44d2-9171-c64c02a12f3e",
             "name": "Person Automation with Presence",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
+            "version": "1.0.0",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-presence.groovy",
             "required": true
         }

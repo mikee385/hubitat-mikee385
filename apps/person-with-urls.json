@@ -2,13 +2,13 @@
     "packageName": "Person Automation with URLs",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-12-08",
+    "dateReleased": "2020-12-28",
     "apps": [
         {
             "id": "e49a5909-5e66-4e5f-8f02-b8e56e9a1b4f",
             "name": "Person Automation with URLs",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.4",
+            "version": "1.0.0",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-urls.groovy",
             "required": true
         }
