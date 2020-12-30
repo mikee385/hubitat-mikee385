@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -85,8 +85,10 @@ def motionHandler(evt) {
     
     if (evt.value == "active") {
         unschedule()
-        for (light in lights) {
-            light.on()
+        if (location.mode != "Away") {
+            for (light in lights) {
+                light.on()
+            }
         }
     } else {
         runIn(60*minutes, turnOff)

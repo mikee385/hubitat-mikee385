@@ -8,7 +8,7 @@
             "id": "a43d78ea-dd49-4798-9a2f-68765249c16a",
             "name": "Pantry Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.1",
+            "version": "1.0.0-beta.2",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.groovy",
             "required": true
         }
