@@ -93,6 +93,12 @@
             "description": "Changes mode based on presence sensors and sleep sensors."
         },
         {
+            "name": "Pantry Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.json",
+            "description": "Turns the pantry light on/off based on motion."
+        },
+        {
             "name": "Person Automation with Power Meter",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-power.json",
