@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.1" }
+String getVersionNum() { return "3.0.0-beta.2" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -57,7 +57,9 @@ preferences {
         section("Reminder") {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
             
-            input "reminderRoutine", "capability.switch", title: "Turn On when", multiple: false, required: true
+            input "reminderRoutine", "capability.switch", title: "Turn On When", multiple: false, required: true
+            
+            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -80,7 +82,7 @@ def updated() {
 def initialize() {
     subscribe(contactSensor, "contact.open", openHandler)
     
-    subscribe(appliance, "state", stateHandler)
+    subscribe(appliance, "state", applianceHandler)
     
     def resetToday = timeToday(resetTime)
     def currentTime = new Date()
@@ -89,6 +91,8 @@ def initialize() {
     subscribe(reminderRoutine, "switch.on", routineHandler)
     
     subscribe(reminderSwitch, "switch", reminderHandler)
+    
+    subscribe(person, "state", personHandler)
 }
 
 def logDebug(msg) {
@@ -105,7 +109,7 @@ def openHandler(evt) {
     }
 }
 
-def stateHandler(evt) {
+def applianceHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (evt.value == "running") {
@@ -171,4 +175,14 @@ def reminderHandler(evt) {
 def reminderAlert() {
     notifier.deviceNotification("Start the dishwasher!")
     runIn(60*5, reminderAlert)
+}
+
+def personHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+
+    if (evt.value != "home") {
+        reminderSwitch.off()
+        
+        notifier.deviceNotification("Dishwasher Reminder has been canceled!")
+    }
 }
