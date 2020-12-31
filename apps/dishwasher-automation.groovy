@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "3.0.0-beta.1" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,14 +38,26 @@ preferences {
             input "bedtimeStart", "time", title: "Bedtime Start", required: true
             
             input "bedtimeEnd", "time", title: "Bedtime End", required: true
-            
-             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
         }
         section("Finish") {
             input "runDuration", "number", title: "Duration (in minutes)", required: true
         }
         section("Reset") {
             input "resetTime", "time", title: "Reset Time", required: true
+        }
+        section("Notifications") {
+            input "alertStarted", "bool", title: "Alert when Started?", required: true, defaultValue: false
+            
+            input "alertFinished", "bool", title: "Alert when Finished?", required: true, defaultValue: false
+            
+            input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
+            
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+        }
+        section("Reminder") {
+            input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
+            
+            input "reminderRoutine", "capability.switch", title: "Turn On when", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -68,11 +80,15 @@ def updated() {
 def initialize() {
     subscribe(contactSensor, "contact.open", openHandler)
     
-    subscribe(appliance, "state.running", runningHandler)
+    subscribe(appliance, "state", stateHandler)
     
     def resetToday = timeToday(resetTime)
     def currentTime = new Date()
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
+    
+    subscribe(reminderRoutine, "switch.on", routineHandler)
+    
+    subscribe(reminderSwitch, "switch", reminderHandler)
 }
 
 def logDebug(msg) {
@@ -89,11 +105,27 @@ def openHandler(evt) {
     }
 }
 
-def runningHandler(evt) {
-    logDebug("Received running event")
+def stateHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
     
-    state.runningStartTime = now()
-    runIn(60*runDuration, durationComplete)
+    if (evt.value == "running") {
+        state.runningStartTime = now()
+        runIn(60*runDuration, durationComplete)
+    
+        reminderSwitch.off()
+        
+        if (alertStarted) {
+            notifier.deviceNotification("Dishwasher has started.")
+        }
+    } else if (evt.value == "finished") {
+        if (alertFinished) {
+            notifier.deviceNotification("Dishwasher has finished.")
+        }
+    } else if (evt.value == "unstarted") {
+        if (alertReset) {
+            notifier.deviceNotification("Dishwasher has reset.")
+        }
+    }
 }
 
 def durationComplete() {
@@ -116,4 +148,27 @@ def dailyReset() {
             appliance.reset()
         }
     }
+}
+
+def routineHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (appliance.currentValue("state") == "unstarted") {
+        reminderSwitch.on()
+    }
+}
+
+def reminderHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        reminderAlert()
+    } else {
+        unschedule("reminderAlert")
+    }
+}
+
+def reminderAlert() {
+    notifier.deviceNotification("Start the dishwasher!")
+    runIn(60*5, reminderAlert)
 }
