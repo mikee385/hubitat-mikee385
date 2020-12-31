@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -73,6 +73,8 @@ def initialize() {
     for (camera in cameras) {
         subscribe(camera, "switch", cameraHandler)
     }
+    
+    subscribe(reminderSwitch, "switch", reminderHandler)
 }
 
 def logDebug(msg) {
@@ -110,7 +112,7 @@ def personHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
 
     if (evt.value == "home") {
-        unschedule()
+        unschedule("checkCameras")
         runIn(5, checkCameras)
     } else {
         reminderSwitch.off()
@@ -121,7 +123,7 @@ def cameraHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (person.currentValue("state") == "home") {
-        unschedule()
+        unschedule("checkCameras")
         runIn(5, checkCameras)
     } else {
         reminderSwitch.off()
@@ -141,4 +143,20 @@ def checkCameras() {
     } else {
         reminderSwitch.off()
     }
+}
+
+def reminderHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        runIn(60*5, reminderAlert)
+    } else {
+        unschedule("reminderAlert")
+        notifier.deviceNotification("Camera Reminder is off.")
+    }
+}
+
+def reminderAlert() {
+    notifier.deviceNotification("Turn off the cameras!")
+    runIn(60*5, reminderAlert)
 }
