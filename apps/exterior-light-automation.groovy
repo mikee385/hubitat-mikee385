@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.4" }
+String getVersionNum() { return "1.0.0-beta.5" }
 String getVersionLabel() { return "Exterior Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,13 +30,18 @@ definition(
 preferences {
     page(name: "settings", title: "Exterior Light Automation", install: true, uninstall: true) {
         section {
-            
             input "exteriorLights", "capability.switch", title: "Exterior Lights", multiple: true, required: true
 
             input "exteriorDoors", "capability.contactSensor", title: "Exterior Doors", multiple: true, required: true
             
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
-
+        }
+        section("Reminder") {
+            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
+            
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+        }
+        section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
@@ -56,12 +61,14 @@ def updated() {
 
 def initialize() {
     for (door in exteriorDoors) {
-        subscribe(door, "contact.open", exteriorDoorHandler)
+        subscribe(door, "contact", exteriorDoorHandler)
     }
     
     subscribe(sunlight, "switch.on", sunlightHandler)
     
     subscribe(location, "mode", modeHandler)
+    
+    subscribe(person, "state", personHandler)
 }
 
 def logDebug(msg) {
@@ -72,11 +79,17 @@ def logDebug(msg) {
 
 def exteriorDoorHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
-
-    if (sunlight.currentValue("switch") == "off") {
-        for (light in exteriorLights) {
-            light.on()
+    
+    if (evt.value == "open") {
+        if (sunlight.currentValue("switch") == "off") {
+            for (light in exteriorLights) {
+                light.on()
+            }
         }
+    
+        runIn(60*5, reminderAlert, [data: evt])
+    } else {
+        unschedule("reminderAlert")
     }
 }
 
@@ -95,5 +108,19 @@ def modeHandler(evt) {
         for (light in exteriorLights) {
             light.off()
         }
+    }
+}
+
+def reminderAlert(evt) {
+    notifier.deviceNotification("Should the ${evt.device} still be open?")
+    runIn(60*30, reminderAlert, [data: evt])
+}
+
+def personHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+
+    if (evt.value != "home") {
+        unsubscribe("reminderAlert")
+        notifier.deviceNotification("$exteriorDoors is still open!")
     }
 }
