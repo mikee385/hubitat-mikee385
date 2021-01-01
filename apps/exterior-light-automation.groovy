@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.5" }
+String getVersionNum() { return "1.0.0-beta.6" }
 String getVersionLabel() { return "Exterior Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -87,7 +87,7 @@ def exteriorDoorHandler(evt) {
             }
         }
     
-        runIn(60*5, reminderAlert, [data: evt])
+        runIn(60*5, reminderAlert, [data: [device: evt.device]])
     } else {
         unschedule("reminderAlert")
     }
@@ -113,7 +113,7 @@ def modeHandler(evt) {
 
 def reminderAlert(evt) {
     notifier.deviceNotification("Should the ${evt.device} still be open?")
-    runIn(60*30, reminderAlert, [data: evt])
+    runIn(60*30, reminderAlert, [data: [device: evt.device]])
 }
 
 def personHandler(evt) {
