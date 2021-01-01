@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0-beta.1" }
+String getVersionNum() { return "3.1.0-beta.2" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -29,7 +29,7 @@ definition(
 
 preferences {
     page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
-        section("") {
+        section {
             input "occupancy", "device.OccupancyStatus", title: "Occupancy Status", multiple: false, required: true
             
             input "overheadDoor", "capability.contactSensor", title: "Overhead Door", multiple: false, required: true
@@ -43,7 +43,13 @@ preferences {
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
             
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
+        }
+        section("Reminder") {
+            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
             
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+        }
+        section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
@@ -73,6 +79,8 @@ def initialize() {
     subscribe(sunlight, "switch", sunlightHandler)
     
     subscribe(location, "mode", modeHandler)
+    
+    subscribe(person, "state", personHandler)
 }
 
 def logDebug(msg) {
@@ -115,12 +123,21 @@ def overheadDoorHandler(evt) {
             garageLight.on()
         }
         occupancy.occupied()
+        
+        runIn(60*5, overheadDoorAlert)
     } else {
         garageLight.on()
         if (entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
             occupancy.checking()
         }
+        
+        unschedule("overheadDoorAlert")
     }
+}
+
+def overheadDoorAlert() {
+    notifier.deviceNotification("Should the $overheadDoor still be open?")
+    runIn(60*30, overheadDoorAlert)
 }
 
 def entryDoorHandler(evt) {
@@ -128,6 +145,8 @@ def entryDoorHandler(evt) {
     
     if (evt.value == "open") {
         occupancy.occupied()
+        
+        runIn(60*5, entryDoorAlert)
     } else {
         if (overheadDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
             if (garageLight.currentValue("switch") == "on") {
@@ -136,7 +155,14 @@ def entryDoorHandler(evt) {
                 occupancy.vacant()
             }
         }
+        
+        unschedule("entryDoorAlert")
     }
+}
+
+def entryDoorAlert() {
+    notifier.deviceNotification("Should the $entryDoor still be open?")
+    runIn(60*30, entryDoorAlert)
 }
 
 def sideDoorHandler(evt) {
@@ -144,6 +170,8 @@ def sideDoorHandler(evt) {
     
     if (evt.value == "open") {
         occupancy.occupied()
+        
+        runIn(60*5, sideDoorAlert)
     } else {
         if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed") {
             if (garageLight.currentValue("switch") == "on") {
@@ -152,7 +180,14 @@ def sideDoorHandler(evt) {
                 occupancy.vacant()
             }
         }
+        
+        unschedule("sideDoorAlert")
     }
+}
+
+def sideDoorAlert() {
+    notifier.deviceNotification("Should the $sideDoor still be open?")
+    runIn(60*30, sideDoorAlert)
 }
 
 def activeHandler(evt) {
@@ -170,5 +205,25 @@ def modeHandler(evt) {
     
     if (evt.value != "Home") {
         garageLight.off()
+    }
+}
+
+def personHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+
+    if (evt.value != "home") {
+        unsubscribe("overheadDoorAlert")
+        unsubscribe("entryDoorAlert")
+        unsubscribe("sideDoorAlert")
+        
+        if (overheadDoor.currentValue("contact") == "open") {
+            notifier.deviceNotification("$overheadDoor is still open!")
+        }
+        if (entryDoor.currentValue("contact") == "open") {
+            notifier.deviceNotification("$entryDoor is still open!")
+        }
+        if (sideDoor.currentValue("contact") == "open") {
+            notifier.deviceNotification("$sideDoor is still open!")
+        }
     }
 }
