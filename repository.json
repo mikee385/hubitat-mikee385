@@ -63,6 +63,12 @@
             "description": "Turns on an exterior light when a door opens, depending on the time of day."
         },
         {
+            "name": "Front Porch Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.json",
+            "description": "Automation and alerts for the door and lights associated with the front porch."
+        },
+        {
             "name": "Garage Light Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.json",
