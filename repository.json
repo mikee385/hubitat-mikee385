@@ -9,58 +9,16 @@
             "description": "Automation and alerts for the door and lights associated with the back porch."
         },
         {
-            "name": "Bathroom Fan Automation",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.json",
-            "description": "Turns a bathroom exhaust fan on/off using a nearby humidity sensor."
-        },
-        {
-            "name": "Bedtime Triggers",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-triggers.json",
-            "description": "Trigger routines for various bedtime actions."
-        },
-        {
             "name": "Camera Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.json",
             "description": "Turns on/off the cameras and reminders based on modes and other devices."
         },
         {
-            "name": "Camera Reminder Triggers",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-reminder-triggers.json",
-            "description": "Triggers to turn on/off the reminder to turn off the cameras."
-        },
-        {
-            "name": "Daily Notification",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/daily-notification.json",
-            "description": "Sends a notification every day at a specific time."
-        },
-        {
             "name": "Dishwasher Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-automation.json",
             "description": "Updates the state of an Appliance Status device representing a dishwasher."
-        },
-        {
-            "name": "Dishwasher Reminder Triggers",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-reminder-triggers.json",
-            "description": "Triggers to turn on/off the reminder to start the dishwasher."
-        },
-        {
-            "name": "Ecobee Home/Away",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/ecobee-home-away.json",
-            "description": "Updates the home/away status of Ecobee thermostats based on the Hubitat mode and the current Ecobee schedule."
-        },
-        {
-            "name": "Exterior Light Automation",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/exterior-light-automation.json",
-            "description": "Turns on an exterior light when a door opens, depending on the time of day."
         },
         {
             "name": "Front Porch Automation",
@@ -73,12 +31,6 @@
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.json",
             "description": "Turns the garage light on and off based on the occupancy of the garage and the status of the doors."
-        },
-        {
-            "name": "Garage Light Reminder",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-reminder.json",
-            "description": "Sends reminders if the garage light is left on."
         },
         {
             "name": "Glows Automation",
@@ -111,18 +63,6 @@
             "description": "Turns the pantry light on/off based on motion."
         },
         {
-            "name": "Person Automation with Power Meter",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-power.json",
-            "description": "Updates the state of a Person Status device using a presence sensor and a power meter."
-        },
-        {
-            "name": "Person Automation with Presence",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-presence.json",
-            "description": "Updates the state of a Person Status device using a presence sensor."
-        },
-        {
             "name": "Person Automation with Switch",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-switch.json",
@@ -141,24 +81,6 @@
             "description": "Sends a notification when the hub reboots."
         },
         {
-            "name": "Roomba Automation",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roomba-automation.json",
-            "description": "Updates the state of an Appliance Status device representing a Roomba."
-        },
-        {
-            "name": "Routine Automation",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/routine-automation.json",
-            "description": "Turn switches on/off when a routine (switch) is activated."
-        },
-        {
-            "name": "Routine Triggers",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/routine-triggers.json",
-            "description": "Trigger routines based on presence sensors and sleep sensors."
-        },
-        {
             "name": "Sunlight Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.json",
@@ -175,18 +97,6 @@
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder.json",
             "description": "Reminder to take out the trash on specific days."
-        },
-        {
-            "name": "Trash Reminder Triggers",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder-triggers.json",
-            "description": "Triggers to turn on/off the reminder to take out the trash."
-        },
-        {
-            "name": "Washer Automation",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/washer-automation.json",
-            "description": "Updates the state of an Appliance Status device representing a washing machine."
         },
         {
             "name": "Appliance Status",
