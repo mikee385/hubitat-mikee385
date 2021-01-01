@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.9" }
+String getVersionNum() { return "1.0.0-beta.10" }
 String getVersionLabel() { return "Exterior Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -119,6 +119,9 @@ def personHandler(evt) {
 
     if (evt.value != "home") {
         unsubscribe("reminderAlert")
-        notifier.deviceNotification("$exteriorDoor is still open!")
+        
+        if (exteriorDoor.currentValue("contact") == "open") {
+            notifier.deviceNotification("$exteriorDoor is still open!")
+        }
     }
 }
