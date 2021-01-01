@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.2" }
+String getVersionNum() { return "3.0.0-beta.3" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -181,8 +181,9 @@ def personHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
 
     if (evt.value != "home") {
-        reminderSwitch.off()
-        
-        notifier.deviceNotification("Dishwasher Reminder has been canceled!")
+        if (reminderSwitch.currentValue("switch") == "on") {
+            reminderSwitch.off()
+            notifier.deviceNotification("Dishwasher Reminder has been canceled!")
+        }
     }
 }
