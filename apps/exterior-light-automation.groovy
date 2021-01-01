@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.6" }
+String getVersionNum() { return "1.0.0-beta.7" }
 String getVersionLabel() { return "Exterior Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -32,7 +32,7 @@ preferences {
         section {
             input "exteriorLights", "capability.switch", title: "Exterior Lights", multiple: true, required: true
 
-            input "exteriorDoors", "capability.contactSensor", title: "Exterior Doors", multiple: true, required: true
+            input "exteriorDoor", "capability.contactSensor", title: "Exterior Doors", multiple: true, required: true
             
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
@@ -60,9 +60,7 @@ def updated() {
 }
 
 def initialize() {
-    for (door in exteriorDoors) {
-        subscribe(door, "contact", exteriorDoorHandler)
-    }
+    subscribe(exteriorDoor, "contact", exteriorDoorHandler)
     
     subscribe(sunlight, "switch.on", sunlightHandler)
     
@@ -87,7 +85,7 @@ def exteriorDoorHandler(evt) {
             }
         }
     
-        runIn(60*5, reminderAlert, [data: [device: evt.device]])
+        runIn(60*5, reminderAlert)
     } else {
         unschedule("reminderAlert")
     }
@@ -111,9 +109,9 @@ def modeHandler(evt) {
     }
 }
 
-def reminderAlert(evt) {
-    notifier.deviceNotification("Should the ${evt.device} still be open?")
-    runIn(60*30, reminderAlert, [data: [device: evt.device]])
+def reminderAlert() {
+    notifier.deviceNotification("Should the $exteriorDoor still be open?")
+    runIn(60*30, reminderAlert)
 }
 
 def personHandler(evt) {
@@ -121,6 +119,6 @@ def personHandler(evt) {
 
     if (evt.value != "home") {
         unsubscribe("reminderAlert")
-        notifier.deviceNotification("$exteriorDoors is still open!")
+        notifier.deviceNotification("$exteriorDoor is still open!")
     }
 }
