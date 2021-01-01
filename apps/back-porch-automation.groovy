@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -144,7 +144,7 @@ def personHandler_LightAlert(evt) {
 
 def lightAlert(evt) {
     notifier.deviceNotification("Should the ${evt.device} still be on?")
-    runIn(60*30, lightAlert, [data: [device: evt.device]]))
+    runIn(60*30, lightAlert, [data: [device: evt.device]])
 }
 
 def doorHandler_DoorAlert(evt) {
