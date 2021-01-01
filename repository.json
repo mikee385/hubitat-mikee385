@@ -3,6 +3,12 @@
     "gitHubUrl": "https://github.com/mikee385/hubitat-mikee385",
     "packages": [
         {
+            "name": "Back Porch Automation",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/back-porch-automation.json",
+            "description": "Automation and alerts for the door and lights associated with the back porch."
+        },
+        {
             "name": "Bathroom Fan Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.json",
