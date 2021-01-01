@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0-beta.2" }
+String getVersionNum() { return "3.1.0-beta.3" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -44,7 +44,7 @@ preferences {
             
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
-        section("Reminder") {
+        section("Reminders") {
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
             
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
@@ -75,6 +75,8 @@ def initialize() {
     subscribe(sideDoor, "contact", sideDoorHandler)
     
     subscribe(motionSensor, "motion.active", activeHandler)
+    
+    subscribe(garageLight, "switch", lightHandler)
     
     subscribe(sunlight, "switch", sunlightHandler)
     
@@ -133,6 +135,8 @@ def overheadDoorHandler(evt) {
         
         unschedule("overheadDoorAlert")
     }
+    
+    checkLight()
 }
 
 def overheadDoorAlert() {
@@ -158,6 +162,8 @@ def entryDoorHandler(evt) {
         
         unschedule("entryDoorAlert")
     }
+    
+    checkLight()
 }
 
 def entryDoorAlert() {
@@ -183,6 +189,8 @@ def sideDoorHandler(evt) {
         
         unschedule("sideDoorAlert")
     }
+    
+    checkLight()
 }
 
 def sideDoorAlert() {
@@ -198,6 +206,26 @@ def activeHandler(evt) {
     } else if (occupancy.currentValue("state") == "vacant") {
         occupancy.checking()
     }
+    
+    checkLight()
+}
+
+def lightHandler(evt) {
+    logDebug("${evt.device} changed to ${evt.value}")
+    
+    checkLight()
+}
+
+def checkLight() {
+    unschedule("lightAlert")
+    if (garageLight.currentValue("switch") == "on") {
+        runIn(60*10, lightAlert)
+    }
+}
+
+def lightAlert() {
+    notifier.deviceNotification("Should the $garageLight still be on?")
+    runIn(60*30, lightAlert)
 }
 
 def modeHandler(evt) {
