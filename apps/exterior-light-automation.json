@@ -8,7 +8,7 @@
             "id": "fcfbb113-40fc-49dd-8a10-dc99db3b044d",
             "name": "Exterior Light Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.8",
+            "version": "1.0.0-beta.9",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/exterior-light-automation.groovy",
             "required": true
         }
