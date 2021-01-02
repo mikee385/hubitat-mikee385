@@ -1,7 +1,7 @@
 /**
  *  Dishwasher Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.4" }
+String getVersionNum() { return "3.0.0-beta.5" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -47,10 +47,12 @@ preferences {
             input "alertStarted", "bool", title: "Alert when Started?", required: true, defaultValue: false
             input "alertFinished", "bool", title: "Alert when Finished?", required: true, defaultValue: false
             input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+        }
+        section("Reminder") {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
             input "reminderRoutine", "capability.switch", title: "Turn On When", multiple: false, required: true
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
