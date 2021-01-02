@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.3" }
+String getVersionNum() { return "1.0.0-beta.4" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -57,12 +57,14 @@ def initialize() {
     subscribe(motionSensor, "motion", motionHandler_LightSwitch)
     for (light in lights) {
         subscribe(light, "switch", switchHandler_LightSwitch)
-    } 
+    }
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Away Alert
     subscribe(motionSensor, "motion.active", handler_AwayAlert)
-    subscribe(light, "switch.on", handler_AwayAlert)
+    for (light in lights) {
+        subscribe(light, "switch.on", handler_AwayAlert)
+    }
 }
 
 def logDebug(msg) {
