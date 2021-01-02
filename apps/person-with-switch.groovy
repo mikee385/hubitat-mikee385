@@ -1,7 +1,7 @@
 /**
  *  Person Automation with Switch
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0-beta.1" }
+String getVersionNum() { return "2.1.0-beta.2" }
 String getVersionLabel() { return "Person Automation with Switch, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,28 +31,18 @@ preferences {
     page(name: "settings", title: "Person Automation with Switch", install: true, uninstall: true) {
         section {
             input "person", "device.PersonStatus", title: "Person Status", multiple: false, required: true
-            
             input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: true
-            
             input "switchSensor", "capability.switch", title: "Switch", multiple: false, required: true
-            
         }
-        section("Notifications") {
-        
+        section("Alerts") {
             input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
-            
             input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
-            
             input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
-            
             input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
-            
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-            
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -69,11 +59,15 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(presenceSensor, "presence", presenceHandler)
+    // Person Status
+    subscribe(presenceSensor, "presence", presenceHandler_PersonStatus)
+    subscribe(switchSensor, "switch", switchHandler_PersonStatus)
     
-    subscribe(switchSensor, "switch", switchHandler)
+    // Switch
+    subscribe(location, "mode", modeHandler_Switch)
     
-    subscribe(location, "mode", modeHandler)
+    // Away Alert
+    subscribe(light, "switch.on", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -82,8 +76,8 @@ def logDebug(msg) {
     }
 }
 
-def presenceHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def presenceHandler_PersonStatus(evt) {
+    logDebug("presenceHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
 
     if (presenceSensor.currentValue("presence") == "present") {
         if (person.currentValue("presence") == "not present") {
@@ -102,8 +96,8 @@ def presenceHandler(evt) {
     }
 }
 
-def switchHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def switchHandler_PersonStatus(evt) {
+    logDebug("switchHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
     
     if (switchSensor.currentValue("switch") == "on") {
         if (person.currentValue("state") == "home") {
@@ -122,10 +116,18 @@ def switchHandler(evt) {
     }
 }
 
-def modeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def modeHandler_Switch(evt) {
+    logDebug("modeHandler_Switch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
         switchSensor.off()
+    }
+}
+
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
