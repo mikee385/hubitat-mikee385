@@ -1,7 +1,7 @@
 /**
  *  Glows Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Glows Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,7 +38,7 @@ preferences {
         section("Remote") {
             input "remote", "capability.pushableButton", title: "Button Device", required: false
         }
-        section("Notifications") {
+        section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
             input "bedtimeNowAlert", "bool", title: "Alert when Bedtime Now?", required: true, defaultValue: false
             input "wakeUpAlert", "bool", title: "Alert when Wake Up?", required: true, defaultValue: false
@@ -56,22 +56,22 @@ preferences {
 mappings {
     path("/bedtimeSoon") {
         action: [
-            GET: "bedtimeSoonUrlHandler"
+            GET: "urlHandler_bedtimeSoon"
         ]
     }
     path("/bedtimeNow") {
         action: [
-            GET: "bedtimeNowUrlHandler"
+            GET: "urlHandler_bedtimeNow"
         ]
     }
     path("/wakeUp") {
         action: [
-            GET: "wakeUpUrlHandler"
+            GET: "urlHandler_wakeUp"
         ]
     }
     path("/glowsOff") {
         action: [
-            GET: "glowsOffUrlHandler"
+            GET: "urlHandler_glowsOff"
         ]
     }
 }
@@ -87,17 +87,24 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(bedtimeSoonRoutine, "switch.on", bedtimeSoonHandler)
-    subscribe(bedtimeNowRoutine, "switch.on", bedtimeNowHandler)
-    subscribe(wakeUpRoutine, "switch.on", wakeUpHandler)
-    subscribe(glowsOffRoutine, "switch.on", glowsOffHandler)
-    
+    // Routine Switches
     if (remote) {
-        subscribe(remote, "pushed", remoteHandler)
+        subscribe(remote, "pushed", remoteHandler_RoutineSwitch)
     }
+    subscribe(location, "mode", modeHandler_RoutineSwitch)
     
-    subscribe(location, "mode", modeHandler)
+    // Routine Alerts
+    subscribe(bedtimeSoonRoutine, "switch.on", bedtimeSoonHandler_RoutineAlert)
+    subscribe(bedtimeNowRoutine, "switch.on", bedtimeNowHandler_RoutineAlert)
+    subscribe(wakeUpRoutine, "switch.on", wakeUpHandler_RoutineAlert)
+    subscribe(glowsOffRoutine, "switch.on", glowsOffHandler_RoutineAlert)
     
+    // Away Alerts
+    subscribe(bedtimeSoonRoutine, "switch.on", handler_AwayAlert)
+    subscribe(bedtimeNowRoutine, "switch.on", handler_AwayAlert)
+    subscribe(wakeUpRoutine, "switch.on", handler_AwayAlert)
+    
+    // URLs
     if(!state.accessToken) {
         createAccessToken()
     }
@@ -113,40 +120,8 @@ def logDebug(msg) {
     }
 }
 
-def bedtimeSoonHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (bedtimeSoonAlert) {
-        notifier.deviceNotification("Bedtime Soon!")
-    }
-}
-
-def bedtimeNowHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (bedtimeNowAlert) {
-        notifier.deviceNotification("Bedtime Now!")
-    }
-}
-
-def wakeUpHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (wakeUpAlert) {
-        notifier.deviceNotification("Wake Up!")
-    }
-}
-
-def glowsOffHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (glowsOffAlert) {
-        notifier.deviceNotification("Glows Off!")
-    }
-}
-
-def remoteHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def remoteHandler_RoutineSwitch(evt) {
+    logDebug("remoteHandler_RoutineSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "1") {
         if (timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
@@ -161,34 +136,74 @@ def remoteHandler(evt) {
     }
 }
 
-def modeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def modeHandler_RoutineSwitch(evt) {
+    logDebug("modeHandler_RoutineSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
         glowsOffRoutine.on()
     }
 }
 
-def bedtimeSoonUrlHandler(evt) {
-    logDebug("Bedtime Soon URL called")
+def bedtimeSoonHandler_RoutineAlert(evt) {
+    logDebug("bedtimeSoonHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (bedtimeSoonAlert) {
+        notifier.deviceNotification("Bedtime Soon!")
+    }
+}
+
+def bedtimeNowHandler_RoutineAlert(evt) {
+    logDebug("bedtimeNowHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (bedtimeNowAlert) {
+        notifier.deviceNotification("Bedtime Now!")
+    }
+}
+
+def wakeUpHandler_RoutineAlert(evt) {
+    logDebug("wakeUpHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (wakeUpAlert) {
+        notifier.deviceNotification("Wake Up!")
+    }
+}
+
+def glowsOffHandler_RoutineAlert(evt) {
+    logDebug("glowsOffHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (glowsOffAlert) {
+        notifier.deviceNotification("Glows Off!")
+    }
+}
+
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+
+def urlHandler_bedtimeSoon(evt) {
+    logDebug("urlHandler_bedtimeSoon")
     
     bedtimeSoonRoutine.on()
 }
 
-def bedtimeNowUrlHandler(evt) {
-    logDebug("Bedtime Now URL called")
+def urlHandler_bedtimeNow(evt) {
+    logDebug("urlHandler_bedtimeNow")
     
     bedtimeNowRoutine.on()
 }
 
-def wakeUpUrlHandler(evt) {
-    logDebug("Wake Up URL called")
+def urlHandler_wakeUp(evt) {
+    logDebug("urlHandler_wakeUp")
     
     wakeUpRoutine.on()
 }
 
-def glowsOffUrlHandler(evt) {
-    logDebug("Glows Off URL called")
+def urlHandler_glowsOff(evt) {
+    logDebug("urlHandler_glowsOff")
     
     glowsOffRoutine.on()
 }
