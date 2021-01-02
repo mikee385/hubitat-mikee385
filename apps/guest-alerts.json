@@ -2,13 +2,13 @@
     "packageName": "Guest Alerts",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-03-24",
+    "dateReleased": "2021-01-02",
     "apps": [
         {
             "id": "7fb16968-9c99-4c61-b4dd-cc3ac9e52446",
             "name": "Guest Alerts",
             "namespace": "mikee385",
-            "version": "2.0.0",
+            "version": "2.1.0-beta.1",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/guest-alerts.groovy",
             "required": true
         }
