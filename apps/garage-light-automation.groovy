@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0-beta.4" }
+String getVersionNum() { return "3.1.0-beta.5" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,7 +38,7 @@ preferences {
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
-        section("Reminders") {
+        section("Alerts") {
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
@@ -72,11 +72,12 @@ def initialize() {
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Light Alert
-    subscribe(overheadDoor, "contact", handler_LightAlert)
-    subscribe(entryDoor, "contact", handler_LightAlert)
-    subscribe(sideDoor, "contact", handler_LightAlert)
-    subscribe(motionSensor, "motion.active", handler_LightAlert)
-    subscribe(garageLight, "switch", handler_LightAlert)
+    subscribe(overheadDoor, "contact", deviceHandler_LightAlert)
+    subscribe(entryDoor, "contact", deviceHandler_LightAlert)
+    subscribe(sideDoor, "contact", deviceHandler_LightAlert)
+    subscribe(motionSensor, "motion.active", deviceHandler_LightAlert)
+    subscribe(garageLight, "switch", deviceHandler_LightAlert)
+    subscribe(person, "state", personHandler_LightAlert)
     
     // Door Alert
     subscribe(overheadDoor, "contact", overheadDoorHandler_DoorAlert)
@@ -190,12 +191,26 @@ def modeHandler_LightSwitch(evt) {
     }
 }
 
-def handler_LightAlert(evt) {
-    logDebug("handler_LightAlert: ${evt.device} changed to ${evt.value}")
+def deviceHandler_LightAlert(evt) {
+    logDebug("deviceHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("lightAlert")
     if (garageLight.currentValue("switch") == "on") {
-        runIn(60*10, lightAlert)
+        if (person.currentValue("state") != "sleep") {
+            runIn(60*10, lightAlert)
+        }
+    }
+}
+
+def personHandler_LightAlert(evt) {
+    logDebug("personHandler_LightAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "sleep") {
+        unschedule("lightAlert")
+        
+        if (garageLight.currentValue("switch") == "on") {
+            notifier.deviceNotification("$garageLight is still on!")
+        }
     }
 }
 
