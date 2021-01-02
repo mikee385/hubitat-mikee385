@@ -1,7 +1,7 @@
 /**
  *  Holiday Lights Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0-beta.1" }
+String getVersionNum() { return "1.1.0-beta.2" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -29,16 +29,16 @@ definition(
 
 preferences {
     page(name: "settings", title: "Holiday Lights Automation", install: true, uninstall: true) {
-        section("") {
-            
-            input "holidayLights", "capability.switch", title: "Holiday Lights", multiple: true, required: true
-            
-            input name: "outdoors", type: "bool", title: "Outdoors?", defaultValue: false
-
+        section {
+            input "lights", "capability.switch", title: "Holiday Lights", multiple: true, required: true
             input "onRoutines", "capability.switch", title: "On Routines", multiple: true, required: false
-
             input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
-
+        }
+        section("Alerts") {
+            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+        }
+        section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
@@ -49,17 +49,17 @@ preferences {
 mappings {
     path("/on") {
         action: [
-            GET: "onUrlHandler"
+            GET: "urlHandler_on"
         ]
     }
     path("/off") {
         action: [
-            GET: "offUrlHandler"
+            GET: "urlHandler_off"
         ]
     }
     path("/toggle") {
         action: [
-            GET: "toggleUrlHandler"
+            GET: "urlHandler_toggle"
         ]
     }
 }
@@ -75,21 +75,23 @@ def updated() {
 }
 
 def initialize() {
-    if (outdoors) {
-        subscribe(location, "sunrise", sunriseHandler)
-        subscribe(location, "sunset", sunsetHandler)
-    }
-
+    // Light Switch
     for (routine in onRoutines) {
-        subscribe(routine, "switch.on", onRoutineHandler)
+        subscribe(routine, "switch.on", onRoutineHandler_LightSwitch)
     }
-    
     for (routine in offRoutines) {
-        subscribe(routine, "switch.on", offRoutineHandler)
+        subscribe(routine, "switch.on", offRoutineHandler_LightSwitch)
+    }
+    subscribe(location, "sunrise", sunriseHandler_LightSwitch)
+    subscribe(location, "sunset", sunsetHandler_LightSwitch)
+    subscribe(location, "mode", modeHandler_LightSwitch)
+    
+    // Away Alert
+    for (light in lights) {
+        subscribe(light, "switch.on", handler_AwayAlert)
     }
     
-    subscribe(location, "mode", modeHandler)
-    
+    // URLs
     if(!state.accessToken) {
         createAccessToken()
     }
@@ -104,94 +106,96 @@ def logDebug(msg) {
     }
 }
 
-def sunriseHandler(evt) {
-    logDebug("Received sunrise event")
-    
-    for (light in holidayLights) {
+def onRoutineHandler_LightSwitch(evt) {
+    logDebug("onRoutineHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+
+    for (light in lights) {
+        light.on()
+    }
+}
+
+def offRoutineHandler_LightSwitch(evt) {
+    logDebug("offRoutineHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+
+    for (light in lights) {
         light.off()
     }
 }
 
-def sunsetHandler(evt) {
-    logDebug("Received sunset event")
+def sunriseHandler_LightSwitch(evt) {
+    logDebug("sunriseHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    for (light in lights) {
+        light.off()
+    }
+}
+
+def sunsetHandler_LightSwitch(evt) {
+    logDebug("sunsetHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Home") {
-        for (light in holidayLights) {
+        for (light in lights) {
             light.on()
         }
     }
 }
 
-def onRoutineHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-
-    for (light in holidayLights) {
-        light.on()
-    }
-}
-
-def offRoutineHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-
-    for (light in holidayLights) {
-        light.off()
-    }
-}
-
-def modeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def modeHandler_LightSwitch(evt) {
+    logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Home") {
-        if (outdoors && timeOfDayIsBetween(location.sunset, timeToday("23:59"), new Date(), location.timeZone)) {
-            for (light in holidayLights) {
+        if (timeOfDayIsBetween(location.sunset, timeToday("23:59"), new Date(), location.timeZone)) {
+            for (light in lights) {
                 light.on()
             }
         }
-    } else if (evt.value == "Away") {
-        if (!outdoors) {
-            for (light in holidayLights) {
-                light.off()
-            }
-        }
     } else if (evt.value == "Sleep") {
-        for (light in holidayLights) {
+        for (light in lights) {
             light.off()
         }
     }
 }
 
-def onUrlHandler() {
-    logDebug("On URL called")
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
-    for (light in holidayLights) {
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+
+def urlHandler_on() {
+    logDebug("urlHandler_on")
+    
+    for (light in lights) {
         light.on()
     }
 }
 
-def offUrlHandler() {
-    logDebug("Off URL called")
+def urlHandler_off() {
+    logDebug("urlHandler_off")
     
-    for (light in holidayLights) {
+    for (light in lights) {
         light.off()
     }
 }
 
-def toggleUrlHandler() {
-    logDebug("Toggle URL called")
+def urlHandler_toggle() {
+    logDebug("urlHandler_toggle")
     
     def anyLightOn = false
-    for (light in holidayLights) {
+    for (light in lights) {
         if (light.currentValue("switch") == "on") {
             anyLightOn = true
             break 
         }
     }
     if (anyLightOn) {
-        for (light in holidayLights) {
+        for (light in lights) {
             light.off()
         }
     } else {
-        for (light in holidayLights) {
+        for (light in lights) {
             light.on()
         }
     }
