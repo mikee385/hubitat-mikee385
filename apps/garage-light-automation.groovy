@@ -1,7 +1,7 @@
 /**
  *  Garage Light Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0-beta.3" }
+String getVersionNum() { return "3.1.0-beta.4" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,27 +31,19 @@ preferences {
     page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
         section {
             input "occupancy", "device.OccupancyStatus", title: "Occupancy Status", multiple: false, required: true
-            
             input "overheadDoor", "capability.contactSensor", title: "Overhead Door", multiple: false, required: true
-            
             input "entryDoor", "capability.contactSensor", title: "Entry Door", multiple: false, required: true
-            
             input "sideDoor", "capability.contactSensor", title: "Side Door", multiple: false, required: true
-            
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
-            
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
-            
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
         section("Reminders") {
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -68,21 +60,36 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(occupancy, "occupancy", occupancyHandler)
+    // Occupancy
+    subscribe(overheadDoor, "contact", overheadDoorHandler_Occupancy)
+    subscribe(entryDoor, "contact", entryDoorHandler_Occupancy)
+    subscribe(sideDoor, "contact", sideDoorHandler_Occupancy)
+    subscribe(motionSensor, "motion.active", motionHandler_Occupancy)
     
-    subscribe(overheadDoor, "contact", overheadDoorHandler)
-    subscribe(entryDoor, "contact", entryDoorHandler)
-    subscribe(sideDoor, "contact", sideDoorHandler)
+    // Light Switch
+    subscribe(occupancy, "occupancy", occupancyHandler_LightSwitch)
+    subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
+    subscribe(location, "mode", modeHandler_LightSwitch)
     
-    subscribe(motionSensor, "motion.active", activeHandler)
+    // Light Alert
+    subscribe(overheadDoor, "contact", handler_LightAlert)
+    subscribe(entryDoor, "contact", handler_LightAlert)
+    subscribe(sideDoor, "contact", handler_LightAlert)
+    subscribe(motionSensor, "motion.active", handler_LightAlert)
+    subscribe(garageLight, "switch", handler_LightAlert)
     
-    subscribe(garageLight, "switch", lightHandler)
+    // Door Alert
+    subscribe(overheadDoor, "contact", overheadDoorHandler_DoorAlert)
+    subscribe(entryDoor, "contact", entryDoorHandler_DoorAlert)
+    subscribe(sideDoor, "contact", sideDoorHandler_DoorAlert)
+    subscribe(person, "state", personHandler_DoorAlert)
     
-    subscribe(sunlight, "switch", sunlightHandler)
-    
-    subscribe(location, "mode", modeHandler)
-    
-    subscribe(person, "state", personHandler)
+    // Away Alert
+    subscribe(overheadDoor, "contact", handler_AwayAlert)
+    subscribe(entryDoor, "contact", handler_AwayAlert)
+    subscribe(sideDoor, "contact", handler_AwayAlert)
+    subscribe(motionSensor, "motion.active", handler_AwayAlert)
+    subscribe(garageLight, "switch.on", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -91,20 +98,68 @@ def logDebug(msg) {
     }
 }
 
-def sunlightHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def overheadDoorHandler_Occupancy(evt) {
+    logDebug("overheadDoorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
-    if (overheadDoor.currentValue("contact") == "open") {
-        if (evt.value == "on") {
+    if (evt.value == "open") {
+        if (sunlight.currentValue("switch") == "on") {
             garageLight.off()
         } else {
             garageLight.on()
         }
+        occupancy.occupied()
+    } else {
+        garageLight.on()
+        if (entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
+            occupancy.checking()
+        }
     }
 }
 
-def occupancyHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def entryDoorHandler_Occupancy(evt) {
+    logDebug("entryDoorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        occupancy.occupied()
+    } else {
+        if (overheadDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
+            if (garageLight.currentValue("switch") == "on") {
+                occupancy.checking()
+            } else {
+                occupancy.vacant()
+            }
+        }
+    }
+}
+
+def sideDoorHandler_Occupancy(evt) {
+    logDebug("sideDoorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        occupancy.occupied()
+    } else {
+        if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed") {
+            if (garageLight.currentValue("switch") == "on") {
+                occupancy.checking()
+            } else {
+                occupancy.vacant()
+            }
+        }
+    }
+}
+
+def motionHandler_Occupancy(evt) {
+    logDebug("motionHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+    
+    if (occupancy.currentValue("state") == "checking") {
+        occupancy.occupied()
+    } else if (occupancy.currentValue("state") == "vacant") {
+        occupancy.checking()
+    }
+}
+
+def occupancyHandler_LightSwitch(evt) {
+    logDebug("occupancyHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (overheadDoor.currentValue("contact") == "closed") {
         if (evt.value == "occupied") {
@@ -115,108 +170,29 @@ def occupancyHandler(evt) {
     }
 }
 
-def overheadDoorHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def sunlightHandler_LightSwitch(evt) {
+    logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "open") {
-        if (sunlight.currentValue("switch") == "on") {
+    if (overheadDoor.currentValue("contact") == "open") {
+        if (evt.value == "on") {
             garageLight.off()
         } else {
             garageLight.on()
         }
-        occupancy.occupied()
-        
-        runIn(60*5, overheadDoorAlert)
-    } else {
-        garageLight.on()
-        if (entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
-            occupancy.checking()
-        }
-        
-        unschedule("overheadDoorAlert")
     }
-    
-    checkLight()
 }
 
-def overheadDoorAlert() {
-    notifier.deviceNotification("Should the $overheadDoor still be open?")
-    runIn(60*30, overheadDoorAlert)
-}
-
-def entryDoorHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def modeHandler_LightSwitch(evt) {
+    logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "open") {
-        occupancy.occupied()
-        
-        runIn(60*5, entryDoorAlert)
-    } else {
-        if (overheadDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
-            if (garageLight.currentValue("switch") == "on") {
-                occupancy.checking()
-            } else {
-                occupancy.vacant()
-            }
-        }
-        
-        unschedule("entryDoorAlert")
+    if (evt.value != "Home") {
+        garageLight.off()
     }
-    
-    checkLight()
 }
 
-def entryDoorAlert() {
-    notifier.deviceNotification("Should the $entryDoor still be open?")
-    runIn(60*30, entryDoorAlert)
-}
-
-def sideDoorHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def handler_LightAlert(evt) {
+    logDebug("handler_LightAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "open") {
-        occupancy.occupied()
-        
-        runIn(60*5, sideDoorAlert)
-    } else {
-        if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed") {
-            if (garageLight.currentValue("switch") == "on") {
-                occupancy.checking()
-            } else {
-                occupancy.vacant()
-            }
-        }
-        
-        unschedule("sideDoorAlert")
-    }
-    
-    checkLight()
-}
-
-def sideDoorAlert() {
-    notifier.deviceNotification("Should the $sideDoor still be open?")
-    runIn(60*30, sideDoorAlert)
-}
-
-def activeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (occupancy.currentValue("state") == "checking") {
-        occupancy.occupied()
-    } else if (occupancy.currentValue("state") == "vacant") {
-        occupancy.checking()
-    }
-    
-    checkLight()
-}
-
-def lightHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    checkLight()
-}
-
-def checkLight() {
     unschedule("lightAlert")
     if (garageLight.currentValue("switch") == "on") {
         runIn(60*10, lightAlert)
@@ -228,16 +204,53 @@ def lightAlert() {
     runIn(60*30, lightAlert)
 }
 
-def modeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def overheadDoorHandler_DoorAlert(evt) {
+    logDebug("overheadDoorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "Home") {
-        garageLight.off()
+    if (evt.value == "open") {
+        runIn(60*5, overheadDoorAlert)
+    } else {
+        unschedule("overheadDoorAlert")
     }
 }
 
-def personHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def overheadDoorAlert() {
+    notifier.deviceNotification("Should the $overheadDoor still be open?")
+    runIn(60*30, overheadDoorAlert)
+}
+
+def entryDoorHandler_DoorAlert(evt) {
+    logDebug("entryDoorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        runIn(60*5, entryDoorAlert)
+    } else {
+        unschedule("entryDoorAlert")
+    }
+}
+
+def entryDoorAlert() {
+    notifier.deviceNotification("Should the $entryDoor still be open?")
+    runIn(60*30, entryDoorAlert)
+}
+
+def sideDoorHandler_DoorAlert(evt) {
+    logDebug("sideDoorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        runIn(60*5, sideDoorAlert)
+    } else {
+        unschedule("sideDoorAlert")
+    }
+}
+
+def sideDoorAlert() {
+    notifier.deviceNotification("Should the $sideDoor still be open?")
+    runIn(60*30, sideDoorAlert)
+}
+
+def personHandler_DoorAlert(evt) {
+    logDebug("personHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "home") {
         unsubscribe("overheadDoorAlert")
@@ -253,5 +266,13 @@ def personHandler(evt) {
         if (sideDoor.currentValue("contact") == "open") {
             notifier.deviceNotification("$sideDoor is still open!")
         }
+    }
+}
+
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
