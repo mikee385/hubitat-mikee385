@@ -8,7 +8,7 @@
             "id": "e528e2eb-0f71-4b81-bc50-56c004bfd9f3",
             "name": "Camera Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
+            "version": "1.0.0-beta.3",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.groovy",
             "required": true
         }

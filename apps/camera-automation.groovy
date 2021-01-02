@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,19 +31,15 @@ preferences {
     page(name: "settings", title: "Camera Automation", install: true, uninstall: true) {
         section {
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
-            
             input "backupButton", "capability.pushableButton", title: "Button", multiple: false, required: false
         }
-        section("Reminder") {
+        section("Alerts") {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
-            
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -62,19 +58,25 @@ def updated() {
 def initialize() {
     state.mode = location.mode
     
-    subscribe(location, "mode", modeHandler)
-    
+    // Camera Switch
+    subscribe(location, "mode", modeHandler_CameraSwitch)
     if (backupButton) {
-        subscribe(backupButton, "pushed", buttonHandler)
+        subscribe(backupButton, "pushed", buttonHandler_CameraSwitch)
     }
-
-    subscribe(person, "state", personHandler)
     
+    // Reminder Switch
     for (camera in cameras) {
-        subscribe(camera, "switch", cameraHandler)
+        subscribe(camera, "switch", cameraHandler_ReminderSwitch)
     }
+    subscribe(person, "state", personHandler_ReminderSwitch)
     
-    subscribe(reminderSwitch, "switch", reminderHandler)
+    // Reminder Alert
+    subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
+    
+    // Away Alert
+    for (camera in cameras) {
+        subscribe(camera, "switch.off", handler_AwayAlert)
+    }
 }
 
 def logDebug(msg) {
@@ -83,8 +85,8 @@ def logDebug(msg) {
     }
 }
 
-def modeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def modeHandler_CameraSwitch(evt) {
+    logDebug("modeHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "Home") {
         if (state.mode == "Away") {
@@ -100,18 +102,18 @@ def modeHandler(evt) {
     state.mode = evt.value
 }
 
-def buttonHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def buttonHandler_CameraSwitch(evt) {
+    logDebug("buttonHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
 
     for (camera in cameras) {
         camera.off()
     }
 }
 
-def personHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-
-    if (evt.value == "home") {
+def cameraHandler_ReminderSwitch(evt) {
+    logDebug("cameraHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (person.currentValue("state") == "home") {
         unschedule("checkCameras")
         runIn(5, checkCameras)
     } else {
@@ -119,10 +121,10 @@ def personHandler(evt) {
     }
 }
 
-def cameraHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (person.currentValue("state") == "home") {
+def personHandler_ReminderSwitch(evt) {
+    logDebug("personHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value == "home") {
         unschedule("checkCameras")
         runIn(5, checkCameras)
     } else {
@@ -145,8 +147,8 @@ def checkCameras() {
     }
 }
 
-def reminderHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def reminderHandler_ReminderAlert(evt) {
+    logDebug("reminderHandler_ReminderAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
         runIn(60*5, reminderAlert)
@@ -159,4 +161,12 @@ def reminderHandler(evt) {
 def reminderAlert() {
     notifier.deviceNotification("Turn off the cameras!")
     runIn(60*5, reminderAlert)
+}
+
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
 }
