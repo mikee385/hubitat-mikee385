@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -71,9 +71,9 @@ def initialize() {
     
     // Away Alert
     for (light in lights) {
-        subscribe(light, "switch", lightHandler_AwayAlert)
+        subscribe(light, "switch.on", handler_AwayAlert)
     }
-    subscribe(door, "contact", doorHandler_AwayAlert)
+    subscribe(door, "contact", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -153,16 +153,8 @@ def doorAlert() {
     runIn(60*30, doorAlert)
 }
 
-def lightHandler_AwayAlert(evt) {
-    logDebug("lightHandler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "on" && location.mode == "Away" && sunlight.currentValue("switch") == "on") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def doorHandler_AwayAlert(evt) {
-    logDebug("doorHandler_AwayAlert: ${evt.device} changed to ${evt.value}")
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
         notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
