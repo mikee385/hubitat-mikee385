@@ -1,7 +1,7 @@
 /**
  *  Pantry Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,8 +35,8 @@ preferences {
             input "minutes", "number", title: "Turn off after (minutes)", required: true
         }
         section {
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -53,13 +53,16 @@ def updated() {
 }
 
 def initialize() {
+    // Light Switch
+    subscribe(motionSensor, "motion", motionHandler_LightSwitch)
     for (light in lights) {
-        subscribe(light, "switch", switchHandler)
+        subscribe(light, "switch", switchHandler_LightSwitch)
     } 
+    subscribe(location, "mode", modeHandler_LightSwitch)
     
-    subscribe(motionSensor, "motion", motionHandler)
-    
-    subscribe(location, "mode", modeHandler)
+    // Away Alert
+    subscribe(motionSensor, "motion.active", handler_AwayAlert)
+    subscribe(light, "switch.on", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -68,20 +71,8 @@ def logDebug(msg) {
     }
 }
 
-def switchHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "on") {
-        if (motionSensor.currentValue("motion") == "inactive") {
-            runIn(60*minutes, turnOff)
-        }
-    } else {
-        unschedule()
-    }
-}
-
-def motionHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def motionHandler_LightSwitch(evt) {
+    logDebug("motionHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "active") {
         unschedule()
@@ -95,6 +86,18 @@ def motionHandler(evt) {
     }
 }
 
+def switchHandler_LightSwitch(evt) {
+    logDebug("switchHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        if (motionSensor.currentValue("motion") == "inactive") {
+            runIn(60*minutes, turnOff)
+        }
+    } else {
+        unschedule()
+    }
+}
+
 def turnOff() {
     logDebug("Received turn off")
     
@@ -103,12 +106,20 @@ def turnOff() {
     }
 }
 
-def modeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def modeHandler_LightSwitch(evt) {
+    logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value != "Home") {
         for (light in lights) {
             light.off()
         }
+    }
+}
+
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

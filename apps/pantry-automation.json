@@ -2,13 +2,13 @@
     "packageName": "Pantry Automation",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-12-29",
+    "dateReleased": "2021-01-02",
     "apps": [
         {
             "id": "a43d78ea-dd49-4798-9a2f-68765249c16a",
             "name": "Pantry Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
+            "version": "1.0.0-beta.3",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.groovy",
             "required": true
         }
