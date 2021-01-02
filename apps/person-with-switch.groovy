@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0-beta.2" }
+String getVersionNum() { return "2.1.0-beta.3" }
 String getVersionLabel() { return "Person Automation with Switch, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -67,7 +67,7 @@ def initialize() {
     subscribe(location, "mode", modeHandler_Switch)
     
     // Away Alert
-    subscribe(light, "switch.on", handler_AwayAlert)
+    subscribe(switchSensor, "switch.on", handler_AwayAlert)
 }
 
 def logDebug(msg) {

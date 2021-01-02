@@ -8,7 +8,7 @@
             "id": "0d7b2919-7847-43f1-b989-edab7622fae0",
             "name": "Person Automation with Switch",
             "namespace": "mikee385",
-            "version": "2.1.0-beta.2",
+            "version": "2.1.0-beta.3",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-switch.groovy",
             "required": true
         }
