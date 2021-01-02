@@ -1,7 +1,7 @@
 /**
  *  Thermostat Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0-beta.1" }
+String getVersionNum() { return "2.0.0-beta.2" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,16 +30,16 @@ definition(
 preferences {
     page(name: "settings", title: "Thermostat Automation", install: true, uninstall: true) {
         section {
-            input "thermostats", "capability.thermostat", title: "Thermostats", multiple: true, required: true
+            input "thermostats", "device.EcobeeThermostat", title: "Thermostats", multiple: true, required: true
+            input "sensors", "device.EcobeeSensor", title: "Remote Sensors", multiple: true, required: false
         }
         section {
             input "workdayTime", "time", title: "Workday Resume Time", required: false
-            
             input "sleepTime", "time", title: "Sleep Resume Time", required: false
         }
         section {
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -58,18 +58,27 @@ def updated() {
 def initialize() {
     state.mode = location.mode
     
-    subscribe(location, "mode", modeHandler)
+    // Thermostat
+    subscribe(location, "mode", modeHandler_Thermostat)
     
     def currentTime = new Date()
     
     if (workdayTime) {
         def workdayToday = timeToday(workdayTime)
-        schedule("$currentTime.seconds $workdayToday.minutes $workdayToday.hours ? * 2-6 *", resumeForWorkday)
+        schedule("$currentTime.seconds $workdayToday.minutes $workdayToday.hours ? * 2-6 *", workdayTimeHandler_Thermostat)
     }
     
     if (sleepTime) {
         def sleepToday = timeToday(sleepTime)
-        schedule("$currentTime.seconds $sleepToday.minutes $sleepToday.hours * * ? *", resumeForSleep)
+        schedule("$currentTime.seconds $sleepToday.minutes $sleepToday.hours * * ? *", sleepTimeHandler_Thermostat)
+    }
+    
+    // Away Alert
+    for (thermostat in thermostats) {
+        subscribe(thermostat, "motion.active", handler_AwayAlert)
+    }
+    for (sensor in sensors) {
+        subscribe(sensor, "motion.active", handler_AwayAlert)
     }
 }
 
@@ -79,8 +88,8 @@ def logDebug(msg) {
     }
 }
 
-def modeHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def modeHandler_Thermostat(evt) {
+    logDebug("modeHandler_Thermostat: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
         def currentTime = new Date()
@@ -98,8 +107,8 @@ def modeHandler(evt) {
     state.mode = evt.value
 }
 
-def resumeForWorkday(evt) {
-    logDebug("Received workday time event")
+def workdayTimeHandler_Thermostat(evt) {
+    logDebug("workdayTimeHandler_Thermostat")
     
     if (location.mode == "Away") {
         for (thermostat in thermostats) {
@@ -108,12 +117,20 @@ def resumeForWorkday(evt) {
     }
 }
 
-def resumeForSleep(evt) {
-    logDebug("Received sleep time event")
+def sleepTimeHandler_Thermostat(evt) {
+    logDebug("sleepTimeHandler_Thermostat")
     
     if (location.mode == "Away") {
         for (thermostat in thermostats) {
             thermostat.resumeProgram()
         }
+    }
+}
+
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
