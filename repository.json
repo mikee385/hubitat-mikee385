@@ -9,6 +9,12 @@
             "description": "Automation and alerts for the door and lights associated with the back porch."
         },
         {
+            "name": "Bedtime Routine",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-routine.json",
+            "description": "Trigger routine for bedtime."
+        },
+        {
             "name": "Camera Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.json",

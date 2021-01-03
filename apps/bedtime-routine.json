@@ -1,0 +1,16 @@
+{
+    "packageName": "Bedtime Routine",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "0.0",
+    "dateReleased": "2021-01-03",
+    "apps": [
+        {
+            "id": "a9f6df9d-4240-4e0a-84ad-225e478acb74",
+            "name": "Bedtime Routine",
+            "namespace": "mikee385",
+            "version": "1.0.0-beta.1",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-routine.groovy",
+            "required": true
+        }
+    ]
+}
