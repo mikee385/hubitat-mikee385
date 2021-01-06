@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-alpha.1" }
+String getVersionNum() { return "1.0.0-alpha.2" }
 String getVersionLabel() { return "Roomba Native Driver, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -34,7 +34,6 @@ metadata {
     }
     section {
         input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-        label title: "Assign a name", required: true
     }
 }
 
