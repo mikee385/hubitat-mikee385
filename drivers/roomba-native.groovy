@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-alpha.7" }
+String getVersionNum() { return "1.0.0-alpha.8" }
 String getVersionLabel() { return "Roomba Native Driver, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -52,11 +52,11 @@ def initialize() {
     log.debug "Client ID: hubitat_${location.hubs[0].name}-${location.hubs[0].hardwareID}"
     log.debug "Blid: ${settings?.roombaBlid}"
     log.debug "Password: ${settings?.roombaPassword}"
-    log.debug "URL: tls://${settings?.roombaIpAddress}:${settings?.roombaPort}"
+    log.debug "URL: tcp://${settings?.roombaIpAddress}:${settings?.roombaPort}"
     
     try {
         log.debug "Connected? ${interfaces.mqtt.isConnected()}"
-        interfaces.mqtt.connect("tls://${settings?.roombaIpAddress}:${settings?.roombaPort}", "hubitat_${location.hubs[0].name}-${location.hubs[0].hardwareID}", settings?.roombaBlid, settings?.roombaPassword)
+        interfaces.mqtt.connect("tcp://${settings?.roombaIpAddress}:${settings?.roombaPort}", "hubitat_${location.hubs[0].name}-${location.hubs[0].hardwareID}", settings?.roombaBlid, settings?.roombaPassword)
        
         // delay for connection
         pauseExecution(1000)
