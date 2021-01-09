@@ -2,13 +2,13 @@
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2021-01-01",
+    "dateReleased": "2021-01-09",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
             "name": "Back Porch Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.4",
+            "version": "1.0.0-beta.5",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/back-porch-automation.groovy",
             "required": true
         }

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.4" }
+String getVersionNum() { return "1.0.0-beta.5" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,8 +30,9 @@ definition(
 preferences {
     page(name: "settings", title: "Back Porch Automation", install: true, uninstall: true) {
         section {
-            input "lights", "capability.switch", title: "Exterior Lights", multiple: true, required: true
-            input "door", "capability.contactSensor", title: "Exterior Door", multiple: false, required: true
+            input "lights", "capability.switch", title: "Lights", multiple: true, required: true
+            input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
+            input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
         section("Alerts") {
@@ -56,8 +57,11 @@ def updated() {
 }
 
 def initialize() {
+    state.waitingForLock = false
+    
     // Light Switch
     subscribe(door, "contact", doorHandler_LightSwitch)
+    subscribe(lock, "contact", lockHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     
@@ -76,6 +80,7 @@ def initialize() {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
     subscribe(door, "contact", handler_AwayAlert)
+    subscribe(lock, "contact", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -92,6 +97,24 @@ def doorHandler_LightSwitch(evt) {
             for (light in lights) {
                 light.on()
             }
+        }
+    } else {
+        state.waitingForLock = true
+        runIn(60*10, stopWaitingForLock)
+    }
+}
+
+def stopWaitingForLock() {
+    state.waitingForLock = false
+}
+
+def lockHandler_LightSwitch(evt) {
+    logDebug("lockHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (state.waitingForLock) {
+        state.waitingForLock = false
+        for (light in lights) {
+            light.off()
         }
     }
 }
