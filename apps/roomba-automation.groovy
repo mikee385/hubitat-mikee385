@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.1" }
+String getVersionNum() { return "3.0.0-beta.2" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Roomba Automation", install: true, uninstall: true) {
         section {
-            input "roomba", "device.Roomba980", title: "Roomba", multiple: false, required: true
+            input "roomba", "device.Roomba", title: "Roomba", multiple: false, required: true
         }
         section {
             input "startTime", "time", title: "Start Time", required: true
@@ -63,7 +63,7 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(roomba, "status", roombaHandler)
+    subscribe(roomba, "cleanStatus", roombaHandler)
     
     //subscribe(location, "mode", modeHandler)
     
@@ -85,13 +85,13 @@ def logDebug(msg) {
 def roombaHandler(evt) {
     logDebug("roombaHandler: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "starting") {
+    if (evt.value == "cleaning") {
         state.startTime = now()
         
         if (startAlert) {
             notifier.deviceNotification("$roomba has started!")
         }
-    } else if (evt.value == "docked") {
+    } else {
         state.endTime = now()
         state.duration += state.endTime - state.startTime
         
@@ -108,12 +108,12 @@ def modeHandler(evt) {
     logDebug("modeHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
-        if (roomba.currentValue("status") == "docked" && timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && state.duration < minimumDuration*60*1000) {
+        if (roomba.currentValue("cleanStatus") != "cleaning" && timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && state.duration < minimumDuration*60*1000) {
             roomba.start()
         }
     } else {
-        if (roomba.currentValue("status") == "starting" || roomba.currentValue("status") == "cleaning" || roomba.currentValue("status") == "resuming") {
-            roomba.stop()
+        if (roomba.currentValue("cleanStatus") == "cleaning") {
+            roomba.dock()
         }
     }
 }
