@@ -99,6 +99,12 @@
             "description": "Starts and stops the Roomba based on a schedule and presence."
         },
         {
+            "name": "Roomba Integration",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-roomba/master/packageManifest.json",
+            "description": "Connects to Roomba via Dorita"
+        },
+        {
             "name": "Sunlight Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.json",
