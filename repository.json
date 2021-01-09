@@ -92,7 +92,8 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.json",
             "description": "Sends a notification when the hub reboots."
         },
-                    "name": "Roomba Automation",
+        {
+            "name": "Roomba Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roomba-automation.json",
             "description": "Starts and stops the Roomba based on a schedule and presence."
