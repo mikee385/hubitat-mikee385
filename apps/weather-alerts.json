@@ -8,7 +8,7 @@
             "id": "6c0f049b-8640-453c-a4b4-0c863f164a59",
             "name": "Weather Alerts",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
+            "version": "1.0.0-beta.3",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.groovy",
             "required": true
         }
