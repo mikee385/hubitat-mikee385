@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.5" }
+String getVersionNum() { return "1.0.0-beta.6" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -60,6 +60,9 @@ def initialize() {
     state.waitingForLock = false
     
     // Light Switch
+    for (light in lights) {
+        subscribe(light, "switch", lightHandler_LightSwitch)
+    }
     subscribe(door, "contact", doorHandler_LightSwitch)
     subscribe(lock, "contact", lockHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
@@ -89,8 +92,18 @@ def logDebug(msg) {
     }
 }
 
+def lightHandler_LightSwitch(evt) {
+    logDebug("lightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    state.waitingForLock = false
+    unschedule("stopWaitingForLock")
+}
+
 def doorHandler_LightSwitch(evt) {
     logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    state.waitingForLock = false
+    unschedule("stopWaitingForLock")
     
     if (evt.value == "open") {
         if (sunlight.currentValue("switch") == "off") {
@@ -112,7 +125,6 @@ def lockHandler_LightSwitch(evt) {
     logDebug("lockHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (state.waitingForLock) {
-        state.waitingForLock = false
         for (light in lights) {
             light.off()
         }
