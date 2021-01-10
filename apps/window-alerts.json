@@ -8,7 +8,7 @@
             "id": "5513b8d1-02cd-4af9-b20c-7fab56c2742d",
             "name": "Window Alerts",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.1",
+            "version": "1.0.0-beta.2",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/window-alerts.groovy",
             "required": true
         }

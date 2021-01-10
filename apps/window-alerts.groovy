@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Window Alerts", install: true, uninstall: true) {
         section {
-            input "windows", "capability.switch", title: "Windows", multiple: true, required: true
+            input "windows", "capability.contactSensor", title: "Windows", multiple: true, required: true
         }
         section("Alerts") {
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
