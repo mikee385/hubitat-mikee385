@@ -123,6 +123,12 @@
             "description": "Reminder to take out the trash on specific days."
         },
         {
+            "name": "Window Alerts",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/window-alerts.json",
+            "description": "Alerts for the windows."
+        },
+        {
             "name": "Appliance Status",
             "category": "My Drivers",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.json",
