@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,6 +35,8 @@ preferences {
         section("Alerts") {
             input "rainStartedAlert", "bool", title: "Alert when Rain Started?", required: true, defaultValue: false
             input "rainStoppedAlert", "bool", title: "Alert when Rain Stopped?", required: true, defaultValue: false
+            input "rainDuringSleepAlert", "bool", title: "Alert when Rain During Sleep?", required: true, defaultValue: false
+            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
@@ -56,8 +58,13 @@ def updated() {
 
 def initialize() {
     state.previousRainRate = weatherStation.currentValue("hourlyrainin_real")
+    state.eventRainTotal_BeforeSleep = 0.0
+    state.eventRainTotal_AfterSleep = 0.0
+    state.eventRainTotal_DuringSleep = 0.0
 
-    subscribe(weatherStation, "hourlyrainin_real", rainRateHandler)
+    // Rain Alert
+    subscribe(weatherStation, "hourlyrainin_real", rainRateHandler_RainAlert)
+    subscribe(person, "sleeping", personHandler_RainAlert)
 }
 
 def logDebug(msg) {
@@ -66,18 +73,32 @@ def logDebug(msg) {
     }
 }
 
-def rainRateHandler(evt) {
-    logDebug("rainRateHandler: ${evt.device} changed to ${evt.value}")
+def rainRateHandler_RainAlert(evt) {
+    logDebug("rainRateHandler_RainAlert: ${evt.device} changed to ${evt.value}")
     
     def currentRainRate = weatherStation.currentValue("hourlyrainin_real")
     if (currentRainRate > 0.0 && state.previousRainRate == 0.0) {
-        if (rainStartedAlert) {
+        if (rainStartedAlert && person.currentValue("sleeping") != "sleeping") {
             notifier.deviceNotification("It's raining! ($currentRainRate in/hr)")
         }
     } else if (currentRainRate == 0.0 && state.previousRainRate > 0.0) {
-        if (rainStoppedAlert) {
+        if (rainStoppedAlert && person.currentValue("sleeping") != "sleeping") {
             notifier.deviceNotification("Rain has stopped!")
         }
     }
     state.previousRainRate = currentRainRate
+}
+
+def personHandler_RainAlert(evt) {
+    logDebug("personHandler_RainAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "sleeping") {
+        state.eventRainTotal_BeforeSleep = weatherStation.currentValue("eventrainin_real")
+    } else {
+        state.eventRainTotal_AfterSleep = weatherStation.currentValue("eventrainin_real")
+        state.eventRainTotal_DuringSleep = state.eventRainTotal_AfterSleep - state.eventRainTotal_BeforeSleep
+        if (state.eventRainTotal_DuringSleep > 0.0 && rainDuringSleepAlert) {
+            notifier.deviceNotification("Rain occurred during Sleep! (${state.eventRainTotal_DuringSleep} in)")
+        }
+    }
 }
