@@ -123,6 +123,12 @@
             "description": "Reminder to take out the trash on specific days."
         },
         {
+            "name": "Weather Alerts",
+            "category": "My Apps",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.json",
+            "description": "Alerts for various weather conditions."
+        },
+        {
             "name": "Window Alerts",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/window-alerts.json",
