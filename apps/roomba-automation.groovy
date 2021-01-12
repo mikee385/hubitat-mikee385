@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.3" }
+String getVersionNum() { return "3.0.0-beta.4" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -99,7 +99,7 @@ def roombaHandler(evt) {
             notifier.deviceNotification("$roomba has finished!")
         }
         if (durationAlert) {
-            notifier.deviceNotification("$roomba runtime = ${round(state.duration/60/1000)} minutes")
+            notifier.deviceNotification("$roomba runtime = ${Math.round(state.duration/60/1000)} minutes")
         }
     }
 }
