@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.4" }
+String getVersionNum() { return "3.0.0-beta.5" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,10 +38,9 @@ preferences {
             input "resetTime", "time", title: "Reset Time", required: true
         }
         section("Alerts") {
-            input "startAlert", "bool", title: "Alert when Started?", required: true, defaultValue: false
-            input "dockedAlert", "bool", title: "Alert when Docked?", required: true, defaultValue: false
-            input "durationAlert", "bool", title: "Alert when Duration Changed?", required: true, defaultValue: false
-            input "resetAlert", "bool", title: "Alert when Reset?", required: true, defaultValue: false
+            input "alertStarted", "bool", title: "Alert when Started?", required: true, defaultValue: false
+            input "alertFinished", "bool", title: "Alert when Finished?", required: true, defaultValue: false
+            input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
@@ -88,19 +87,16 @@ def roombaHandler(evt) {
     if (evt.value == "cleaning") {
         state.startTime = now()
         
-        if (startAlert) {
+        if (alertStarted) {
             notifier.deviceNotification("$roomba has started!")
         }
     } else if (state.endTime < state.startTime) { // should only be true while Roomba is running
         state.endTime = now()
         state.duration += state.endTime - state.startTime
-        
-        if (dockedAlert) {
-            notifier.deviceNotification("$roomba has finished!")
-        }
-        if (durationAlert) {
-            notifier.deviceNotification("$roomba runtime = ${Math.round(state.duration/60/1000)} minutes")
-        }
+    }
+    
+    if (evt.value == "charging" && alertFinished) {
+        notifier.deviceNotification("$roomba has cleaned for ${Math.round(state.duration/60/1000)} minutes today!")
     }
 }
 
@@ -121,7 +117,7 @@ def modeHandler(evt) {
 def dailyStart() {
     logDebug("dailyStart")
     
-    if (location.mode == "Away" && roomba.currentValue("status") == "docked" && state.duration < minimumDuration*60*1000) {
+    if (location.mode == "Away" && roomba.currentValue("cleanStatus") != "cleaning" && state.duration < minimumDuration*60*1000) {
         roomba.start()
     }
 }
@@ -131,7 +127,7 @@ def dailyReset() {
     
     state.duration = 0
     
-    if (resetAlert) {
+    if (alertReset) {
         notifier.deviceNotification("$roomba has reset!")
     }
 }

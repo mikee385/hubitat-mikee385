@@ -8,7 +8,7 @@
             "id": "8f28ae8c-f76b-44de-99bb-42d5b77cbaef",
             "name": "Roomba Automation",
             "namespace": "mikee385",
-            "version": "3.0.0-beta.4",
+            "version": "3.0.0-beta.5",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roomba-automation.groovy",
             "required": true
         }
