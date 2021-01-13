@@ -75,16 +75,10 @@
             "description": "Turns the pantry light on/off based on motion."
         },
         {
-            "name": "Person Automation with Switch",
+            "name": "Person Automation",
             "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-switch.json",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-automation.json",
             "description": "Updates the state of a Person Status device using a presence sensor and a switch."
-        },
-        {
-            "name": "Person Automation with URLs",
-            "category": "My Apps",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-with-urls.json",
-            "description": "Updates the state of a Person Status device using a presence sensor and URLs."
         },
         {
             "name": "Reboot Notification",
