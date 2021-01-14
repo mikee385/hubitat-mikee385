@@ -2,13 +2,13 @@
     "packageName": "Christmas Tree Automation",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2021-01-01",
+    "dateReleased": "2021-01-13",
     "apps": [
         {
             "id": "1d01b53f-131a-4d47-ac61-7a90bd37288a",
             "name": "Christmas Tree Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.1",
+            "version": "1.0.0-beta.2",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/christmas-tree-automation.groovy",
             "required": true
         }

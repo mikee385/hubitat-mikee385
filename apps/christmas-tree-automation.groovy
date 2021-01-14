@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Christmas Tree Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,12 +35,10 @@ preferences {
             input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
         }
         section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
