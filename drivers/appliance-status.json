@@ -2,13 +2,13 @@
     "packageName": "Appliance Status",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-02-22",
+    "dateReleased": "2021-01-13",
     "drivers": [
         {
             "id": "06b05cc8-6ccd-429a-a47d-5412a22d8228",
             "name": "Appliance Status",
             "namespace": "mikee385",
-            "version": "2.1.0",
+            "version": "3.0.0",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.groovy",
             "required": true
         }

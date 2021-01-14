@@ -1,7 +1,7 @@
 /**
  *  Trash Reminder
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -36,7 +36,6 @@ preferences {
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -53,7 +52,8 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(person, "state", stateHandler)
+    // Trash Reminder
+    subscribe(person, "status", personHandler_TrashReminder)
 }
 
 def logDebug(msg) {
@@ -62,10 +62,10 @@ def logDebug(msg) {
     }
 }
 
-def stateHandler(evt) {
-    logDebug("${evt.device} changed to ${evt.value}")
+def personHandler_TrashReminder(evt) {
+    logDebug("personHandler_TrashReminder: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("state") == "home") {
+    if (evt.value == "home") {
         def df = new java.text.SimpleDateFormat("EEEE")
         df.setTimeZone(location.timeZone)
 

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -58,7 +58,7 @@ def initialize() {
     for (window in windows) {
         subscribe(window, "contact", windowHandler_WindowAlert)
     }
-    subscribe(person, "state", personHandler_WindowAlert)
+    subscribe(person, "status", personHandler_WindowAlert)
     
     // Away Alert
     for (window in windows) {
@@ -76,7 +76,7 @@ def windowHandler_WindowAlert(evt) {
     logDebug("windowHandler_WindowAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("state") == "home") {
+        if (person.currentValue("status") == "home") {
             unschedule("windowAlert")
             runIn(60*5, windowAlert)
         }

@@ -1,7 +1,7 @@
 /**
  *  Camera Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.3" }
+String getVersionNum() { return "1.0.0-beta.4" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -68,7 +68,7 @@ def initialize() {
     for (camera in cameras) {
         subscribe(camera, "switch", cameraHandler_ReminderSwitch)
     }
-    subscribe(person, "state", personHandler_ReminderSwitch)
+    subscribe(person, "status", personHandler_ReminderSwitch)
     
     // Reminder Alert
     subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
@@ -113,7 +113,7 @@ def buttonHandler_CameraSwitch(evt) {
 def cameraHandler_ReminderSwitch(evt) {
     logDebug("cameraHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("state") == "home") {
+    if (person.currentValue("status") == "home") {
         unschedule("checkCameras")
         runIn(5, checkCameras)
     } else {

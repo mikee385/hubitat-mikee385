@@ -14,14 +14,14 @@
  *
  */
  
-String getVersionNum() { return "3.0.0-beta.5" }
+String getVersionNum() { return "3.0.0-beta.6" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
     name: "Dishwasher Automation",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Updates the state of an Appliance Status device representing a dishwasher.",
+    description: "Updates the status of an Appliance Status device representing a dishwasher.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
@@ -74,7 +74,7 @@ def updated() {
 def initialize() {
     // Appliance Status
     subscribe(contactSensor, "contact.open", contactSensorHandler_ApplianceStatus)
-    subscribe(appliance, "state", applianceHandler_ApplianceStatus)
+    subscribe(appliance, "status", applianceHandler_ApplianceStatus)
     
     def resetToday = timeToday(resetTime)
     def currentTime = new Date()
@@ -82,8 +82,8 @@ def initialize() {
     
     // Reminder Switch
     subscribe(reminderRoutine, "switch.on", routineHandler_ReminderSwitch)
-    subscribe(appliance, "state", applianceHandler_ReminderSwitch)
-    subscribe(person, "state", personHandler_ReminderSwitch)
+    subscribe(appliance, "status", applianceHandler_ReminderSwitch)
+    subscribe(person, "status", personHandler_ReminderSwitch)
     
     // Reminder Alert
     subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
@@ -120,7 +120,7 @@ def applianceHandler_ApplianceStatus(evt) {
         if (alertFinished) {
             notifier.deviceNotification("Dishwasher has finished.")
         }
-    } else if (evt.value == "unstarted") {
+    } else if (evt.value == "idle") {
         if (alertReset) {
             notifier.deviceNotification("Dishwasher has reset.")
         }
@@ -130,7 +130,7 @@ def applianceHandler_ApplianceStatus(evt) {
 def durationComplete() {
     logDebug("durationComplete")
     
-    if (appliance.currentValue("state") == "running") {
+    if (appliance.currentValue("status") == "running") {
         appliance.finish()
     }
 }
@@ -138,9 +138,9 @@ def durationComplete() {
 def resetTimeHandler_ApplianceStatus() {
     logDebug("resetTimeHandler_ApplianceStatus")
     
-    if (appliance.currentValue("state") == "finished") {
+    if (appliance.currentValue("status") == "finished") {
         appliance.reset()
-    } else if (appliance.currentValue("state") == "running") {
+    } else if (appliance.currentValue("status") == "running") {
         def currentDuration = now() - state.runningStartTime
         if (currentDuration > 2*runDuration*60*1000) {
             logDebug("Ran too long. Resetting...")
@@ -152,7 +152,7 @@ def resetTimeHandler_ApplianceStatus() {
 def routineHandler_ReminderSwitch(evt) {
     logDebug("routineHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (appliance.currentValue("state") == "unstarted") {
+    if (appliance.currentValue("status") == "idle") {
         reminderSwitch.on()
     }
 }

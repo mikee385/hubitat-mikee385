@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.6" }
+String getVersionNum() { return "1.0.0-beta.7" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -72,11 +72,11 @@ def initialize() {
     for (light in lights) {
         subscribe(light, "switch", lightHandler_LightAlert)
     }
-    subscribe(person, "state", personHandler_LightAlert)
+    subscribe(person, "status", personHandler_LightAlert)
     
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
-    subscribe(person, "state", personHandler_DoorAlert)
+    subscribe(person, "status", personHandler_DoorAlert)
     
     // Away Alert
     for (light in lights) {
@@ -155,7 +155,7 @@ def lightHandler_LightAlert(evt) {
     logDebug("lightHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        if (person.currentValue("state") != "sleep") {
+        if (person.currentValue("status") != "sleep") {
             runIn(60*5, lightAlert, [data: [device: "${evt.device}"]])
         }
     } else {
@@ -186,7 +186,7 @@ def doorHandler_DoorAlert(evt) {
     logDebug("doorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("state") == "home") {
+        if (person.currentValue("status") == "home") {
             runIn(60*5, doorAlert)
         }
     } else {

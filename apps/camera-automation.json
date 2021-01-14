@@ -2,13 +2,13 @@
     "packageName": "Camera Automation",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2020-12-31",
+    "dateReleased": "2021-01-13",
     "apps": [
         {
             "id": "e528e2eb-0f71-4b81-bc50-56c004bfd9f3",
             "name": "Camera Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.3",
+            "version": "1.0.0-beta.4",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.groovy",
             "required": true
         }

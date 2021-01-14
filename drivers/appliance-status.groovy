@@ -1,7 +1,7 @@
 /**
  *  Appliance Status Device Handler
  *
- *  Copyright 2019 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Appliance Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -28,8 +28,7 @@ metadata {
         capability "Sensor"
         capability "Switch"
 
-        attribute "state", "enum", ["running", "finished", "unstarted"]
-        attribute "stateColor", "enum", ["running-blue", "running-orange", "running-gray", "finished-blue", "finished-orange", "finished-gray", "unstarted-blue", "unstarted-orange", "unstarted-gray"]
+        attribute "status", "enum", ["idle", "running", "finished"]
         
         attribute "startTime", "string"
         attribute "finishTime", "string"
@@ -38,12 +37,6 @@ metadata {
         command "start"
         command "finish"
         command "reset"
-    }
-    
-    preferences {
-        input name: "stateColorRunning", type: "enum", title: "What color should be shown for 'Running'?", options: ["Blue", "Orange", "Gray"], defaultValue: "Blue", required: true, displayDuringSetup: false
-        input name: "stateColorFinished", type: "enum", title: "What color should be shown for 'Finished'?", options: ["Blue", "Orange", "Gray"], defaultValue: "Orange", required: true, displayDuringSetup: false
-        input name: "stateColorUnstarted", type: "enum", title: "What color should be shown for 'Unstarted'?", options: ["Blue", "Orange", "Gray"], defaultValue: "Gray", required: true, displayDuringSetup: false
     }
 }
 
@@ -57,7 +50,7 @@ def updated() {
 }
 
 def initialize() {
-    if (!device.currentValue("state")) {
+    if (!device.currentValue("status")) {
         reset()
     }
 }
@@ -71,49 +64,20 @@ def off() {
 }
 
 def start() {
-    sendEvent(name: "state", value: "running", descriptionText: "$device.displayName changed to running", displayed: true)    
+    sendEvent(name: "status", value: "running", descriptionText: "$device.displayName changed to running", displayed: true)    
     sendEvent(name: "switch", value: "on", displayed: false)
     sendEvent(name: "startTime", value: new Date(), displayed: false)
-    
-    if (stateColorRunning == "Blue") {
-        sendEvent(name: "stateColor", value: "running-blue", displayed: false)
-    } else if (stateColorRunning == "Orange") {
-        sendEvent(name: "stateColor", value: "running-orange", displayed: false)
-    } else if (stateColorRunning == "Gray") {
-        sendEvent(name: "stateColor", value: "running-gray", displayed: false)
-    } else {
-        sendEvent(name: "stateColor", value: "running-blue", displayed: false)
-    }
 }
 
 def finish() {
-    sendEvent(name: "state", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)    
+    sendEvent(name: "status", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)    
     sendEvent(name: "switch", value: "off", displayed: false)
     sendEvent(name: "finishTime", value: new Date(), displayed: false)
-    
-    if (stateColorFinished == "Blue") {
-        sendEvent(name: "stateColor", value: "finished-blue", displayed: false)
-    } else if (stateColorFinished == "Orange") {
-        sendEvent(name: "stateColor", value: "finished-orange", displayed: false)
-    } else if (stateColorFinished == "Gray") {
-        sendEvent(name: "stateColor", value: "finished-gray", displayed: false)
-    } else {
-        sendEvent(name: "stateColor", value: "finished-orange", displayed: false)
     }
 }
 
 def reset() {
-    sendEvent(name: "state", value: "unstarted", descriptionText: "$device.displayName changed to unstarted", displayed: true)    
+    sendEvent(name: "status", value: "idle", descriptionText: "$device.displayName changed to idle", displayed: true)    
     sendEvent(name: "switch", value: "off", displayed: false)
     sendEvent(name: "resetTime", value: new Date(), displayed: false)
-    
-    if (stateColorUnstarted == "Blue") {
-        sendEvent(name: "stateColor", value: "unstarted-blue", displayed: false)
-    } else if (stateColorUnstarted == "Orange") {
-        sendEvent(name: "stateColor", value: "unstarted-orange", displayed: false)
-    } else if (stateColorUnstarted == "Gray") {
-        sendEvent(name: "stateColor", value: "unstarted-gray", displayed: false)
-    } else {
-        sendEvent(name: "stateColor", value: "unstarted-gray", displayed: false)
-    }
 }

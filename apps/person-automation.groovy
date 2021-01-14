@@ -14,14 +14,14 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0-beta.2" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
     name: "Person Automation",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Updates the state of a Person Status device using a presence sensor and a switch.",
+    description: "Updates the status of a Person Status device using a presence sensor and a switch.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
@@ -133,7 +133,7 @@ def departed() {
 }
 
 def awake() {
-    if (person.currentValue("state") == "sleep") {
+    if (person.currentValue("status") == "sleep") {
         person.awake()
         if (alertAwake) {
             notifier.deviceNotification("$person is awake!")
@@ -142,7 +142,7 @@ def awake() {
 }
 
 def asleep() {
-    if (person.currentValue("state") == "home") {
+    if (person.currentValue("status") == "home") {
         person.asleep()
         if (alertAsleep) {
             notifier.deviceNotification("$person is asleep!")

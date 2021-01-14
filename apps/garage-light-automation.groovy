@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0-beta.5" }
+String getVersionNum() { return "3.1.0-beta.6" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -77,13 +77,13 @@ def initialize() {
     subscribe(sideDoor, "contact", deviceHandler_LightAlert)
     subscribe(motionSensor, "motion.active", deviceHandler_LightAlert)
     subscribe(garageLight, "switch", deviceHandler_LightAlert)
-    subscribe(person, "state", personHandler_LightAlert)
+    subscribe(person, "status", personHandler_LightAlert)
     
     // Door Alert
     subscribe(overheadDoor, "contact", overheadDoorHandler_DoorAlert)
     subscribe(entryDoor, "contact", entryDoorHandler_DoorAlert)
     subscribe(sideDoor, "contact", sideDoorHandler_DoorAlert)
-    subscribe(person, "state", personHandler_DoorAlert)
+    subscribe(person, "status", personHandler_DoorAlert)
     
     // Away Alert
     subscribe(overheadDoor, "contact", handler_AwayAlert)
@@ -152,9 +152,9 @@ def sideDoorHandler_Occupancy(evt) {
 def motionHandler_Occupancy(evt) {
     logDebug("motionHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
-    if (occupancy.currentValue("state") == "checking") {
+    if (occupancy.currentValue("status") == "checking") {
         occupancy.occupied()
-    } else if (occupancy.currentValue("state") == "vacant") {
+    } else if (occupancy.currentValue("status") == "vacant") {
         occupancy.checking()
     }
 }
@@ -196,7 +196,7 @@ def deviceHandler_LightAlert(evt) {
     
     unschedule("lightAlert")
     if (garageLight.currentValue("switch") == "on") {
-        if (person.currentValue("state") != "sleep") {
+        if (person.currentValue("status") != "sleep") {
             runIn(60*10, lightAlert)
         }
     }

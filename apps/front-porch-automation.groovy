@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.2" }
+String getVersionNum() { return "1.0.0-beta.3" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -67,7 +67,7 @@ def initialize() {
     
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
-    subscribe(person, "state", personHandler_DoorAlert)
+    subscribe(person, "status", personHandler_DoorAlert)
     
     // Away Alert
     for (light in lights) {
@@ -128,7 +128,7 @@ def doorHandler_DoorAlert(evt) {
     logDebug("doorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("state") == "home") {
+        if (person.currentValue("status") == "home") {
             runIn(60*5, doorAlert)
         }
     } else {

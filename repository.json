@@ -78,7 +78,7 @@
             "name": "Person Automation",
             "category": "My Apps",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-automation.json",
-            "description": "Updates the state of a Person Status device using a presence sensor and a switch."
+            "description": "Updates the status of a Person Status device using a presence sensor and a switch."
         },
         {
             "name": "Reboot Notification",
@@ -132,7 +132,7 @@
             "name": "Appliance Status",
             "category": "My Drivers",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.json",
-            "description": "Driver representing an appliance with 3 states: unstarted, running, finished."
+            "description": "Driver representing an appliance with 3 states: idle, running, finished."
         },
         {
             "name": "Occupancy Status",

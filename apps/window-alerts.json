@@ -2,13 +2,13 @@
     "packageName": "Window Alerts",
     "author": "Michael Pierce",
     "minimumHEVersion": "0.0",
-    "dateReleased": "2021-01-09",
+    "dateReleased": "2021-01-13",
     "apps": [
         {
             "id": "5513b8d1-02cd-4af9-b20c-7fab56c2742d",
             "name": "Window Alerts",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
+            "version": "1.0.0-beta.3",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/window-alerts.groovy",
             "required": true
         }

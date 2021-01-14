@@ -1,7 +1,7 @@
 /**
  *  Occupancy Status Device Handler
  *
- *  Copyright 2019 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -27,7 +27,7 @@ metadata {
         capability "Actuator"
         capability "Sensor"
 
-        attribute "state", "enum", ["occupied", "vacant", "checking", "blind"]
+        attribute "status", "enum", ["occupied", "vacant", "checking", "blind"]
         attribute "occupancy", "enum", ["occupied", "unoccupied"]
 
         command "occupied"
@@ -36,8 +36,8 @@ metadata {
     }
     
     preferences {
-        input "checkingPeriod", "number", title: "Checking Period in Seconds\nHow long (in seconds) should zone stay in the 'checking' state (including the 'blind' period) before transitioning to the 'vacant' state?", range: "0..*", defaultValue: 240, required: true, displayDuringSetup: false
-        input "blindPeriod", "number", title: "Blind Period in Seconds\nHow long (in seconds) at the beginning of the 'checking' state should zone ignore certain events?", range: "0..*", defaultValue: 0, required: true, displayDuringSetup: false
+        input "checkingPeriod", "number", title: "Checking Period in Seconds\nHow long (in seconds) should zone stay in the 'checking' status (including the 'blind' period) before transitioning to the 'vacant' status?", range: "0..*", defaultValue: 240, required: true, displayDuringSetup: false
+        input "blindPeriod", "number", title: "Blind Period in Seconds\nHow long (in seconds) at the beginning of the 'checking' status should zone ignore certain events?", range: "0..*", defaultValue: 0, required: true, displayDuringSetup: false
     }
 }
 
@@ -51,63 +51,63 @@ def updated() {
 }
 
 def initialize() {
-    if (!device.currentValue("state")) {
+    if (!device.currentValue("status")) {
         vacant()
     }
 }
 
 def occupied() {
-    setStateToOccupied()
+    setStatusToOccupied()
 }
 
 def vacant() {
-    setStateToVacant()
+    setStatusToVacant()
 }
 
 def checking() {
     if (blindPeriod > 0) {
-        setStateToBlind()
+        setStatusToBlind()
         runIn(blindPeriod, resumeFromBlind)
     } else if (checkingPeriod > 0) {
-        setStateToChecking()
+        setStatusToChecking()
         runIn(checkingPeriod, resumeFromChecking)
     } else {
-        setStateToVacant()
+        setStatusToVacant()
     }
 }
 
 def resumeFromBlind() {
     def remainingTime = checkingPeriod - blindPeriod
     if (remainingTime > 0) {
-        setStateToChecking()
+        setStatusToChecking()
         runIn(remainingTime, resumeFromChecking)
     } else {
-        setStateToVacant()
+        setStatusToVacant()
     }
 }
 
 def resumeFromChecking() {
-    setStateToVacant()
+    setStatusToVacant()
 }
 
-private def setStateToOccupied() {
-    sendEvent(name: "state", value: "occupied", descriptionText: "$device.displayName changed to occupied", displayed: true)
+private def setStatusToOccupied() {
+    sendEvent(name: "status", value: "occupied", descriptionText: "$device.displayName changed to occupied", displayed: true)
     sendEvent(name: "occupancy", value: "occupied", displayed: false)
     unschedule()
 }
 
-private def setStateToVacant() {
-    sendEvent(name: "state", value: "vacant", descriptionText: "$device.displayName changed to vacant", displayed: true)
+private def setStatusToVacant() {
+    sendEvent(name: "status", value: "vacant", descriptionText: "$device.displayName changed to vacant", displayed: true)
     sendEvent(name: "occupancy", value: "unoccupied", displayed: false)
     unschedule()
 }
 
-private def setStateToChecking() {
-    sendEvent(name: "state", value: "checking", descriptionText: "$device.displayName changed to checking", displayed: true)
+private def setStatusToChecking() {
+    sendEvent(name: "status", value: "checking", descriptionText: "$device.displayName changed to checking", displayed: true)
     sendEvent(name: "occupancy", value: "occupied", displayed: false)
 }
 
-private def setStateToBlind() {
-    sendEvent(name: "state", value: "blind", descriptionText: "$device.displayName changed to blind", displayed: true)
+private def setStatusToBlind() {
+    sendEvent(name: "status", value: "blind", descriptionText: "$device.displayName changed to blind", displayed: true)
     sendEvent(name: "occupancy", value: "occupied", displayed: false)
 }
