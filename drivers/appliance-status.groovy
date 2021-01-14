@@ -73,7 +73,6 @@ def finish() {
     sendEvent(name: "status", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)    
     sendEvent(name: "switch", value: "off", displayed: false)
     sendEvent(name: "finishTime", value: new Date(), displayed: false)
-    }
 }
 
 def reset() {
