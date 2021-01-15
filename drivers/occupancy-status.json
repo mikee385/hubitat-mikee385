@@ -1,14 +1,16 @@
 {
     "packageName": "Occupancy Status",
     "author": "Michael Pierce",
-    "minimumHEVersion": "0.0",
+    "version": "3.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Rename 'state' attribute to 'status'",
     "dateReleased": "2021-01-13",
     "drivers": [
         {
             "id": "9a0311c1-63d2-4d93-aee3-61aaf22dbe93",
             "name": "Occupancy Status",
             "namespace": "mikee385",
-            "version": "3.0.0",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.groovy",
             "required": true
         }

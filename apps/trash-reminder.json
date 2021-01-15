@@ -1,16 +1,20 @@
 {
     "packageName": "Trash Reminder",
     "author": "Michael Pierce",
-    "minimumHEVersion": "0.0",
+    "version": "1.0.0-beta.2",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Rename 'state' attribute to 'status'",
     "dateReleased": "2021-01-13",
     "apps": [
         {
             "id": "77aa6509-9292-4b58-a56f-34e7f0077a84",
             "name": "Trash Reminder",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder.groovy",
-            "required": true
+            "required": true,
+            "oauth": false,
+            "primary": true
         }
     ]
 }

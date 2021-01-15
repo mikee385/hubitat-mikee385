@@ -1,16 +1,20 @@
 {
     "packageName": "Dishwasher Automation",
     "author": "Michael Pierce",
-    "minimumHEVersion": "0.0",
+    "version": "3.0.0-beta.6",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Rename 'state' attribute to 'status'",
     "dateReleased": "2021-01-13",
     "apps": [
         {
             "id": "97026f47-53ce-4803-b475-2028ca1cbf7c",
             "name": "Dishwasher Automation",
             "namespace": "mikee385",
-            "version": "3.0.0-beta.6",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-automation.groovy",
-            "required": true
+            "required": true,
+            "oauth": false,
+            "primary": true
         }
     ]
 }

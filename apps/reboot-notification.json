@@ -1,16 +1,20 @@
 {
     "packageName": "Reboot Notification",
     "author": "Michael Pierce",
-    "minimumHEVersion": "0.0",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Update version number to 1.0.0",
     "dateReleased": "2020-03-29",
     "apps": [
         {
             "id": "542f47a7-a210-414b-bd5c-06313db3fe48",
             "name": "Reboot Notification",
             "namespace": "mikee385",
-            "version": "1.0.0",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.groovy",
-            "required": true
+            "required": true,
+            "oauth": false,
+            "primary": true
         }
     ]
 }

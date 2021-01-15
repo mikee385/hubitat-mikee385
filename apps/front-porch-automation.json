@@ -1,16 +1,20 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "minimumHEVersion": "0.0",
+    "version": "1.0.0-beta.3",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Rename 'state' attribute to 'status'",
     "dateReleased": "2021-01-13",
     "apps": [
         {
             "id": "2b643332-38a5-413c-b76e-647edd831fa9",
             "name": "Front Porch Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.3",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.groovy",
-            "required": true
+            "required": true,
+            "oauth": false,
+            "primary": true
         }
     ]
 }

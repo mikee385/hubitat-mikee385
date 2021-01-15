@@ -1,16 +1,20 @@
 {
     "packageName": "Mode Automation",
     "author": "Michael Pierce",
-    "minimumHEVersion": "0.0",
+    "version": "1.0.0-beta.2",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Add missing inputs for backup times",
     "dateReleased": "2020-12-28",
     "apps": [
         {
             "id": "3f46c581-4084-433f-8af4-1df659985426",
             "name": "Mode Automation",
             "namespace": "mikee385",
-            "version": "1.0.0-beta.2",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/mode-automation.groovy",
-            "required": true
+            "required": true,
+            "oauth": false,
+            "primary": true
         }
     ]
 }
