@@ -4,159 +4,185 @@
     "packages": [
         {
             "name": "Back Porch Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/back-porch-automation.json",
-            "description": "Automation and alerts for the door and lights associated with the back porch."
+            "description": "Automation and alerts for the door and lights associated with the back porch.",
+            "tags": [ "Automations & Groups", "Doors & Windows", "Lights & Switches", "Locks" ]
         },
         {
             "name": "Bedtime Routine",
-            "category": "My Apps",
+            "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-routine.json",
-            "description": "Trigger routine for bedtime."
+            "description": "Trigger routine for bedtime.",
+            "tags": [ "Automations & Groups" ]
         },
         {
             "name": "Camera Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.json",
-            "description": "Turns on/off the cameras and reminders based on modes and other devices."
+            "description": "Turns on/off the cameras and reminders based on modes and other devices.",
+            "tags": [ "Automations & Groups", "Lights & Switches", "Safety & Security" ]
         },
         {
             "name": "Christmas Tree Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/christmas-tree-automation.json",
-            "description": "Turns the Christmas Tree on and off based on routines."
+            "description": "Turns the Christmas Tree on and off based on routines.",
+            "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
             "name": "Dishwasher Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-automation.json",
-            "description": "Updates the state of an Appliance Status device representing a dishwasher."
+            "description": "Updates the state of an Appliance Status device representing a dishwasher.",
+            "tags": [ "Appliances", "Automations & Groups" ]
         },
         {
             "name": "Front Porch Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.json",
-            "description": "Automation and alerts for the door and lights associated with the front porch."
+            "description": "Automation and alerts for the door and lights associated with the front porch.",
+            "tags": [ "Automations & Groups", "Doors & Windows", "Lights & Switches", "Motion Control" ]
         },
         {
             "name": "Garage Light Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.json",
-            "description": "Turns the garage light on and off based on the occupancy of the garage and the status of the doors."
+            "description": "Turns the garage light on and off based on the occupancy of the garage and the status of the doors.",
+            "tags": [ "Automations & Groups", "Doors & Windows", "Garage Doors", "Lights & Switches", "Motion Control" ]
         },
         {
             "name": "Glows Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/glows-automation.json",
-            "description": "Triggers Alexa virtual buttons using various mechanisms."
+            "description": "Triggers Alexa virtual buttons using various mechanisms.",
+            "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
             "name": "Guest Alerts",
-            "category": "My Apps",
+            "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/guest-alerts.json",
-            "description": "Sends alerts when guests may have arrived or departed."
+            "description": "Sends alerts when guests may have arrived or departed.",
+            "tags": [ "Notifications", "Presence & Location" ]
         },
         {
             "name": "Holiday Lights Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/holiday-lights-automation.json",
-            "description": "Turns the holiday light on and off based on the time of day and mode."
+            "description": "Turns the holiday light on and off based on the time of day and mode.",
+            "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
             "name": "Mode Automation",
-            "category": "My Apps",
+            "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/mode-automation.json",
-            "description": "Changes mode based on presence sensors and sleep sensors."
+            "description": "Changes mode based on presence sensors and sleep sensors.",
+            "tags": [ "Automations & Groups", "Presence & Location" ]
         },
         {
             "name": "Pantry Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.json",
-            "description": "Turns the pantry light on/off based on motion."
+            "description": "Turns the pantry light on/off based on motion.",
+            "tags": [ "Automations & Groups", "Lights & Switches", "Motion Control" ]
         },
         {
             "name": "Person Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-automation.json",
-            "description": "Updates the status of a Person Status device using a presence sensor and a switch."
+            "description": "Updates the status of a Person Status device using a presence sensor and a switch.",
+            "tags": [ "Automations & Groups", "Presence & Location", "Sleep" ]
         },
         {
             "name": "Reboot Notification",
-            "category": "My Apps",
+            "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.json",
-            "description": "Sends a notification when the hub reboots."
+            "description": "Sends a notification when the hub reboots.",
+            "tags": [ "Notifications", "Tools & Utilities" ]
         },
         {
             "name": "Roomba Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roomba-automation.json",
-            "description": "Starts and stops the Roomba based on a schedule and presence."
+            "description": "Starts and stops the Roomba based on a schedule and presence.",
+            "tags": [ "Automations & Groups", "Cleaning Devices" ]
         },
         {
             "name": "Roomba Integration",
-            "category": "My Apps",
+            "category": "Integrations",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-roomba/master/packageManifest.json",
-            "description": "Connects to Roomba via Dorita"
+            "description": "Connects to Roomba via Dorita",
+            "tags": [ "Cleaning Devices", "LAN" ]
         },
         {
             "name": "Sunlight Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.json",
-            "description": "Updates a switch based on time of day and illuminance."
+            "description": "Updates a switch based on time of day and illuminance.",
+            "tags": [ "Automations & Groups", "Weather" ]
         },
         {
             "name": "Thermostat Automation",
-            "category": "My Apps",
+            "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/thermostat-automation.json",
-            "description": "Sets thermostats to home/away based on the mode."
+            "description": "Sets thermostats to home/away based on the mode.",
+            "tags": [ "Automations & Groups", "Climate Control", "Temperature & Humidity" ]
         },
         {
             "name": "Trash Reminder",
-            "category": "My Apps",
+            "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder.json",
-            "description": "Reminder to take out the trash on specific days."
+            "description": "Reminder to take out the trash on specific days.",
+            "tags": [ "Notifications" ]
         },
         {
             "name": "Weather Alerts",
-            "category": "My Apps",
+            "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.json",
-            "description": "Alerts for various weather conditions."
+            "description": "Alerts for various weather conditions.",
+            "tags": [ "Notifications", "Weather" ]
         },
         {
             "name": "Window Alerts",
-            "category": "My Apps",
+            "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/window-alerts.json",
-            "description": "Alerts for the windows."
+            "description": "Alerts for the windows.",
+            "tags": [ "Doors & Windows", "Notifications" ]
         },
         {
             "name": "Appliance Status",
-            "category": "My Drivers",
+            "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.json",
-            "description": "Driver representing an appliance with 3 states: idle, running, finished."
+            "description": "Driver representing an appliance with 3 states: idle, running, finished.",
+            "tags": [ "Appliances", "Misc. Devices" ]
         },
         {
             "name": "Occupancy Status",
-            "category": "My Drivers",
+            "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.json",
-            "description": "Driver representing a room with 3 states: vacant, occupied, checking."
+            "description": "Driver representing a room with 3 states: vacant, occupied, checking.",
+            "tags": [ "Misc. Devices" ]
         },
         {
             "name": "Person Status",
-            "category": "My Drivers",
+            "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.json",
-            "description": "Driver representing a person with 3 states: home, away, sleep."
+            "description": "Driver representing a person with 3 states: home, away, sleep.",
+            "tags": [ "Misc. Devices", "Presence & Location", "Sleep" ]
         },
         {
             "name": "Virtual Alexa Button",
-            "category": "My Drivers",
+            "category": "Utility",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-button.json",
-            "description": "Driver for a button that additionally can be used as a sensor in Alexa routines."
+            "description": "Driver for a button that additionally can be used as a sensor in Alexa routines.",
+            "tags": [ "Buttons", "Misc. Devices", "Voice Assistants" ]
         },
         {
             "name": "Virtual Alexa Switch",
-            "category": "My Drivers",
+            "category": "Utility",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-switch.json",
-            "description": "Driver for a switch that additionally can be used as a sensor in Alexa routines."
+            "description": "Driver for a switch that additionally can be used as a sensor in Alexa routines.",
+            "tags": [ "Misc. Devices", "Voice Assistants" ]
         }
     ]
 }
