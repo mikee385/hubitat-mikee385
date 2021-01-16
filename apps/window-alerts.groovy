@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -98,7 +98,7 @@ def personHandler_WindowAlert(evt) {
     logDebug("personHandler_WindowAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value != "home") {
-        unsubscribe("windowAlert")
+        unschedule("windowAlert")
         
         for (window in windows) {
             if (window.currentValue("contact") == "open") {

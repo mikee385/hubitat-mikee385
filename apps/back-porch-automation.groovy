@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -167,7 +167,7 @@ def personHandler_LightAlert(evt) {
     logDebug("personHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "sleep") {
-        unsubscribe("lightAlert")
+        unschedule("lightAlert")
         
         for (light in lights) {
             if (light.currentValue("switch") == "on") {
@@ -198,7 +198,7 @@ def personHandler_DoorAlert(evt) {
     logDebug("personHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value != "home") {
-        unsubscribe("doorAlert")
+        unschedule("doorAlert")
         
         if (door.currentValue("contact") == "open") {
             notifier.deviceNotification("$door is still open!")

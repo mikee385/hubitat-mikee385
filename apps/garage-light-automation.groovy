@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.1.1" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -268,9 +268,9 @@ def personHandler_DoorAlert(evt) {
     logDebug("personHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "home") {
-        unsubscribe("overheadDoorAlert")
-        unsubscribe("entryDoorAlert")
-        unsubscribe("sideDoorAlert")
+        unschedule("overheadDoorAlert")
+        unschedule("entryDoorAlert")
+        unschedule("sideDoorAlert")
         
         if (overheadDoor.currentValue("contact") == "open") {
             notifier.deviceNotification("$overheadDoor is still open!")
