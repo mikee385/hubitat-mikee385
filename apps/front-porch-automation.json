@@ -1,11 +1,11 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "1.0.0-beta.3",
+    "version": "1.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename 'state' attribute to 'status'",
-    "dateReleased": "2021-01-13",
+    "releaseNotes": "Remove beta from the version number",
+    "dateReleased": "2021-01-15",
     "apps": [
         {
             "id": "2b643332-38a5-413c-b76e-647edd831fa9",

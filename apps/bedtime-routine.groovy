@@ -1,7 +1,7 @@
 /**
  *  Bedtime Routine
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0-beta.1" }
+String getVersionNum() { return "1.0.0" }
 String getVersionLabel() { return "Bedtime Routine, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(

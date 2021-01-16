@@ -1,11 +1,11 @@
 {
     "packageName": "Mode Automation",
     "author": "Michael Pierce",
-    "version": "1.0.0-beta.2",
+    "version": "1.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add missing inputs for backup times",
-    "dateReleased": "2020-12-28",
+    "releaseNotes": "Remove beta from the version number",
+    "dateReleased": "2021-01-15",
     "apps": [
         {
             "id": "3f46c581-4084-433f-8af4-1df659985426",

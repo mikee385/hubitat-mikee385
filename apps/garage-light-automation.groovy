@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0-beta.6" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(

@@ -1,11 +1,11 @@
 {
     "packageName": "Thermostat Automation",
     "author": "Michael Pierce",
-    "version": "2.0.0-beta.2",
+    "version": "2.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add alerts when mode is Away",
-    "dateReleased": "2021-01-02",
+    "releaseNotes": "Remove beta from the version number",
+    "dateReleased": "2021-01-15",
     "apps": [
         {
             "id": "a53151e5-9ddf-43c4-af86-440edf88ba24",

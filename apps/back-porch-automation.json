@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "1.0.0-beta.7",
+    "version": "1.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename 'state' attribute to 'status'",
-    "dateReleased": "2021-01-13",
+    "releaseNotes": "Remove beta from the version number",
+    "dateReleased": "2021-01-15",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",

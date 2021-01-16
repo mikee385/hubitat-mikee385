@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0-beta.2" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(

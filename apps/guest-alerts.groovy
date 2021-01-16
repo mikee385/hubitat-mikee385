@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0-beta.2" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
