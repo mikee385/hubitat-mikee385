@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -68,12 +68,12 @@ def initialize() {
 
     subscribe(roomba, "cleanStatus", roombaHandler)
     
-    //subscribe(location, "mode", modeHandler)
+    subscribe(location, "mode", modeHandler)
     
     def currentTime = new Date()
     
     def startToday = timeToday(startTime)
-    //schedule("$currentTime.seconds $startToday.minutes $startToday.hours * * ? *", dailyStart)
+    schedule("$currentTime.seconds $startToday.minutes $startToday.hours * * ? *", dailyStart)
     
     def resetToday = timeToday(resetTime)
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
