@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.1.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -108,11 +108,22 @@ def modeHandler(evt) {
     logDebug("modeHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
+        logDebug("Away!"
+        logDebug("cleanStatus = ${roomba.currentValue('cleanStatus')}")
+        logDebug("startTime = ${timeToday(startTime)}")
+        logDebug("sunset = ${location.sunset}")
+        logDebug("current = ${new Date()}")
+        logDebug("duration = ${state.duration}")
+        logDebug("minimumDuration = ${minimumDuration*60*1000}")
+        logDebug("minimumMinutes = ${minimumDuration}")
+        
         if (roomba.currentValue("cleanStatus") != "cleaning" && timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && state.duration < minimumDuration*60*1000) {
+            logDebug("Starting!")
             roomba.start()
         }
     } else {
         if (roomba.currentValue("cleanStatus") == "cleaning") {
+            logDebug("Docking!")
             roomba.dock()
         }
     }
