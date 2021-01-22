@@ -108,13 +108,6 @@
             "tags": [ "Automations & Groups", "Cleaning Devices" ]
         },
         {
-            "name": "Roomba Integration",
-            "category": "Integrations",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-roomba/master/packageManifest.json",
-            "description": "Connects to Roomba via Dorita",
-            "tags": [ "Cleaning Devices", "LAN" ]
-        },
-        {
             "name": "Sunlight Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.json",
@@ -183,6 +176,20 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-alexa-switch.json",
             "description": "Driver for a switch that additionally can be used as a sensor in Alexa routines.",
             "tags": [ "Misc. Devices", "Voice Assistants" ]
+        },
+        {
+            "name": "Ambient Weather Integration",
+            "category": "Integrations",
+            "location": "https://raw.githubusercontent.com/mikee385/Hubitat-Ambient-Weather/master/packageManifest.json",
+            "description": "A simple api for providing ambient weather access",
+            "tags": [ "Misc. Devices", "Weather"]
+        },
+        {
+            "name": "Roomba Integration",
+            "category": "Integrations",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-roomba/master/packageManifest.json",
+            "description": "Connects to Roomba via Dorita",
+            "tags": [ "Cleaning Devices", "LAN" ]
         }
     ]
 }
