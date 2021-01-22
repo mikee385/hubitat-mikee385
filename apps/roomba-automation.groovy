@@ -108,7 +108,7 @@ def modeHandler(evt) {
     logDebug("modeHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
-        logDebug("Away!"
+        logDebug("Away!")
         logDebug("cleanStatus = ${roomba.currentValue('cleanStatus')}")
         logDebug("startTime = ${timeToday(startTime)}")
         logDebug("sunset = ${location.sunset}")
