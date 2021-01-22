@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -58,6 +58,9 @@ def updated() {
 
 def initialize() {
     state.previousRainRate = weatherStation.currentValue("precip_1hr")
+    state.previousRainTotal = weatherStation.currentValue("precip_today")
+    state.eventRainTotal = 0.0
+    
     state.rainTotal_BeforeSleep = 0.0
     state.rainTotal_AfterSleep = 0.0
     state.rainTotal_DuringSleep = 0.0
@@ -77,16 +80,23 @@ def rainRateHandler_RainAlert(evt) {
     logDebug("rainRateHandler_RainAlert: ${evt.device} changed to ${evt.value}")
     
     def currentRainRate = weatherStation.currentValue("precip_1hr")
+    def currentRainTotal = weatherStation.currentValue("precip_today")
+    def deltaRainTotal = currentRainTotal - previousRainTotal
+    state.eventRainTotal += deltaRainTotal
+    
     if (currentRainRate > 0.0 && state.previousRainRate == 0.0) {
         if (rainStartedAlert && person.currentValue("sleeping") != "sleeping") {
-            notifier.deviceNotification("It's raining! ($currentRainRate in/hr)")
+            notifier.deviceNotification("It's raining! ($deltaRainTotal in.)")
         }
     } else if (currentRainRate == 0.0 && state.previousRainRate > 0.0) {
         if (rainStoppedAlert && person.currentValue("sleeping") != "sleeping") {
-            notifier.deviceNotification("Rain has stopped!")
+            notifier.deviceNotification("Rain has stopped! (${state.eventRainTotal} in.)")
         }
+        state.eventRainTotal = 0.0
     }
+    
     state.previousRainRate = currentRainRate
+    state.previousRainTotal = currentRainTotal
 }
 
 def personHandler_RainAlert(evt) {
