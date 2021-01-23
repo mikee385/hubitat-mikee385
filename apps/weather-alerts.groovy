@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.1.1" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -81,7 +81,7 @@ def rainRateHandler_RainAlert(evt) {
     
     def currentRainRate = weatherStation.currentValue("precip_1hr")
     def currentRainTotal = weatherStation.currentValue("precip_today")
-    def deltaRainTotal = currentRainTotal - previousRainTotal
+    def deltaRainTotal = currentRainTotal - state.previousRainTotal
     state.eventRainTotal += deltaRainTotal
     
     if (currentRainRate > 0.0 && state.previousRainRate == 0.0) {

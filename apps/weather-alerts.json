@@ -1,11 +1,11 @@
 {
     "packageName": "Weather Alerts",
     "author": "Michael Pierce",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Report rain total instead of rain rate",
-    "dateReleased": "2021-01-21",
+    "releaseNotes": "Fix missing 'state.' for previousRainTotal",
+    "dateReleased": "2021-01-22",
     "apps": [
         {
             "id": "6c0f049b-8640-453c-a4b4-0c863f164a59",
