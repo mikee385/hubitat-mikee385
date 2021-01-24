@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.2" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,9 +33,6 @@ preferences {
             input "weatherStation", "device.AmbientWeatherDevice", title: "Weather Station", multiple: false, required: true
         }
         section("Alerts") {
-            input "rainStartedAlert", "bool", title: "Alert when Rain Started?", required: true, defaultValue: false
-            input "rainStoppedAlert", "bool", title: "Alert when Rain Stopped?", required: true, defaultValue: false
-            input "rainDuringSleepAlert", "bool", title: "Alert when Rain During Sleep?", required: true, defaultValue: false
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
@@ -57,13 +54,16 @@ def updated() {
 }
 
 def initialize() {
-    state.previousRainRate = weatherStation.currentValue("precip_1hr")
-    state.previousRainTotal = weatherStation.currentValue("precip_today")
-    state.eventRainTotal = 0.0
+    state.rate = weatherStation.currentValue("precip_1hr")
+    state.today_total = weatherStation.currentValue("precip_today")
     
-    state.rainTotal_BeforeSleep = 0.0
-    state.rainTotal_AfterSleep = 0.0
-    state.rainTotal_DuringSleep = 0.0
+    state.event_total = 0.0
+    state.event_level = 0
+    state.event_text = "No rain"
+    
+    state.sleep_total = 0.0
+    state.sleep_level = 0
+    state.sleep_text = "No rain"
 
     // Rain Alert
     subscribe(weatherStation, "precip_1hr", rainRateHandler_RainAlert)
@@ -79,42 +79,117 @@ def logDebug(msg) {
 def rainRateHandler_RainAlert(evt) {
     logDebug("rainRateHandler_RainAlert: ${evt.device} changed to ${evt.value}")
     
-    def currentRainRate = weatherStation.currentValue("precip_1hr")
-    def currentRainTotal = weatherStation.currentValue("precip_today")
+    // Get state variables
+    def asleep = person.currentValue("sleeping") == "sleeping"
     
-    def deltaRainTotal = 0.0
-    if (currentRainTotal < state.previousRainTotal) {
-        deltaRainTotal = currentRainTotal
+    def rate_previous = state.rate
+    def total_previous = state.today_total
+    
+    def rate_current = weatherStation.currentValue("precip_1hr")
+    def total_current = weatherStation.currentValue("precip_today")
+    
+    // Calculate values
+    def delta = 0.0
+    if (total_current < total_previous) {
+        delta = total_current
     } else {
-        deltaRainTotal = currentRainTotal - state.previousRainTotal
-    }
-    state.eventRainTotal += deltaRainTotal
-    
-    if (currentRainRate > 0.0 && state.previousRainRate == 0.0) {
-        if (rainStartedAlert && person.currentValue("sleeping") != "sleeping") {
-            notifier.deviceNotification("It's raining! ($deltaRainTotal in.)")
-        }
-    } else if (currentRainRate == 0.0 && state.previousRainRate > 0.0) {
-        if (rainStoppedAlert && person.currentValue("sleeping") != "sleeping") {
-            notifier.deviceNotification("Rain has stopped! (${state.eventRainTotal} in.)")
-        }
-        state.eventRainTotal = 0.0
+        delta = total_current - total_previous
     }
     
-    state.previousRainRate = currentRainRate
-    state.previousRainTotal = currentRainTotal
+    def level = -1
+    def text = ""
+    if (rate_current > 2.0) {
+        level = 4
+        text = "Violent rain"
+    } else if (rate_current > 0.39) {
+        level = 3
+        text = "Heavy rain"
+    } else if (rate_current > 0.098) {
+        level = 2
+        text = "Moderate rain"
+    } else if (rate_current > 0.0) {
+        level = 1
+        text = "Light rain"
+    } else {
+        level = 0
+        text = "No rain"
+    }
+    
+    // Update state values
+    state.rate = rate_current
+    state.today_total = total_current
+    
+    // Update event status
+    state.event_total += delta
+    if (level > state.event_level) {
+        state.event_level = level
+        state.event_text = text
+        if (!asleep) {
+            sendLevelAlert()
+        }
+    } else if (rate_current == 0.0 && rate_previous > 0.0) {
+        if (!asleep) {
+            sendStoppedAlert()
+        }
+        state.event_total = 0.0
+        state.event_level = 0
+        state.event_text = "No rain"
+    }
+    
+    // Update sleep status
+    if (asleep) {
+        state.sleep_total += delta
+        if (level > state.sleep_level) {
+            state.sleep_level = level
+            state.sleep_text = text
+        }
+    }
 }
 
 def personHandler_RainAlert(evt) {
     logDebug("personHandler_RainAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "sleeping") {
-        state.rainTotal_BeforeSleep = weatherStation.currentValue("precip_today")
+        state.sleep_total = 0.0
+        state.sleep_level = 0
+        state.sleep_text = "No rain"
     } else {
-        state.rainTotal_AfterSleep = weatherStation.currentValue("precip_today")
-        state.rainTotal_DuringSleep = state.rainTotal_AfterSleep - state.rainTotal_BeforeSleep
-        if (state.rainTotal_DuringSleep > 0.0 && rainDuringSleepAlert) {
-            notifier.deviceNotification("Rain occurred during Sleep! (${state.rainTotal_DuringSleep} in)")
-        }
+        sendAwakeAlert()
+    }
+}
+
+def sendLevelAlert() {
+    def current_time = now()
+    if (state.event_level == 1 && current_time < (state.alert_time + (60*60*1000)) {
+        return
+    }
+    state.alert_time = current_time
+
+    notifier.deviceNotification(
+"""${state.event_text}!
+Rate:  ${state.rate} in./hr
+Event: ${state.event_total} in.
+Today: ${state.today_total} in."""
+    )
+}
+
+def sendStoppedAlert() {
+    if (state.event_level > 1) {
+        notifier.deviceNotification(
+"""${state.event_text} has stopped!
+Event: ${state.event_total} in.
+Today: ${state.today_total} in."""
+        )
+    }
+}
+
+def sendAwakeAlert() {
+    if (state.sleep_level > 0) {
+        notifier.deviceNotification(
+"""${state.sleep_text} during Sleep!
+Rate:  ${state.rate} in./hr
+Event: ${state.sleep_total} in.
+Today: ${state.today_total} in."""
+        )
     }
 }
