@@ -160,7 +160,7 @@ def personHandler_RainAlert(evt) {
 
 def sendLevelAlert() {
     def current_time = now()
-    if (state.event_level == 1 && current_time < (state.alert_time + (60*60*1000)) {
+    if (state.event_level == 1 && current_time < (state.alert_time + (60*60*1000))) {
         return
     }
     state.alert_time = current_time
