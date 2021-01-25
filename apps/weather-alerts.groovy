@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -64,6 +64,8 @@ def initialize() {
     state.sleep_total = 0.0
     state.sleep_level = 0
     state.sleep_text = "No rain"
+    
+    state.alert_time = 0
 
     // Rain Alert
     subscribe(weatherStation, "precip_1hr", rainRateHandler_RainAlert)
