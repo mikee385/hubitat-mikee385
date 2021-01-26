@@ -1,10 +1,10 @@
 {
     "packageName": "Weather Alerts",
     "author": "Michael Pierce",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add initialization of alert_time",
+    "releaseNotes": "Minor tweak to rain intensity ranges",
     "dateReleased": "2021-01-25",
     "apps": [
         {

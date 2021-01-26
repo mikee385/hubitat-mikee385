@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -103,10 +103,10 @@ def rainRateHandler_RainAlert(evt) {
     if (rate_current > 2.0) {
         level = 4
         text = "Violent rain"
-    } else if (rate_current > 0.39) {
+    } else if (rate_current > 0.3) {
         level = 3
         text = "Heavy rain"
-    } else if (rate_current > 0.098) {
+    } else if (rate_current > 0.1) {
         level = 2
         text = "Moderate rain"
     } else if (rate_current > 0.0) {
