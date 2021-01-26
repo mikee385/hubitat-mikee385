@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -62,9 +62,15 @@ def updated() {
 }
 
 def initialize() {
-    state.startTime = now()
-    state.endTime = now()
-    state.durationMinutes = 0
+    if (state.startTime == null) {
+        state.startTime = now()
+    }
+    if (state.endTime == null) {
+        state.endTime = now()
+    }
+    if (state.durationMinutes == null) {
+        state.durationMinutes = 0
+    }
 
     subscribe(roomba, "cleanStatus", roombaHandler)
     
