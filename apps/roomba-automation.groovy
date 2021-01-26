@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.1" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -34,7 +34,7 @@ preferences {
         }
         section {
             input "startTime", "time", title: "Start Time", required: true
-            input "minimumDuration", "number", title: "Minimum Duration (in minutes)", required: true
+            input "minimumMinutes", "number", title: "Minimum Duration (in minutes)", required: true
             input "resetTime", "time", title: "Reset Time", required: true
         }
         section("Alerts") {
@@ -64,7 +64,7 @@ def updated() {
 def initialize() {
     state.startTime = now()
     state.endTime = now()
-    state.duration = 0
+    state.durationMinutes = 0
 
     subscribe(roomba, "cleanStatus", roombaHandler)
     
@@ -96,11 +96,11 @@ def roombaHandler(evt) {
         }
     } else if (state.endTime < state.startTime) { // should only be true while Roomba is running
         state.endTime = now()
-        state.duration += state.endTime - state.startTime
+        state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     }
     
     if (evt.value == "charging" && alertFinished) {
-        notifier.deviceNotification("$roomba has cleaned for ${Math.round(state.duration/60/1000)} minutes today!")
+        notifier.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
     }
 }
 
@@ -108,22 +108,11 @@ def modeHandler(evt) {
     logDebug("modeHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
-        logDebug("Away!")
-        logDebug("cleanStatus = ${roomba.currentValue('cleanStatus')}")
-        logDebug("startTime = ${timeToday(startTime)}")
-        logDebug("sunset = ${location.sunset}")
-        logDebug("current = ${new Date()}")
-        logDebug("duration = ${state.duration}")
-        logDebug("minimumDuration = ${minimumDuration*60*1000}")
-        logDebug("minimumMinutes = ${minimumDuration}")
-        
-        if (roomba.currentValue("cleanStatus") != "cleaning" && timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && state.duration < minimumDuration*60*1000) {
-            logDebug("Starting!")
+        if (roomba.currentValue("cleanStatus") != "cleaning" && timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && state.durationMinutes < minimumMinutes) {
             roomba.start()
         }
     } else {
         if (roomba.currentValue("cleanStatus") == "cleaning") {
-            logDebug("Docking!")
             roomba.dock()
         }
     }
@@ -132,7 +121,7 @@ def modeHandler(evt) {
 def dailyStart() {
     logDebug("dailyStart")
     
-    if (location.mode == "Away" && roomba.currentValue("cleanStatus") != "cleaning" && state.duration < minimumDuration*60*1000) {
+    if (location.mode == "Away" && roomba.currentValue("cleanStatus") != "cleaning" && state.durationMinutes < minimumMinutes) {
         roomba.start()
     }
 }
@@ -140,7 +129,7 @@ def dailyStart() {
 def dailyReset() {
     logDebug("dailyReset")
     
-    state.duration = 0
+    state.durationMinutes = 0
     
     if (alertReset) {
         notifier.deviceNotification("$roomba has reset!")
