@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -52,26 +52,21 @@ preferences {
 }
 
 def installed() {
+    state.startTime = now()
+    state.endTime = now()
+    state.durationMinutes = 0
+    
     initialize()
 }
 
 def updated() {
     unsubscribe()
     unschedule()
+    
     initialize()
 }
 
 def initialize() {
-    if (state.startTime == null) {
-        state.startTime = now()
-    }
-    if (state.endTime == null) {
-        state.endTime = now()
-    }
-    if (state.durationMinutes == null) {
-        state.durationMinutes = 0
-    }
-
     subscribe(roomba, "cleanStatus", roombaHandler)
     
     subscribe(location, "mode", modeHandler)
@@ -83,6 +78,15 @@ def initialize() {
     
     def resetToday = timeToday(resetTime)
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
+    
+    def deviceRunning = roomba.currentValue("cleanStatus") == "cleaning"
+    def stateRunning = state.endTime < state.startTime
+    
+    if (deviceRunning && !stateRunning) {
+        roombaStarted()
+    } else if (!deviceRunning && stateRunning) {
+        roombaStopped()
+    }
 }
 
 def logDebug(msg) {
@@ -91,22 +95,30 @@ def logDebug(msg) {
     }
 }
 
+def roombaStarted() {
+    state.startTime = now()
+        
+    if (alertStarted) {
+        notifier.deviceNotification("$roomba has started!")
+    }
+}
+
+def roombaStopped() {
+    state.endTime = now()
+    state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
+    
+    if (roomba.currentValue("cleanStatus") == "charging" && alertFinished) {
+        notifier.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
+    }
+}
+
 def roombaHandler(evt) {
     logDebug("roombaHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "cleaning") {
-        state.startTime = now()
-        
-        if (alertStarted) {
-            notifier.deviceNotification("$roomba has started!")
-        }
+        roombaStarted()
     } else if (state.endTime < state.startTime) { // should only be true while Roomba is running
-        state.endTime = now()
-        state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
-    }
-    
-    if (evt.value == "charging" && alertFinished) {
-        notifier.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
+        roombaStopped()
     }
 }
 
