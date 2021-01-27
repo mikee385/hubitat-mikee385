@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -62,19 +62,24 @@ preferences {
 }
 
 def installed() {
+    state.startTime = now()
+    state.endTime = now()
+    state.durationMinutes = 0
+    
     initialize()
 }
 
 def updated() {
     unsubscribe()
     unschedule()
+    
     initialize()
 }
 
 def initialize() {
     // Appliance Status
-    subscribe(contactSensor, "contact.open", contactSensorHandler_ApplianceStatus)
     subscribe(appliance, "status", applianceHandler_ApplianceStatus)
+    subscribe(contactSensor, "contact.open", contactSensorHandler_ApplianceStatus)
     
     def resetToday = timeToday(resetTime)
     def currentTime = new Date()
@@ -90,6 +95,16 @@ def initialize() {
     
     // Away Alert
     subscribe(contactSensor, "contact", handler_AwayAlert)
+    
+    // Clean up state
+    def deviceRunning = appliance.currentValue("status") == "running"
+    def stateRunning = state.endTime < state.startTime
+    
+    if (deviceRunning && !stateRunning) {
+        dishwasherStarted()
+    } else if (!deviceRunning && stateRunning) {
+        dishwasherFinished()
+    }
 }
 
 def logDebug(msg) {
@@ -98,11 +113,21 @@ def logDebug(msg) {
     }
 }
 
-def contactSensorHandler_ApplianceStatus(evt) {
-    logDebug("contactSensorHandler_ApplianceStatus: ${evt.device} changed to ${evt.value}")
+def dishwasherStarted() {
+    state.startTime = now()
+    runIn(60*runDuration, durationComplete)
+        
+    if (alertStarted) {
+        notifier.deviceNotification("Dishwasher has started.")
+    }
+}
+
+def dishwasherFinished() {
+    state.endTime = now()
+    state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     
-    if (timeOfDayIsBetween(timeToday(bedtimeStart), timeToday(bedtimeEnd), new Date(), location.timeZone) || reminderSwitch.currentValue("switch") == "on") {
-        appliance.start()
+    if (alertFinished) {
+        notifier.deviceNotification("Dishwasher has finished.")
     }
 }
 
@@ -110,20 +135,21 @@ def applianceHandler_ApplianceStatus(evt) {
     logDebug("applianceHandler_ApplianceStatus: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "running") {
-        state.runningStartTime = now()
-        runIn(60*runDuration, durationComplete)
-        
-        if (alertStarted) {
-            notifier.deviceNotification("Dishwasher has started.")
-        }
+        dishwasherStarted()
     } else if (evt.value == "finished") {
-        if (alertFinished) {
-            notifier.deviceNotification("Dishwasher has finished.")
-        }
+        dishwasherFinished()
     } else if (evt.value == "idle") {
         if (alertReset) {
             notifier.deviceNotification("Dishwasher has reset.")
         }
+    }
+}
+
+def contactSensorHandler_ApplianceStatus(evt) {
+    logDebug("contactSensorHandler_ApplianceStatus: ${evt.device} changed to ${evt.value}")
+    
+    if (timeOfDayIsBetween(timeToday(bedtimeStart), timeToday(bedtimeEnd), new Date(), location.timeZone) || reminderSwitch.currentValue("switch") == "on") {
+        appliance.start()
     }
 }
 
@@ -141,7 +167,7 @@ def resetTimeHandler_ApplianceStatus() {
     if (appliance.currentValue("status") == "finished") {
         appliance.reset()
     } else if (appliance.currentValue("status") == "running") {
-        def currentDuration = now() - state.runningStartTime
+        def currentDuration = now() - state.startTime
         if (currentDuration > 2*runDuration*60*1000) {
             logDebug("Ran too long. Resetting...")
             appliance.reset()
