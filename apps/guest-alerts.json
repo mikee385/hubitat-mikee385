@@ -1,11 +1,11 @@
 {
     "packageName": "Guest Alerts",
     "author": "Michael Pierce",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove beta from the version number",
-    "dateReleased": "2021-01-15",
+    "releaseNotes": "Only reset lockout variables during installation",
+    "dateReleased": "2021-01-27",
     "apps": [
         {
             "id": "7fb16968-9c99-4c61-b4dd-cc3ac9e52446",
