@@ -80,6 +80,13 @@
             "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
+            "name": "Life360 Refresh",
+            "category": "Utility",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/life360-refresh.json",
+            "description": "Refreshes Life360 if presence sensors are inconsistent.",
+            "tags": [ "Presence & Location", "Tools & Utilities" ]
+        },
+        {
             "name": "Mode Automation",
             "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/mode-automation.json",
