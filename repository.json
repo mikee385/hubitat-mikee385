@@ -38,6 +38,13 @@
             "tags": [ "Appliances", "Automations & Groups" ]
         },
         {
+            "name": "Dog Alerts",
+            "category": "Notifications",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dog-alerts.json",
+            "description": "Alerts for chores related to the dogs.",
+            "tags": [ "Notifications" ]
+        },
+        {
             "name": "Front Porch Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.json",
