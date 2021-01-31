@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "2.3.0" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -45,20 +45,23 @@ preferences {
 }
 
 def installed() {
-    state.lockoutTime = now()
-    state.lockoutString = new Date(state.lockoutTime)
-    
     initialize()
 }
 
 def updated() {
     unsubscribe()
     unschedule()
-    
     initialize()
 }
 
 def initialize() {
+    // Create state
+    if (state.lockoutTime == null) {
+        state.lockoutTime = now()
+    }
+    if (state.lockoutString == null) {
+        state.lockoutString = new Date(state.lockoutTime)
+    }
     state.waitForBedroomDoor = false
     state.waitForFrontDoor = false
     
