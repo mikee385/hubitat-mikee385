@@ -34,7 +34,7 @@ preferences {
             input "foodDoor", "capability.contactSensor", title: "Food Door", multiple: false, required: false
         }
         section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
+            input "person", "device.PersonStatus", title: "Sleeping Person", multiple: false, required: true
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {

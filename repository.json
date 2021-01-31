@@ -42,7 +42,7 @@
             "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dog-alerts.json",
             "description": "Alerts for chores related to the dogs.",
-            "tags": [ "Notifications" ]
+            "tags": [ "Notifications", "Pets & Animals" ]
         },
         {
             "name": "Front Porch Automation",
