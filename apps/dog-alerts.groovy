@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Dog Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -55,6 +55,13 @@ def updated() {
 }
 
 def initialize() {
+    if (state.backyardAlertSent == null) {
+        state.backyardAlertSent = false
+    }
+    if (state.foodAlertSent == null) {
+        state.foodAlertSent = false
+    }
+
     if (backyardDoor) {
         subscribe(backyardDoor, "contact.open", backyardDoorHandler)
     }
@@ -62,6 +69,8 @@ def initialize() {
     if (foodDoor) {
         subscribe(foodDoor, "contact.open", foodDoorHandler)
     }
+    
+    subscribe(person, "status", personHandler)
 }
 
 def logDebug(msg) {
@@ -73,15 +82,26 @@ def logDebug(msg) {
 def backyardDoorHandler(evt) {
     logDebug("backyardDoorHandler: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("status") == "sleep") {
+    if (person.currentValue("status") == "sleep" && state.backyardAlertSent == false) {
         notifier.deviceNotification("Dogs have gone out!")
+        state.backyardAlertSent = true
     }
 }
 
 def foodDoorHandler(evt) {
     logDebug("foodDoorHandler: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("status") == "sleep") {
+    if (person.currentValue("status") == "sleep" && state.foodAlertSent == false) {
         notifier.deviceNotification("Dogs have been fed!")
+        state.foodAlertSent = true
+    }
+}
+
+def personHandler(evt) {
+    logDebug("personHandler: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "sleep") {
+        state.backyardAlertSent = false
+        state.foodAlertSent = false
     }
 }

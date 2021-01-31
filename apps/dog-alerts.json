@@ -1,11 +1,11 @@
 {
     "packageName": "Dog Alerts",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial commit",
-    "dateReleased": "2021-01-30",
+    "releaseNotes": "Prevent alerts from being sent multiple times",
+    "dateReleased": "2021-01-31",
     "apps": [
         {
             "id": "0b123dd1-8526-4d9c-a301-ce44b12b5b03",
