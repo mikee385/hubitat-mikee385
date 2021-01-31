@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -62,21 +62,27 @@ preferences {
 }
 
 def installed() {
-    state.startTime = now()
-    state.endTime = now()
-    state.durationMinutes = 0
-    
     initialize()
 }
 
 def updated() {
     unsubscribe()
     unschedule()
-    
     initialize()
 }
 
 def initialize() {
+    // Create state
+    if (state.startTime == null) {
+        state.startTime = now()
+    }
+    if (state.endTime == null) {
+        state.endTime = now()
+    }
+    if (state.durationMinutes == null) {
+        state.durationMinutes = 0
+    }
+
     // Appliance Status
     subscribe(appliance, "status", applianceHandler_ApplianceStatus)
     subscribe(contactSensor, "contact.open", contactSensorHandler_ApplianceStatus)
@@ -96,14 +102,14 @@ def initialize() {
     // Away Alert
     subscribe(contactSensor, "contact", handler_AwayAlert)
     
-    // Clean up state
+    // Set initial state
     def deviceRunning = appliance.currentValue("status") == "running"
     def stateRunning = state.endTime < state.startTime
     
     if (deviceRunning && !stateRunning) {
-        dishwasherStarted()
+        started()
     } else if (!deviceRunning && stateRunning) {
-        dishwasherFinished()
+        finished()
     }
 }
 
@@ -113,7 +119,7 @@ def logDebug(msg) {
     }
 }
 
-def dishwasherStarted() {
+def started() {
     state.startTime = now()
     runIn(60*runDuration, durationComplete)
         
@@ -122,7 +128,7 @@ def dishwasherStarted() {
     }
 }
 
-def dishwasherFinished() {
+def finished() {
     state.endTime = now()
     state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     
@@ -131,17 +137,21 @@ def dishwasherFinished() {
     }
 }
 
+def reset() {
+    if (alertReset) {
+        notifier.deviceNotification("Dishwasher has reset.")
+    }
+}
+
 def applianceHandler_ApplianceStatus(evt) {
     logDebug("applianceHandler_ApplianceStatus: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "running") {
-        dishwasherStarted()
+        started()
     } else if (evt.value == "finished") {
-        dishwasherFinished()
+        finished()
     } else if (evt.value == "idle") {
-        if (alertReset) {
-            notifier.deviceNotification("Dishwasher has reset.")
-        }
+        reset()
     }
 }
 
