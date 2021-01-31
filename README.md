@@ -6,4 +6,4 @@ A collection of apps and drivers created for Hubitat, based on ones I created fo
 
 All the code in this project is distributed under the terms of the MIT license.
 
-See LICENSE.md for details.
+See LICENSE for details.
