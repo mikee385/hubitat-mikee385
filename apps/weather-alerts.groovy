@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -57,15 +57,21 @@ def initialize() {
     state.rate = weatherStation.currentValue("precip_1hr")
     state.today_total = weatherStation.currentValue("precip_today")
     
-    state.event_total = 0.0
-    state.event_level = 0
-    state.event_text = "No rain"
+    if (state.event_total == null) {
+        state.event_total = 0.0
+        state.event_level = 0
+        state.event_text = "No rain"
+    }
     
-    state.sleep_total = 0.0
-    state.sleep_level = 0
-    state.sleep_text = "No rain"
+    if (state.sleep_total == null) {
+        state.sleep_total = 0.0
+        state.sleep_level = 0
+        state.sleep_text = "No rain"
+    }
     
-    state.alert_time = 0
+    if (state.alert_time == null) {
+        state.alert_time = 0
+    }
 
     // Rain Alert
     subscribe(weatherStation, "precip_1hr", rainRateHandler_RainAlert)
