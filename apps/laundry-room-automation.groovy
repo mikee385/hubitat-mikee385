@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Laundry Room Automation", install: true, uninstall: true) {
         section {
-            input "light", "device.GEZWavePlusMotionSwitch", title: "Light", multiple: false, required: true
+            input "light", "device.GEZ-WavePlusMotionSwitch", title: "Light", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
         }
         section("Bedtime") {
