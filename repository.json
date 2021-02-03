@@ -80,6 +80,13 @@
             "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
+            "name": "Laundry Room Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/laundry-room-automation.json",
+            "description": "Automation and alerts for the devices associated with the laundry room.",
+            "tags": [ "Automations & Groups", "Doors & Windows", "Lights & Switches" ]
+        },
+        {
             "name": "Life360 Refresh",
             "category": "Utility",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/life360-refresh.json",

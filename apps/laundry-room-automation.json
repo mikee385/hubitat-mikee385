@@ -1,0 +1,20 @@
+{
+    "packageName": "Laundry Room Automation",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Add GE motion/switch to Bedtime Routine",
+    "dateReleased": "2021-02-02",
+    "apps": [
+        {
+            "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",
+            "name": "Laundry Room Automation",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/laundry-room-automation.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ]
+}
