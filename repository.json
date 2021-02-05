@@ -17,13 +17,6 @@
             "tags": [ "Automations & Groups", "Bathroom", "Shower", "Temperature & Humidity" ]
         },
         {
-            "name": "Bedtime Routine",
-            "category": "Convenience",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-routine.json",
-            "description": "Trigger routine for bedtime.",
-            "tags": [ "Automations & Groups" ]
-        },
-        {
             "name": "Camera Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.json",
