@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix device type for GE motion/switch",
-    "dateReleased": "2021-02-02",
+    "releaseNotes": "Use longer light timeout for first motion event",
+    "dateReleased": "2021-02-05",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

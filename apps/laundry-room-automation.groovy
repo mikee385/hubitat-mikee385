@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -60,8 +60,16 @@ def updated() {
 }
 
 def initialize() {
+    if (state.firstTime == null) {
+        state.firstTime = false
+    }
+
     // Light Switch
     subscribe(location, "mode", modeHandler_LightSwitch)
+    
+    // Light Timeout
+    subscribe(door, "contact.open", doorHandler_LightTimeout)
+    subscribe(light, "switch.off", lightHandler_LightTimeout)
 
     // Bedtime Routine
     subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
@@ -89,6 +97,22 @@ def modeHandler_LightSwitch(evt) {
     }
 }
 
+def doorHandler_LightTimeout(evt) {
+    logDebug("doorHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
+    
+    state.firstTime = true
+    light.setLightTimeout("5 minutes (default)")
+}
+
+def lightHandler_LightTimeout(evt) {
+    logDebug("lightHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
+    
+    if (state.firstTime) {
+        state.firstTime = false
+        light.setLightTimeout("1 minute")
+    }
+}
+
 def doorHandler_BedtimeRoutine(evt) {
     logDebug("doorHandler_BedtimeRoutine: ${evt.device} changed to ${evt.value}")
     
@@ -103,7 +127,11 @@ def lightHandler_LightAlert(evt) {
     
     if (evt.value == "on") {
         if (person.currentValue("status") != "sleep") {
-            runIn(60*5, lightAlert)
+            if (state.firstTime) {
+                runIn(60*10, lightAlert)
+            } else {
+                runIn(60*5, lightAlert)
+            }
         }
     } else {
         unschedule("lightAlert")
