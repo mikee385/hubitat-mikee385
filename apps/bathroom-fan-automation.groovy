@@ -23,7 +23,7 @@ definition(
     name: "Bathroom Fan Automation",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Turns a bathroom exhaust fan based on the humidity level.",
+    description: "Controls a bathroom exhaust fan based on the humidity level.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",

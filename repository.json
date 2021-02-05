@@ -10,6 +10,13 @@
             "tags": [ "Automations & Groups", "Doors & Windows", "Lights & Switches", "Locks" ]
         },
         {
+            "name": "Bathroom Fan Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.json",
+            "description": "Controls a bathroom exhaust fan based on the humidity level.",
+            "tags": [ "Automations & Groups", "Bathroom", "Shower", "Temperature & Humidity" ]
+        },
+        {
             "name": "Bedtime Routine",
             "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-routine.json",
