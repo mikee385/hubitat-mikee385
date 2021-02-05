@@ -162,7 +162,7 @@ ${state.rate.setScale(2, RoundingMode.HALF_UP)} %/min"""
 
 def rising() {
     state.status = "rising"
-    runIn(60*state.risingMinutesToWait), risingTimeout)
+    runIn(60*state.risingMinutesToWait, risingTimeout)
 }
 
 def risingTimeout() {
@@ -179,7 +179,7 @@ def peak() {
 
 def falling() {
     state.status = "falling"
-    runIn(60*state.fallingMinutesToWait), fallingTimeout)
+    runIn(60*state.fallingMinutesToWait, fallingTimeout)
 }
 
 def fallingTimeout() {
