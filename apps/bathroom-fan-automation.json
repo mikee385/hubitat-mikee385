@@ -1,0 +1,20 @@
+{
+    "packageName": "Bathroom Fan Automation",
+    "author": "Michael Pierce",
+    "version": "1.0.8",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Reworked to handle additional timeouts",
+    "dateReleased": "2021-02-05",
+    "apps": [
+        {
+            "id": "47b33df5-abb1-4296-903a-71bebc4c2565",
+            "name": "Bathroom Fan Automation",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ]
+}
