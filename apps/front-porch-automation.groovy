@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.1.1" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -89,14 +89,39 @@ def logDebug(msg) {
     }
 }
 
+def on() {
+    for (light in lights) {
+        light.on()
+    }
+}
+
+def off() {
+    for (light in lights) {
+        light.off()
+    }
+}
+
+def toggle() {
+    def anyLightOn = false
+    for (light in lights) {
+        if (light.currentValue("switch") == "on") {
+            anyLightOn = true
+            break 
+        }
+    }
+    if (anyLightOn) {
+        off()
+    } else {
+        on()
+    }
+}
+
 def doorHandler_LightSwitch(evt) {
     logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
         if (sunlight.currentValue("switch") == "off") {
-            for (light in lights) {
-                light.on()
-            }
+            on()
         }
     }
 }
@@ -105,9 +130,7 @@ def sunlightHandler_LightSwitch(evt) {
     logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        for (light in lights) {
-            light.off()
-        }
+        off()
     }
 }
 
@@ -115,9 +138,7 @@ def modeHandler_LightSwitch(evt) {
     logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "Sleep") {
-        for (light in lights) {
-            light.off()
-        }
+        off()
     }
 }
 
@@ -125,11 +146,7 @@ def buttonHandler_LightSwitch(evt) {
     logDebug("buttonHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (buttonNumber == null || evt.value == buttonNumber.toString()) {
-        if (light.currentValue("switch") == "off") {
-            light.on()
-        } else {
-            light.off()
-        }
+        toggle()
     }
 }
 
