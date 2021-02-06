@@ -1,11 +1,11 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix incorrect use of unsubscribe for unschedule",
-    "dateReleased": "2021-01-15",
+    "releaseNotes": "Add button to toggle light on/off",
+    "dateReleased": "2021-02-05",
     "apps": [
         {
             "id": "2b643332-38a5-413c-b76e-647edd831fa9",

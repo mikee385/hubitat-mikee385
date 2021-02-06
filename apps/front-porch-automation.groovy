@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -34,6 +34,10 @@ preferences {
             input "door", "capability.contactSensor", title: "Exterior Door", multiple: false, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
+        }
+        section() {
+            input "buttonDevice", "capability.pushableButton", title: "Button Device", required: false
+            input "buttonNumber", "number", title: "Button Number", required: false
         }
         section("Alerts") {
             input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
@@ -61,6 +65,9 @@ def initialize() {
     subscribe(door, "contact", doorHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
+    if (buttonDevice) {
+        subscribe(buttonDevice, "pushed", buttonHandler_LightSwitch)
+    }
     
     // Motion Alert
     subscribe(motionSensor, "motion", motionHandler_MotionAlert)
@@ -109,6 +116,18 @@ def modeHandler_LightSwitch(evt) {
 
     if (evt.value == "Sleep") {
         for (light in lights) {
+            light.off()
+        }
+    }
+}
+
+def buttonHandler_LightSwitch(evt) {
+    logDebug("buttonHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (buttonNumber == null || evt.value == buttonNumber.toString()) {
+        if (light.currentValue("switch") == "off") {
+            light.on()
+        } else {
             light.off()
         }
     }
