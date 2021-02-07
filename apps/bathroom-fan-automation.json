@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Reworked to handle additional timeouts",
-    "dateReleased": "2021-02-05",
+    "releaseNotes": "Track starting and peak humidities",
+    "dateReleased": "2021-02-06",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

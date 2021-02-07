@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "1.0.8" }
+String getVersionNum() { return "1.0.9" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -43,6 +43,7 @@ preferences {
         section("Levels") {
             input "risingRate", "decimal", title: "Rising Humidity Rate (% per minute)", required: true
             input "fallingRate", "decimal", title: "Falling Humidity Rate (% per minute)", required: true
+            input "percentAboveStart", "decimal", title: "Percent Above Starting Humidity to Turn Off Fan (%)", required: true
         }
         section("Notifications") {
             input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
@@ -65,12 +66,22 @@ def updated() {
 }
 
 def initialize() {
-    if (state.currentHumidity == null) {
-        state.currentHumidity = bathroomSensor.currentValue("humidity")
-    }
     if (state.currentTime == null) {
         state.currentTime = now()
     }
+    
+    humidity = bathroomSensor.currentValue("humidity")
+    if (state.currentHumidity == null) {
+        state.currentHumidity = humidity
+    }
+    if (state.startHumidity == null) {
+        state.startHumidity = humidity
+    }
+    if (state.peakHumidity == null) {
+        state.peakHumidity = humidity
+    }
+    updateTargetHumidity()
+    
     if (state.status == null) {
         state.status = "normal"
     }
@@ -84,7 +95,6 @@ def initialize() {
     subscribe(bathroomSensor, "humidity", humidityHandler)
     subscribe(bathroomFan, "switch", fanHandler)
     
-    humidity = bathroomSensor.currentValue("humidity")
     process(humidity)
 }
 
@@ -105,14 +115,19 @@ def process(humidity) {
     unschedule("risingTimeout")
     unschedule("fallingTimeout")
     
-    state.previousHumidity = state.currentHumidity
     state.previousTime = state.currentTime
-     
-    state.currentHumidity = humidity
+    state.previousHumidity = state.currentHumidity
+    
     state.currentTime = now()
-     
-    state.deltaHumidity = state.currentHumidity - state.previousHumidity
+    state.currentHumidity = humidity
+    
+    if (humidity > state.peakHumidity) {
+        state.peakHumidity = humidity
+        updateTargetHumidity()
+    }
+    
     state.deltaTime = (state.currentTime - state.previousTime)/1000.0/60.0
+    state.deltaHumidity = state.currentHumidity - state.previousHumidity
      
     state.rate = state.deltaHumidity/state.deltaTime
      
@@ -120,6 +135,10 @@ def process(humidity) {
         if (state.rate >= risingRate) {
             rising()
             bathroomFan.on()
+            
+            state.startHumidity = state.previousHumidity
+            state.peakHumidity = state.currentHumidity
+            updateTargetHumidity()
             
             message = "Fan has started! Humidity rising!"
             logDebug(message)
@@ -149,15 +168,19 @@ def process(humidity) {
         }
     }
      
-    logDebug("${state.status}: ${state.currentHumidity}%, ${state.deltaHumidity}%, ${state.deltaTime.setScale(2, RoundingMode.HALF_UP)} min, ${state.rate.setScale(2, RoundingMode.HALF_UP)} %/min")
+    logDebug("${state.status}: ${state.currentHumidity}%, ${state.deltaHumidity}%, start: ${state.startHumidity}%, peak: ${state.peakHumidity}%, target: ${state.targetHumidity}%, ${state.deltaTime.setScale(2, RoundingMode.HALF_UP)} min, ${state.rate.setScale(2, RoundingMode.HALF_UP)} %/min")
     
     if (state.status != "normal") {
         notifier.deviceNotification(
 """${state.status}! ${state.currentHumidity}%, ${state.deltaHumidity}%
-${state.deltaTime.setScale(2, RoundingMode.HALF_UP)} min
-${state.rate.setScale(2, RoundingMode.HALF_UP)} %/min"""
+${state.startHumidity}%, ${state.peakHumidity}%, ${state.targetHumidity}%
+${state.deltaTime.setScale(2, RoundingMode.HALF_UP)} min ${state.rate.setScale(2, RoundingMode.HALF_UP)} %/min"""
         )
     }
+}
+
+def updateTargetHumidity() {
+    state.targetHumidity = state.startHumidity + (state.peakHumidity - state.startHumidity)*(percentAboveStart/100.0)
 }
 
 def rising() {
