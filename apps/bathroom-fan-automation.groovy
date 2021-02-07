@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -153,51 +153,60 @@ def handleHumidity(humidity) {
      
     if (state.status == "normal") {
         if (state.rate >= rapidRiseRate) {
-            rising()
+            state.status = "rising"
             smartFanOn()
             logInfo("Fan turned on due to rapid rise: ${state.rate}%/min")
         } else if (state.deltaHumidity >= excessiveIncrease) {
-            rising()
+            state.status = "rising"
             smartFanOn()
             logInfo("Fan turned on due to excessive increase: ${state.deltaHumidity}%")
         } else if (state.currentHumidity >= maximumThreshold) {
-            peak()
+            state.status = "peak"
             smartFanOn()
             logInfo("Fan turned on due to maximum threshold: ${state.currentHumidity}%")
         }
         
     } else if (state.status == "rising") {
         if (state.rate <= rapidFallRate) {
-            falling()
+            state.status = "falling"
             logInfo("Falling due to rapid rate: ${state.rate}%/min")
         } else if (state.rate < rapidRiseRate) {
-            peak()
+            state.status = "peak"
             logInfo("Peak due to non-rapid rate: ${state.rate}%/min")
         }
         
     } else if (state.status == "peak") {
         if (state.rate >= rapidRiseRate) {
-            rising()
+            state.status = "rising"
             logInfo("Rising due to rapid rate: ${state.rate}%/min")
         } else if (state.currentHumidity <= state.targetHumidity) {
-            normal()
+            state.status = "normal"
+            smartFanOff()
             logInfo("Fan turned off due to dropping below target: ${state.currentHumidity}% < ${state.targetHumidity}%")
         } else if (state.rate <= rapidFallRate) {
-            falling()
+            state.status = "falling"
             logInfo("Falling due to rapid rate: ${state.rate}%/min")
         }
         
     } else if (state.status == "falling") {
         if (state.rate >= rapidRiseRate) {
-            rising()
+            state.status = "rising"
             logInfo("Rising due to rapid rate: ${state.rate}%/min")
         } else if (state.currentHumidity <= state.targetHumidity) {
-            normal()
+            state.status = "normal"
+            smartFanOff()
             logInfo("Fan turned off due to dropping below target: ${state.currentHumidity}% < ${state.targetHumidity}%")
         } else if (state.rate > rapidFallRate) {
-            normal()
+            state.status = "normal"
+            smartFanOff()
             logInfo("Fan turned off due to non-rapid rate: ${state.rate}%/min")
         }
+    }
+    
+    if (state.status == "rising") {
+        runIn(60*state.risingMinutesToWait, risingRateTimeout)
+    } else if (state.status == "falling") {
+        runIn(60*state.fallingMinutesToWait, fallingRateTimeout)
     }
     
     logDebug("Status: ${state.status}")
@@ -224,33 +233,15 @@ def smartFanOff() {
     fan.off()
 }
 
-def rising() {
-    state.status = "rising"
-    runIn(60*state.risingMinutesToWait, risingRateTimeout)
-}
-
 def risingRateTimeout() {
-    peak()
+    state.status = "peak"
     logInfo("Peak due to exceeding time for rapid rate")
 }
 
-def peak() {
-    state.status = "peak"
-}
-
-def falling() {
-    state.status = "falling"
-    runIn(60*state.fallingMinutesToWait, fallingRateTimeout)
-}
-
 def fallingRateTimeout() {
-    normal()
-    logInfo("Fan turned off due to exceeding time for rapid rate")
-}
-
-def normal(message) {
     state.status = "normal"
     smartFanOff()
+    logInfo("Fan turned off due to exceeding time for rapid rate")
 }
 
 def fanHandler_FanSwitch(evt) {
@@ -266,7 +257,8 @@ def fanHandler_FanSwitch(evt) {
 }
 
 def totalRuntimeExceeded() {
-    normal()
+    state.status = "normal"
+    smartFanOff()
     logInfo("Fan turned off due to exceeding total time")
 }
 
