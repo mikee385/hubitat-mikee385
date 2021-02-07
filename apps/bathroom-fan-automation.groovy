@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "1.0.9" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -32,24 +32,27 @@ definition(
 preferences {
     page(name: "settings", title: "Bathroom Fan Automation", install: true, uninstall: true) {
         section("Fan") {
-            input "bathroomFan", "capability.switch", title: "Bathroom Fan", multiple: false, required: true
-            input "maximumRuntime", "number", title: "Maximum runtime (minutes)", required: true
+            input "fan", "capability.switch", title: "Bathroom Fan", multiple: false, required: true
         }
         section("Sensor") {
-            input "bathroomSensor", "capability.relativeHumidityMeasurement", title: "Bathroom Sensor", multiple: false, required: true
-            input "reportInterval", "number", title: "Reporting Interval (minutes)", required: true
+            input "sensor", "capability.relativeHumidityMeasurement", title: "Bathroom Sensor", multiple: false, required: true
+            input "reportTimeInterval", "number", title: "Reporting Interval (minutes)", required: true
             input "reportHumidityChange", "decimal", title: "Humidity Change Reported (%)", required: true
         }
-        section("Levels") {
-            input "risingRate", "decimal", title: "Rising Humidity Rate (% per minute)", required: true
-            input "fallingRate", "decimal", title: "Falling Humidity Rate (% per minute)", required: true
-            input "percentAboveStart", "decimal", title: "Percent Above Starting Humidity to Turn Off Fan (%)", required: true
+        section("Turn Fan On") {
+            input "rapidRiseRate", "decimal", title: "Rapid Rising Humidity (% per minute)", required: true
+            input "excessiveIncrease", "decimal", title: "Excessive Increase Between Readings (%)", required: true
+            input "maximumThreshold", "decimal", title: "Above Maximum Humidty (%)", required: true
         }
-        section("Notifications") {
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+        section("Turn Fan Off") {
+            input "rapidFallRate", "decimal", title: "Rapid Falling Humidity (% per minute)", required: true
+            input "percentAboveStart", "decimal", title: "Percent Above Starting Humidity (%)", required: true
+            input "maximumRuntime", "number", title: "Maximum runtime (minutes)", required: true
         }
         section {
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+            input name: "logEnableInfo", type: "bool", title: "Enable info logging?", defaultValue: false
+            input name: "logEnableDebug", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -66,11 +69,12 @@ def updated() {
 }
 
 def initialize() {
+    // Create state
     if (state.currentTime == null) {
         state.currentTime = now()
     }
     
-    humidity = bathroomSensor.currentValue("humidity")
+    humidity = sensor.currentValue("humidity")
     if (state.currentHumidity == null) {
         state.currentHumidity = humidity
     }
@@ -85,35 +89,45 @@ def initialize() {
     if (state.status == null) {
         state.status = "normal"
     }
-    if (state.fan == null) {
-        state.fan = "off"
+    
+    state.risingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidRiseRate))
+    state.fallingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidFallRate))
+    
+    // Fan Switch
+    subscribe(sensor, "humidity", humidityHandler_FanSwitch)
+    subscribe(fan, "switch", fanHandler_FanSwitch)
+    subscribe(location, "mode", modeHandler_FanSwitch)
+    
+    // Away Alert
+    subscribe(fan, "switch.on", handler_AwayAlert)
+    
+    // Initialize state
+    handleHumidity(humidity)
+}
+
+def logInfo(msg) {
+    if (logEnableInfo) {
+        log.info msg
+        notifier.deviceNotification(msg)
     }
-    
-    state.risingMinutesToWait = Math.round(reportHumidityChange / Math.abs(risingRate))
-    state.fallingMinutesToWait = Math.round(reportHumidityChange / Math.abs(fallingRate))
-    
-    subscribe(bathroomSensor, "humidity", humidityHandler)
-    subscribe(bathroomFan, "switch", fanHandler)
-    
-    process(humidity)
 }
 
 def logDebug(msg) {
-    if (logEnable) {
+    if (logEnableDebug) {
         log.debug msg
     }
 }
 
-def humidityHandler(evt) {
-    //logDebug("humidityHandler: ${evt.device} changed to ${evt.value}")
+def humidityHandler_FanSwitch(evt) {
+    //logDebug("humidityHandler_FanSwitch: ${evt.device} changed to ${evt.value}")
     
-    humidity = bathroomSensor.currentValue("humidity")
-    process(humidity)
+    humidity = sensor.currentValue("humidity")
+    handleHumidity(humidity)
 }
 
-def process(humidity) {
-    unschedule("risingTimeout")
-    unschedule("fallingTimeout")
+def handleHumidity(humidity) {
+    unschedule("risingRateTimeout")
+    unschedule("fallingRateTimeout")
     
     state.previousTime = state.currentTime
     state.previousHumidity = state.currentHumidity
@@ -130,52 +144,67 @@ def process(humidity) {
     state.deltaHumidity = state.currentHumidity - state.previousHumidity
      
     state.rate = state.deltaHumidity/state.deltaTime
+    
+    logDebug("Previous humidity: ${state.previousHumidity}%")
+    logDebug("Current humidity: ${state.currentHumidity}%")
+    logDebug("Delta humidity: ${state.deltaHumidity}%")
+    logDebug("Delta time: ${state.deltaTime} min")
+    logDebug("Rate: ${state.rate}%/min")
      
     if (state.status == "normal") {
-        if (state.rate >= risingRate) {
+        if (state.rate >= rapidRiseRate) {
             rising()
-            bathroomFan.on()
-            
-            state.startHumidity = state.previousHumidity
-            state.peakHumidity = state.currentHumidity
-            updateTargetHumidity()
-            
-            message = "Fan has started! Humidity rising!"
-            logDebug(message)
-            notifier.deviceNotification(message)
-        }
-    } else if (state.status == "rising") {
-        if (state.rate <= fallingRate) {
-            falling()
-        } else if (state.rate < risingRate) {
+            smartFanOn()
+            logInfo("Fan turned on due to rapid rise: ${state.rate}%/min")
+        } else if (state.deltaHumidity >= excessiveIncrease) {
+            rising()
+            smartFanOn()
+            logInfo("Fan turned on due to excessive increase: ${state.deltaHumidity}%")
+        } else if (state.currentHumidity >= maximumThreshold) {
             peak()
+            smartFanOn()
+            logInfo("Fan turned on due to maximum threshold: ${state.currentHumidity}%")
         }
-    } else if (state.status == "peak") {
-        if (state.rate >= risingRate) {
-            rising()
-        } else if (state.rate <= fallingRate) {
+        
+    } else if (state.status == "rising") {
+        if (state.rate <= rapidFallRate) {
             falling()
+            logInfo("Falling due to rapid rate: ${state.rate}%/min")
+        } else if (state.rate < rapidRiseRate) {
+            peak()
+            logInfo("Peak due to non-rapid rate: ${state.rate}%/min")
         }
-    } else if (state.status == "falling") {
-        if (state.rate >= risingRate) {
+        
+    } else if (state.status == "peak") {
+        if (state.rate >= rapidRiseRate) {
             rising()
-        } else if (state.rate > fallingRate) {
+            logInfo("Rising due to rapid rate: ${state.rate}%/min")
+        } else if (state.currentHumidity <= state.targetHumidity) {
             normal()
-            
-            message = "Fan has finished! Rate no longer falling!"
-            logDebug(message)
-            notifier.deviceNotification(message)
+            logInfo("Fan turned off due to dropping below target: ${state.currentHumidity}% < ${state.targetHumidity}%")
+        } else if (state.rate <= rapidFallRate) {
+            falling()
+            logInfo("Falling due to rapid rate: ${state.rate}%/min")
+        }
+        
+    } else if (state.status == "falling") {
+        if (state.rate >= rapidRiseRate) {
+            rising()
+            logInfo("Rising due to rapid rate: ${state.rate}%/min")
+        } else if (state.currentHumidity <= state.targetHumidity) {
+            normal()
+            logInfo("Fan turned off due to dropping below target: ${state.currentHumidity}% < ${state.targetHumidity}%")
+        } else if (state.rate > rapidFallRate) {
+            normal()
+            logInfo("Fan turned off due to non-rapid rate: ${state.rate}%/min")
         }
     }
-     
-    logDebug("${state.status}: ${state.currentHumidity}%, ${state.deltaHumidity}%, start: ${state.startHumidity}%, peak: ${state.peakHumidity}%, target: ${state.targetHumidity}%, ${state.deltaTime.setScale(2, RoundingMode.HALF_UP)} min, ${state.rate.setScale(2, RoundingMode.HALF_UP)} %/min")
     
+    logDebug("Status: ${state.status}")
     if (state.status != "normal") {
-        notifier.deviceNotification(
-"""${state.status}! ${state.currentHumidity}%, ${state.deltaHumidity}%
-${state.startHumidity}%, ${state.peakHumidity}%, ${state.targetHumidity}%
-${state.deltaTime.setScale(2, RoundingMode.HALF_UP)} min ${state.rate.setScale(2, RoundingMode.HALF_UP)} %/min"""
-        )
+        logDebug("Start humidity: ${state.startHumidity}%")
+        logDebug("Peak humidity: ${state.peakHumidity}%")
+        logDebug("Target humidity: ${state.targetHumidity}%")
     }
 }
 
@@ -183,17 +212,26 @@ def updateTargetHumidity() {
     state.targetHumidity = state.startHumidity + (state.peakHumidity - state.startHumidity)*(percentAboveStart/100.0)
 }
 
-def rising() {
-    state.status = "rising"
-    runIn(60*state.risingMinutesToWait, risingTimeout)
+def smartFanOn() {
+    fan.on()
+            
+    state.startHumidity = state.previousHumidity
+    state.peakHumidity = state.currentHumidity
+    updateTargetHumidity()
 }
 
-def risingTimeout() {
+def smartFanOff() {
+    fan.off()
+}
+
+def rising() {
+    state.status = "rising"
+    runIn(60*state.risingMinutesToWait, risingRateTimeout)
+}
+
+def risingRateTimeout() {
     peak()
-    
-    message = "Humidity has peaked! Too long for rising rate!"
-    logDebug(message)
-    notifier.deviceNotification(message)
+    logInfo("Peak due to exceeding time for rapid rate")
 }
 
 def peak() {
@@ -202,38 +240,48 @@ def peak() {
 
 def falling() {
     state.status = "falling"
-    runIn(60*state.fallingMinutesToWait, fallingTimeout)
+    runIn(60*state.fallingMinutesToWait, fallingRateTimeout)
 }
 
-def fallingTimeout() {
+def fallingRateTimeout() {
     normal()
-    
-    message = "Fan has finished! Too long for falling rate!"
-    logDebug(message)
-    notifier.deviceNotification(message)
+    logInfo("Fan turned off due to exceeding time for rapid rate")
 }
 
 def normal(message) {
     state.status = "normal"
-    bathroomFan.off()
+    smartFanOff()
 }
 
-def fanHandler(evt) {
-    logDebug("fanHandler: ${evt.device} changed to ${evt.value}")
+def fanHandler_FanSwitch(evt) {
+    logDebug("fanHandler_FanSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        runIn(60*maximumRuntime, totalTimeout)
+        runIn(60*maximumRuntime, totalRuntimeExceeded)
     } else {
-        unschedule("risingTimeout")
-        unschedule("fallingTimeout")
-        unschedule("totalTimeout")
+        unschedule("risingRateTimeout")
+        unschedule("fallingRateTimeout")
+        unschedule("totalRuntimeExceeded")
     }
 }
 
-def totalTimeout() {
+def totalRuntimeExceeded() {
     normal()
+    logInfo("Fan turned off due to exceeding total time")
+}
+
+def modeHandler_FanSwitch(evt) {
+    logDebug("modeHandler_FanSwitch: ${evt.device} changed to ${evt.value}")
     
-    message = "Fan has finished! Total runtime exceeded!"
-    logDebug(message)
-    notifier.deviceNotification(message)
+    if (evt.value != "Home") {
+        fan.off()
+    }
+}
+
+def handler_AwayAlert(evt) {
+    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
 }
