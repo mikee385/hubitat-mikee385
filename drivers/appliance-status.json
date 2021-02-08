@@ -1,11 +1,11 @@
 {
     "packageName": "Appliance Status",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename 'state' attribute to 'status'",
-    "dateReleased": "2021-01-13",
+    "releaseNotes": "Remove unnecessary 'displayed:' parameters",
+    "dateReleased": "2021-02-08",
     "drivers": [
         {
             "id": "06b05cc8-6ccd-429a-a47d-5412a22d8228",

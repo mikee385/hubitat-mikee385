@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -54,29 +54,29 @@ def initialize() {
 }
 
 def awake() {
-    sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (awake)", displayed: true)
+    sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (awake)")
     
-    sendEvent(name: "presence", value: "present", displayed: false)
-    sendEvent(name: "sleeping", value: "not sleeping", displayed: false)
+    sendEvent(name: "presence", value: "present")
+    sendEvent(name: "sleeping", value: "not sleeping")
 }
 
 def asleep() {
-    sendEvent(name: "status", value: "sleep", descriptionText: "$device.displayName changed to sleep", displayed: true)
+    sendEvent(name: "status", value: "sleep", descriptionText: "$device.displayName changed to sleep")
     
-    sendEvent(name: "presence", value: "present", displayed: false)
-    sendEvent(name: "sleeping", value: "sleeping", displayed: false)
+    sendEvent(name: "presence", value: "present")
+    sendEvent(name: "sleeping", value: "sleeping")
 }
 
 def arrived() {
-    sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (arrived)", displayed: true)
+    sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (arrived)")
     
-    sendEvent(name: "presence", value: "present", displayed: false)
-    sendEvent(name: "sleeping", value: "not sleeping", displayed: false)
+    sendEvent(name: "presence", value: "present")
+    sendEvent(name: "sleeping", value: "not sleeping")
 }
 
 def departed() {
-    sendEvent(name: "status", value: "away", descriptionText: "$device.displayName changed to away", displayed: true)
+    sendEvent(name: "status", value: "away", descriptionText: "$device.displayName changed to away")
     
-    sendEvent(name: "presence", value: "not present", displayed: false)
-    sendEvent(name: "sleeping", value: "not sleeping", displayed: false)
+    sendEvent(name: "presence", value: "not present")
+    sendEvent(name: "sleeping", value: "not sleeping")
 }

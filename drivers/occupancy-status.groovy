@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.0.1" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -91,23 +91,23 @@ def resumeFromChecking() {
 }
 
 private def setStatusToOccupied() {
-    sendEvent(name: "status", value: "occupied", descriptionText: "$device.displayName changed to occupied", displayed: true)
-    sendEvent(name: "occupancy", value: "occupied", displayed: false)
+    sendEvent(name: "status", value: "occupied", descriptionText: "$device.displayName changed to occupied")
+    sendEvent(name: "occupancy", value: "occupied")
     unschedule()
 }
 
 private def setStatusToVacant() {
-    sendEvent(name: "status", value: "vacant", descriptionText: "$device.displayName changed to vacant", displayed: true)
-    sendEvent(name: "occupancy", value: "unoccupied", displayed: false)
+    sendEvent(name: "status", value: "vacant", descriptionText: "$device.displayName changed to vacant")
+    sendEvent(name: "occupancy", value: "unoccupied")
     unschedule()
 }
 
 private def setStatusToChecking() {
-    sendEvent(name: "status", value: "checking", descriptionText: "$device.displayName changed to checking", displayed: true)
-    sendEvent(name: "occupancy", value: "occupied", displayed: false)
+    sendEvent(name: "status", value: "checking", descriptionText: "$device.displayName changed to checking")
+    sendEvent(name: "occupancy", value: "occupied")
 }
 
 private def setStatusToBlind() {
-    sendEvent(name: "status", value: "blind", descriptionText: "$device.displayName changed to blind", displayed: true)
-    sendEvent(name: "occupancy", value: "occupied", displayed: false)
+    sendEvent(name: "status", value: "blind", descriptionText: "$device.displayName changed to blind")
+    sendEvent(name: "occupancy", value: "occupied")
 }

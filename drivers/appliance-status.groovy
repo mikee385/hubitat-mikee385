@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.0.1" }
 String getVersionLabel() { return "Appliance Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -64,19 +64,19 @@ def off() {
 }
 
 def start() {
-    sendEvent(name: "status", value: "running", descriptionText: "$device.displayName changed to running", displayed: true)    
-    sendEvent(name: "switch", value: "on", displayed: false)
-    sendEvent(name: "startTime", value: new Date(), displayed: false)
+    sendEvent(name: "status", value: "running", descriptionText: "$device.displayName changed to running")    
+    sendEvent(name: "switch", value: "on")
+    sendEvent(name: "startTime", value: new Date())
 }
 
 def finish() {
-    sendEvent(name: "status", value: "finished", descriptionText: "$device.displayName changed to finished", displayed: true)    
-    sendEvent(name: "switch", value: "off", displayed: false)
-    sendEvent(name: "finishTime", value: new Date(), displayed: false)
+    sendEvent(name: "status", value: "finished", descriptionText: "$device.displayName changed to finished")    
+    sendEvent(name: "switch", value: "off")
+    sendEvent(name: "finishTime", value: new Date())
 }
 
 def reset() {
-    sendEvent(name: "status", value: "idle", descriptionText: "$device.displayName changed to idle", displayed: true)    
-    sendEvent(name: "switch", value: "off", displayed: false)
-    sendEvent(name: "resetTime", value: new Date(), displayed: false)
+    sendEvent(name: "status", value: "idle", descriptionText: "$device.displayName changed to idle")    
+    sendEvent(name: "switch", value: "off")
+    sendEvent(name: "resetTime", value: new Date())
 }

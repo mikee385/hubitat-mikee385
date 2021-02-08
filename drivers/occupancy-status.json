@@ -1,11 +1,11 @@
 {
     "packageName": "Occupancy Status",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename 'state' attribute to 'status'",
-    "dateReleased": "2021-01-13",
+    "releaseNotes": "Remove unnecessary 'displayed:' parameters",
+    "dateReleased": "2021-02-08",
     "drivers": [
         {
             "id": "9a0311c1-63d2-4d93-aee3-61aaf22dbe93",
