@@ -1,11 +1,11 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unnecessary 'displayed:' parameters",
-    "dateReleased": "2021-02-08",
+    "releaseNotes": "Add device notification capability",
+    "dateReleased": "2021-02-09",
     "drivers": [
         {
             "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",

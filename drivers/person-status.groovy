@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -25,11 +25,13 @@ metadata {
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy"
 	) {
         capability "Actuator"
+        capability "Notification"
         capability "Presence Sensor"
         capability "Sensor"
         capability "Sleep Sensor"
 
         attribute "status", "enum", ["home", "away", "sleep"]
+        attribute "message", "string"
         
         command "awake"
         command "asleep"
@@ -79,4 +81,8 @@ def departed() {
     
     sendEvent(name: "presence", value: "not present")
     sendEvent(name: "sleeping", value: "not sleeping")
+}
+
+def deviceNotification(message) {
+  	sendEvent(name: "message", value: "${message}")
 }
