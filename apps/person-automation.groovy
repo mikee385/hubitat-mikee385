@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,15 +33,16 @@ preferences {
             input "person", "device.PersonStatus", title: "Person Status", multiple: false, required: true
             input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: false
             input "sleepSwitch", "capability.switch", title: "Sleep Switch", multiple: false, required: false
+            input "notificationDevices", "capability.notification", title: "Notification Devices", multiple: true, required: false
         }
         section("Alerts") {
             input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
             input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
             input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
             input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -98,6 +99,14 @@ def initialize() {
         subscribe(sleepSwitch, "switch.on", handler_AwayAlert)
     }
     
+    // Command Alert
+    subscribe(person, "command", personHandler_CommandAlert)
+    
+    if (notificationDevices) {
+        // Notification
+        subscribe(person, "message", handler_Notification)
+    }
+    
     // URLs
     if(!state.accessToken) {
         createAccessToken()
@@ -114,49 +123,13 @@ def logDebug(msg) {
     }
 }
 
-def arrived() {
-    if (person.currentValue("presence") == "not present") {
-        person.arrived()
-        if (alertArrived) {
-            notifier.deviceNotification("$person is home!")
-        }
-    }
-}
-
-def departed() {
-    if (person.currentValue("presence") == "present") {
-        person.departed()
-        if (alertDeparted) {
-            notifier.deviceNotification("$person has left!")
-        }
-    }
-}
-
-def awake() {
-    if (person.currentValue("status") == "sleep") {
-        person.awake()
-        if (alertAwake) {
-            notifier.deviceNotification("$person is awake!")
-        }
-    }
-}
-
-def asleep() {
-    if (person.currentValue("status") == "home") {
-        person.asleep()
-        if (alertAsleep) {
-            notifier.deviceNotification("$person is asleep!")
-        }
-    }
-}
-
 def presenceHandler_PersonStatus(evt) {
     logDebug("presenceHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "present") {
-        arrived()
+        person.arrived()
     } else {
-        departed()
+        person.departed()
     }
 }
 
@@ -164,9 +137,9 @@ def switchHandler_PersonStatus(evt) {
     logDebug("switchHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        asleep()
+        person.asleep()
     } else {
-        awake()
+        person.awake()
     }
 }
 
@@ -178,34 +151,64 @@ def modeHandler_Switch(evt) {
     }
 }
 
+def personHandler_CommandAlert(evt) {
+    logDebug("personHandler_CommandAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "arrived") {
+        if (alertArrived) {
+            personToNotify.deviceNotification("$person is home!")
+        }
+    } else if (evt.value == "departed") {
+        if (alertDeparted) {
+            personToNotify.deviceNotification("$person has left!")
+        }
+    } else if (evt.value == "awake") {
+        if (alertAwake) {
+            personToNotify.deviceNotification("$person is awake!")
+        }
+    } else if (evt.value == "asleep") {
+        if (alertAsleep) {
+            personToNotify.deviceNotification("$person is asleep!")
+        }
+    }
+}
+
 def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        personToNotify.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+    
+def handler_Notification(evt) {
+    logDebug("handler_Notification: ${evt.device} changed to ${evt.value}")
+    
+    for (notifier in notificationDevices) {
+        notifier.deviceNotification("${evt.value}")
     }
 }
 
 def urlHandler_arrived() {
     logDebug("urlHandler_arrived")
     
-    arrived()
+    person.arrived()
 }
 
 def urlHandler_departed() {
     logDebug("urlHandler_departed")
     
-    departed()
+    person.departed()
 }
 
 def urlHandler_awake() {
     logDebug("urlHandler_awake")
     
-    awake()
+    person.awake()
 }
 
 def urlHandler_asleep() {
     logDebug("urlHandler_asleep")
     
-    asleep()
+    person.asleep()
 }

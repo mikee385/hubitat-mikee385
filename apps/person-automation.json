@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove beta from the version number",
-    "dateReleased": "2021-01-15",
+    "releaseNotes": "Add notification devices and message handling",
+    "dateReleased": "2021-02-09",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",
