@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,11 +35,8 @@ preferences {
             input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
-        section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -171,14 +168,14 @@ def personHandler_LightAlert(evt) {
         
         for (light in lights) {
             if (light.currentValue("switch") == "on") {
-                notifier.deviceNotification("$light is still on!")
+                person.deviceNotification("$light is still on!")
             }
         }
     }
 }
 
 def lightAlert(evt) {
-    notifier.deviceNotification("Should the ${evt.device} still be on?")
+    person.deviceNotification("Should the ${evt.device} still be on?")
     runIn(60*30, lightAlert, [data: [device: "${evt.device}"]])
 }
 
@@ -201,13 +198,13 @@ def personHandler_DoorAlert(evt) {
         unschedule("doorAlert")
         
         if (door.currentValue("contact") == "open") {
-            notifier.deviceNotification("$door is still open!")
+            person.deviceNotification("$door is still open!")
         }
     }
 }
 
 def doorAlert() {
-    notifier.deviceNotification("Should the $door still be open?")
+    person.deviceNotification("Should the $door still be open?")
     runIn(60*30, doorAlert)
 }
 
@@ -215,6 +212,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

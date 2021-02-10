@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.1" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,11 +38,8 @@ preferences {
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
-        section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -209,13 +206,13 @@ def personHandler_LightAlert(evt) {
         unschedule("lightAlert")
         
         if (garageLight.currentValue("switch") == "on") {
-            notifier.deviceNotification("$garageLight is still on!")
+            person.deviceNotification("$garageLight is still on!")
         }
     }
 }
 
 def lightAlert() {
-    notifier.deviceNotification("Should the $garageLight still be on?")
+    person.deviceNotification("Should the $garageLight still be on?")
     runIn(60*30, lightAlert)
 }
 
@@ -230,7 +227,7 @@ def overheadDoorHandler_DoorAlert(evt) {
 }
 
 def overheadDoorAlert() {
-    notifier.deviceNotification("Should the $overheadDoor still be open?")
+    person.deviceNotification("Should the $overheadDoor still be open?")
     runIn(60*30, overheadDoorAlert)
 }
 
@@ -245,7 +242,7 @@ def entryDoorHandler_DoorAlert(evt) {
 }
 
 def entryDoorAlert() {
-    notifier.deviceNotification("Should the $entryDoor still be open?")
+    person.deviceNotification("Should the $entryDoor still be open?")
     runIn(60*30, entryDoorAlert)
 }
 
@@ -260,7 +257,7 @@ def sideDoorHandler_DoorAlert(evt) {
 }
 
 def sideDoorAlert() {
-    notifier.deviceNotification("Should the $sideDoor still be open?")
+    person.deviceNotification("Should the $sideDoor still be open?")
     runIn(60*30, sideDoorAlert)
 }
 
@@ -273,13 +270,13 @@ def personHandler_DoorAlert(evt) {
         unschedule("sideDoorAlert")
         
         if (overheadDoor.currentValue("contact") == "open") {
-            notifier.deviceNotification("$overheadDoor is still open!")
+            person.deviceNotification("$overheadDoor is still open!")
         }
         if (entryDoor.currentValue("contact") == "open") {
-            notifier.deviceNotification("$entryDoor is still open!")
+            person.deviceNotification("$entryDoor is still open!")
         }
         if (sideDoor.currentValue("contact") == "open") {
-            notifier.deviceNotification("$sideDoor is still open!")
+            person.deviceNotification("$sideDoor is still open!")
         }
     }
 }
@@ -288,6 +285,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

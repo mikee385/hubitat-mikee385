@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -47,14 +47,13 @@ preferences {
             input "alertStarted", "bool", title: "Alert when Started?", required: true, defaultValue: false
             input "alertFinished", "bool", title: "Alert when Finished?", required: true, defaultValue: false
             input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section("Reminder") {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
             input "reminderRoutine", "capability.switch", title: "Turn On When", multiple: false, required: true
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
         }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -124,7 +123,7 @@ def started() {
     runIn(60*runDuration, durationComplete)
         
     if (alertStarted) {
-        notifier.deviceNotification("Dishwasher has started.")
+        person.deviceNotification("Dishwasher has started.")
     }
 }
 
@@ -133,13 +132,13 @@ def finished() {
     state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     
     if (alertFinished) {
-        notifier.deviceNotification("Dishwasher has finished.")
+        person.deviceNotification("Dishwasher has finished.")
     }
 }
 
 def reset() {
     if (alertReset) {
-        notifier.deviceNotification("Dishwasher has reset.")
+        person.deviceNotification("Dishwasher has reset.")
     }
 }
 
@@ -207,7 +206,7 @@ def personHandler_ReminderSwitch(evt) {
     if (evt.value != "home") {
         if (reminderSwitch.currentValue("switch") == "on") {
             reminderSwitch.off()
-            notifier.deviceNotification("Dishwasher Reminder has been canceled!")
+            person.deviceNotification("Dishwasher Reminder has been canceled!")
         }
     }
 }
@@ -223,7 +222,7 @@ def reminderHandler_ReminderAlert(evt) {
 }
 
 def reminderAlert() {
-    notifier.deviceNotification("Start the dishwasher!")
+    person.deviceNotification("Start the dishwasher!")
     runIn(60*5, reminderAlert)
 }
 
@@ -231,6 +230,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

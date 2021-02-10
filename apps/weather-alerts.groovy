@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "2.3.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -32,11 +32,8 @@ preferences {
         section {
             input "weatherStation", "device.AmbientWeatherDevice", title: "Weather Station", multiple: false, required: true
         }
-        section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -173,7 +170,7 @@ def sendLevelAlert() {
     }
     state.alert_time = current_time
 
-    notifier.deviceNotification(
+    person.deviceNotification(
 """${state.event_text}!
 Rate:  ${state.rate} in./hr
 Event: ${state.event_total} in.
@@ -183,7 +180,7 @@ Today: ${state.today_total} in."""
 
 def sendStoppedAlert() {
     if (state.event_level > 1) {
-        notifier.deviceNotification(
+        person.deviceNotification(
 """${state.event_text} has stopped!
 Event: ${state.event_total} in.
 Today: ${state.today_total} in."""
@@ -193,7 +190,7 @@ Today: ${state.today_total} in."""
 
 def sendAwakeAlert() {
     if (state.sleep_level > 0) {
-        notifier.deviceNotification(
+        person.deviceNotification(
 """${state.sleep_text} during Sleep!
 Rate:  ${state.rate} in./hr
 Event: ${state.sleep_total} in.

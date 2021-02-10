@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "1.3.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,11 +38,8 @@ preferences {
             input "startTime", "time", title: "Start Time", required: true
             input "endTime", "time", title: "End Time", required: true
         }
-        section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -146,13 +143,13 @@ def personHandler_LightAlert(evt) {
         unschedule("lightAlert")
         
         if (light.currentValue("switch") == "on") {
-            notifier.deviceNotification("$light is still on!")
+            person.deviceNotification("$light is still on!")
         }
     }
 }
 
 def lightAlert(evt) {
-    notifier.deviceNotification("Should the $light still be on?")
+    person.deviceNotification("Should the $light still be on?")
     runIn(60*30, lightAlert)
 }
 
@@ -160,6 +157,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

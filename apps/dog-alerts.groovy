@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Dog Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,11 +33,8 @@ preferences {
             input "backyardDoor", "capability.contactSensor", title: "Backyard Door", multiple: false, required: false
             input "foodDoor", "capability.contactSensor", title: "Food Door", multiple: false, required: false
         }
-        section("Alerts") {
-            input "person", "device.PersonStatus", title: "Sleeping Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -83,7 +80,7 @@ def backyardDoorHandler(evt) {
     logDebug("backyardDoorHandler: ${evt.device} changed to ${evt.value}")
     
     if (person.currentValue("status") == "sleep" && state.backyardAlertSent == false) {
-        notifier.deviceNotification("Dogs have gone out!")
+        person.deviceNotification("Dogs have gone out!")
         state.backyardAlertSent = true
     }
 }
@@ -92,7 +89,7 @@ def foodDoorHandler(evt) {
     logDebug("foodDoorHandler: ${evt.device} changed to ${evt.value}")
     
     if (person.currentValue("status") == "sleep" && state.foodAlertSent == false) {
-        notifier.deviceNotification("Dogs have been fed!")
+        person.deviceNotification("Dogs have been fed!")
         state.foodAlertSent = true
     }
 }

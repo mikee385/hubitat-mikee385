@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Mode Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,28 +31,21 @@ preferences {
     page(name: "settings", title: "Mode Automation", install: true, uninstall: true) {
         section("Sensors") {
             input "presenceSleepSensors", "capability.sleepSensor", title: "Presence+Sleep Sensors", multiple: true, required: false
-            
             input "presenceSensors", "capability.presenceSensor", title: "Presence Sensors", multiple: true, required: false
         }
-        section("Notifications") {
-        
+        section("Alerts") {
             input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
-            
             input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
-            
             input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
-            
             input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
-            
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section("Backup Times") {
             input "awakeTime", "time", title: "Awake Time", required: false
             input "asleepTime", "time", title: "Asleep Time", required: false
         }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -100,12 +93,12 @@ def arrivedHandler(evt) {
     
     if (location.mode == "Away") {
         if (alertArrived) {
-            notifier.deviceNotification("Welcome Back!")
+            person.deviceNotification("Welcome Back!")
         }
         location.setMode("Home")
     } else if (location.mode == "Sleep") {
         if (alertAwake) {
-            notifier.deviceNotification("Good Morning!")
+            person.deviceNotification("Good Morning!")
         }
         location.setMode("Home")
     }
@@ -132,14 +125,14 @@ def departedHandler(evt) {
     if (anyonePresent == false) {
         if (location.mode != "Away") {
             if (alertDeparted) {
-                notifier.deviceNotification("Goodbye!")
+                person.deviceNotification("Goodbye!")
             }
             location.setMode("Away")
         }
     } else if (anyoneAwake == false) {
         if (location.mode != "Sleep") {
             if (alertAsleep) {
-                notifier.deviceNotification("Good Night!")
+                person.deviceNotification("Good Night!")
             }
             location.setMode("Sleep")
         }
@@ -159,7 +152,7 @@ def asleepHandler(evt) {
         if (anyoneAwake == false) {
             if (location.mode != "Sleep") {
                 if (alertAsleep) {
-                    notifier.deviceNotification("Good Night!")
+                    person.deviceNotification("Good Night!")
                 }
                 location.setMode("Sleep")
             }
@@ -173,7 +166,7 @@ def awakeHandler(evt) {
     if (evt.device.currentValue("presence") == "present") {
         if (location.mode == "Sleep") {
             if (alertAwake) {
-                notifier.deviceNotification("Good Morning!")
+                person.deviceNotification("Good Morning!")
             }
             location.setMode("Home")
         }
@@ -185,7 +178,7 @@ def awakeTimeHandler(evt) {
     
     if (location.mode == "Sleep") {
         if (alertAwake) {
-            notifier.deviceNotification("Good Morning!")
+            person.deviceNotification("Good Morning!")
         }
         location.setMode("Home")
     }
@@ -196,7 +189,7 @@ def asleepTimeHandler(evt) {
     
     if (location.mode == "Home") {
         if (alertAsleep) {
-            notifier.deviceNotification("Good Night!")
+            person.deviceNotification("Good Night!")
         }
         location.setMode("Sleep")
     }

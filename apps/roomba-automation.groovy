@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.3.0" }
+String getVersionNum() { return "4.4.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -41,11 +41,10 @@ preferences {
             input "alertStarted", "bool", title: "Alert when Started?", required: true, defaultValue: false
             input "alertFinished", "bool", title: "Alert when Finished?", required: true, defaultValue: false
             input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
             label title: "Assign a name", required: true
         }
     }
@@ -107,7 +106,7 @@ def started() {
     state.startTime = now()
         
     if (alertStarted) {
-        notifier.deviceNotification("$roomba has started!")
+        person.deviceNotification("$roomba has started!")
     }
 }
 
@@ -116,7 +115,7 @@ def stopped() {
     state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     
     if (roomba.currentValue("cleanStatus") == "charging" && alertFinished) {
-        notifier.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
+        person.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
     }
 }
 
@@ -158,6 +157,6 @@ def dailyReset() {
     state.durationMinutes = 0
     
     if (alertReset) {
-        notifier.deviceNotification("$roomba has reset!")
+        person.deviceNotification("$roomba has reset!")
     }
 }

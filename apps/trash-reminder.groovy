@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,10 +31,9 @@ preferences {
     page(name: "settings", title: "Trash Reminder", install: true, uninstall: true) {
         section {
             input "trashDays", "enum", title: "Trash Days", multiple: true, required: true, options: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -71,7 +70,7 @@ def personHandler_TrashReminder(evt) {
 
         def day = df.format(new Date())
         if (trashDays.contains(day) && timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
-            notifier.deviceNotification("Take out the trash!")
+            person.deviceNotification("Take out the trash!")
         }
     }
 }

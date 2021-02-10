@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Restart rate timeouts after each humidity update",
-    "dateReleased": "2021-02-07",
+    "releaseNotes": "Consolidate person and notification device",
+    "dateReleased": "2021-02-09",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

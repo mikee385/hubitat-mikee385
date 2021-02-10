@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -32,11 +32,8 @@ preferences {
         section {
             input "windows", "capability.contactSensor", title: "Windows", multiple: true, required: true
         }
-        section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -102,7 +99,7 @@ def personHandler_WindowAlert(evt) {
         
         for (window in windows) {
             if (window.currentValue("contact") == "open") {
-                notifier.deviceNotification("$window is still open!")
+                person.deviceNotification("$window is still open!")
             }
         }
     }
@@ -112,7 +109,7 @@ def windowAlert() {
     def anyWindowOpen = false
     for (window in windows) {
         if (window.currentValue("contact") == "open") {
-            notifier.deviceNotification("Should the ${evt.device} still be open?")
+            person.deviceNotification("Should the ${evt.device} still be open?")
             anyWindowOpen = true
         }
     }
@@ -125,6 +122,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

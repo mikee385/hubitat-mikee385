@@ -1,7 +1,7 @@
 /**
  *  Reboot Notification
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Reboot Notification, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,10 +30,8 @@ definition(
 preferences {
     page(name: "settings", title: "Reboot Notification", install: true, uninstall: true) {
         section {
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-            input "message", "text", title: "Message Text", multiple: false, required: true
-        }
-        section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -53,6 +51,14 @@ def initialize() {
     subscribe(location, "systemStart", rebootHandler)
 }
 
+def logDebug(msg) {
+    if (logEnable) {
+        log.debug msg
+    }
+}
+
 def rebootHandler(evt) {
-    notifier.deviceNotification(message)
+    logDebug("rebootHandler: ${evt.device} changed to ${evt.value}")
+    
+    person.deviceNotification("Hub has rebooted.")
 }

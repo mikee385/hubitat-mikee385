@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -50,7 +50,7 @@ preferences {
             input "maximumRuntime", "number", title: "Maximum runtime (minutes)", required: true
         }
         section {
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnableInfo", type: "bool", title: "Enable info logging?", defaultValue: false
             input name: "logEnableDebug", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
@@ -108,7 +108,7 @@ def initialize() {
 def logInfo(msg) {
     if (logEnableInfo) {
         log.info msg
-        notifier.deviceNotification(msg)
+        person.deviceNotification(msg)
     }
 }
 
@@ -274,6 +274,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

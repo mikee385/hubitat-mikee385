@@ -1,11 +1,11 @@
 {
     "packageName": "Life360 Refresh",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial commit",
-    "dateReleased": "2021-01-30",
+    "releaseNotes": "Consolidate person and notification device",
+    "dateReleased": "2021-02-09",
     "apps": [
         {
             "id": "9a72d8b3-9161-44a2-beed-c94912fe6e5a",

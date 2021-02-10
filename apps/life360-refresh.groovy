@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Life360 Refresh, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,18 +33,18 @@ preferences {
             input "refreshButton", "device.ApplicationRefreshButton", title: "Refresh Button", multiple: false, required: true
             input "alertRefreshed", "bool", title: "Alert when refreshed?", required: true, defaultValue: false
         }
-        section("Person 1") {
-            input "person1", "capability.presenceSensor", title: "Life360 Presence", multiple: false, required: true
+        section("Presence 1") {
+            input "presence1", "capability.presenceSensor", title: "Life360 Presence", multiple: false, required: true
             input "otherPresence1", "capability.presenceSensor", title: "Other Presence Sensors", multiple: true, required: true
             input "alertInconsistent1", "bool", title: "Alert when inconsistent?", required: true, defaultValue: false
         }
-        section("Person 2") {
-            input "person2", "capability.presenceSensor", title: "Life360 Presence", multiple: false, required: true
+        section("Presence 2") {
+            input "presence2", "capability.presenceSensor", title: "Life360 Presence", multiple: false, required: true
             input "otherPresence2", "capability.presenceSensor", title: "Other Presence Sensors", multiple: true, required: true
             input "alertInconsistent2", "bool", title: "Alert when inconsistent?", required: true, defaultValue: false
         }
         section {
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -63,11 +63,11 @@ def updated() {
 
 def initialize() {
     for (presenceSensor in otherPresence1) {
-        subscribe(presenceSensor, "presence.present", presenceHandler_Person1)
+        subscribe(presenceSensor, "presence.present", presenceHandler_Presence1)
     }
     
     for (presenceSensor in otherPresence2) {
-        subscribe(presenceSensor, "presence.present", presenceHandler_Person2)
+        subscribe(presenceSensor, "presence.present", presenceHandler_Presence2)
     }
 }
 
@@ -77,50 +77,50 @@ def logDebug(msg) {
     }
 }
 
-def presenceHandler_Person1(evt) {
-    logDebug("presenceHandler_Person1: ${evt.device} changed to ${evt.value}")
+def presenceHandler_Presence1(evt) {
+    logDebug("presenceHandler_Presence1: ${evt.device} changed to ${evt.value}")
 
-    runIn(30, refresh_Person1)
+    runIn(30, refresh_Presence1)
 }
 
-def refresh_Person1() {
-    if (person1.currentValue("presence") != "present") {
+def refresh_Presence1() {
+    if (presence1.currentValue("presence") != "present") {
         refreshButton.refresh()
         if (alertRefreshed) {
-            notifier.deviceNotification("Refreshing Life360! ($person1)")
+            person.deviceNotification("Refreshing Life360! ($presence1)")
         }
         if (alertInconsistent1) {
-            runIn(60, alert_Person1)
+            runIn(60, alert_Presence1)
         }
     }
 }
 
-def alert_Person1() {
-    if (person1.currentValue("presence") != "present") {
-        notifier.deviceNotification("$person1 may be incorrect!")
+def alert_Presence1() {
+    if (presence1.currentValue("presence") != "present") {
+        person.deviceNotification("$presence1 may be incorrect!")
     }
 }
 
-def presenceHandler_Person2(evt) {
-    logDebug("presenceHandler_Person2: ${evt.device} changed to ${evt.value}")
+def presenceHandler_Presence2(evt) {
+    logDebug("presenceHandler_Presence2: ${evt.device} changed to ${evt.value}")
 
-    runIn(30, refresh_Person2)
+    runIn(30, refresh_Presence2)
 }
 
-def refresh_Person2() {
-    if (person2.currentValue("presence") != "present") {
+def refresh_Presence2() {
+    if (presence2.currentValue("presence") != "present") {
         refreshButton.refresh()
         if (alertRefreshed) {
-            notifier.deviceNotification("Refreshing Life360! ($person2)")
+            person.deviceNotification("Refreshing Life360! ($presence2)")
         }
         if (alertInconsistent2) {
-            runIn(60, alert_Person2)
+            runIn(60, alert_Presence2)
         }
     }
 }
 
-def alert_Person2() {
-    if (person2.currentValue("presence") != "present") {
-        notifier.deviceNotification("$person2 may be incorrect!")
+def alert_Presence2() {
+    if (presence2.currentValue("presence") != "present") {
+        person.deviceNotification("$presence2 may be incorrect!")
     }
 }

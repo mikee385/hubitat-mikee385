@@ -1,7 +1,7 @@
 /**
  *  Sunlight Automation
  *
- *  Copyright 2020 Michael Pierce
+ *  Copyright 2021 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,14 +35,14 @@ preferences {
             input "lightLevelForOn", "decimal", title: "Light Level for On", required: true
             input "lightLevelForOff", "decimal", title: "Light Level for Off", required: true
         }
-        section("Notifications") {
+        section("Alerts") {
             input "alertSunrise", "bool", title: "Alert on Sunrise?", required: true, defaultValue: false
             input "alertSunset", "bool", title: "Alert on Sunset?", required: true, defaultValue: false
             input "alertOn", "bool", title: "Alert when On?", required: true, defaultValue: false
             input "alertOff", "bool", title: "Alert when Off?", required: true, defaultValue: false
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -77,7 +77,7 @@ def sunriseHandler(evt) {
     
     if (alertSunrise) {
         def lightValue = lightSensor.currentValue("illuminance")
-        notifier.deviceNotification("Sunrise! ($lightValue)")
+        person.deviceNotification("Sunrise! ($lightValue)")
     }
 }
 
@@ -89,7 +89,7 @@ def sunsetHandler(evt) {
     }
     if (alertSunset) {
         def lightValue = lightSensor.currentValue("illuminance")
-        notifier.deviceNotification("Sunset! ($lightValue)")
+        person.deviceNotification("Sunset! ($lightValue)")
     }
 }
 
@@ -101,14 +101,14 @@ def lightHandler(evt) {
             if (sunlightSwitch.currentValue("switch") == "on") {
                 sunlightSwitch.off()
                 if (alertOff) {
-                    notifier.deviceNotification("It's dark! (${evt.value})")
+                    person.deviceNotification("It's dark! (${evt.value})")
                 }
             }
         } else if (lightSensor.currentValue("illuminance") >= lightLevelForOn) {
             if (sunlightSwitch.currentValue("switch") == "off") {
                 sunlightSwitch.on()
                 if (alertOn) {
-                    notifier.deviceNotification("It's light! (${evt.value})")
+                    person.deviceNotification("It's light! (${evt.value})")
                 }
             }
         }

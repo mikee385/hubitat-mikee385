@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,12 +33,11 @@ preferences {
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
             input "backupButton", "capability.pushableButton", title: "Button", multiple: false, required: false
         }
-        section("Alerts") {
+        section {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -154,12 +153,12 @@ def reminderHandler_ReminderAlert(evt) {
         runIn(60*5, reminderAlert)
     } else {
         unschedule("reminderAlert")
-        notifier.deviceNotification("Camera Reminder is off.")
+        person.deviceNotification("Camera Reminder is off.")
     }
 }
 
 def reminderAlert() {
-    notifier.deviceNotification("Turn off the cameras!")
+    person.deviceNotification("Turn off the cameras!")
     runIn(60*5, reminderAlert)
 }
 
@@ -167,6 +166,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

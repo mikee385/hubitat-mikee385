@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Glows Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -43,9 +43,9 @@ preferences {
             input "bedtimeNowAlert", "bool", title: "Alert when Bedtime Now?", required: true, defaultValue: false
             input "wakeUpAlert", "bool", title: "Alert when Wake Up?", required: true, defaultValue: false
             input "glowsOffAlert", "bool", title: "Alert when Glows Off?", required: true, defaultValue: false
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             
             label title: "Assign a name", required: true
@@ -148,7 +148,7 @@ def bedtimeSoonHandler_RoutineAlert(evt) {
     logDebug("bedtimeSoonHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
     
     if (bedtimeSoonAlert) {
-        notifier.deviceNotification("Bedtime Soon!")
+        person.deviceNotification("Bedtime Soon!")
     }
 }
 
@@ -156,7 +156,7 @@ def bedtimeNowHandler_RoutineAlert(evt) {
     logDebug("bedtimeNowHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
     
     if (bedtimeNowAlert) {
-        notifier.deviceNotification("Bedtime Now!")
+        person.deviceNotification("Bedtime Now!")
     }
 }
 
@@ -164,7 +164,7 @@ def wakeUpHandler_RoutineAlert(evt) {
     logDebug("wakeUpHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
     
     if (wakeUpAlert) {
-        notifier.deviceNotification("Wake Up!")
+        person.deviceNotification("Wake Up!")
     }
 }
 
@@ -172,7 +172,7 @@ def glowsOffHandler_RoutineAlert(evt) {
     logDebug("glowsOffHandler_RoutineAlert: ${evt.device} changed to ${evt.value}")
     
     if (glowsOffAlert) {
-        notifier.deviceNotification("Glows Off!")
+        person.deviceNotification("Glows Off!")
     }
 }
 
@@ -180,7 +180,7 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
 

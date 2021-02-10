@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -34,10 +34,8 @@ preferences {
             input "onRoutines", "capability.switch", title: "On Routines", multiple: true, required: false
             input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
         }
-        section("Alerts") {
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -158,7 +156,7 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
 

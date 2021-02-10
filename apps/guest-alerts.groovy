@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.3.0" }
+String getVersionNum() { return "2.4.0" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,9 +33,8 @@ preferences {
             input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: true
             input "frontDoor", "capability.contactSensor", title: "Front Door", multiple: false, required: true
-            input "primaryPerson", "device.PersonStatus", title: "Primary Person", multiple: false, required: true
+            input "primaryPerson", "device.PersonStatus", title: "Primary Person to Notify", multiple: false, required: true
             input "otherPeople", "capability.presenceSensor", title: "Other People", multiple: true, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -142,9 +141,9 @@ def guestAlert() {
     state.waitForFrontDoor = false
     
     if (guest.currentValue("presence") == "present") {
-        notifier.deviceNotification("Are guests leaving?")
+        primaryPerson.deviceNotification("Are guests leaving?")
     } else {
-        notifier.deviceNotification("Have guests arrived?")
+        primaryPerson.deviceNotification("Have guests arrived?")
     }
 }
 
@@ -159,7 +158,7 @@ def personHandler_ReminderAlert(evt) {
             }
         }
         if (everyoneLeft) {
-            notifier.deviceNotification("Do you still have guests?")
+            primaryPerson.deviceNotification("Do you still have guests?")
         }
     }
 }
@@ -168,6 +167,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        primaryPerson.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

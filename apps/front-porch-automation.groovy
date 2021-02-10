@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.1" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -39,11 +39,8 @@ preferences {
             input "buttonDevice", "capability.pushableButton", title: "Button Device", required: false
             input "buttonNumber", "number", title: "Button Number", required: false
         }
-        section("Alerts") {
-            input "person", "device.PersonStatus", title: "Person", multiple: false, required: true
-            input "notifier", "capability.notification", title: "Notification Device", multiple: false, required: true
-        }
         section {
+            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -155,7 +152,7 @@ def motionHandler_MotionAlert(evt) {
     
     if (evt.value == "active") {
         if (door.currentValue("contact") == "closed") {
-            notifier.deviceNotification("Motion on the Front Porch!")
+            person.deviceNotification("Motion on the Front Porch!")
         }
     }
 }
@@ -179,13 +176,13 @@ def personHandler_DoorAlert(evt) {
         unschedule("doorAlert")
         
         if (door.currentValue("contact") == "open") {
-            notifier.deviceNotification("$door is still open!")
+            person.deviceNotification("$door is still open!")
         }
     }
 }
 
 def doorAlert() {
-    notifier.deviceNotification("Should the $door still be open?")
+    person.deviceNotification("Should the $door still be open?")
     runIn(60*30, doorAlert)
 }
 
@@ -193,6 +190,6 @@ def handler_AwayAlert(evt) {
     logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
-        notifier.deviceNotification("${evt.device} is ${evt.value} while Away!")
+        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
