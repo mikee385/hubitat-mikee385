@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -30,6 +30,7 @@ metadata {
         capability "Sensor"
         capability "Sleep Sensor"
 
+        attribute "command", "enum", ["awake", "asleep", "arrived", "departed"]
         attribute "status", "enum", ["home", "away", "sleep"]
         attribute "message", "string"
         
@@ -56,6 +57,7 @@ def initialize() {
 }
 
 def awake() {
+    sendEvent(name: "command", value: "awake", descriptionText: "$device.displayName is awake")
     sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (awake)")
     
     sendEvent(name: "presence", value: "present")
@@ -63,6 +65,7 @@ def awake() {
 }
 
 def asleep() {
+    sendEvent(name: "command", value: "asleep", descriptionText: "$device.displayName is asleep")
     sendEvent(name: "status", value: "sleep", descriptionText: "$device.displayName changed to sleep")
     
     sendEvent(name: "presence", value: "present")
@@ -70,6 +73,7 @@ def asleep() {
 }
 
 def arrived() {
+    sendEvent(name: "command", value: "arrived", descriptionText: "$device.displayName is arrived")
     sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (arrived)")
     
     sendEvent(name: "presence", value: "present")
@@ -77,6 +81,7 @@ def arrived() {
 }
 
 def departed() {
+    sendEvent(name: "command", value: "departed", descriptionText: "$device.displayName is departed")
     sendEvent(name: "status", value: "away", descriptionText: "$device.displayName changed to away")
     
     sendEvent(name: "presence", value: "not present")
