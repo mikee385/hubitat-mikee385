@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,7 +31,8 @@ preferences {
     page(name: "settings", title: "Person Automation", install: true, uninstall: true) {
         section {
             input "person", "device.PersonStatus", title: "Person Status", multiple: false, required: true
-            input "presenceSensor", "capability.presenceSensor", title: "Presence Sensor", multiple: false, required: false
+            input "arrivalSensors", "capability.presenceSensor", title: "Arrival Sensors", multiple: true, required: false
+            input "departureSensors", "capability.presenceSensor", title: "Departure Sensors", multiple: true, required: false
             input "sleepSwitch", "capability.switch", title: "Sleep Switch", multiple: false, required: false
             input "notificationDevices", "capability.notification", title: "Notification Devices", multiple: true, required: false
         }
@@ -83,9 +84,12 @@ def updated() {
 }
 
 def initialize() {
-    if (presenceSensor) {
-        // Person Status
-        subscribe(presenceSensor, "presence", presenceHandler_PersonStatus)
+    // Person Status
+    for (presenceSensor in arrivalSensors) {
+        subscribe(presenceSensor, "presence.present", arrivalHandler_PersonStatus)
+    }
+    for (presenceSensor in departureSensors) {
+        subscribe(presenceSensor, "presence.not present", departureHandler_PersonStatus)
     }
     
     if (sleepSwitch) {
@@ -123,14 +127,16 @@ def logDebug(msg) {
     }
 }
 
-def presenceHandler_PersonStatus(evt) {
-    logDebug("presenceHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
+def arrivalHandler_PersonStatus(evt) {
+    logDebug("arrivalHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
 
-    if (evt.value == "present") {
-        person.arrived()
-    } else {
-        person.departed()
-    }
+    person.arrived()
+}
+
+def departureHandler_PersonStatus(evt) {
+    logDebug("departureHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
+
+    person.departed()
 }
 
 def switchHandler_PersonStatus(evt) {
