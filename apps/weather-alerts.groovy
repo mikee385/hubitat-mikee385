@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.3.0" }
+String getVersionNum() { return "2.4.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -172,9 +172,7 @@ def sendLevelAlert() {
 
     person.deviceNotification(
 """${state.event_text}!
-Rate:  ${state.rate} in./hr
-Event: ${state.event_total} in.
-Today: ${state.today_total} in."""
+Rate:  ${state.rate} in./hr"""
     )
 }
 
