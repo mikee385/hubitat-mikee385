@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,12 +31,13 @@ preferences {
     page(name: "settings", title: "Person Automation", install: true, uninstall: true) {
         section {
             input "person", "device.PersonStatus", title: "Person Status", multiple: false, required: true
-            input "arrivalSensors", "capability.presenceSensor", title: "Arrival Sensors", multiple: true, required: false
-            input "departureSensors", "capability.presenceSensor", title: "Departure Sensors", multiple: true, required: false
+            input "primarySensors", "capability.presenceSensor", title: "Primary Presence (Arrival & Departure)", multiple: true, required: false
+            input "secondarySensors", "capability.presenceSensor", title: "Secondary Presence (Arrival Only)", multiple: true, required: false
             input "sleepSwitch", "capability.switch", title: "Sleep Switch", multiple: false, required: false
             input "notificationDevices", "capability.notification", title: "Notification Devices", multiple: true, required: false
         }
         section("Alerts") {
+            input "alertInconsistent", "bool", title: "Alert when Presence is Inconsistent?", required: true, defaultValue: false
             input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
             input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
             input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
@@ -85,11 +86,17 @@ def updated() {
 
 def initialize() {
     // Person Status
-    for (presenceSensor in arrivalSensors) {
-        subscribe(presenceSensor, "presence.present", arrivalHandler_PersonStatus)
+    for (primarySensor in primarySensors) {
+        subscribe(primarySensor, "presence.present", arrivalHandler_PersonStatus)
+        subscribe(primarySensor, "presence.not present", departureHandler_PersonStatus)
     }
-    for (presenceSensor in departureSensors) {
-        subscribe(presenceSensor, "presence.not present", departureHandler_PersonStatus)
+    for (secondarySensor in secondarySensors) {
+        subscribe(secondarySensor, "presence.present", arrivalHandler_PersonStatus)
+    }
+    
+    // Inconsistency Check
+    if (alertInconsistent) {
+        subscribe(person, "presence", personHandler_InconsistencyCheck)
     }
     
     if (sleepSwitch) {
@@ -137,6 +144,21 @@ def departureHandler_PersonStatus(evt) {
     logDebug("departureHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
 
     person.departed()
+}
+
+def personHandler_InconsistencyCheck(evt) {
+    logDebug("personHandler_InconsistencyCheck: ${evt.device} changed to ${evt.value}")
+    
+    runIn(30, inconsistencyCheck)
+}
+
+def inconsistencyCheck() {
+    def presenceValue = person.currentValue("presence")
+    for (primarySensor in primarySensors) {
+        if (primarySensor.currentValue("presence") != presenceValue) {
+            personToNotify.deviceNotification("$primarySensor failed to change to $presenceValue!")
+        }
+    }
 }
 
 def switchHandler_PersonStatus(evt) {

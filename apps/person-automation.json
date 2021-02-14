@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Allow separate devices for arrival and departure",
-    "dateReleased": "2021-02-11",
+    "releaseNotes": "Track presence sensors for inconsistency",
+    "dateReleased": "2021-02-14",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",
