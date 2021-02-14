@@ -1,0 +1,20 @@
+{
+    "packageName": "Presence URLs",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2021-02-13",
+    "apps": [
+        {
+            "id": "abb11855-aaa8-46b3-8864-d8a44c862f45",
+            "name": "Presence URLs",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/presence-urls.groovy",
+            "required": true,
+            "oauth": true,
+            "primary": true
+        }
+    ]
+}
