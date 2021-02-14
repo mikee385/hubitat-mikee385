@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Presence URLs, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -53,6 +53,12 @@ def installed() {
     initialize()
 }
 
+def uninstalled() {
+    for (device in getChildDevices()) {
+        deleteChildDevice(device.deviceNetworkId)
+    }
+}
+
 def updated() {
     unsubscribe()
     unschedule()
@@ -71,26 +77,14 @@ def initialize() {
     state.departedUrl = "${getFullApiServerUrl()}/departed?access_token=$state.accessToken"
 }
 
-def uninstalled() {
-    def childID = childDeviceID()
-    def child = getChildDevice(childID)
-    if (child) {
-        deleteChildDevice(childID)
-    }
-}
-
 def logDebug(msg) {
     if (logEnable) {
         log.debug msg
     }
 }
 
-def childDeviceID() {
-    return "presence:" + app.getId()
-}
-
 def childDevice() {
-    def childID = childDeviceID()
+    def childID = "presence:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
         addChildDevice("hubitat", "Virtual Presence", childID, 1234, [name: app.label, isComponent: false])
