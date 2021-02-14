@@ -115,6 +115,13 @@
             "tags": [ "Automations & Groups", "Presence & Location", "Sleep" ]
         },
         {
+            "name": "Presence URLs",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/presence-urls.json",
+            "description": "Provides URLs to control the status of child presence sensor from an external source (e.g. Locative).",
+            "tags": [ "Automations & Groups", "Presence & Location" ]
+        },
+        {
             "name": "Reboot Notification",
             "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.json",
