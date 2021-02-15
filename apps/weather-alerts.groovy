@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.4.0" }
+String getVersionNum() { return "2.5.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -172,7 +172,7 @@ def sendLevelAlert() {
 
     person.deviceNotification(
 """${state.event_text}!
-Rate:  ${state.rate} in./hr"""
+Rate: ${state.rate} in./hr"""
     )
 }
 
@@ -190,9 +190,8 @@ def sendAwakeAlert() {
     if (state.sleep_level > 0) {
         person.deviceNotification(
 """${state.sleep_text} during Sleep!
-Rate:  ${state.rate} in./hr
-Event: ${state.sleep_total} in.
-Today: ${state.today_total} in."""
+Total: ${state.sleep_total} in.
+Now: ${state.rate} in./hr"""
         )
     }
 }
