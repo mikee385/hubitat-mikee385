@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Glows Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -35,8 +35,9 @@ preferences {
             input "wakeUpRoutine", "capability.switch", title: "Wake Up", multiple: false, required: true
             input "glowsOffRoutine", "capability.switch", title: "Glows Off", multiple: false, required: true
         }
-        section("Remote") {
-            input "remote", "capability.pushableButton", title: "Button Device", required: false
+        section("Remotes") {
+            input "hueRemote", "capability.pushableButton", title: "Hue Remote", required: false
+            input "harmonyRemote", "capability.pushableButton", title: "Harmony Remote", required: false
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
@@ -88,8 +89,11 @@ def updated() {
 
 def initialize() {
     // Routine Switches
-    if (remote) {
-        subscribe(remote, "pushed", remoteHandler_RoutineSwitch)
+    if (hueRemote) {
+        subscribe(hueRemote, "pushed", hueRemoteHandler_RoutineSwitch)
+    }
+    if (harmonyRemote) {
+        subscribe(harmonyRemote, "pushed", harmonyRemoteHandler_RoutineSwitch)
     }
     subscribe(location, "mode", modeHandler_RoutineSwitch)
     
@@ -120,8 +124,8 @@ def logDebug(msg) {
     }
 }
 
-def remoteHandler_RoutineSwitch(evt) {
-    logDebug("remoteHandler_RoutineSwitch: ${evt.device} changed to ${evt.value}")
+def hueRemoteHandler_RoutineSwitch(evt) {
+    logDebug("hueRemoteHandler_RoutineSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "1") {
         if (timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
@@ -131,6 +135,20 @@ def remoteHandler_RoutineSwitch(evt) {
         }
     } else if (evt.value == "2") {
         bedtimeNowRoutine.on()
+    } else if (evt.value == "4") {
+        glowsOffRoutine.on()
+    }
+}
+
+def harmonyRemoteHandler_RoutineSwitch(evt) {
+    logDebug("harmonyRemoteHandler_RoutineSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "1") {
+        bedtimeSoonRoutine.on()
+    } else if (evt.value == "2") {
+        bedtimeNowRoutine.on()
+    } else if (evt.value == "3") {
+        wakeUpRoutine.on()
     } else if (evt.value == "4") {
         glowsOffRoutine.on()
     }
