@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Mode Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,15 +33,19 @@ preferences {
             input "presenceSleepSensors", "capability.sleepSensor", title: "Presence+Sleep Sensors", multiple: true, required: false
             input "presenceSensors", "capability.presenceSensor", title: "Presence Sensors", multiple: true, required: false
         }
+        section("Backup Times") {
+            input "awakeTime", "time", title: "Awake Time", required: false
+            input "asleepTime", "time", title: "Asleep Time", required: false
+        }
+        section("Alarm") {
+            input "alarmAway", "capability.switch", title: "Arm Away", multiple: false, required: false
+            input "alarmSleep", "capability.switch", title: "Arm Stay", multiple: false, required: false
+        }
         section("Alerts") {
             input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
             input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
             input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
             input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
-        }
-        section("Backup Times") {
-            input "awakeTime", "time", title: "Awake Time", required: false
-            input "asleepTime", "time", title: "Asleep Time", required: false
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -128,6 +132,9 @@ def departedHandler(evt) {
                 person.deviceNotification("Goodbye!")
             }
             location.setMode("Away")
+            if (alarmAway) {
+                alarmAway.on()
+            }
         }
     } else if (anyoneAwake == false) {
         if (location.mode != "Sleep") {
@@ -135,6 +142,9 @@ def departedHandler(evt) {
                 person.deviceNotification("Good Night!")
             }
             location.setMode("Sleep")
+            if (alarmSleep) {
+                alarmSleep.on()
+            }
         }
     }
 }
@@ -155,6 +165,9 @@ def asleepHandler(evt) {
                     person.deviceNotification("Good Night!")
                 }
                 location.setMode("Sleep")
+                if (alarmSleep) {
+                    alarmSleep.on()
+                }
             }
         }
     }
@@ -192,5 +205,8 @@ def asleepTimeHandler(evt) {
             person.deviceNotification("Good Night!")
         }
         location.setMode("Sleep")
+        if (alarmSleep) {
+            alarmSleep.on()
+        }
     }
 }
