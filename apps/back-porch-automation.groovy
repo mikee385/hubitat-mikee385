@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -176,7 +176,7 @@ def modeHandler_CameraSwitch(evt) {
 }
 
 def stopWaiting_CameraSwitch() {
-    unschedule("stopWaiting_CameraSwitch")
+    unschedule("turnOn_CameraSwitch")
     unsubscribe("lockHandler_CameraSwitch")
 }
 
