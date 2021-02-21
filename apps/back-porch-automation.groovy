@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -57,16 +57,14 @@ def updated() {
 }
 
 def initialize() {
-    state.waitingForLock = false
-    
     // Light Switch
-    for (light in lights) {
-        subscribe(light, "switch", lightHandler_LightSwitch)
-    }
     subscribe(door, "contact", doorHandler_LightSwitch)
-    subscribe(lock, "contact", lockHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
+    
+    // Camera Notification
+    subscribe(door, "contact", doorHandler_CameraSwitch)
+    subscribe(location, "mode", modeHandler_CameraSwitch)
     
     // Light Alert
     for (light in lights) {
@@ -96,46 +94,24 @@ def doorHandler_LightSwitch(evt) {
     logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        state.waitingForLock = false
-        unschedule("stopWaitingForLock")
-        
+        stopWaiting_LightSwitch()
         if (sunlight.currentValue("switch") == "off") {
             for (light in lights) {
                 light.on()
             }
         }
-        
-        if (cameraNotification) {
-            cameraNotification.off()
-        }
     } else {
-        state.waitingForLock = true
-        runIn(60*10, stopWaitingForLock)
+        subscribe(lock, "contact", lockHandler_LightSwitch)
+        runIn(60*5, stopWaiting_LightSwitch)
     }
 }
 
 def lockHandler_LightSwitch(evt) {
     logDebug("lockHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (state.waitingForLock) {
-        state.waitingForLock = false
-        unschedule("stopWaitingForLock")
-        
-        for (light in lights) {
-            light.off()
-        }
-        
-        if (cameraNotification) {
-            cameraNotification.on()
-        }
-    }
-}
-
-def stopWaitingForLock() {
-    state.waitingForLock = false
-    
-    if (cameraNotification) {
-        cameraNotification.on()
+    stopWaiting_LightSwitch()
+    for (light in lights) {
+        light.off()
     }
 }
 
@@ -143,6 +119,7 @@ def sunlightHandler_LightSwitch(evt) {
     logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
+        stopWaiting_LightSwitch()
         for (light in lights) {
             light.off()
         }
@@ -153,14 +130,54 @@ def modeHandler_LightSwitch(evt) {
     logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "Home") {
+        stopWaiting_LightSwitch()
         for (light in lights) {
             light.off()
         }
-        
-        if (cameraNotification) {
-            cameraNotification.on()
-        }
     }
+}
+
+def stopWaiting_LightSwitch() {
+    unschedule("stopWaiting_LightSwitch")
+    unsubscribe("lockHandler_LightSwitch")
+}
+
+def doorHandler_CameraSwitch(evt) {
+    logDebug("doorHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        stopWaiting_CameraSwitch()
+        cameraNotification.off()
+    } else {
+        subscribe(lock, "contact", lockHandler_CameraSwitch)
+        runIn(60*5, turnOn_CameraSwitch)
+    }
+}
+
+def turnOn_CameraSwitch() {
+    stopWaiting_CameraSwitch()
+    cameraNotification.on()
+}
+
+def lockHandler_CameraSwitch(evt) {
+    logDebug("lockHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
+    
+    stopWaiting_CameraSwitch()
+    cameraNotification.on()
+}
+
+def modeHandler_CameraSwitch(evt) {
+    logDebug("modeHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value != "Home") {
+        stopWaiting_CameraSwitch()
+        cameraNotification.on()
+    }
+}
+
+def stopWaiting_CameraSwitch() {
+    unschedule("stopWaiting_CameraSwitch")
+    unsubscribe("lockHandler_CameraSwitch")
 }
 
 def lightHandler_LightAlert(evt) {
