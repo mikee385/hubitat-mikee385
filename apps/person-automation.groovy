@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -45,6 +45,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "logPresence", type: "bool", title: "Enable presence logging?", defaultValue: false
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -138,12 +139,20 @@ def arrivalHandler_PersonStatus(evt) {
     logDebug("arrivalHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
 
     person.arrived()
+    
+    if (logPresence) {
+        log.info "${evt.device} is ${evt.value}!"
+    }
 }
 
 def departureHandler_PersonStatus(evt) {
     logDebug("departureHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
 
     person.departed()
+    
+    if (logPresence) {
+        log.info "${evt.device} is ${evt.value}!"
+    }
 }
 
 def personHandler_InconsistencyCheck(evt) {
