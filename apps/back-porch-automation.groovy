@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,7 +33,10 @@ preferences {
             input "lights", "capability.switch", title: "Lights", multiple: true, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
+        }
+        section {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
+            input "cameraNotification", "capability.switch", title: "Camera Notifications", multiple: false, required: false
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -89,24 +92,21 @@ def logDebug(msg) {
     }
 }
 
-def lightHandler_LightSwitch(evt) {
-    logDebug("lightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    state.waitingForLock = false
-    unschedule("stopWaitingForLock")
-}
-
 def doorHandler_LightSwitch(evt) {
     logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    state.waitingForLock = false
-    unschedule("stopWaitingForLock")
-    
     if (evt.value == "open") {
+        state.waitingForLock = false
+        unschedule("stopWaitingForLock")
+        
         if (sunlight.currentValue("switch") == "off") {
             for (light in lights) {
                 light.on()
             }
+        }
+        
+        if (cameraNotification) {
+            cameraNotification.off()
         }
     } else {
         state.waitingForLock = true
@@ -114,17 +114,28 @@ def doorHandler_LightSwitch(evt) {
     }
 }
 
-def stopWaitingForLock() {
-    state.waitingForLock = false
-}
-
 def lockHandler_LightSwitch(evt) {
     logDebug("lockHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (state.waitingForLock) {
+        state.waitingForLock = false
+        unschedule("stopWaitingForLock")
+        
         for (light in lights) {
             light.off()
         }
+        
+        if (cameraNotification) {
+            cameraNotification.on()
+        }
+    }
+}
+
+def stopWaitingForLock() {
+    state.waitingForLock = false
+    
+    if (cameraNotification) {
+        cameraNotification.on()
     }
 }
 
@@ -144,6 +155,10 @@ def modeHandler_LightSwitch(evt) {
     if (evt.value != "Home") {
         for (light in lights) {
             light.off()
+        }
+        
+        if (cameraNotification) {
+            cameraNotification.on()
         }
     }
 }
