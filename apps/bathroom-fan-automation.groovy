@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.3.0" }
+String getVersionNum() { return "2.4.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -159,11 +159,11 @@ def handleHumidity(humidity) {
         } else if (state.deltaHumidity >= excessiveIncrease) {
             state.status = "rising"
             smartFanOn()
-            logInfo("$fan turned on due to excessive increase: ${state.deltaHumidity}%")
+            logInfo("$fan turned on due to excessive increase: ${state.deltaHumidity.round(1)}%")
         } else if (state.currentHumidity >= maximumThreshold) {
             state.status = "peak"
             smartFanOn()
-            logInfo("$fan turned on due to maximum threshold: ${state.currentHumidity}%")
+            logInfo("$fan turned on due to maximum threshold: ${state.currentHumidity.round(1)}%")
         }
         
     } else if (state.status == "rising") {
@@ -182,7 +182,7 @@ def handleHumidity(humidity) {
         } else if (state.currentHumidity <= state.targetHumidity) {
             state.status = "normal"
             smartFanOff()
-            logInfo("$fan turned off due to dropping below target: ${state.currentHumidity}% < ${state.targetHumidity}%")
+            logInfo("$fan turned off due to dropping below target: ${state.currentHumidity.round(1)}% < ${state.targetHumidity.round(1)}%")
         } else if (state.rate <= rapidFallRate) {
             state.status = "falling"
             logInfo("$fan falling due to rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
@@ -195,7 +195,7 @@ def handleHumidity(humidity) {
         } else if (state.currentHumidity <= state.targetHumidity) {
             state.status = "normal"
             smartFanOff()
-            logInfo("$fan turned off due to dropping below target: ${state.currentHumidity}% < ${state.targetHumidity}%")
+            logInfo("$fan turned off due to dropping below target: ${state.currentHumidity.round(1)}% < ${state.targetHumidity.round(1)}%")
         } else if (state.rate > rapidFallRate) {
             state.status = "normal"
             smartFanOff()

@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "2.3.0",
+    "version": "2.4.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add fan name to info logging messages",
-    "dateReleased": "2021-02-22",
+    "releaseNotes": "Round numeric values in log messages",
+    "dateReleased": "2021-02-27",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",
