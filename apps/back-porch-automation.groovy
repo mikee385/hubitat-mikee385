@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -154,25 +154,23 @@ def doorHandler_CameraSwitch(evt) {
     }
 }
 
-def turnOn_CameraSwitch() {
-    stopWaiting_CameraSwitch()
-    cameraNotification.on()
-}
-
 def lockHandler_CameraSwitch(evt) {
     logDebug("lockHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
     
-    stopWaiting_CameraSwitch()
-    cameraNotification.on()
+    runIn(15, turnOn_CameraSwitch)
 }
 
 def modeHandler_CameraSwitch(evt) {
     logDebug("modeHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "Home") {
-        stopWaiting_CameraSwitch()
-        cameraNotification.on()
+        turnOn_CameraSwitch()
     }
+}
+
+def turnOn_CameraSwitch() {
+    stopWaiting_CameraSwitch()
+    cameraNotification.on()
 }
 
 def stopWaiting_CameraSwitch() {

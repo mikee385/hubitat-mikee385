@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix unschedule for the camera notifications",
-    "dateReleased": "2021-02-21",
+    "releaseNotes": "Delay turning camera switch on when locking door",
+    "dateReleased": "2021-02-26",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
