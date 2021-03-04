@@ -171,6 +171,13 @@
             "tags": [ "Doors & Windows", "Notifications" ]
         },
         {
+            "name": "Alarm System Status",
+            "category": "Convenience",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/alarm-system-status.json",
+            "description": "Driver representing an alarm system with 3 states: diasrmed, armed home, armed away.",
+            "tags": [ "Alarm Systems", "Misc. Devices", "Safety & Security" ]
+        },
+        {
             "name": "Appliance Status",
             "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/appliance-status.json",
