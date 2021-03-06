@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -39,6 +39,10 @@ preferences {
             input "cameraNotification", "capability.switch", title: "Camera Notifications", multiple: false, required: false
         }
         section {
+            input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
+            input "sprinklerZones", "device.RachioZone", title: "Sprinkler Zones", multiple: true, required: false
+        }
+        section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
@@ -57,6 +61,8 @@ def updated() {
 }
 
 def initialize() {
+    state.sprinklersPaused = false
+    
     // Light Switch
     subscribe(door, "contact", doorHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
@@ -65,6 +71,10 @@ def initialize() {
     // Camera Notification
     subscribe(door, "contact", doorHandler_CameraSwitch)
     subscribe(location, "mode", modeHandler_CameraSwitch)
+    
+    // Sprinkler Zones
+    subscribe(door, "contact", doorHandler_SprinklerZones)
+    subscribe(location, "mode", modeHandler_SprinklerZones)
     
     // Light Alert
     for (light in lights) {
@@ -102,27 +112,21 @@ def doorHandler_LightSwitch(evt) {
         }
     } else {
         subscribe(lock, "contact", lockHandler_LightSwitch)
-        runIn(60*5, stopWaiting_LightSwitch)
+        runIn(60*10, stopWaiting_LightSwitch)
     }
 }
 
 def lockHandler_LightSwitch(evt) {
     logDebug("lockHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    stopWaiting_LightSwitch()
-    for (light in lights) {
-        light.off()
-    }
+    turnOff_LightSwitch()
 }
 
 def sunlightHandler_LightSwitch(evt) {
     logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        stopWaiting_LightSwitch()
-        for (light in lights) {
-            light.off()
-        }
+        turnOff_LightSwitch()
     }
 }
 
@@ -130,10 +134,14 @@ def modeHandler_LightSwitch(evt) {
     logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "Home") {
-        stopWaiting_LightSwitch()
-        for (light in lights) {
-            light.off()
-        }
+        turnOff_LightSwitch()
+    }
+}
+
+def turnOff_LightSwitch() {
+    stopWaiting_LightSwitch()
+    for (light in lights) {
+        light.off()
     }
 }
 
@@ -150,7 +158,7 @@ def doorHandler_CameraSwitch(evt) {
         cameraNotification.off()
     } else {
         subscribe(lock, "contact", lockHandler_CameraSwitch)
-        runIn(60*5, turnOn_CameraSwitch)
+        runIn(60*10, turnOn_CameraSwitch)
     }
 }
 
@@ -176,6 +184,55 @@ def turnOn_CameraSwitch() {
 def stopWaiting_CameraSwitch() {
     unschedule("turnOn_CameraSwitch")
     unsubscribe("lockHandler_CameraSwitch")
+}
+
+def doorHandler_SprinklerZones(evt) {
+    logDebug("doorHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        stopWaiting_SprinklerZones()
+        
+        for (sprinklerZone in sprinklerZones) {
+            if (sprinklerZone.currentValue("switch") == "on") {
+                state.sprinklersPaused = true
+                //sprinklerController.pauseZoneRun(30)
+                person.deviceNotification("Pausing sprinklers!")
+                break
+            }
+        }
+    } else {
+        subscribe(lock, "contact", lockHandler_SprinklerZones)
+        runIn(60*10, resume_SprinklerZones)
+    }
+}
+
+def lockHandler_SprinklerZones(evt) {
+    logDebug("lockHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
+    
+    resume_SprinklerZones()
+}
+
+def modeHandler_SprinklerZones(evt) {
+    logDebug("modeHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value != "Home") {
+        resume_SprinklerZones()
+    }
+}
+
+def resume_SprinklerZones() {
+    stopWaiting_SprinklerZones()
+    
+    if (state.sprinklersPaused) {
+        state.sprinklersPaused = false
+        //sprinklerController.resumeZoneRun()
+        person.deviceNotification("Resuming sprinklers!")
+    }
+}
+
+def stopWaiting_SprinklerZones() {
+    unschedule("resume_SprinklerZones")
+    unsubscribe("lockHandler_SprinklerZones")
 }
 
 def lightHandler_LightAlert(evt) {
