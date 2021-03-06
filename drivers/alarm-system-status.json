@@ -1,11 +1,11 @@
 {
     "packageName": "Alarm System Status",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial release",
-    "dateReleased": "2021-03-04",
+    "releaseNotes": "Prevent duplicate events",
+    "dateReleased": "2021-03-06",
     "drivers": [
         {
             "id": "a1612157-1433-4415-b06e-892d95f99029",
