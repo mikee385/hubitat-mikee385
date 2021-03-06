@@ -213,6 +213,13 @@
             "tags": [ "Misc. Devices", "Voice Assistants" ]
         },
         {
+            "name": "Virtual Simple Lock",
+            "category": "Utility",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-simple-lock.json",
+            "description": "Driver for a simple virtual lock without codes.",
+            "tags": [ "Locks", "Misc. Devices" ]
+        },
+        {
             "name": "Ambient Weather Integration",
             "category": "Integrations",
             "location": "https://raw.githubusercontent.com/mikee385/Hubitat-Ambient-Weather/master/packageManifest.json",
