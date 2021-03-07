@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -59,7 +59,6 @@ def updated() {
 
 def initialize() {
     // Light Switch
-    subscribe(door, "contact", doorHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     if (buttonDevice) {
@@ -110,16 +109,6 @@ def toggle() {
         off()
     } else {
         on()
-    }
-}
-
-def doorHandler_LightSwitch(evt) {
-    logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "open") {
-        if (sunlight.currentValue("switch") == "off") {
-            on()
-        }
     }
 }
 
