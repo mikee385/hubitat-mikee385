@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Alarm System Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -51,19 +51,13 @@ def initialize() {
 }
 
 def disarm() {
-    if (device.currentValue("status") != "disarmed") {
-        sendEvent(name: "status", value: "disarmed", descriptionText: "$device.displayName changed to disarmed")
-    }
+    sendEvent(name: "status", value: "disarmed", descriptionText: "$device.displayName changed to disarmed")
 }
 
 def armHome() {
-    if (device.currentValue("status") != "armed home") {
-        sendEvent(name: "status", value: "armed home", descriptionText: "$device.displayName changed to armed home")
-    }
+    sendEvent(name: "status", value: "armed home", descriptionText: "$device.displayName changed to armed home")
 }
     
 def armAway() {
-    if (device.currentValue("status") != "armed away") {
-        sendEvent(name: "status", value: "armed away", descriptionText: "$device.displayName changed to armed away")
-    }
+    sendEvent(name: "status", value: "armed away", descriptionText: "$device.displayName changed to armed away")
 }
