@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "2.4.1",
+    "version": "2.5.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix incorrect rounding method",
-    "dateReleased": "2021-02-28",
+    "releaseNotes": "Use smaller rate to detect rising after falling",
+    "dateReleased": "2021-03-09",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

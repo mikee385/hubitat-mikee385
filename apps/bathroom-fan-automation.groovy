@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.4.1" }
+String getVersionNum() { return "2.5.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -90,6 +90,7 @@ def initialize() {
         state.status = "normal"
     }
     
+    state.minimumRiseRate = reportHumidityChange / reportTimeInterval
     state.risingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidRiseRate))
     state.fallingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidFallRate))
     
@@ -192,6 +193,9 @@ def handleHumidity(humidity) {
         if (state.rate >= rapidRiseRate) {
             state.status = "rising"
             logInfo("$fan rising due to rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
+        } else if (state.rate >= state.minimumRiseRate) {
+            state.status = "rising"
+            logInfo("$fan rising due to minimum rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
         } else if (state.currentHumidity <= state.targetHumidity) {
             state.status = "normal"
             smartFanOff()
