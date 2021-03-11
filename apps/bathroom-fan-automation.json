@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "2.6.0",
+    "version": "2.6.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add fan runtime to notification messages",
-    "dateReleased": "2021-03-10",
+    "releaseNotes": "Fix incorrect string substitution of fan duration",
+    "dateReleased": "2021-03-11",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",
