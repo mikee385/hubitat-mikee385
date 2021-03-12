@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.6.0" }
+String getVersionNum() { return "4.6.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -108,10 +108,6 @@ def started() {
 def stopped() {
     state.endTime = now()
     state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
-    
-    if (roomba.currentValue("cleanStatus") == "charging") {
-        person.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
-    }
 }
 
 def roombaHandler(evt) {
@@ -121,6 +117,10 @@ def roombaHandler(evt) {
         started()
     } else if (state.endTime < state.startTime) { // should only be true while Roomba is running
         stopped()
+    }
+    
+    if (evt.value == "charging" && state.durationMinutes >= 0.5) {
+        person.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
     }
 }
 
