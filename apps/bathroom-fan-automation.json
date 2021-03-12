@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "2.6.2",
+    "version": "2.6.3",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Round fan duration to the nearest minute",
-    "dateReleased": "2021-03-11",
+    "releaseNotes": "Fix for fan duration incorrectly incrementing",
+    "dateReleased": "2021-03-12",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

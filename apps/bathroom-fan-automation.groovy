@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.6.2" }
+String getVersionNum() { return "2.6.3" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -247,7 +247,7 @@ def smartFanOff() {
     fan.off()
     
     state.endTime = now()
-    state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
+    state.durationMinutes = (state.endTime - state.startTime)/1000.0/60.0
 }
 
 def risingRateTimeout() {
