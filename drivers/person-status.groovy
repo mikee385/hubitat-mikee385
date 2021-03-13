@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.3.0" }
+String getVersionNum() { return "2.3.1" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -97,5 +97,5 @@ def departed() {
 }
 
 def deviceNotification(message) {
-  	sendEvent(name: "message", value: "${message}")
+  	sendEvent(name: "message", value: "${message}", isStateChange: true)
 }
