@@ -220,6 +220,13 @@
             "tags": [ "Misc. Devices", "Weather"]
         },
         {
+            "name": "Rachio Community Package",
+            "category": "Integrations",
+            "location": "https://raw.githubusercontent.com/mikee385/Rachio-Community/master/packageManifest.json",
+            "description": "Rachio Community Package",
+            "tags": [ "Cloud", "Irrigation", "Water" ]
+        }
+        {
             "name": "Roomba Integration",
             "category": "Integrations",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-roomba/master/packageManifest.json",
