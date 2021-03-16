@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "2.6.3",
+    "version": "2.6.4",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix for fan duration incorrectly incrementing",
-    "dateReleased": "2021-03-12",
+    "releaseNotes": "Add line break to fan off messages",
+    "dateReleased": "2021-03-15",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

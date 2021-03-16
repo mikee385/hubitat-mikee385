@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.6.3" }
+String getVersionNum() { return "2.6.4" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -192,7 +192,10 @@ def handleHumidity(humidity) {
         } else if (state.currentHumidity <= state.targetHumidity) {
             state.status = "normal"
             smartFanOff()
-            logInfo("$fan turned off due to dropping below target: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}% < ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%. Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.")
+            logInfo(
+"""$fan turned off due to dropping below target: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}% < ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%. 
+Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
+            )
         } else if (state.rate <= rapidFallRate) {
             state.status = "falling"
             logInfo("$fan falling due to rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
@@ -208,11 +211,17 @@ def handleHumidity(humidity) {
         } else if (state.currentHumidity <= state.targetHumidity) {
             state.status = "normal"
             smartFanOff()
-            logInfo("$fan turned off due to dropping below target: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}% < ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%. Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.")
+            logInfo(
+"""$fan turned off due to dropping below target: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}% < ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%.
+Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
+            )
         } else if (state.rate > rapidFallRate) {
             state.status = "normal"
             smartFanOff()
-            logInfo("$fan turned off due to non-rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min. Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.")
+            logInfo(
+"""$fan turned off due to non-rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min. 
+Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
+            )
         }
     }
     
@@ -258,7 +267,10 @@ def risingRateTimeout() {
 def fallingRateTimeout() {
     state.status = "normal"
     smartFanOff()
-    logInfo("$fan turned off due to exceeding time for rapid falling rate: ${state.fallingMinutesToWait} min. Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.")
+    logInfo(
+"""$fan turned off due to exceeding time for rapid falling rate: ${state.fallingMinutesToWait} min. 
+Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
+    )
 }
 
 def fanHandler_FanSwitch(evt) {
@@ -276,7 +288,10 @@ def fanHandler_FanSwitch(evt) {
 def totalRuntimeExceeded() {
     state.status = "normal"
     smartFanOff()
-    logInfo("$fan turned off due to exceeding total time: ${maximumRuntime} min. Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.")
+    logInfo(
+"""$fan turned off due to exceeding total time: ${maximumRuntime} min. 
+Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
+    )
 }
 
 def modeHandler_FanSwitch(evt) {
