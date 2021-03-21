@@ -232,6 +232,13 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-roomba/master/packageManifest.json",
             "description": "Connects to Roomba via Dorita",
             "tags": [ "Cleaning Devices", "LAN" ]
+        },
+        {
+            "name": "Vivint Integration",
+            "category": "Integrations",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/hubitat/packageManifest.json",
+            "description": "Connects to Vivint SmartHome products",
+            "tags": [ "Alarm Systems", "LAN", "Safety & Security" ]
         }
     ]
 }
