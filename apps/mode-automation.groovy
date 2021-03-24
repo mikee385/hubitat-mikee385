@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "1.2.1" }
 String getVersionLabel() { return "Mode Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -113,11 +113,14 @@ def departedHandler(evt) {
     
     def anyonePresent = false
     def anyoneAwake = false
+    def anyoneAsleep = false
     for (sensor in presenceSleepSensors) {
         if (sensor.currentValue("presence") == "present") {
             anyonePresent = true
             if (sensor.currentValue("sleeping") == "not sleeping") {
                 anyoneAwake = true
+            } else {
+                anyoneAsleep = true
             }
         }
     }
@@ -136,7 +139,7 @@ def departedHandler(evt) {
                 alarmAway.on()
             }
         }
-    } else if (anyoneAwake == false) {
+    } else if (anyoneAsleep == true && anyoneAwake == false) {
         if (location.mode != "Sleep") {
             if (alertAsleep) {
                 person.deviceNotification("Good Night!")
