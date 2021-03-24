@@ -1,11 +1,11 @@
 {
     "packageName": "Guest Alerts",
     "author": "Michael Pierce",
-    "version": "2.4.0",
+    "version": "3.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Consolidate person and notification device",
-    "dateReleased": "2021-02-09",
+    "releaseNotes": "Remove guest arrived and departed alerts",
+    "dateReleased": "2021-03-23",
     "apps": [
         {
             "id": "7fb16968-9c99-4c61-b4dd-cc3ac9e52446",

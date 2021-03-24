@@ -14,14 +14,14 @@
  *
  */
  
-String getVersionNum() { return "2.4.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Guest Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
     name: "Guest Alerts",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Sends alerts when guests may have arrived or departed.",
+    description: "Sends a reminder alert to check if guests are still present.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
@@ -31,12 +31,9 @@ preferences {
     page(name: "settings", title: "Guest Alerts", install: true, uninstall: true) {
         section {
             input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
-            input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: true
-            input "frontDoor", "capability.contactSensor", title: "Front Door", multiple: false, required: true
-            input "primaryPerson", "device.PersonStatus", title: "Primary Person to Notify", multiple: false, required: true
             input "otherPeople", "capability.presenceSensor", title: "Other People", multiple: true, required: true
-        }
         section {
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -54,28 +51,10 @@ def updated() {
 }
 
 def initialize() {
-    // Create state
-    if (state.lockoutTime == null) {
-        state.lockoutTime = now()
-    }
-    if (state.lockoutString == null) {
-        state.lockoutString = new Date(state.lockoutTime)
-    }
-    state.waitForBedroomDoor = false
-    state.waitForFrontDoor = false
-    
-    // Guest Alert
-    subscribe(bedroomDoor, "contact.open", bedroomDoorHandler_GuestAlert)
-    subscribe(frontDoor, "contact.open", frontDoorHandler_GuestAlert)
-    
     // Reminder Alert
-    subscribe(primaryPerson, "presence.not present", personHandler_ReminderAlert)
     for (person in otherPeople) {
         subscribe(person, "presence.not present", personHandler_ReminderAlert)
     }
-    
-    // Away Alert
-    subscribe(bedroomDoor, "contact", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -84,89 +63,18 @@ def logDebug(msg) {
     }
 }
 
-def bedroomDoorHandler_GuestAlert(evt) {
-    logDebug("bedroomDoorHandler_GuestAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (now() < state.lockoutTime) {
-        return
-    }
-    if (guest.currentValue("presence") == "not present" && primaryPerson.currentValue("status") == "sleep") {
-        return
-    }
-    
-    if (frontDoor.currentValue("contact") == "open") {
-        guestAlert()
-    } else if (state.waitForBedroomDoor) {
-        guestAlert()
-    } else {
-        state.waitForFrontDoor = true
-        runIn(10*60, cancelWaitForFrontDoor)
-    }
-}
-
-def cancelWaitForFrontDoor() {
-    state.waitForFrontDoor = false
-}
-
-def frontDoorHandler_GuestAlert(evt) {
-    logDebug("frontDoorHandler_GuestAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (now() < state.lockoutTime) {
-        return
-    }
-    if (guest.currentValue("presence") == "not present" && primaryPerson.currentValue("status") == "sleep") {
-        return
-    }
-    
-    if (bedroomDoor.currentValue("contact") == "open") {
-        guestAlert()
-    } else if (state.waitForFrontDoor) {
-        guestAlert()
-    } else {
-        state.waitForBedroomDoor = true
-        runIn(10*60, cancelWaitForBedroomDoor)
-    }
-}
-
-def cancelWaitForBedroomDoor() {
-    state.waitForBedroomDoor = false
-}
-
-def guestAlert() {
-    unschedule()
-
-    state.lockoutTime = now() + (30*60*1000)
-    state.lockoutString = new Date(state.lockoutTime)
-    state.waitForBedroomDoor = false
-    state.waitForFrontDoor = false
-    
-    if (guest.currentValue("presence") == "present") {
-        primaryPerson.deviceNotification("Are guests leaving?")
-    } else {
-        primaryPerson.deviceNotification("Have guests arrived?")
-    }
-}
-
 def personHandler_ReminderAlert(evt) {
     logDebug("personHandler_ReminderAlert: ${evt.device} changed to ${evt.value}")
     
     if (guest.currentValue("presence") == "present") {
-        def everyoneLeft = primaryPerson.currentValue("presence") == "not present"
+        def everyoneLeft = true
         for (person in otherPeople) {
             if (person.currentValue("presence") != "not present") {
                 everyoneLeft = false
             }
         }
         if (everyoneLeft) {
-            primaryPerson.deviceNotification("Do you still have guests?")
+            personToNotify.deviceNotification("Do you still have guests?")
         }
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        primaryPerson.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }

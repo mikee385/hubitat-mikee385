@@ -69,7 +69,7 @@
             "name": "Guest Alerts",
             "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/guest-alerts.json",
-            "description": "Sends alerts when guests may have arrived or departed.",
+            "description": "Sends a reminder alert to check if guests are still present.",
             "tags": [ "Notifications", "Presence & Location" ]
         },
         {
