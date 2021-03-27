@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,7 +31,7 @@ preferences {
     page(name: "settings", title: "Camera Automation", install: true, uninstall: true) {
         section {
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
-            input "alarmPanel", "device.vivintPanel", title: "Alarm Panel", multiple: false, required: true
+            input "alarmPanel", "device.VivintPanel", title: "Alarm Panel", multiple: false, required: false
             input "backupButton", "capability.pushableButton", title: "Button", multiple: false, required: false
         }
         section {
