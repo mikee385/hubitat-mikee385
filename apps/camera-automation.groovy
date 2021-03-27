@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,6 +31,7 @@ preferences {
     page(name: "settings", title: "Camera Automation", install: true, uninstall: true) {
         section {
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
+            input "alarmPanel", "device.vivintPanel", title: "Alarm Panel", multiple: false, required: true
             input "backupButton", "capability.pushableButton", title: "Button", multiple: false, required: false
         }
         section {
@@ -59,6 +60,9 @@ def initialize() {
     
     // Camera Switch
     subscribe(location, "mode", modeHandler_CameraSwitch)
+    if (alarmPanel) {
+        subscribe(alarmPanel, "status", alarmPanelHandler_CameraSwitch)
+    }
     if (backupButton) {
         subscribe(backupButton, "pushed", buttonHandler_CameraSwitch)
     }
@@ -88,7 +92,13 @@ def modeHandler_CameraSwitch(evt) {
     logDebug("modeHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "Home") {
-        if (state.mode == "Away") {
+        if (alarmPanel) {
+            if (alarmPanel.currentValue("status") == "disarmed") {
+                for (camera in cameras) {
+                    camera.off()
+                }
+            }
+        } else if (state.mode == "Away") {
             for (camera in cameras) {
                 camera.off()
             }
@@ -99,6 +109,22 @@ def modeHandler_CameraSwitch(evt) {
         }
     }
     state.mode = evt.value
+}
+
+def alarmPanelHandler_CameraSwitch(evt) {
+    logDebug("alarmPanelHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "disarmed") {
+        if (location.mode == "Home") {
+            for (camera in cameras) {
+                camera.off()
+            }
+        }
+    } else {
+        for (camera in cameras) {
+            camera.on()
+        }
+    }
 }
 
 def buttonHandler_CameraSwitch(evt) {
