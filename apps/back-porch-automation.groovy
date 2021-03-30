@@ -195,7 +195,7 @@ def doorHandler_SprinklerZones(evt) {
         for (sprinklerZone in sprinklerZones) {
             if (sprinklerZone.currentValue("switch") == "on") {
                 state.sprinklersPaused = true
-                //sprinklerController.pauseZoneRun(30)
+                //sprinklerController.pauseZoneRun(1800)
                 person.deviceNotification("Pausing sprinklers!")
                 break
             }
