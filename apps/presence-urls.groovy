@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "1.3.0" }
 String getVersionLabel() { return "Presence URLs, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -39,12 +39,14 @@ preferences {
 mappings {
     path("/arrived") {
         action: [
-            GET: "urlHandler_arrived"
+            GET: "urlHandler_arrived",
+            POST: "urlHandler_arrived"
         ]
     }
     path("/departed") {
         action: [
-            GET: "urlHandler_departed"
+            GET: "urlHandler_departed",
+            POST: "urlHandler_departed"
         ]
     }
 }
