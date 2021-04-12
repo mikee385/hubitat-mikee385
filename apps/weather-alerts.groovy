@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.6.2" }
+String getVersionNum() { return "2.6.3" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -80,7 +80,7 @@ def initialize() {
     
     // Heartbeat
     if (alertOffline) {
-        subscribe(weatherStation, "feelsLike", heartbeat)
+        subscribe(weatherStation, "feelsLike", handler_Heartbeat)
         heartbeat()
     }
 }
@@ -214,9 +214,13 @@ Now: ${state.rate} in./hr"""
     }
 }
 
-def heartbeat(evt) {
-    logDebug("heartbeat: ${evt.device} changed to ${evt.value}")
+def handler_Heartbeat(evt) {
+    logDebug("handler_Heartbeat: ${evt.device} changed to ${evt.value}")
     
+    heartbeat()
+}
+    
+def heartbeat() {
     unschedule("offlineAlert")
     state.offline = false
     runIn(60*offlineDuration, offlineAlert)
