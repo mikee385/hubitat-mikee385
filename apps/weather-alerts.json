@@ -1,10 +1,10 @@
 {
     "packageName": "Weather Alerts",
     "author": "Michael Pierce",
-    "version": "2.6.1",
+    "version": "2.6.2",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Run heartbeat during initialize",
+    "releaseNotes": "Add evt argument to heartbeat method",
     "dateReleased": "2021-04-11",
     "apps": [
         {

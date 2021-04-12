@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.6.1" }
+String getVersionNum() { return "2.6.2" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -214,7 +214,7 @@ Now: ${state.rate} in./hr"""
     }
 }
 
-def heartbeat() {
+def heartbeat(evt) {
     logDebug("heartbeat: ${evt.device} changed to ${evt.value}")
     
     unschedule("offlineAlert")
