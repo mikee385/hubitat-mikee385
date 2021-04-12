@@ -1,11 +1,11 @@
 {
     "packageName": "Weather Alerts",
     "author": "Michael Pierce",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove today total from sleep alert",
-    "dateReleased": "2021-02-14",
+    "releaseNotes": "Add alert when weather station is offline",
+    "dateReleased": "2021-04-11",
     "apps": [
         {
             "id": "6c0f049b-8640-453c-a4b4-0c863f164a59",

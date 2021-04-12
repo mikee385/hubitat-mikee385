@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.5.0" }
+String getVersionNum() { return "2.6.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,6 +31,10 @@ preferences {
     page(name: "settings", title: "Weather Alerts", install: true, uninstall: true) {
         section {
             input "weatherStation", "device.AmbientWeatherDevice", title: "Weather Station", multiple: false, required: true
+        }
+        section {
+            input name: "alertOffline", type: "bool", title: "Alert when offline?", defaultValue: false
+            input "offlineDuration", "number", title: "Minimum time before offline (in minutes)", required: true, defaultValue: 60
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -73,6 +77,11 @@ def initialize() {
     // Rain Alert
     subscribe(weatherStation, "precip_1hr", rainRateHandler_RainAlert)
     subscribe(person, "sleeping", personHandler_RainAlert)
+    
+    // Heartbeat
+    if (alertOffline) {
+        subscribe(weatherStation, "feelsLike", heartbeat)
+    }
 }
 
 def logDebug(msg) {
@@ -92,6 +101,9 @@ def rainRateHandler_RainAlert(evt) {
     
     def rate_current = weatherStation.currentValue("precip_1hr")
     def total_current = weatherStation.currentValue("precip_today")
+    
+    log.debug("Previous Event: ${state.event_total}")
+    log.debug("Previous Today: ${state.today_total}")
     
     // Calculate values
     def delta = 0.0
@@ -126,6 +138,11 @@ def rainRateHandler_RainAlert(evt) {
     
     // Update event status
     state.event_total += delta
+    
+    log.debug("Delta: ${delta}")
+    log.debug("Current Event: ${state.event_total}")
+    log.debug("Current Today: ${state.today_total}")
+    
     if (level > state.event_level) {
         state.event_level = level
         state.event_text = text
@@ -194,4 +211,17 @@ Total: ${state.sleep_total} in.
 Now: ${state.rate} in./hr"""
         )
     }
+}
+
+def heartbeat() {
+    logDebug("heartbeat: ${evt.device} changed to ${evt.value}")
+    
+    unschedule("offlineAlert")
+    state.offline = false
+    runIn(60*offlineDuration, offlineAlert)
+}
+
+def offlineAlert() {
+    state.offline = true
+    person.deviceNotification("${weatherStation} is offline!")
 }
