@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.6.3" }
+String getVersionNum() { return "2.7.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,10 +31,6 @@ preferences {
     page(name: "settings", title: "Weather Alerts", install: true, uninstall: true) {
         section {
             input "weatherStation", "device.AmbientWeatherDevice", title: "Weather Station", multiple: false, required: true
-        }
-        section {
-            input name: "alertOffline", type: "bool", title: "Alert when offline?", defaultValue: false
-            input "offlineDuration", "number", title: "Minimum time before offline (in minutes)", required: true, defaultValue: 60
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -77,12 +73,6 @@ def initialize() {
     // Rain Alert
     subscribe(weatherStation, "precip_1hr", rainRateHandler_RainAlert)
     subscribe(person, "sleeping", personHandler_RainAlert)
-    
-    // Heartbeat
-    if (alertOffline) {
-        subscribe(weatherStation, "feelsLike", handler_Heartbeat)
-        heartbeat()
-    }
 }
 
 def logDebug(msg) {
@@ -212,21 +202,4 @@ Total: ${state.sleep_total} in.
 Now: ${state.rate} in./hr"""
         )
     }
-}
-
-def handler_Heartbeat(evt) {
-    logDebug("handler_Heartbeat: ${evt.device} changed to ${evt.value}")
-    
-    heartbeat()
-}
-    
-def heartbeat() {
-    unschedule("offlineAlert")
-    state.offline = false
-    runIn(60*offlineDuration, offlineAlert)
-}
-
-def offlineAlert() {
-    state.offline = true
-    person.deviceNotification("${weatherStation} is offline!")
 }

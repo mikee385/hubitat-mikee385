@@ -1,11 +1,11 @@
 {
     "packageName": "Weather Alerts",
     "author": "Michael Pierce",
-    "version": "2.6.3",
+    "version": "2.7.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix heartbeat during initialize",
-    "dateReleased": "2021-04-11",
+    "releaseNotes": "Remove alert when weather station is offline",
+    "dateReleased": "2021-04-12",
     "apps": [
         {
             "id": "6c0f049b-8640-453c-a4b4-0c863f164a59",
