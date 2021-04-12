@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.6.0" }
+String getVersionNum() { return "2.6.1" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -81,6 +81,7 @@ def initialize() {
     // Heartbeat
     if (alertOffline) {
         subscribe(weatherStation, "feelsLike", heartbeat)
+        heartbeat()
     }
 }
 
