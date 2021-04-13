@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "2.2.1",
+    "version": "2.3.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change sprinkler pause from 30 sec to 30 min",
-    "dateReleased": "2021-03-29",
+    "releaseNotes": "Alert when lock has not been locked",
+    "dateReleased": "2021-04-12",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",

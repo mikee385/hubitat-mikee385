@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "2.3.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -34,13 +34,16 @@ preferences {
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
         }
-        section {
+        section("Outdoor Sensors") {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
             input "cameraNotification", "capability.switch", title: "Camera Notifications", multiple: false, required: false
         }
-        section {
+        section("Sprinklers") {
             input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
             input "sprinklerZones", "device.RachioZone", title: "Sprinkler Zones", multiple: true, required: false
+        }
+        section("Alerts") {
+            input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -148,6 +151,10 @@ def turnOff_LightSwitch() {
 def stopWaiting_LightSwitch() {
     unschedule("stopWaiting_LightSwitch")
     unsubscribe("lockHandler_LightSwitch")
+    
+    if (alertReset) {
+        person.deviceNotification("$lock has not been locked!")
+    }
 }
 
 def doorHandler_CameraSwitch(evt) {
