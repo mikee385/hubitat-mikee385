@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.3.0" }
+String getVersionNum() { return "2.4.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -41,9 +41,6 @@ preferences {
         section("Sprinklers") {
             input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
             input "sprinklerZones", "device.RachioZone", title: "Sprinkler Zones", multiple: true, required: false
-        }
-        section("Alerts") {
-            input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -88,6 +85,10 @@ def initialize() {
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
     subscribe(person, "status", personHandler_DoorAlert)
+    
+    // Lock Alert
+    subscribe(door, "contact", doorHandler_LockAlert)
+    subscribe(person, "status", personHandler_LockAlert)
     
     // Away Alert
     for (light in lights) {
@@ -151,10 +152,6 @@ def turnOff_LightSwitch() {
 def stopWaiting_LightSwitch() {
     unschedule("stopWaiting_LightSwitch")
     unsubscribe("lockHandler_LightSwitch")
-    
-    if (alertReset) {
-        person.deviceNotification("$lock has not been locked!")
-    }
 }
 
 def doorHandler_CameraSwitch(evt) {
@@ -300,6 +297,43 @@ def personHandler_DoorAlert(evt) {
 def doorAlert() {
     person.deviceNotification("Should the $door still be open?")
     runIn(60*30, doorAlert)
+}
+
+def doorHandler_LockAlert(evt) {
+    logDebug("doorHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        stopWaiting_LockAlert()
+    } else {
+        if (person.currentValue("status") == "home") {
+            subscribe(lock, "contact", lockHandler_LockAlert)
+            runIn(60*5, lockAlert)
+        }
+    }
+}
+
+def lockHandler_LockAlert(evt) {
+    logDebug("lockHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+    
+    stopWaiting_LockAlert()
+}
+
+def personHandler_LockAlert(evt) {
+    logDebug("personHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value != "home") {
+        stopWaiting_LockAlert()
+    }
+}
+
+def stopWaiting_LockAlert() {
+    unschedule("lockAlert")
+    unsubscribe("lockHandler_LockAlert")
+}
+
+def lockAlert() {
+    person.deviceNotification("Should the $lock still be unlocked?")
+    runIn(60*30, lockAlert)
 }
 
 def handler_AwayAlert(evt) {
