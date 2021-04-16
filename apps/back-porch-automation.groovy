@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.0.1" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -242,11 +242,11 @@ def occupancyHandler_LockAlert(evt) {
     logDebug("occupancyHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "occupied") {
-        unschedule("lockAlert")
-    } else {
         if (person.currentValue("status") == "home") {
             runIn(60*5, lockAlert)
         }
+    } else {
+        unschedule("lockAlert")
     }
 }
 
