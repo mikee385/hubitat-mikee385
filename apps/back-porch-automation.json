@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "2.4.0",
+    "version": "3.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Alert when lock has not been locked",
-    "dateReleased": "2021-04-13",
+    "releaseNotes": "Use occupancy to manage automation",
+    "dateReleased": "2021-04-15",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",

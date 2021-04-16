@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.4.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,9 +30,10 @@ definition(
 preferences {
     page(name: "settings", title: "Back Porch Automation", install: true, uninstall: true) {
         section {
-            input "lights", "capability.switch", title: "Lights", multiple: true, required: true
+            input "occupancy", "device.OccupancyStatus", title: "Occupancy Status", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
+            input "lights", "capability.switch", title: "Lights", multiple: true, required: true
         }
         section("Outdoor Sensors") {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
@@ -63,18 +64,18 @@ def updated() {
 def initialize() {
     state.sprinklersPaused = false
     
+    // Occupancy
+    subscribe(door, "contact", doorHandler_Occupancy)
+    subscribe(location, "mode", modeHandler_Occupancy)
+    
     // Light Switch
-    subscribe(door, "contact", doorHandler_LightSwitch)
-    subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
-    subscribe(location, "mode", modeHandler_LightSwitch)
+    subscribe(occupancy, "occupancy", occupancyHandler_LightSwitch)
     
     // Camera Notification
-    subscribe(door, "contact", doorHandler_CameraSwitch)
-    subscribe(location, "mode", modeHandler_CameraSwitch)
+    subscribe(occupancy, "occupancy", occupancyHandler_CameraNotification)
     
     // Sprinkler Zones
-    subscribe(door, "contact", doorHandler_SprinklerZones)
-    subscribe(location, "mode", modeHandler_SprinklerZones)
+    subscribe(occupancy, "occupancy", occupancyHandler_SprinklerZones)
     
     // Light Alert
     for (light in lights) {
@@ -87,15 +88,15 @@ def initialize() {
     subscribe(person, "status", personHandler_DoorAlert)
     
     // Lock Alert
-    subscribe(door, "contact", doorHandler_LockAlert)
+    subscribe(occupancy, "occupancy", occupancyHandler_LockAlert)
     subscribe(person, "status", personHandler_LockAlert)
     
     // Away Alert
+    subscribe(door, "contact", handler_AwayAlert)
+    subscribe(lock, "contact", handler_AwayAlert)
     for (light in lights) {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
-    subscribe(door, "contact", handler_AwayAlert)
-    subscribe(lock, "contact", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -104,98 +105,62 @@ def logDebug(msg) {
     }
 }
 
-def doorHandler_LightSwitch(evt) {
-    logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def doorHandler_Occupancy(evt) {
+    logDebug("doorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        stopWaiting_LightSwitch()
+        occupancy.occupied()
+    } else {
+        subscribe(lock, "contact", lockHandler_Occupancy)
+    }
+}
+
+def lockHandler_Occupancy(evt) {
+    logDebug("lockHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+    
+    unsubscribe("lockHandler_Occupancy")
+    occupancy.vacant()
+}
+
+def modeHandler_Occupancy(evt) {
+    logDebug("modeHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value != "Home") {
+        unsubscribe("lockHandler_Occupancy")
+        occupancy.vacant()
+    }
+}
+
+def occupancyHandler_LightSwitch(evt) {
+    logDebug("occupancyHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "occupied") {
         if (sunlight.currentValue("switch") == "off") {
             for (light in lights) {
                 light.on()
             }
         }
     } else {
-        subscribe(lock, "contact", lockHandler_LightSwitch)
-        runIn(60*10, stopWaiting_LightSwitch)
+        for (light in lights) {
+            light.off()
+        }
     }
 }
 
-def lockHandler_LightSwitch(evt) {
-    logDebug("lockHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def occupancyHandler_CameraNotification(evt) {
+    logDebug("occupancyHandler_CameraNotification: ${evt.device} changed to ${evt.value}")
     
-    turnOff_LightSwitch()
-}
-
-def sunlightHandler_LightSwitch(evt) {
-    logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "on") {
-        turnOff_LightSwitch()
-    }
-}
-
-def modeHandler_LightSwitch(evt) {
-    logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-
-    if (evt.value != "Home") {
-        turnOff_LightSwitch()
-    }
-}
-
-def turnOff_LightSwitch() {
-    stopWaiting_LightSwitch()
-    for (light in lights) {
-        light.off()
-    }
-}
-
-def stopWaiting_LightSwitch() {
-    unschedule("stopWaiting_LightSwitch")
-    unsubscribe("lockHandler_LightSwitch")
-}
-
-def doorHandler_CameraSwitch(evt) {
-    logDebug("doorHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "open") {
-        stopWaiting_CameraSwitch()
+    if (evt.value == "occupied") {
         cameraNotification.off()
     } else {
-        subscribe(lock, "contact", lockHandler_CameraSwitch)
-        runIn(60*10, turnOn_CameraSwitch)
+        cameraNotification.on()
     }
 }
 
-def lockHandler_CameraSwitch(evt) {
-    logDebug("lockHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
+def occupancyHandler_SprinklerZones(evt) {
+    logDebug("occupancyHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
     
-    runIn(15, turnOn_CameraSwitch)
-}
-
-def modeHandler_CameraSwitch(evt) {
-    logDebug("modeHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
-
-    if (evt.value != "Home") {
-        turnOn_CameraSwitch()
-    }
-}
-
-def turnOn_CameraSwitch() {
-    stopWaiting_CameraSwitch()
-    cameraNotification.on()
-}
-
-def stopWaiting_CameraSwitch() {
-    unschedule("turnOn_CameraSwitch")
-    unsubscribe("lockHandler_CameraSwitch")
-}
-
-def doorHandler_SprinklerZones(evt) {
-    logDebug("doorHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "open") {
-        stopWaiting_SprinklerZones()
-        
+    if (evt.value == "occupied") {
         for (sprinklerZone in sprinklerZones) {
             if (sprinklerZone.currentValue("switch") == "on") {
                 state.sprinklersPaused = true
@@ -205,38 +170,12 @@ def doorHandler_SprinklerZones(evt) {
             }
         }
     } else {
-        subscribe(lock, "contact", lockHandler_SprinklerZones)
-        runIn(60*10, resume_SprinklerZones)
+        if (state.sprinklersPaused) {
+            state.sprinklersPaused = false
+            //sprinklerController.resumeZoneRun()
+            person.deviceNotification("Resuming sprinklers!")
+        }
     }
-}
-
-def lockHandler_SprinklerZones(evt) {
-    logDebug("lockHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
-    
-    resume_SprinklerZones()
-}
-
-def modeHandler_SprinklerZones(evt) {
-    logDebug("modeHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
-
-    if (evt.value != "Home") {
-        resume_SprinklerZones()
-    }
-}
-
-def resume_SprinklerZones() {
-    stopWaiting_SprinklerZones()
-    
-    if (state.sprinklersPaused) {
-        state.sprinklersPaused = false
-        //sprinklerController.resumeZoneRun()
-        person.deviceNotification("Resuming sprinklers!")
-    }
-}
-
-def stopWaiting_SprinklerZones() {
-    unschedule("resume_SprinklerZones")
-    unsubscribe("lockHandler_SprinklerZones")
 }
 
 def lightHandler_LightAlert(evt) {
@@ -299,36 +238,28 @@ def doorAlert() {
     runIn(60*30, doorAlert)
 }
 
-def doorHandler_LockAlert(evt) {
-    logDebug("doorHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+def occupancyHandler_LockAlert(evt) {
+    logDebug("occupancyHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "open") {
-        stopWaiting_LockAlert()
+    if (evt.value == "occupied") {
+        unschedule("lockAlert")
     } else {
         if (person.currentValue("status") == "home") {
-            subscribe(lock, "contact", lockHandler_LockAlert)
             runIn(60*5, lockAlert)
         }
     }
-}
-
-def lockHandler_LockAlert(evt) {
-    logDebug("lockHandler_LockAlert: ${evt.device} changed to ${evt.value}")
-    
-    stopWaiting_LockAlert()
 }
 
 def personHandler_LockAlert(evt) {
     logDebug("personHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value != "home") {
-        stopWaiting_LockAlert()
+        unschedule("lockAlert")
+        
+        if (occupancy.currentValue("occupancy") == "occupied") {
+            person.deviceNotification("$lock is still unlocked!")
+        }
     }
-}
-
-def stopWaiting_LockAlert() {
-    unschedule("lockAlert")
-    unsubscribe("lockHandler_LockAlert")
 }
 
 def lockAlert() {
