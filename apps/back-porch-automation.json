@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "3.0.1",
+    "version": "3.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix where lock alert triggers were backwards",
-    "dateReleased": "2021-04-16",
+    "releaseNotes": "Add delay for turning on camera notification",
+    "dateReleased": "2021-04-19",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",

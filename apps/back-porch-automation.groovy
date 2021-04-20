@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.1" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -153,8 +153,12 @@ def occupancyHandler_CameraNotification(evt) {
     if (evt.value == "occupied") {
         cameraNotification.off()
     } else {
-        cameraNotification.on()
+        runIn(15, turnOn_CameraNotification)
     }
+}
+
+def turnOn_CameraNotification() {
+    cameraNotification.on()
 }
 
 def occupancyHandler_SprinklerZones(evt) {
