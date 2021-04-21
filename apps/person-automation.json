@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "3.1.0",
+    "version": "3.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add optional logging of presence events",
-    "dateReleased": "2021-02-21",
+    "releaseNotes": "Increase wait time for inconsistency check",
+    "dateReleased": "2021-04-21",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

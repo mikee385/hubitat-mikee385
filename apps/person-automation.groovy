@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -158,7 +158,7 @@ def departureHandler_PersonStatus(evt) {
 def personHandler_InconsistencyCheck(evt) {
     logDebug("personHandler_InconsistencyCheck: ${evt.device} changed to ${evt.value}")
     
-    runIn(30, inconsistencyCheck)
+    runIn(60, inconsistencyCheck)
 }
 
 def inconsistencyCheck() {
