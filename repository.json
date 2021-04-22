@@ -10,6 +10,13 @@
             "tags": [ "Automations & Groups", "Doors & Windows", "Lights & Switches", "Locks" ]
         },
         {
+            "name": "Backup Battery Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/backup-battery-automation.json",
+            "description": "Shuts down hub when backup battery is low on power and sends alerts based on status.",
+            "tags": [ "Automations & Groups", "Energy Monitoring", "Monitoring", "Notifications" ]
+        },
+        {
             "name": "Bathroom Fan Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.json",
