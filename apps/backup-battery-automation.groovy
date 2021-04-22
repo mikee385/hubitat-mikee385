@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Backup Battery Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -92,14 +92,17 @@ def backupBatteryHandler_PowerSourceAlert(evt) {
     logDebug("backupBatteryHandler_PowerSourceAlert: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "battery") {
+        log.info "Hub power is on battery!"
         if (alertBattery) {
             person.deviceNotification("Hub power is on battery!")
         }
     } else if (evt.value == "mains") {
+        log.info "Hub power has been restored!"
         if (alertMains) {
             person.deviceNotification("Hub power has been restored!")
         }
     } else if (evt.value == "unknown") {
+        log.warn "Backup battery is offline!"
         if (alertOffline) {
             person.deviceNotification("Backup battery is offline!")
         }
