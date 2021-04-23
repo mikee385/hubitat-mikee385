@@ -1,11 +1,11 @@
 {
     "packageName": "Backup Battery Automation",
     "author": "Michael Pierce",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add additional logging",
-    "dateReleased": "2021-04-21",
+    "releaseNotes": "Fix issue where shutdown timer resets incorrectly",
+    "dateReleased": "2021-04-23",
     "apps": [
         {
             "id": "3773bced-1945-464b-ab83-95aa5f752708",
