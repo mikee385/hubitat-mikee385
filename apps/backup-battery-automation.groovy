@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.1" }
+String getVersionNum() { return "1.2.2" }
 String getVersionLabel() { return "Backup Battery Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -79,7 +79,8 @@ def backupBatteryHandler_ShutdownHub(evt) {
     if (backupBattery.currentValue("powerSource") == "battery") {
         if (backupBattery.currentValue("batteryRuntimeSecs") <= (shutdownMinutes*60) && !state.lowBattery) {
             state.lowBattery = true
-            person.deviceNotification("Backup battery is low! Hub will shutdown in 15 seconds.")
+            log.warn "Backup battery is low! Hub is shutting down..."
+            person.deviceNotification("Backup battery is low! Hub is shutting down...")
             runIn(15, shutdownHub)
         }
     } else if (backupBattery.currentValue("powerSource") == "mains") {
@@ -89,7 +90,7 @@ def backupBatteryHandler_ShutdownHub(evt) {
 }
 
 def shutdownHub() {
-    httpPost("http://127.0.0.1:8080/hub/shutdown") { resp -> }
+    httpPost("http://127.0.0.1:8080/hub/shutdown", "") { resp -> }
 }
 
 def backupBatteryHandler_PowerSourceAlert(evt) {
