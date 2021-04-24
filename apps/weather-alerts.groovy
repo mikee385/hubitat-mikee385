@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.8.0" }
+String getVersionNum() { return "2.9.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -71,7 +71,8 @@ def initialize() {
     }
 
     // Rain Alert
-    subscribe(weatherStation, "precip_today", rainRateHandler_RainAlert)
+    subscribe(weatherStation, "precip_1hr", rainRateHandler_RainAlert)
+    subscribe(weatherStation, "precip_today", rainTodayHandler_RainAlert)
     subscribe(person, "sleeping", personHandler_RainAlert)
 }
 
@@ -84,6 +85,20 @@ def logDebug(msg) {
 def rainRateHandler_RainAlert(evt) {
     logDebug("rainRateHandler_RainAlert: ${evt.device} changed to ${evt.value}")
     
+    rainHandler_RainAlert()
+}
+
+def rainTodayHandler_RainAlert(evt) {
+    logDebug("rainTodayHandler_RainAlert: ${evt.device} changed to ${evt.value}")
+    
+    def rate_previous = state.rate
+    def rate_current = weatherStation.currentValue("precip_1hr")
+    if (rate_current == rate_previous) {
+        rainHandler_RainAlert()
+    }
+}
+
+def rainHandler_RainAlert() {
     log.debug("START UPDATE")
     
     // Get state variables
