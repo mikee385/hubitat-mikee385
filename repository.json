@@ -213,6 +213,13 @@
             "tags": [ "Misc. Devices", "Voice Assistants" ]
         },
         {
+            "name": "Virtual Power Source",
+            "category": "Utility",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-power-source.json",
+            "description": "Driver for a power source that can be set by external systems.",
+            "tags": [ "Energy Monitoring", "Misc. Devices", "Monitoring" ]
+        },
+        {
             "name": "Ambient Weather Integration",
             "category": "Integrations",
             "location": "https://raw.githubusercontent.com/mikee385/Hubitat-Ambient-Weather/master/packageManifest.json",

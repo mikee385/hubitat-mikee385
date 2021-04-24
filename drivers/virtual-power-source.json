@@ -1,0 +1,18 @@
+{
+    "packageName": "Virtual Power Source",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial release",
+    "dateReleased": "2020-04-24",
+    "drivers": [
+        {
+            "id": "061b4ae3-e285-43fc-a480-bd2da106a6a2",
+            "name": "Virtual Power Source",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-power-source.groovy",
+            "required": true
+        }
+    ]
+}
