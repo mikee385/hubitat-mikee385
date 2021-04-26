@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.2" }
+String getVersionNum() { return "1.3.0" }
 String getVersionLabel() { return "Backup Battery Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -61,7 +61,7 @@ def initialize() {
 
     // Shutdown Hub
     subscribe(backupBattery, "powerSource", backupBatteryHandler_ShutdownHub)
-    subscribe(backupBattery, "batteryRuntimeSecs", backupBatteryHandler_ShutdownHub)
+    subscribe(backupBattery, "batteryRuntime", backupBatteryHandler_ShutdownHub)
     
     // Power Source Alert
     subscribe(backupBattery, "powerSource", backupBatteryHandler_PowerSourceAlert)
@@ -77,10 +77,10 @@ def backupBatteryHandler_ShutdownHub(evt) {
     logDebug("backupBatteryHandler_ShutdownHub: ${evt.device} changed to ${evt.value}")
 
     if (backupBattery.currentValue("powerSource") == "battery") {
-        if (backupBattery.currentValue("batteryRuntimeSecs") <= (shutdownMinutes*60) && !state.lowBattery) {
+        if (backupBattery.currentValue("batteryRuntime") <= (shutdownMinutes*60) && !state.lowBattery) {
             state.lowBattery = true
-            log.warn "Backup battery is low! Hub is shutting down..."
-            person.deviceNotification("Backup battery is low! Hub is shutting down...")
+            log.warn "Backup battery is low! Shutting down..."
+            person.deviceNotification("Backup battery is low! Shutting down... (mine)")
             runIn(15, shutdownHub)
         }
     } else if (backupBattery.currentValue("powerSource") == "mains") {
@@ -97,19 +97,19 @@ def backupBatteryHandler_PowerSourceAlert(evt) {
     logDebug("backupBatteryHandler_PowerSourceAlert: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "battery") {
-        log.info "Hub power is on battery!"
+        log.info "Power is on battery!"
         if (alertBattery) {
-            person.deviceNotification("Hub power is on battery!")
+            person.deviceNotification("Power is on battery! (mine)")
         }
     } else if (evt.value == "mains") {
-        log.info "Hub power has been restored!"
+        log.info "Power has been restored!"
         if (alertMains) {
-            person.deviceNotification("Hub power has been restored!")
+            person.deviceNotification("Power has been restored! (mine)")
         }
     } else if (evt.value == "unknown") {
         log.warn "Backup battery is offline!"
         if (alertOffline) {
-            person.deviceNotification("Backup battery is offline!")
+            person.deviceNotification("Backup battery is offline! (mine)")
         }
     } else {
         log.warn "Unknown powerSource value: ${evt.value}"
