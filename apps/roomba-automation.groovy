@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.6.1" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -68,9 +68,9 @@ def initialize() {
     }
 
     // Roomba Status
-    subscribe(roomba, "cleanStatus", roombaHandler)
-    
     subscribe(location, "mode", modeHandler)
+    subscribe(roomba, "phase", phaseHandler)
+    subscribe(roomba, "cycle", cycleHandler)
     
     def currentTime = new Date()
     
@@ -81,13 +81,14 @@ def initialize() {
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
     
     // Initialize state
-    def deviceRunning = roomba.currentValue("cleanStatus") == "cleaning"
+    def deviceRunning = roomba.currentValue("phase") == "run"
     def stateRunning = state.endTime < state.startTime
     
     if (deviceRunning && !stateRunning) {
-        started()
+        state.startTime = now()
     } else if (!deviceRunning && stateRunning) {
-        stopped()
+        state.endTime = now()
+        state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     }
 }
 
@@ -97,43 +98,46 @@ def logDebug(msg) {
     }
 }
 
-def started() {
-    state.startTime = now()
-        
-    if (location.mode == "Away") {
-        person.deviceNotification("$roomba has started!")
-    }
-}
-
-def stopped() {
-    state.endTime = now()
-    state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
-}
-
-def roombaHandler(evt) {
-    logDebug("roombaHandler: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "cleaning") {
-        started()
-    } else if (state.endTime < state.startTime) { // should only be true while Roomba is running
-        stopped()
-    }
-    
-    if (evt.value == "charging" && state.durationMinutes >= 0.5) {
-        person.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
-    }
-}
-
 def modeHandler(evt) {
     logDebug("modeHandler: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "Away") {
-        if (roomba.currentValue("cleanStatus") != "cleaning" && timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && state.durationMinutes < minimumMinutes) {
+
+    if (evt.value == "Sleep") {
+        if (roomba.currentValue("cycle") != "none") {
+            roomba.stop()
+        }
+    } else if (evt.value == "Away") {
+        if (roomba.currentValue("cycle") == "none" && timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && state.durationMinutes < minimumMinutes) {
             roomba.start()
         }
     } else {
-        if (roomba.currentValue("cleanStatus") == "cleaning") {
+        if (roomba.currentValue("cycle") != "none") {
+            roomba.pause()
             roomba.dock()
+        }
+    }
+}
+
+def phaseHandler(evt) {
+    logDebug("phaseHandler: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "run") {
+        state.startTime = now()
+    } else if (state.endTime < state.startTime) { // should only be true while Roomba is running
+        state.endTime = now()
+        state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
+    }
+}
+
+def cycleHandler(evt) {
+    logDebug("cycleHandler: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "none") {
+        if (location.mode == "Away") {
+            person.deviceNotification("$roomba has started!")
+        }
+    } else {
+        if (state.durationMinutes >= 0.5) {
+            person.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
         }
     }
 }
@@ -141,7 +145,7 @@ def modeHandler(evt) {
 def dailyStart() {
     logDebug("dailyStart")
     
-    if (location.mode == "Away" && roomba.currentValue("cleanStatus") != "cleaning" && state.durationMinutes < minimumMinutes) {
+    if (location.mode == "Away" && roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
         roomba.start()
     }
 }
