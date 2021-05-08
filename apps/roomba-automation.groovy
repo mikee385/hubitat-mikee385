@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -100,6 +100,9 @@ def logDebug(msg) {
 
 def modeHandler(evt) {
     logDebug("modeHandler: ${evt.device} changed to ${evt.value}")
+    
+    unsubscribe("scheduleCancellation")
+    unschedule("cancelMission")
 
     if (evt.value == "Sleep") {
         if (roomba.currentValue("cycle") != "none") {
@@ -111,9 +114,41 @@ def modeHandler(evt) {
         }
     } else {
         if (roomba.currentValue("cycle") != "none") {
-            roomba.pause()
-            roomba.dock()
+            if (roomba.currentValue("phase") == "charge") {
+                scheduleCancellation(null)
+            } else {
+                subscribe(roomba, "phase.charge", scheduleCancellation)
+                if (roomba.currentValue("phase") == "run") {
+                    roomba.pause()
+                    roomba.dock()
+                }
+            } 
         }
+    }
+}
+
+def scheduleCancellation(evt) {
+    unsubscribe("scheduleCancellation")
+    unschedule("cancelMission")
+    
+    if (roomba.currentValue("cycle") != "none") {
+        rechrgTm = roomba.currentValue("rechrgTm").toLong()*1000
+        if (rechrgTm > 0) {
+            cancelTm = rechrgTm - 2*60*1000
+            if (cancelTm < now()) {
+                cancelMission()
+            } else {
+                runOnce(new Date(cancelTm), cancelMission)
+                person.deviceNotification("$roomba will be canceled at ${new Date(cancelTm)}!")
+            }
+        }
+    }
+}
+
+def cancelMission() {
+    if (roomba.currentValue("cycle") != "none") {
+        roomba.stop()
+        person.deviceNotification("$roomba has been canceled!")
     }
 }
 
@@ -132,12 +167,15 @@ def cycleHandler(evt) {
     logDebug("cycleHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "none") {
-        if (location.mode == "Away") {
-            person.deviceNotification("$roomba has started!")
-        }
-    } else {
+        unsubscribe("scheduleCancellation")
+        unschedule("cancelMission")
+    
         if (state.durationMinutes >= 0.5) {
             person.deviceNotification("$roomba has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
+        }
+    } else {
+        if (location.mode == "Away") {
+            person.deviceNotification("$roomba has started!")
         }
     }
 }
