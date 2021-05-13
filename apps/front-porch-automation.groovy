@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,12 +30,19 @@ definition(
 preferences {
     page(name: "settings", title: "Front Porch Automation", install: true, uninstall: true) {
         section {
-            input "lights", "capability.switch", title: "Exterior Lights", multiple: true, required: true
-            input "door", "capability.contactSensor", title: "Exterior Door", multiple: false, required: true
-            input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
-            input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
+            input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
+            input "lock", "capability.lock", title: "Door Lock", multiple: false, required: true
+            input "lights", "capability.switch", title: "Lights", multiple: true, required: true
         }
-        section() {
+        section("Outdoor Sensors") {
+            input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
+            input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
+        }
+        section("Sprinklers") {
+            input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
+            input "sprinklerZones", "device.RachioZone", title: "Sprinkler Zones", multiple: true, required: false
+        }
+        section("Light Button") {
             input "buttonDevice", "capability.pushableButton", title: "Button Device", required: false
             input "buttonNumber", "number", title: "Button Number", required: false
         }
@@ -71,6 +78,10 @@ def initialize() {
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
     subscribe(person, "status", personHandler_DoorAlert)
+    
+    // Lock Alert
+    subscribe(lock, "lock", lockHandler_LockAlert)
+    subscribe(person, "status", personHandler_LockAlert)
     
     // Away Alert
     for (light in lights) {
@@ -173,6 +184,35 @@ def personHandler_DoorAlert(evt) {
 def doorAlert() {
     person.deviceNotification("Should the $door still be open?")
     runIn(60*30, doorAlert)
+}
+
+def lockHandler_LockAlert(evt) {
+    logDebug("lockHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "unlocked") {
+        if (person.currentValue("status") == "home") {
+            runIn(60*5, lockAlert)
+        }
+    } else {
+        unschedule("lockAlert")
+    }
+}
+
+def personHandler_LockAlert(evt) {
+    logDebug("personHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value != "home") {
+        unschedule("lockAlert")
+        
+        if (lock.currentValue("lock") == "unlocked") {
+            person.deviceNotification("$lock is still unlocked!")
+        }
+    }
+}
+
+def lockAlert() {
+    person.deviceNotification("Should the $lock still be unlocked?")
+    runIn(60*30, lockAlert)
 }
 
 def handler_AwayAlert(evt) {

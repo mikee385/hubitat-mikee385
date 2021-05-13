@@ -1,11 +1,11 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove door handler for light switch",
-    "dateReleased": "2021-03-06",
+    "releaseNotes": "Add alert when lock is left unlocked",
+    "dateReleased": "2021-05-12",
     "apps": [
         {
             "id": "2b643332-38a5-413c-b76e-647edd831fa9",
