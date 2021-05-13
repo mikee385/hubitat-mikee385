@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,12 +31,12 @@ preferences {
     page(name: "settings", title: "Front Porch Automation", install: true, uninstall: true) {
         section {
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
-            input "lock", "capability.lock", title: "Door Lock", multiple: false, required: true
+            input "lock", "capability.lock", title: "Door Lock", multiple: false, required: false
             input "lights", "capability.switch", title: "Lights", multiple: true, required: true
         }
         section("Outdoor Sensors") {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
-            input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
+            input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: false
         }
         section("Sprinklers") {
             input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
@@ -73,21 +73,28 @@ def initialize() {
     }
     
     // Motion Alert
-    subscribe(motionSensor, "motion", motionHandler_MotionAlert)
+    if (motionSensor) {
+        subscribe(motionSensor, "motion", motionHandler_MotionAlert)
+    }
     
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
     subscribe(person, "status", personHandler_DoorAlert)
     
     // Lock Alert
-    subscribe(lock, "lock", lockHandler_LockAlert)
-    subscribe(person, "status", personHandler_LockAlert)
+    if (lock) {
+        subscribe(lock, "lock", lockHandler_LockAlert)
+        subscribe(person, "status", personHandler_LockAlert)
+    }
     
     // Away Alert
+    subscribe(door, "contact", handler_AwayAlert)
+    if (lock) {
+        subscribe(lock, "lock", handler_AwayAlert)
+    }
     for (light in lights) {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
-    subscribe(door, "contact", handler_AwayAlert)
 }
 
 def logDebug(msg) {

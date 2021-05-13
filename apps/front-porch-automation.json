@@ -1,10 +1,10 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add alert when lock is left unlocked",
+    "releaseNotes": "Change lock and motion sensor to optional",
     "dateReleased": "2021-05-12",
     "apps": [
         {
