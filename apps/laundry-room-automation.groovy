@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.3.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,10 +33,21 @@ preferences {
             input "light", "device.GEZ-WavePlusMotionSwitch", title: "Light", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
         }
+        section("Laundry") {
+            input "laundry", "device.ApplianceStatus", title: "Laundry", multiple: false, required: true
+            input "washer", "device.LGThinQWasher", title: "Washer", required: true
+            input "dryer", "device.LGThinQDryer", title: "Dryer", required: true
+        }
         section("Bedtime") {
             input "routine", "capability.switch", title: "Routine", multiple: false, required: true
             input "startTime", "time", title: "Start Time", required: true
             input "endTime", "time", title: "End Time", required: true
+        }
+        section("Alerts") {
+            input "alertReminder", "bool", title: "Reminder when Laundry Not Moved?", required: true, defaultValue: false
+            input "alertStarted", "bool", title: "Alert when Laundry Started?", required: true, defaultValue: false
+            input "alertFinished", "bool", title: "Alert when Laundry Finished?", required: true, defaultValue: false
+            input "alertReset", "bool", title: "Alert when Laundry Reset?", required: true, defaultValue: false
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -67,6 +78,15 @@ def initialize() {
     // Light Timeout
     subscribe(door, "contact.open", doorHandler_LightTimeout)
     subscribe(light, "switch.off", lightHandler_LightTimeout)
+    
+    // Laundry Status
+    subscribe(washer, "currentState", washerHandler_LaundryStatus)
+    subscribe(dryer, "currentState", dryerHandler_LaundryStatus)
+    subscribe(light, "motion.active", lightHandler_LaundryStatus)
+    
+    // Laundry Alert
+    subscribe(laundry, "status", laundryHandler_LaundryAlert)
+    subscribe(person, "status", personHandler_LaundryAlert)
 
     // Bedtime Routine
     subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
@@ -80,6 +100,8 @@ def initialize() {
     // Away Alert
     subscribe(light, "switch.on", handler_AwayAlert)
     subscribe(door, "contact", handler_AwayAlert)
+    subscribe(washer, "currentState", handler_AwayAlert)
+    subscribe(dryer, "currentState", handler_AwayAlert)
 }
 
 def logDebug(msg) {
@@ -110,6 +132,117 @@ def lightHandler_LightTimeout(evt) {
         state.firstTime = false
         light.setLightTimeout("1 minute")
     }
+}
+
+def washerRunning(currentStatus) {
+    return currentStatus == "detecting" || currentStatus == "running" || currentStatus == "rinsing" || currentStatus == "spinning"
+}
+
+def washerFinished(currentStatus) {
+    return currentStatus == "end" || currentStatus == "power off"
+}
+
+def washerOther(currentStatus) {
+    return currentStatus == "initial"
+}
+
+def washerHandler_LaundryStatus(evt) {
+    logDebug("washerHandler_LaundryStatus: ${evt.device} changed to ${evt.value}")
+    
+    if (washerRunning(evt.value)) {
+        if (laundry.currentValue("status") != "running") {
+            laundry.start()
+        }
+    } else if (washerFinished(evt.value)) {
+        if (dryerFinished(dryer.currentValue("currentStatus")) && laundry.currentValue("status") != "finished") {
+            laundry.finish()
+        }
+    } else if (!washerOther(evt.value)) {
+        person.deviceNotification("Error: Unknown status for $washer: ${evt.value}")
+    }
+}
+
+def dryerRunning(currentStatus) {
+    return currentStatus == "drying" || currentStatus == "cooling"
+}
+
+def dryerFinished(currentStatus) {
+    return currentStatus == "end" || currentStatus == "power off"
+}
+
+def dryerOther(currentStatus) {
+    return currentStatus == "initial"
+}
+
+def dryerHandler_LaundryStatus(evt) {
+    logDebug("dryerHandler_LaundryStatus: ${evt.device} changed to ${evt.value}")
+    
+    if (dryerRunning(evt.value)) {
+        if (laundry.currentValue("status") != "running") {
+            laundry.start()
+        }
+    } else if (dryerFinished(evt.value)) {
+        if (washerFinished(washer.currentValue("currentStatus")) && laundry.currentValue("status") != "finished") {
+            laundry.finish()
+        }
+    } else if (!dryerOther(evt.value)) {
+        person.deviceNotification("Error: Unknown status for $dryer: ${evt.value}")
+    }
+}
+
+def lightHandler_LaundryStatus(evt) {
+    logDebug("lightHandler_LaundryStatus: ${evt.device} changed to ${evt.value}")
+    
+    if (laundry.currentValue("status") == "finished") {
+        laundry.reset()
+    }
+}
+    
+def laundryHandler_LaundryAlert(evt) {
+    logDebug("laundryHandler_LaundryAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "running") {
+        unschedule("reminderAlert")
+        
+        if (alertStarted) {
+            person.deviceNotification("Laundry has started.")
+        }
+    } else if (evt.value == "finished") {
+        if (alertFinished) {
+            person.deviceNotification("Laundry has finished.")
+        }
+        
+        if (alertReminder && person.currentValue("status") == "home") {
+            reminderAlert()
+        }
+    } else if (evt.value == "idle") {
+        unschedule("reminderAlert")
+        
+        if (alertReset) {
+            person.deviceNotification("Laundry has reset.")
+        }
+    }
+}
+
+def personHandler_LaundryAlert(evt) {
+    logDebug("personHandler_LaundryAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value = "home") {
+        if (alertReminder && laundry.currentValue("status") == "finished") {
+            reminderAlert()
+        }
+    } else {
+        unschedule("reminderAlert")
+        
+        if (alertReminder && laundry.currentValue("status") == "finished") {
+            person.deviceNotification("Laundry has not been moved!")
+        }
+    }
+}
+
+def reminderAlert() {
+    person.deviceNotification("Move the laundry!")
+    runIn(60*5, reminderAlert)
 }
 
 def doorHandler_BedtimeRoutine(evt) {
