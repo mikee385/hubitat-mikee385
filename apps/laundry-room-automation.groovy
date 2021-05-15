@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.5" }
+String getVersionNum() { return "2.0.6" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -163,7 +163,7 @@ def washerHandler_LaundryStatus(evt) {
             laundry.start()
         }
     } else if (washerFinished(evt.value)) {
-        if (!dryerRunning(dryer.currentValue("currentState")) && laundry.currentValue("status") != "finished") {
+        if (!dryerRunning(dryer.currentValue("currentState")) && laundry.currentValue("status") == "running") {
             laundry.finish()
         }
     } else if (!washerOther(evt.value)) {
@@ -200,7 +200,7 @@ def dryerHandler_LaundryStatus(evt) {
             laundry.start()
         }
     } else if (dryerFinished(evt.value)) {
-        if (!washerRunning(washer.currentValue("currentState")) && laundry.currentValue("status") != "finished") {
+        if (!washerRunning(washer.currentValue("currentState")) && laundry.currentValue("status") == "running") {
             laundry.finish()
         }
     } else if (!dryerOther(evt.value)) {
