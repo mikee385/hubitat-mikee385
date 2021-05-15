@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix issue where laundry didn't change to finished",
-    "dateReleased": "2021-05-13",
+    "releaseNotes": "Add additional logging",
+    "dateReleased": "2021-05-14",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

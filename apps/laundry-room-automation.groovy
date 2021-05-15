@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.2" }
+String getVersionNum() { return "2.0.3" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -149,6 +149,15 @@ def washerOther(currentStatus) {
 def washerHandler_LaundryStatus(evt) {
     logDebug("washerHandler_LaundryStatus: ${evt.device} changed to ${evt.value}")
     
+    log.info "Washer Status: ${evt.value}"
+    log.info "Washer Running: ${washerRunning(evt.value)}"
+    log.info "Washer Finished: ${washerFinished(evt.value)}"
+    
+    def dryerStatus = dryer.currentValue("currentStatus")
+    log.info "Dryer Status: ${dryerStatus}"
+    log.info "Dryer Running: ${dryerRunning(dryerStatus)}"
+    log.info "Dryer Finished: ${dryerFinished(dryerStatus)}"
+    
     if (washerRunning(evt.value)) {
         if (laundry.currentValue("status") != "running") {
             laundry.start()
@@ -176,6 +185,15 @@ def dryerOther(currentStatus) {
 
 def dryerHandler_LaundryStatus(evt) {
     logDebug("dryerHandler_LaundryStatus: ${evt.device} changed to ${evt.value}")
+    
+    log.info "Dryer Status: ${evt.value}"
+    log.info "Dryer Running: ${dryerRunning(evt.value)}"
+    log.info "Dryer Finished: ${dryerFinished(evt.value)}"
+    
+    def washerStatus = washer.currentValue("currentStatus")
+    log.info "Washer Status: ${washerStatus}"
+    log.info "Washer Running: ${washerRunning(washerStatus)}"
+    log.info "Washer Finished: ${washerFinished(washerStatus)}"
     
     if (dryerRunning(evt.value)) {
         if (laundry.currentValue("status") != "running") {
