@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.3" }
+String getVersionNum() { return "2.0.4" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -135,7 +135,7 @@ def lightHandler_LightTimeout(evt) {
 }
 
 def washerRunning(currentStatus) {
-    return currentStatus == "detecting" || currentStatus == "running" || currentStatus == "rinsing" || currentStatus == "spinning"
+    return currentStatus == "detecting" || currentStatus == "running" || currentStatus == "rinsing" || currentStatus == "spinning" || currentStatus == "pause"
 }
 
 def washerFinished(currentStatus) {
@@ -172,7 +172,7 @@ def washerHandler_LaundryStatus(evt) {
 }
 
 def dryerRunning(currentStatus) {
-    return currentStatus == "drying" || currentStatus == "cooling"
+    return currentStatus == "drying" || currentStatus == "cooling" || currentStatus == "pause"
 }
 
 def dryerFinished(currentStatus) {
