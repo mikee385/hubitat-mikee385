@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.6" }
+String getVersionNum() { return "2.0.7" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -100,8 +100,6 @@ def initialize() {
     // Away Alert
     subscribe(light, "switch.on", handler_AwayAlert)
     subscribe(door, "contact", handler_AwayAlert)
-    subscribe(washer, "currentState", handler_AwayAlert)
-    subscribe(dryer, "currentState", handler_AwayAlert)
 }
 
 def logDebug(msg) {
