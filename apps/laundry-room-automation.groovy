@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.4" }
+String getVersionNum() { return "2.0.5" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -134,16 +134,16 @@ def lightHandler_LightTimeout(evt) {
     }
 }
 
-def washerRunning(currentStatus) {
-    return currentStatus == "detecting" || currentStatus == "running" || currentStatus == "rinsing" || currentStatus == "spinning" || currentStatus == "pause"
+def washerRunning(currentState) {
+    return currentState == "detecting" || currentState == "running" || currentState == "rinsing" || currentState == "spinning" || currentState == "pause"
 }
 
-def washerFinished(currentStatus) {
-    return currentStatus == "end" || currentStatus == "power off"
+def washerFinished(currentState) {
+    return currentState == "end" || currentState == "power off"
 }
 
-def washerOther(currentStatus) {
-    return currentStatus == "initial"
+def washerOther(currentState) {
+    return currentState == "initial"
 }
 
 def washerHandler_LaundryStatus(evt) {
@@ -153,7 +153,7 @@ def washerHandler_LaundryStatus(evt) {
     log.info "Washer Running: ${washerRunning(evt.value)}"
     log.info "Washer Finished: ${washerFinished(evt.value)}"
     
-    def dryerStatus = dryer.currentValue("currentStatus")
+    def dryerStatus = dryer.currentValue("currentState")
     log.info "Dryer Status: ${dryerStatus}"
     log.info "Dryer Running: ${dryerRunning(dryerStatus)}"
     log.info "Dryer Finished: ${dryerFinished(dryerStatus)}"
@@ -163,7 +163,7 @@ def washerHandler_LaundryStatus(evt) {
             laundry.start()
         }
     } else if (washerFinished(evt.value)) {
-        if (!dryerRunning(dryer.currentValue("currentStatus")) && laundry.currentValue("status") != "finished") {
+        if (!dryerRunning(dryer.currentValue("currentState")) && laundry.currentValue("status") != "finished") {
             laundry.finish()
         }
     } else if (!washerOther(evt.value)) {
@@ -171,16 +171,16 @@ def washerHandler_LaundryStatus(evt) {
     }
 }
 
-def dryerRunning(currentStatus) {
-    return currentStatus == "drying" || currentStatus == "cooling" || currentStatus == "pause"
+def dryerRunning(currentState) {
+    return currentState == "drying" || currentState == "cooling" || currentState == "pause"
 }
 
-def dryerFinished(currentStatus) {
-    return currentStatus == "end" || currentStatus == "power off"
+def dryerFinished(currentState) {
+    return currentState == "end" || currentState == "power off"
 }
 
-def dryerOther(currentStatus) {
-    return currentStatus == "initial"
+def dryerOther(currentState) {
+    return currentState == "initial"
 }
 
 def dryerHandler_LaundryStatus(evt) {
@@ -190,7 +190,7 @@ def dryerHandler_LaundryStatus(evt) {
     log.info "Dryer Running: ${dryerRunning(evt.value)}"
     log.info "Dryer Finished: ${dryerFinished(evt.value)}"
     
-    def washerStatus = washer.currentValue("currentStatus")
+    def washerStatus = washer.currentValue("currentState")
     log.info "Washer Status: ${washerStatus}"
     log.info "Washer Running: ${washerRunning(washerStatus)}"
     log.info "Washer Finished: ${washerFinished(washerStatus)}"
@@ -200,7 +200,7 @@ def dryerHandler_LaundryStatus(evt) {
             laundry.start()
         }
     } else if (dryerFinished(evt.value)) {
-        if (!washerRunning(washer.currentValue("currentStatus")) && laundry.currentValue("status") != "finished") {
+        if (!washerRunning(washer.currentValue("currentState")) && laundry.currentValue("status") != "finished") {
             laundry.finish()
         }
     } else if (!dryerOther(evt.value)) {
