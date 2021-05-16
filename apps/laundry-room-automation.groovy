@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.1.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -83,6 +83,15 @@ def initialize() {
     subscribe(washer, "currentState", washerHandler_LaundryStatus)
     subscribe(dryer, "currentState", dryerHandler_LaundryStatus)
     subscribe(light, "motion.active", lightHandler_LaundryStatus)
+
+    // Bedtime Routine
+    subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
+    
+    // Light Alert
+    subscribe(door, "contact", deviceHandler_LightAlert)
+    subscribe(light, "motion.active", deviceHandler_LightAlert)
+    subscribe(light, "switch", deviceHandler_LightAlert)
+    subscribe(person, "status", personHandler_LightAlert)
     
     // Laundry Alert
     subscribe(laundry, "status", laundryHandler_LaundryAlert)
@@ -95,15 +104,6 @@ def initialize() {
     // Dryer Pause Alert
     subscribe(dryer, "currentState", dryerHandler_DryerPauseAlert)
     subscribe(person, "status", personHandler_DryerPauseAlert)
-
-    // Bedtime Routine
-    subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
-    
-    // Light Alert
-    subscribe(door, "contact", deviceHandler_LightAlert)
-    subscribe(light, "motion.active", deviceHandler_LightAlert)
-    subscribe(light, "switch", deviceHandler_LightAlert)
-    subscribe(person, "status", personHandler_LightAlert)
     
     // Away Alert
     subscribe(light, "switch.on", handler_AwayAlert)
@@ -203,7 +203,48 @@ def lightHandler_LaundryStatus(evt) {
         laundry.reset()
     }
 }
+
+def doorHandler_BedtimeRoutine(evt) {
+    logDebug("doorHandler_BedtimeRoutine: ${evt.device} changed to ${evt.value}")
     
+    if (location.mode != "Away" && timeOfDayIsBetween(timeToday(startTime), timeToday(endTime), new Date(), location.timeZone)) {
+        routine.on()
+        light.off()
+    }
+}
+
+def deviceHandler_LightAlert(evt) {
+    logDebug("deviceHandler_LightAlert: ${evt.device} changed to ${evt.value}")
+    
+    unschedule("lightAlert")
+    if (light.currentValue("switch") == "on") {
+        if (person.currentValue("status") != "sleep") {
+            if (state.firstTime) {
+                runIn(60*10, lightAlert)
+            } else {
+                runIn(60*5, lightAlert)
+            }
+        }
+    }
+}
+
+def personHandler_LightAlert(evt) {
+    logDebug("personHandler_LightAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "sleep") {
+        unschedule("lightAlert")
+        
+        if (light.currentValue("switch") == "on") {
+            person.deviceNotification("$light is still on!")
+        }
+    }
+}
+
+def lightAlert(evt) {
+    person.deviceNotification("Should the $light still be on?")
+    runIn(60*30, lightAlert)
+}
+
 def laundryHandler_LaundryAlert(evt) {
     logDebug("laundryHandler_LaundryAlert: ${evt.device} changed to ${evt.value}")
     
@@ -305,47 +346,6 @@ def personHandler_DryerPauseAlert(evt) {
 def dryerPauseAlert(evt) {
     person.deviceNotification("Should the $dryer still be paused?")
     runIn(60*5, dryerPauseAlert)
-}
-
-def doorHandler_BedtimeRoutine(evt) {
-    logDebug("doorHandler_BedtimeRoutine: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode != "Away" && timeOfDayIsBetween(timeToday(startTime), timeToday(endTime), new Date(), location.timeZone)) {
-        routine.on()
-        light.off()
-    }
-}
-
-def deviceHandler_LightAlert(evt) {
-    logDebug("deviceHandler_LightAlert: ${evt.device} changed to ${evt.value}")
-    
-    unschedule("lightAlert")
-    if (light.currentValue("switch") == "on") {
-        if (person.currentValue("status") != "sleep") {
-            if (state.firstTime) {
-                runIn(60*10, lightAlert)
-            } else {
-                runIn(60*5, lightAlert)
-            }
-        }
-    }
-}
-
-def personHandler_LightAlert(evt) {
-    logDebug("personHandler_LightAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "sleep") {
-        unschedule("lightAlert")
-        
-        if (light.currentValue("switch") == "on") {
-            person.deviceNotification("$light is still on!")
-        }
-    }
-}
-
-def lightAlert(evt) {
-    person.deviceNotification("Should the $light still be on?")
-    runIn(60*30, lightAlert)
 }
 
 def handler_AwayAlert(evt) {
