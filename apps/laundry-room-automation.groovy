@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.6.0" }
+String getVersionNum() { return "2.7.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -68,17 +68,12 @@ def updated() {
 }
 
 def initialize() {
-    if (state.firstTime == null) {
-        state.firstTime = false
-    }
-
     // Light Switch
     subscribe(door, "contact.open", doorHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Light Timeout
     subscribe(door, "contact.open", doorHandler_LightTimeout)
-    subscribe(light, "switch.off", lightHandler_LightTimeout)
     
     // Laundry Status
     subscribe(washer, "currentState", washerHandler_LaundryStatus)
@@ -134,17 +129,15 @@ def modeHandler_LightSwitch(evt) {
 def doorHandler_LightTimeout(evt) {
     logDebug("doorHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
     
-    state.firstTime = true
     light.setLightTimeout("5 minutes (default)")
+    subscribe(light, "switch.off", lightHandler_LightTimeout)
 }
 
 def lightHandler_LightTimeout(evt) {
     logDebug("lightHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
     
-    if (state.firstTime) {
-        state.firstTime = false
-        light.setLightTimeout("1 minute")
-    }
+    unsubscribe("lightHandler_LightTimeout")
+    light.setLightTimeout("1 minute")
 }
 
 def washerRunning(currentState) {
@@ -226,11 +219,7 @@ def deviceHandler_LightAlert(evt) {
     unschedule("lightAlert")
     if (light.currentValue("switch") == "on" && light.currentValue("motion") == "inactive") {
         if (person.currentValue("status") != "sleep") {
-            if (state.firstTime) {
-                runIn(60*10, lightAlert)
-            } else {
-                runIn(60*5, lightAlert)
-            }
+            runIn(60*5, lightAlert)
         }
     }
 }
