@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "4.3.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -84,7 +84,7 @@ def initialize() {
 
     // Appliance Status
     subscribe(appliance, "status", applianceHandler_ApplianceStatus)
-    subscribe(contactSensor, "contact.open", contactSensorHandler_ApplianceStatus)
+    subscribe(contactSensor, "contact", contactSensorHandler_ApplianceStatus)
     
     def resetToday = timeToday(resetTime)
     def currentTime = new Date()
