@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.1" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -260,7 +260,7 @@ def laundryHandler_LaundryAlert(evt) {
         }
         
         if (alertReminder && person.currentValue("status") == "home") {
-            reminderAlert()
+            runIn(60*5, reminderAlert)
         }
     } else if (evt.value == "idle") {
         unschedule("reminderAlert")
@@ -276,7 +276,7 @@ def personHandler_LaundryAlert(evt) {
     
     if (evt.value == "home") {
         if (alertReminder && laundry.currentValue("status") == "finished") {
-            reminderAlert()
+            runIn(60*5, reminderAlert)
         }
     } else {
         unschedule("reminderAlert")

@@ -1,10 +1,10 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "2.1.1",
+    "version": "2.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rearrange alert methods",
+    "releaseNotes": "Delay initial laundry reminder for 5 minutes",
     "dateReleased": "2021-05-14",
     "apps": [
         {
