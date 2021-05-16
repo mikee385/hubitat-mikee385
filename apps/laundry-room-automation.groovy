@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.8" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -87,6 +87,14 @@ def initialize() {
     // Laundry Alert
     subscribe(laundry, "status", laundryHandler_LaundryAlert)
     subscribe(person, "status", personHandler_LaundryAlert)
+    
+    // Washer Pause Alert
+    subscribe(washer, "currentState", washerHandler_WasherPauseAlert)
+    subscribe(person, "status", personHandler_WasherPauseAlert)
+    
+    // Dryer Pause Alert
+    subscribe(dryer, "currentState", dryerHandler_DryerPauseAlert)
+    subscribe(person, "status", personHandler_DryerPauseAlert)
 
     // Bedtime Routine
     subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
@@ -241,6 +249,62 @@ def personHandler_LaundryAlert(evt) {
 def reminderAlert() {
     person.deviceNotification("Move the laundry!")
     runIn(60*5, reminderAlert)
+}
+
+def washerHandler_WasherPauseAlert(evt) {
+    logDebug("washerHandler_WasherPauseAlert: ${evt.device} changed to ${evt.value}")
+    if (evt.value == "pause") {
+        if (person.currentValue("status") == "home") {
+            runIn(60*5, washerPauseAlert)
+        }
+    } else {
+        unschedule("washerPauseAlert")
+    }
+}
+
+def personHandler_WasherPauseAlert(evt) {
+    logDebug("personHandler_WasherPauseAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value != "home") {
+        unschedule("washerPauseAlert")
+        
+        if (washer.currentValue("currentState") == "pause") {
+            person.deviceNotification("$washerPauseAlert is still paused!")
+        }
+    }
+}
+
+def washerPauseAlert(evt) {
+    person.deviceNotification("Should the $washer still be paused?")
+    runIn(60*5, washerPauseAlert)
+}
+
+def dryerHandler_DryerPauseAlert(evt) {
+    logDebug("dryerHandler_DryerPauseAlert: ${evt.device} changed to ${evt.value}")
+    if (evt.value == "pause") {
+        if (person.currentValue("status") == "home") {
+            runIn(60*5, dryerPauseAlert)
+        }
+    } else {
+        unschedule("dryerPauseAlert")
+    }
+}
+
+def personHandler_DryerPauseAlert(evt) {
+    logDebug("personHandler_DryerPauseAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value != "home") {
+        unschedule("dryerPauseAlert")
+        
+        if (dryer.currentValue("currentState") == "pause") {
+            person.deviceNotification("$dryerPauseAlert is still paused!")
+        }
+    }
+}
+
+def dryerPauseAlert(evt) {
+    person.deviceNotification("Should the $dryer still be paused?")
+    runIn(60*5, dryerPauseAlert)
 }
 
 def doorHandler_BedtimeRoutine(evt) {
