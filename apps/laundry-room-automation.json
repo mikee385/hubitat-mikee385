@@ -1,10 +1,10 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Only send light alert when motion is inactive",
+    "releaseNotes": "Turn on light when door opens",
     "dateReleased": "2021-05-16",
     "apps": [
         {

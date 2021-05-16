@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.5.0" }
+String getVersionNum() { return "2.6.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -73,6 +73,7 @@ def initialize() {
     }
 
     // Light Switch
+    subscribe(door, "contact.open", doorHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Light Timeout
@@ -114,6 +115,12 @@ def logDebug(msg) {
     if (logEnable) {
         log.debug msg
     }
+}
+
+def doorHandler_LightSwitch(evt) {
+    logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    light.on()
 }
 
 def modeHandler_LightSwitch(evt) {
