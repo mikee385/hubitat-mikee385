@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "2.3.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -266,7 +266,7 @@ def laundryHandler_LaundryAlert(evt) {
         unschedule("reminderAlert")
         
         if (alertReset) {
-            person.deviceNotification("Laundry has reset.")
+            person.deviceNotification("Laundry has been reset.")
         }
     }
 }
@@ -306,7 +306,11 @@ def washerHandler_WasherPauseAlert(evt) {
 def personHandler_WasherPauseAlert(evt) {
     logDebug("personHandler_WasherPauseAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "home") {
+    if (evt.value == "home") {
+        if (washer.currentValue("currentState") == "pause") {
+            washerPauseAlert()
+        }
+    } else {
         unschedule("washerPauseAlert")
         
         if (washer.currentValue("currentState") == "pause") {
@@ -334,7 +338,11 @@ def dryerHandler_DryerPauseAlert(evt) {
 def personHandler_DryerPauseAlert(evt) {
     logDebug("personHandler_DryerPauseAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "home") {
+    if (evt.value == "home") {
+        if (dryer.currentValue("currentState") == "pause") {
+            dryerPauseAlert()
+        }
+    } else {
         unschedule("dryerPauseAlert")
         
         if (dryer.currentValue("currentState") == "pause") {
