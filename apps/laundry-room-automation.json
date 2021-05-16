@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Resume pause alerts when person is home",
-    "dateReleased": "2021-05-15",
+    "releaseNotes": "Minor wording change",
+    "dateReleased": "2021-05-16",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

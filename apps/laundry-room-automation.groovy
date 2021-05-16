@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.3.0" }
+String getVersionNum() { return "2.3.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -266,7 +266,7 @@ def laundryHandler_LaundryAlert(evt) {
         unschedule("reminderAlert")
         
         if (alertReset) {
-            person.deviceNotification("Laundry has been reset.")
+            person.deviceNotification("Laundry has reset.")
         }
     }
 }
