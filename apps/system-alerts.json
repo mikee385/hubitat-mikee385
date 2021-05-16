@@ -1,17 +1,17 @@
 {
-    "packageName": "Reboot Notification",
+    "packageName": "System Alerts",
     "author": "Michael Pierce",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Consolidate person and notification device",
-    "dateReleased": "2021-02-09",
+    "releaseNotes": "Add more alerts and rename to System Alerts",
+    "dateReleased": "2021-05-16",
     "apps": [
         {
             "id": "542f47a7-a210-414b-bd5c-06313db3fe48",
-            "name": "Reboot Notification",
+            "name": "System Alerts",
             "namespace": "mikee385",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.groovy",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/system-alerts.groovy",
             "required": true,
             "oauth": false,
             "primary": true

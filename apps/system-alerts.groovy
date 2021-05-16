@@ -1,5 +1,5 @@
 /**
- *  Reboot Notification
+ *  System Alerts
  *
  *  Copyright 2021 Michael Pierce
  *
@@ -14,21 +14,25 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
-String getVersionLabel() { return "Reboot Notification, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "2.0.0" }
+String getVersionLabel() { return "System Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
-    name: "Reboot Notification",
+    name: "System Alerts",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Sends a notification when the hub reboots.",
+    description: "Sends alerts when the system events occur.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/system-alerts.groovy")
 
 preferences {
-    page(name: "settings", title: "Reboot Notification", install: true, uninstall: true) {
+    page(name: "settings", title: "System Alerts", install: true, uninstall: true) {
+        section("Alerts") {
+            input "alertReboot", "bool", title: "Alert when Rebooted?", required: true, defaultValue: true
+            input "alertSevereLoad", "bool", title: "Alert when Severe Load?", required: true, defaultValue: true
+        }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -48,7 +52,13 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(location, "systemStart", rebootHandler)
+    if (alertReboot) {
+        subscribe(location, "systemStart", rebootHandler)
+    }
+    
+    if (alertSevereLoad) {
+        subscribe(location, "severeLoad", severeLoadHandler)
+    }
 }
 
 def logDebug(msg) {
@@ -61,4 +71,10 @@ def rebootHandler(evt) {
     logDebug("rebootHandler: ${evt.device} changed to ${evt.value}")
     
     person.deviceNotification("Hub has rebooted.")
+}
+
+def severeLoadHandler(evt) {
+    logDebug("severeLoadHandler: ${evt.device} changed to ${evt.value}")
+    
+    person.deviceNotification("Hub has severe load!")
 }

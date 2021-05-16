@@ -122,10 +122,10 @@
             "tags": [ "Automations & Groups", "Presence & Location" ]
         },
         {
-            "name": "Reboot Notification",
+            "name": "System Alerts",
             "category": "Notifications",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/reboot-notification.json",
-            "description": "Sends a notification when the hub reboots.",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/system-alerts.json",
+            "description": "Sends alerts when the system events occur.",
             "tags": [ "Notifications", "Tools & Utilities" ]
         },
         {
