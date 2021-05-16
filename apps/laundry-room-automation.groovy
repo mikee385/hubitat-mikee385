@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.4.0" }
+String getVersionNum() { return "2.5.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -89,7 +89,7 @@ def initialize() {
     
     // Light Alert
     subscribe(door, "contact", deviceHandler_LightAlert)
-    subscribe(light, "motion.active", deviceHandler_LightAlert)
+    subscribe(light, "motion", deviceHandler_LightAlert)
     subscribe(light, "switch", deviceHandler_LightAlert)
     subscribe(person, "status", personHandler_LightAlert)
     
@@ -217,7 +217,7 @@ def deviceHandler_LightAlert(evt) {
     logDebug("deviceHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("lightAlert")
-    if (light.currentValue("switch") == "on") {
+    if (light.currentValue("switch") == "on" && light.currentValue("motion") == "inactive") {
         if (person.currentValue("status") != "sleep") {
             if (state.firstTime) {
                 runIn(60*10, lightAlert)
