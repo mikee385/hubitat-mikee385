@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,6 +31,8 @@ preferences {
     page(name: "settings", title: "Trash Reminder", install: true, uninstall: true) {
         section {
             input "trashDays", "enum", title: "Trash Days", multiple: true, required: true, options: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+            input "recycleDay", "enum", title: "Recycle Day", multiple: false, required: true, options: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+            input "isRecycleWeek", "bool", title: "Recycle this week?", required: true, defaultValue: true
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -51,8 +53,10 @@ def updated() {
 }
 
 def initialize() {
-    // Trash Reminder
     subscribe(person, "status", personHandler_TrashReminder)
+    
+    def currentTime = new Date()
+    schedule("$currentTime.seconds 0 0 ? * 1 *", updateRecycleWeek)
 }
 
 def logDebug(msg) {
@@ -65,12 +69,31 @@ def personHandler_TrashReminder(evt) {
     logDebug("personHandler_TrashReminder: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "home") {
-        def df = new java.text.SimpleDateFormat("EEEE")
-        df.setTimeZone(location.timeZone)
-
-        def day = df.format(new Date())
-        if (trashDays.contains(day) && timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
-            person.deviceNotification("Take out the trash!")
+        if (timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
+            def df = new java.text.SimpleDateFormat("EEEE")
+            df.setTimeZone(location.timeZone)
+            def day = df.format(new Date())
+        
+            def isTrashDay = trashDays.contains(day)
+            def isRecycleDay = (recycleDay == day && isRecycleWeek)
+            
+            if (isTrashDay && isRecycleDay) {
+                person.deviceNotification("Take out the trash and recycle!")
+            } else if (isTrashDay) {
+                person.deviceNotification("Take out the trash!")
+            } else if (isRecycleDay) {
+                person.deviceNotification("Take out the recycle!")
+            }
         }
+    }
+}
+
+def updateRecycleWeek() {
+    logDebug("updateRecycleWeek")
+    
+    if (isRecycleWeek) {
+        app.updateSetting("isRecycleWeek", false)
+    } else {
+        app.updateSetting("isRecycleWeek", true)
     }
 }
