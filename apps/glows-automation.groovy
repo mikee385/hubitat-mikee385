@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Glows Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,6 +38,8 @@ preferences {
         section("Remotes") {
             input "hueRemote", "capability.pushableButton", title: "Hue Remote", required: false
             input "harmonyRemote", "capability.pushableButton", title: "Harmony Remote", required: false
+            input "rokuRemote", "device.RokuTV", title: "Roku Remote", required: false
+            input "bedtimeNowPause", "bool", title: "Pause when Bedtime Now?", required: true, defaultValue: false
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
@@ -175,6 +177,13 @@ def bedtimeNowHandler_RoutineAlert(evt) {
     
     if (bedtimeNowAlert) {
         person.deviceNotification("Bedtime Now!")
+    }
+    
+    if (bedtimeNowPause && rokuRemote) {
+        rokuRemote.queryMediaPlayer()
+        if (rokuRemote.currentValue("transportStatus") == "playing") {
+            rokuRemote.pause()
+        }
     }
 }
 
