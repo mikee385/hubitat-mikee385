@@ -1,10 +1,10 @@
 {
     "packageName": "Glows Automation",
     "author": "Michael Pierce",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Pause Roku on Bedtime Now",
+    "releaseNotes": "Add small delay before pausing Roku",
     "dateReleased": "2021-05-18",
     "apps": [
         {

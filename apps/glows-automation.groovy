@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Glows Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -181,9 +181,14 @@ def bedtimeNowHandler_RoutineAlert(evt) {
     
     if (bedtimeNowPause && rokuRemote) {
         rokuRemote.queryMediaPlayer()
-        if (rokuRemote.currentValue("transportStatus") == "playing") {
-            rokuRemote.pause()
-        }
+        runIn(2, pauseRoku)
+    }
+}
+
+def pauseRoku() {
+    if (rokuRemote.currentValue("transportStatus") == "playing") {
+        rokuRemote.pause()
+        rokuRemote.queryMediaPlayer()
     }
 }
 
