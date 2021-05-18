@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.9.0" }
+String getVersionNum() { return "2.9.1" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -99,8 +99,6 @@ def rainTodayHandler_RainAlert(evt) {
 }
 
 def rainHandler_RainAlert() {
-    log.debug("START UPDATE")
-    
     // Get state variables
     def asleep = person.currentValue("sleeping") == "sleeping"
     
@@ -109,9 +107,6 @@ def rainHandler_RainAlert() {
     
     def rate_current = weatherStation.currentValue("precip_1hr")
     def total_current = weatherStation.currentValue("precip_today")
-    
-    log.debug("Previous Event: ${state.event_total}")
-    log.debug("Previous Today: ${state.today_total}")
     
     // Calculate values
     def delta = 0.0
@@ -147,10 +142,6 @@ def rainHandler_RainAlert() {
     // Update event status
     state.event_total += delta
     
-    log.debug("Delta: ${delta}")
-    log.debug("Current Event: ${state.event_total}")
-    log.debug("Current Today: ${state.today_total}")
-    
     if (level > state.event_level) {
         state.event_level = level
         state.event_text = text
@@ -164,8 +155,6 @@ def rainHandler_RainAlert() {
         state.event_total = 0.0
         state.event_level = 0
         state.event_text = "No rain"
-        
-        log.debug("RAIN STOPPED")
     }
     
     // Update sleep status
@@ -176,8 +165,6 @@ def rainHandler_RainAlert() {
             state.sleep_text = text
         }
     }
-    
-    log.debug("END UPDATE")
 }
 
 def personHandler_RainAlert(evt) {
