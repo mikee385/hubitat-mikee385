@@ -1,10 +1,10 @@
 {
     "packageName": "Roomba Automation",
     "author": "Michael Pierce",
-    "version": "6.0.2",
+    "version": "6.0.3",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix extraneous parentheses",
+    "releaseNotes": "Fix presence sensor capability",
     "dateReleased": "2021-05-25",
     "apps": [
         {

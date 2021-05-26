@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.2" }
+String getVersionNum() { return "6.0.3" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,21 +31,19 @@ preferences {
     page(name: "settings", title: "Roomba Automation", install: true, uninstall: true) {
         section {
             input "roomba", "device.Roomba", title: "Roomba", multiple: false, required: true
-        }
-        section {
             input "roombaStartTime", "time", title: "Start Time", required: true
             input "minimumMinutes", "number", title: "Minimum Duration (in minutes)", required: true
             input "roombaResetTime", "time", title: "Reset Time", required: true
         }
         section("Work from Home") {
-            input "workFromHomePerson", "capability.Presence", title: "Person", multiple: false, required: true
+            input "workFromHomePerson", "capability.presenceSensor", title: "Person", multiple: false, required: true
             input "workStartTime", "time", title: "Start Time", multiple: false, required: true
             input "workEndTime", "time", title: "End Time", multiple: false, required: true
             input "workAwaySwitch", "device.GCalSwitch", title: "Away Switch", multiple: false, required: true
             input "workBusySwitch", "device.GCalSwitch", title: "Busy Switch", multiple: false, required: true
         }
         section {
-            input "additionalPeople", "capability.Presence", title: "Additional People", multiple: true, required: false
+            input "additionalPeople", "capability.presenceSensor", title: "Additional People", multiple: true, required: false
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
