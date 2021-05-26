@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.1" }
+String getVersionNum() { return "6.0.2" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -202,7 +202,7 @@ def startCycle() {
      if (timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && everyoneAway && (workFromHomePerson.currentValue("presence") == "not present" || (duringWorkHours() && !busyWithWork()))) {
         if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
             roomba.start()
-        } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop")) {
+        } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
             roomba.resume()
         }
     }
