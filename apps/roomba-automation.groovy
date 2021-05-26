@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.3" }
+String getVersionNum() { return "6.0.4" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -93,10 +93,10 @@ def initialize() {
     // Daily Triggers
     def currentTime = new Date()
     
-    def startToday = timeToday(startTime)
+    def startToday = timeToday(roombaStartTime)
     schedule("$currentTime.seconds $startToday.minutes $startToday.hours * * ? *", dailyStart)
     
-    def resetToday = timeToday(resetTime)
+    def resetToday = timeToday(roombaResetTime)
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
     
     // Initialize state
@@ -197,7 +197,7 @@ def startCycle() {
         }
     }
 
-     if (timeOfDayIsBetween(timeToday(startTime), location.sunset, new Date(), location.timeZone) && everyoneAway && (workFromHomePerson.currentValue("presence") == "not present" || (duringWorkHours() && !busyWithWork()))) {
+     if (timeOfDayIsBetween(timeToday(roombaStartTime), location.sunset, new Date(), location.timeZone) && everyoneAway && (workFromHomePerson.currentValue("presence") == "not present" || (duringWorkHours() && !busyWithWork()))) {
         if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
             roomba.start()
         } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
