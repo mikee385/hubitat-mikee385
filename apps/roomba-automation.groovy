@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.1.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -160,6 +160,13 @@ def additionalPersonHandler(evt) {
 }
 
 def chargeHandler(evt) {
+    logDebug("chargeHandler: ${evt.device} changed to ${evt.value}")
+    
+    log.debug "device: ${evt.device}"
+    log.debug "value: ${evt.value}"
+    log.debug "cycle: ${roomba.currentValue('cycle')}"
+    log.debug "rechrgTm: ${roomba.currentValue('rechrgTm')}"
+
     if (roomba.currentValue("cycle") != "none") {
         rechrgTm = roomba.currentValue("rechrgTm").toLong()*1000
         if (rechrgTm > 0) {
@@ -170,10 +177,10 @@ def chargeHandler(evt) {
             }
             
             finalTm = rechrgTm + 2*1000
-            if (finalTm < now()) {
-                finalCheck()
-            } else {
+            if (finalTm > now()) {
                 runOnce(new Date(finalTm), finalCheck)
+            } else {
+                finalCheck()
             }
         }
     }
