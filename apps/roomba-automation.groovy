@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.1.1" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -87,7 +87,9 @@ def initialize() {
     }
     subscribe(roomba, "phase.charge", chargeHandler)
     if (pauseButton) {
-        subscribe(pauseButton, "pushed", buttonHandler)
+        subscribe(pauseButton, "pushed", buttonPushedHandler)
+        subscribe(pauseButton, "doubleTapped", buttonDoubleTappedHandler)
+        subscribe(pauseButton, "held", buttonHeldHandler)
     }
 
     // Runtime Tracking
@@ -186,14 +188,22 @@ def chargeHandler(evt) {
     }
 }
 
-def buttonHandler(evt) {
-    logDebug("buttonHandler: ${evt.device} changed to ${evt.value}")
+def buttonPushedHandler(evt) {
+    logDebug("buttonPushedHandler: ${evt.device} changed to ${evt.value}")
 
-    if (roomba.currentValue("phase") == "stop") {
-        roomba.resume()
-    } else {
-        roomba.pause()
-    }
+    roomba.pause()
+}
+
+def buttonDoubleTappedHandler(evt) {
+    logDebug("buttonDoubleTappedHandler: ${evt.device} changed to ${evt.value}")
+
+    roomba.resume()
+}
+
+def buttonHeldHandler(evt) {
+    logDebug("buttonHeldHandler: ${evt.device} changed to ${evt.value}")
+
+    roomba.start()
 }
 
 def duringWorkHours() {
