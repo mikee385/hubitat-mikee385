@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.4" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -34,6 +34,7 @@ preferences {
             input "roombaStartTime", "time", title: "Start Time", required: true
             input "minimumMinutes", "number", title: "Minimum Duration (in minutes)", required: true
             input "roombaResetTime", "time", title: "Reset Time", required: true
+            input "pauseButton", "capability.pushableButton", title: "Pause/Resume Button", multiple: false, required: false
         }
         section("Work from Home") {
             input "workFromHomePerson", "capability.presenceSensor", title: "Person", multiple: false, required: true
@@ -85,6 +86,9 @@ def initialize() {
         }
     }
     subscribe(roomba, "phase.charge", chargeHandler)
+    if (pauseButton) {
+        subscribe(pauseButton, "pushed", buttonHandler)
+    }
 
     // Runtime Tracking
     subscribe(roomba, "phase", phaseHandler)
@@ -172,6 +176,16 @@ def chargeHandler(evt) {
                 runOnce(new Date(finalTm), finalCheck)
             }
         }
+    }
+}
+
+def buttonHandler(evt) {
+    logDebug("buttonHandler: ${evt.device} changed to ${evt.value}")
+
+    if (roomba.currentValue("phase") == "stop") {
+        roomba.resume()
+    } else {
+        roomba.pause()
     }
 }
 
