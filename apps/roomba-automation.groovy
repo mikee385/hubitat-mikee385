@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.2.0" }
+String getVersionNum() { return "6.2.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -85,7 +85,7 @@ def initialize() {
             subscribe(additionalPerson, "presence", additionalPersonHandler)
         }
     }
-    subscribe(roomba, "phase.charge", chargeHandler)
+    subscribe(roomba, "rechrgTm", rechrgTmHandler)
     if (pauseButton) {
         subscribe(pauseButton, "pushed", buttonPushedHandler)
         subscribe(pauseButton, "doubleTapped", buttonDoubleTappedHandler)
@@ -161,8 +161,8 @@ def additionalPersonHandler(evt) {
     }
 }
 
-def chargeHandler(evt) {
-    logDebug("chargeHandler: ${evt.device} changed to ${evt.value}")
+def rechrgTmHandler(evt) {
+    logDebug("rechrgTmHandler: ${evt.device} changed to ${evt.value}")
     
     log.debug "device: ${evt.device}"
     log.debug "value: ${evt.value}"
