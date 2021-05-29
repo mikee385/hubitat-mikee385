@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "3.2.0",
+    "version": "4.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Increase wait time for inconsistency check",
-    "dateReleased": "2021-04-21",
+    "releaseNotes": "Move alerts to new People Alerts app",
+    "dateReleased": "2021-05-29",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

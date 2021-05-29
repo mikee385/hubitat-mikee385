@@ -73,13 +73,6 @@
             "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
-            "name": "Guest Alerts",
-            "category": "Notifications",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/guest-alerts.json",
-            "description": "Sends a reminder alert to check if guests are still present.",
-            "tags": [ "Notifications", "Presence & Location" ]
-        },
-        {
             "name": "Holiday Lights Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/holiday-lights-automation.json",
@@ -106,6 +99,13 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.json",
             "description": "Turns the pantry light on/off based on motion.",
             "tags": [ "Automations & Groups", "Lights & Switches", "Motion Control" ]
+        },
+        {
+            "name": "People Alerts",
+            "category": "Notifications",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/people-alerts.json",
+            "description": "Sends alerts when people arrive, depart, etc.",
+            "tags": [ "Notifications", "Presence & Location" ]
         },
         {
             "name": "Person Automation",

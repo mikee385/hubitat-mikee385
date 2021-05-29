@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,10 +38,6 @@ preferences {
         }
         section("Alerts") {
             input "alertInconsistent", "bool", title: "Alert when Presence is Inconsistent?", required: true, defaultValue: false
-            input "alertArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
-            input "alertDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
-            input "alertAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
-            input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -110,9 +106,6 @@ def initialize() {
         // Away Alert
         subscribe(sleepSwitch, "switch.on", handler_AwayAlert)
     }
-    
-    // Command Alert
-    subscribe(person, "command", personHandler_CommandAlert)
     
     if (notificationDevices) {
         // Notification
@@ -185,28 +178,6 @@ def modeHandler_Switch(evt) {
     
     if (evt.value == "Away") {
         sleepSwitch.off()
-    }
-}
-
-def personHandler_CommandAlert(evt) {
-    logDebug("personHandler_CommandAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "arrived") {
-        if (alertArrived) {
-            personToNotify.deviceNotification("$person is home!")
-        }
-    } else if (evt.value == "departed") {
-        if (alertDeparted) {
-            personToNotify.deviceNotification("$person has left!")
-        }
-    } else if (evt.value == "awake") {
-        if (alertAwake) {
-            personToNotify.deviceNotification("$person is awake!")
-        }
-    } else if (evt.value == "asleep") {
-        if (alertAsleep) {
-            personToNotify.deviceNotification("$person is asleep!")
-        }
     }
 }
 
