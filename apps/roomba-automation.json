@@ -1,10 +1,10 @@
 {
     "packageName": "Roomba Automation",
     "author": "Michael Pierce",
-    "version": "6.2.1",
+    "version": "6.3.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use rechrgTm instead of charge for scheduling",
+    "releaseNotes": "Ignore work day if calendar is away all day",
     "dateReleased": "2021-05-28",
     "apps": [
         {
