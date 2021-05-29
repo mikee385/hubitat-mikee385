@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -29,7 +29,7 @@ definition(
 
 preferences {
     page(name: "settings", title: "People Alerts", install: true, uninstall: true) {
-        section("Primary Person" {
+        section("Primary Person") {
             input "primaryPerson", "device.PersonStatus", title: "Person", multiple: false, required: true
             input "alertPrimaryArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
             input "alertPrimaryDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
