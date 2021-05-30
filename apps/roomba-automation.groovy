@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.3.0" }
+String getVersionNum() { return "6.3.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -214,10 +214,10 @@ def duringWorkHours() {
     log.debug "day: ${day}"
     log.debug "workStartTime: ${workStartTime}"
     log.debug "workEndTime: ${workEndTime}"
-    log.debug "eventAllDay: ${workAwaySwitch.currentValue("eventAllDay")}"
+    log.debug "eventAllDay: ${workAwaySwitch.currentValue('eventAllDay')}"
     log.debug "work day?: ${day >= 2 && day <= 6}"
     log.debug "work hours?: ${timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone)}"
-    log.debug "away all day?: ${workAwaySwitch.currentValue('eventAllDay') != true}"
+    log.debug "not away all day?: ${workAwaySwitch.currentValue('eventAllDay') != true}"
     log.debug "during work hours?: ${day >= 2 && day <= 6 && timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone) && workAwaySwitch.currentValue('eventAllDay') != true}"
     
     return day >= 2 && day <= 6 && timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone) && workAwaySwitch.currentValue("eventAllDay") != true
