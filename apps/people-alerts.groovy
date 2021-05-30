@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -43,6 +43,12 @@ preferences {
             input "alertSecondaryAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
             input "alertSecondaryAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
         }
+        section("Combined") {
+            input "combinedArrivedSeconds", "number", title: "Arrival Time Window (seconds)", required: true, defaultValue: 15
+            input "combinedDepartedSeconds", "number", title: "Departure Time Window (seconds)", required: true, defaultValue: 60
+            input "alertCombinedArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
+            input "alertCombinedDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
+        }
         section("Guest") {
             input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
             input "alertGuestArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
@@ -68,6 +74,20 @@ def updated() {
 }
 
 def initialize() {
+    // Create state
+    if (state.primaryArrivedTime == null) {
+        state.primaryArrivedTime = now() - (24*60*60*1000)
+    }
+    if (state.primaryDepartedTime == null) {
+        state.primaryDepartedTime = now() - (24*60*60*1000)
+    }
+    if (state.secondaryArrivedTime == null) {
+        state.secondaryArrivedTime = now() - (24*60*60*1000)
+    }
+    if (state.secondaryDepartedTime == null) {
+        state.secondaryDepartedTime = now() - (24*60*60*1000)
+    }
+
     // Person Alerts
     subscribe(primaryPerson, "command", personHandler_PrimaryAlert)
     subscribe(secondaryPerson, "command", personHandler_SecondaryAlert)
@@ -88,20 +108,38 @@ def personHandler_PrimaryAlert(evt) {
     logDebug("personHandler_PrimaryAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "arrived") {
-        if (alertPrimaryArrived) {
-            personToNotify.deviceNotification("${evt.device} is home!")
+        state.primaryArrivedTime = now()
+        
+        if (secondaryPerson.currentValue("presence") == "present") {
+            deltaTime = state.primaryArrivedTime - state.secondaryArrivedTime
+            if (deltaTime <= (combinedArrivedSeconds*1000)) {
+                combinedArrivedAlert()
+            } else {
+                primaryArrivedAlert()
+            }
+        } else {
+            runIn(combinedArrivedSeconds, primaryArrivedAlert)
         }
     } else if (evt.value == "departed") {
-        if (alertPrimaryDeparted) {
-            personToNotify.deviceNotification("${evt.device} has left!")
+        state.primaryDepartedTime = now()
+        
+        if (seconaryPerson.currentValue("presence") == "not present") {
+            deltaTime = state.primaryDepartedTime - state.secondaryDepartedTime
+            if (deltaTime <= (combinedDepartedSeconds*1000)) {
+                combinedDepartedAlert()
+            } else {
+                primaryDepartedAlert()
+            }
+        } else {
+            runIn(combinedDepartedSeconds, primaryDepartedAlert)
         }
     } else if (evt.value == "awake") {
         if (alertPrimaryAwake) {
-            personToNotify.deviceNotification("${evt.device} is awake!")
+            personToNotify.deviceNotification("${primaryPerson} is awake!")
         }
     } else if (evt.value == "asleep") {
         if (alertPrimaryAsleep) {
-            personToNotify.deviceNotification("${evt.device} is asleep!")
+            personToNotify.deviceNotification("${primaryPerson} is asleep!")
         }
     }
 }
@@ -110,21 +148,81 @@ def personHandler_SecondaryAlert(evt) {
     logDebug("personHandler_SecondaryAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "arrived") {
-        if (alertSecondaryArrived) {
-            personToNotify.deviceNotification("${evt.device} is home!")
+        state.secondaryArrivedTime = now()
+        
+        if (primaryPerson.currentValue("presence") == "present") {
+            deltaTime = state.secondaryArrivedTime - state.primaryArrivedTime
+            if (deltaTime <= (combinedArrivedSeconds*1000)) {
+                combinedArrivedAlert()
+            } else {
+                secondaryArrivedAlert()
+            }
+        } else {
+            runIn(combinedArrivedSeconds, secondaryArrivedAlert)
         }
     } else if (evt.value == "departed") {
-        if (alertSecondaryDeparted) {
-            personToNotify.deviceNotification("${evt.device} has left!")
+        state.secondaryDepartedTime = now()
+        
+        if (primaryPerson.currentValue("presence") == "not present") {
+            deltaTime = state.secondaryDepartedTime - state.primaryDepartedTime
+            if (deltaTime <= (combinedDepartedSeconds*1000)) {
+                combinedDepartedAlert()
+            } else {
+                secondaryDepartedAlert()
+            }
+        } else {
+            runIn(combinedDepartedSeconds, secondaryDepartedAlert)
         }
     } else if (evt.value == "awake") {
         if (alertSecondaryAwake) {
-            personToNotify.deviceNotification("${evt.device} is awake!")
+            personToNotify.deviceNotification("${secondaryPerson} is awake!")
         }
     } else if (evt.value == "asleep") {
         if (alertSecondaryAsleep) {
-            personToNotify.deviceNotification("${evt.device} is asleep!")
+            personToNotify.deviceNotification("${secondaryPerson} is asleep!")
         }
+    }
+}
+
+def primaryArrivedAlert() {
+    if (alertPrimaryArrived) {
+        personToNotify.deviceNotification("${primaryPerson} is home!")
+    }
+}
+
+def primaryDepartedAlert() {
+    if (alertPrimaryDeparted) {
+        personToNotify.deviceNotification("${primryPerson} has left!")
+    }
+}
+
+def secondaryArrivedAlert() {
+    if (alertSecondaryArrived) {
+        personToNotify.deviceNotification("${secondaryPerson} is home!")
+    }
+}
+
+def secondaryDepartedAlert() {
+    if (alertSecondaryDeparted) {
+        personToNotify.deviceNotification("${secondaryPerson} has left!")
+    }
+}
+
+def combinedArrivedAlert() {
+    unschedule("primaryArrivedAlert")
+    unschedule("secondaryArrivedAlert")
+
+    if (alertCombinedArrived) {
+        personToNotify.deviceNotification("Welcome home!")
+    }
+}
+
+def combinedDepartedAlert() {
+    unschedule("primaryDepartedAlert")
+    unschedule("secondaryDepartedAlert")
+
+    if (alertCombinedDeparted) {
+        personToNotify.deviceNotification("Goodbye!")
     }
 }
 
@@ -133,11 +231,11 @@ def personHandler_GuestAlert(evt) {
     
     if (evt.value == "present") {
         if (alertGuestArrived) {
-            personToNotify.deviceNotification("${evt.device} has arrived!")
+            personToNotify.deviceNotification("Guests have arrived!")
         }
     } else if (evt.value == "not present") {
         if (alertGuestDeparted) {
-            personToNotify.deviceNotification("${evt.device} has left!")
+            personToNotify.deviceNotification("Guests have left!")
         }
     }
 }
