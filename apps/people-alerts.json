@@ -1,11 +1,11 @@
 {
     "packageName": "People Alerts",
     "author": "Michael Pierce",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Combine alerts when people arrive/depart together",
-    "dateReleased": "2021-05-29",
+    "releaseNotes": "Fix misspelled device name",
+    "dateReleased": "2021-05-30",
     "apps": [
         {
             "id": "d1053cf4-db2c-44af-b589-035bde02619d",

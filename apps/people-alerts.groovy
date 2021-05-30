@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -123,7 +123,7 @@ def personHandler_PrimaryAlert(evt) {
     } else if (evt.value == "departed") {
         state.primaryDepartedTime = now()
         
-        if (seconaryPerson.currentValue("presence") == "not present") {
+        if (secondaryPerson.currentValue("presence") == "not present") {
             deltaTime = state.primaryDepartedTime - state.secondaryDepartedTime
             if (deltaTime <= (combinedDepartedSeconds*1000)) {
                 combinedDepartedAlert()
