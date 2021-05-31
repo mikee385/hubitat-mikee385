@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.0.2" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -192,7 +192,7 @@ def primaryArrivedAlert() {
 
 def primaryDepartedAlert() {
     if (alertPrimaryDeparted) {
-        personToNotify.deviceNotification("${primryPerson} has left!")
+        personToNotify.deviceNotification("${primaryPerson} has left!")
     }
 }
 
