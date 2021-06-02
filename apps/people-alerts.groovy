@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.2" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -213,7 +213,7 @@ def combinedArrivedAlert() {
     unschedule("secondaryArrivedAlert")
 
     if (alertCombinedArrived) {
-        personToNotify.deviceNotification("Welcome home!")
+        personToNotify.deviceNotification("${primaryPerson} and ${secondaryPerson} are home!")
     }
 }
 
@@ -222,7 +222,7 @@ def combinedDepartedAlert() {
     unschedule("secondaryDepartedAlert")
 
     if (alertCombinedDeparted) {
-        personToNotify.deviceNotification("Goodbye!")
+        personToNotify.deviceNotification("${primaryPerson} and ${secondaryPerson} have left!")
     }
 }
 
