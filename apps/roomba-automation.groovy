@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.3.3" }
+String getVersionNum() { return "6.3.4" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -163,11 +163,6 @@ def additionalPersonHandler(evt) {
 
 def rechrgTmHandler(evt) {
     logDebug("rechrgTmHandler: ${evt.device} changed to ${evt.value}")
-    
-    log.debug "device: ${evt.device}"
-    log.debug "value: ${evt.value}"
-    log.debug "cycle: ${roomba.currentValue('cycle')}"
-    log.debug "rechrgTm: ${roomba.currentValue('rechrgTm')}"
 
     if (roomba.currentValue("cycle") != "none") {
         rechrgTm = roomba.currentValue("rechrgTm").toLong()*1000
@@ -209,17 +204,6 @@ def buttonHeldHandler(evt) {
 def duringWorkHours() {
     def date = new Date()
     def day = date[Calendar.DAY_OF_WEEK]
-
-    log.debug "During Work Hours?"
-    log.debug "day: ${day}"
-    log.debug "workStartTime: ${workStartTime}"
-    log.debug "workEndTime: ${workEndTime}"
-    log.debug "eventAllDay: ${workAwaySwitch.currentValue('eventAllDay')}"
-    log.debug "work day?: ${day >= 2 && day <= 6}"
-    log.debug "work hours?: ${timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone)}"
-    log.debug "away all day (bool)?: ${workAwaySwitch.currentValue('eventAllDay') == true}"
-    log.debug "away all day (string)?: ${workAwaySwitch.currentValue('eventAllDay') == "true"}"
-    log.debug "during work hours?: ${day >= 2 && day <= 6 && timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone) && workAwaySwitch.currentValue('eventAllDay') != true}"
     
     return day >= 2 && day <= 6 && timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone) && workAwaySwitch.currentValue("eventAllDay") != "true"
 }

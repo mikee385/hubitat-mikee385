@@ -1,11 +1,11 @@
 {
     "packageName": "Roomba Automation",
     "author": "Michael Pierce",
-    "version": "6.3.3",
+    "version": "6.3.4",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix data type of eventAllDay",
-    "dateReleased": "2021-05-30",
+    "releaseNotes": "Remove extra debug logging",
+    "dateReleased": "2021-06-02",
     "apps": [
         {
             "id": "8f28ae8c-f76b-44de-99bb-42d5b77cbaef",
