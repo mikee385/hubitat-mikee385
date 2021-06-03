@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.3.4" }
+String getVersionNum() { return "6.4.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -205,7 +205,7 @@ def duringWorkHours() {
     def date = new Date()
     def day = date[Calendar.DAY_OF_WEEK]
     
-    return day >= 2 && day <= 6 && timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone) && workAwaySwitch.currentValue("eventAllDay") != "true"
+    return day >= 2 && day <= 6 && timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone) && workAwaySwitch.currentValue("eventAllDay") != true && workAwaySwitch.currentValue("eventAllDay") != "true"
 }
 
 def busyWithWork() {
