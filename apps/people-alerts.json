@@ -1,11 +1,11 @@
 {
     "packageName": "People Alerts",
     "author": "Michael Pierce",
-    "version": "2.1.0",
+    "version": "3.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change combined arrival and departure messages",
-    "dateReleased": "2021-06-01",
+    "releaseNotes": "Remove command attribute from PersonStatus",
+    "dateReleased": "2021-06-05",
     "apps": [
         {
             "id": "d1053cf4-db2c-44af-b589-035bde02619d",
