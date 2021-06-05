@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -38,6 +38,7 @@ preferences {
         }
         section("Alerts") {
             input "alertInconsistent", "bool", title: "Alert when Presence is Inconsistent?", required: true, defaultValue: false
+            input "alertAsleepWhenAway", "bool", title: "Alert when Asleep while Away?", required: true, defaultValue: false
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -91,9 +92,13 @@ def initialize() {
         subscribe(secondarySensor, "presence.present", arrivalHandler_PersonStatus)
     }
     
-    // Inconsistency Check
+    // Checks
     if (alertInconsistent) {
         subscribe(person, "presence", personHandler_InconsistencyCheck)
+    }
+    if (alertAsleepWhenAway) {
+        subscribe(person, "presence", personHandler_AsleepWhenAwayCheck)
+        subscribe(person, "sleeping", personHandler_AsleepWhenAwayCheck)
     }
     
     if (sleepSwitch) {
@@ -158,8 +163,16 @@ def inconsistencyCheck() {
     def presenceValue = person.currentValue("presence")
     for (primarySensor in primarySensors) {
         if (primarySensor.currentValue("presence") != presenceValue) {
-            personToNotify.deviceNotification("$primarySensor failed to change to $presenceValue!")
+            personToNotify.deviceNotification("WARNING: $primarySensor failed to change to $presenceValue!")
         }
+    }
+}
+
+def personHandler_AsleepWhenAwayCheck(evt) {
+    logDebug("personHandler_AsleepWhenAwayCheck: ${evt.device} changed to ${evt.value}")
+    
+    if (person.currentValue("presence") == "not present" && person.currentValue("sleeping") == "sleeping") {
+        personToNotify.deviceNotification("WARNING: $person is Asleep while Away!")
     }
 }
 
