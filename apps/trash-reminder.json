@@ -1,11 +1,11 @@
 {
     "packageName": "Trash Reminder",
     "author": "Michael Pierce",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
     "releaseNotes": "Add reminder for recycle every other week",
-    "dateReleased": "2021-05-17",
+    "dateReleased": "2021-06-05",
     "apps": [
         {
             "id": "77aa6509-9292-4b58-a56f-34e7f0077a84",

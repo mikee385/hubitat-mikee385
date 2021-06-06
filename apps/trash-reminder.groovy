@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -53,7 +53,8 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(person, "status", personHandler_TrashReminder)
+    subscribe(person, "presence", personHandler_TrashReminder)
+    subscribe(person, "sleeping", personHandler_TrashReminder)
     
     def currentTime = new Date()
     schedule("$currentTime.seconds 0 0 ? * 1 *", updateRecycleWeek)
@@ -68,7 +69,7 @@ def logDebug(msg) {
 def personHandler_TrashReminder(evt) {
     logDebug("personHandler_TrashReminder: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "home") {
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
         if (timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
             def df = new java.text.SimpleDateFormat("EEEE")
             df.setTimeZone(location.timeZone)
