@@ -1,10 +1,10 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove command attribute from PersonStatus",
+    "releaseNotes": "Add helper methods for checking status",
     "dateReleased": "2021-06-05",
     "drivers": [
         {
