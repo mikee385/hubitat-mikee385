@@ -1,10 +1,10 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove occupancy attribute from Occupancy Status",
+    "releaseNotes": "Rename 'status' to  'occupancy'",
     "dateReleased": "2021-06-06",
     "apps": [
         {

@@ -27,7 +27,7 @@ metadata {
         capability "Actuator"
         capability "Sensor"
 
-        attribute "status", "enum", ["occupied", "vacant", "checking", "blind"]
+        attribute "occupancy", "enum", ["occupied", "vacant", "checking", "blind"]
 
         command "occupied"
         command "vacant"
@@ -50,7 +50,7 @@ def updated() {
 }
 
 def initialize() {
-    if (!device.currentValue("status")) {
+    if (!device.currentValue("occupancy")) {
         vacant()
     }
 }
@@ -90,19 +90,19 @@ def resumeFromChecking() {
 }
 
 private def setStatusToOccupied() {
-    sendEvent(name: "status", value: "occupied", descriptionText: "$device.displayName changed to occupied")
+    sendEvent(name: "occupancy", value: "occupied")
     unschedule()
 }
 
 private def setStatusToVacant() {
-    sendEvent(name: "status", value: "vacant", descriptionText: "$device.displayName changed to vacant")
+    sendEvent(name: "occupancy", value: "vacant")
     unschedule()
 }
 
 private def setStatusToChecking() {
-    sendEvent(name: "status", value: "checking", descriptionText: "$device.displayName changed to checking")
+    sendEvent(name: "occupancy", value: "checking")
 }
 
 private def setStatusToBlind() {
-    sendEvent(name: "status", value: "blind", descriptionText: "$device.displayName changed to blind")
+    sendEvent(name: "occupancy", value: "blind")
 }

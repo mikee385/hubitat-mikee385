@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.4.0" }
+String getVersionNum() { return "3.5.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -64,7 +64,7 @@ def initialize() {
     subscribe(motionSensor, "motion.active", motionHandler_Occupancy)
     
     // Light Switch
-    subscribe(occupancy, "status", occupancyHandler_LightSwitch)
+    subscribe(occupancy, "occupancy", occupancyHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     
@@ -150,9 +150,9 @@ def sideDoorHandler_Occupancy(evt) {
 def motionHandler_Occupancy(evt) {
     logDebug("motionHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
-    if (occupancy.currentValue("status") == "checking") {
+    if (occupancy.currentValue("occupancy") == "checking") {
         occupancy.occupied()
-    } else if (occupancy.currentValue("status") == "vacant") {
+    } else if (occupancy.currentValue("occupancy") == "vacant") {
         occupancy.checking()
     }
 }

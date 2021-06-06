@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.3.0" }
+String getVersionNum() { return "3.4.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -69,13 +69,13 @@ def initialize() {
     subscribe(location, "mode", modeHandler_Occupancy)
     
     // Light Switch
-    subscribe(occupancy, "status", occupancyHandler_LightSwitch)
+    subscribe(occupancy, "occupancy", occupancyHandler_LightSwitch)
     
     // Camera Notification
-    subscribe(occupancy, "status", occupancyHandler_CameraNotification)
+    subscribe(occupancy, "occupancy", occupancyHandler_CameraNotification)
     
     // Sprinkler Zones
-    subscribe(occupancy, "status", occupancyHandler_SprinklerZones)
+    subscribe(occupancy, "occupancy", occupancyHandler_SprinklerZones)
     
     // Light Alert
     for (light in lights) {
@@ -89,7 +89,7 @@ def initialize() {
     subscribe(person, "sleeping", personHandler_DoorAlert)
     
     // Lock Alert
-    subscribe(occupancy, "status", occupancyHandler_LockAlert)
+    subscribe(occupancy, "occupancy", occupancyHandler_LockAlert)
     subscribe(person, "presence", personHandler_LockAlert)
     subscribe(person, "sleeping", personHandler_LockAlert)
     
@@ -262,7 +262,7 @@ def personHandler_LockAlert(evt) {
     if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
         unschedule("lockAlert")
         
-        if (occupancy.currentValue("status") != "vacant") {
+        if (occupancy.currentValue("occupancy") != "vacant") {
             person.deviceNotification("$lock is still unlocked!")
         }
     }
