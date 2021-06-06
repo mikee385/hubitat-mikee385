@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -53,18 +53,6 @@ def initialize() {
     if (!device.currentValue("status")) {
         awake()
     }
-}
-
-def isHome() {
-    return device.currentValue("presence") == "present" && device.currentValue("sleeping") == "not sleeping"
-}
-
-def isAway() {
-    return device.currentValue("presence") == "not present"
-}
-
-def isSleep() {
-    return device.currentValue("presence") == "present" && device.currentValue("sleeping") == "sleeping"
 }
 
 def awake() {
