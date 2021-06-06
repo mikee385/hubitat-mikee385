@@ -4,7 +4,7 @@
     "version": "2.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add reminder for recycle every other week",
+    "releaseNotes": "Use presence and sleeping, not status, for Person",
     "dateReleased": "2021-06-05",
     "apps": [
         {
