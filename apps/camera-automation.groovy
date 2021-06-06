@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -69,9 +69,10 @@ def initialize() {
     
     // Reminder Switch
     for (camera in cameras) {
-        subscribe(camera, "switch", cameraHandler_ReminderSwitch)
+        subscribe(camera, "switch", handler_ReminderSwitch)
     }
-    subscribe(person, "status", personHandler_ReminderSwitch)
+    subscribe(person, "presence", handler_ReminderSwitch)
+    subscribe(person, "sleeping", handler_ReminderSwitch)
     
     // Reminder Alert
     subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
@@ -135,21 +136,10 @@ def buttonHandler_CameraSwitch(evt) {
     }
 }
 
-def cameraHandler_ReminderSwitch(evt) {
-    logDebug("cameraHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
+def handler_ReminderSwitch(evt) {
+    logDebug("handler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("status") == "home") {
-        unschedule("checkCameras")
-        runIn(5, checkCameras)
-    } else {
-        reminderSwitch.off()
-    }
-}
-
-def personHandler_ReminderSwitch(evt) {
-    logDebug("personHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
-
-    if (evt.value == "home") {
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
         unschedule("checkCameras")
         runIn(5, checkCameras)
     } else {
