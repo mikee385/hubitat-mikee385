@@ -1,11 +1,11 @@
 {
     "packageName": "Dog Alerts",
     "author": "Michael Pierce",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Consolidate person and notification device",
-    "dateReleased": "2021-02-09",
+    "releaseNotes": "Use presence and sleeping, not status, for Person",
+    "dateReleased": "2021-06-05",
     "apps": [
         {
             "id": "0b123dd1-8526-4d9c-a301-ce44b12b5b03",
