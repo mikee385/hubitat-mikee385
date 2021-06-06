@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -30,7 +30,6 @@ metadata {
         capability "Sensor"
         capability "Sleep Sensor"
 
-        attribute "status", "enum", ["home", "away", "sleep"]
         attribute "message", "string"
         
         command "awake"
@@ -50,45 +49,28 @@ def updated() {
 }
 
 def initialize() {
-    if (!device.currentValue("status")) {
+    if (!device.currentValue("presence")) {
+        arrived()
+    }
+    if (!device.currentValue("sleeping")) {
         awake()
     }
 }
 
 def awake() {
-    if (device.currentValue("status") == "sleep") {
-        sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (awake)")
-    
-        sendEvent(name: "presence", value: "present")
-        sendEvent(name: "sleeping", value: "not sleeping")
-    }
+    sendEvent(name: "sleeping", value: "not sleeping")
 }
 
 def asleep() {
-    if (device.currentValue("status") == "home") {
-        sendEvent(name: "status", value: "sleep", descriptionText: "$device.displayName changed to sleep")
-    
-        sendEvent(name: "presence", value: "present")
-        sendEvent(name: "sleeping", value: "sleeping")
-    }
+    sendEvent(name: "sleeping", value: "sleeping")
 }
 
 def arrived() {
-    if (device.currentValue("presence") == "not present") {
-        sendEvent(name: "status", value: "home", descriptionText: "$device.displayName changed to home (arrived)")
-    
-        sendEvent(name: "presence", value: "present")
-        sendEvent(name: "sleeping", value: "not sleeping")
-    }
+    sendEvent(name: "presence", value: "present")
 }
 
 def departed() {
-    if (device.currentValue("presence") == "present") {
-        sendEvent(name: "status", value: "away", descriptionText: "$device.displayName changed to away")
-    
-        sendEvent(name: "presence", value: "not present")
-        sendEvent(name: "sleeping", value: "not sleeping")
-    }
+    sendEvent(name: "presence", value: "not present")
 }
 
 def deviceNotification(message) {
