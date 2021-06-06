@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "3.3.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -74,13 +74,14 @@ def initialize() {
     subscribe(sideDoor, "contact", deviceHandler_LightAlert)
     subscribe(motionSensor, "motion.active", deviceHandler_LightAlert)
     subscribe(garageLight, "switch", deviceHandler_LightAlert)
-    subscribe(person, "status", personHandler_LightAlert)
+    subscribe(person, "sleeping", personHandler_LightAlert)
     
     // Door Alert
     subscribe(overheadDoor, "contact", overheadDoorHandler_DoorAlert)
     subscribe(entryDoor, "contact", entryDoorHandler_DoorAlert)
     subscribe(sideDoor, "contact", sideDoorHandler_DoorAlert)
-    subscribe(person, "status", personHandler_DoorAlert)
+    subscribe(person, "presence", personHandler_DoorAlert)
+    subscribe(person, "sleeping", personHandler_DoorAlert)
     
     // Away Alert
     subscribe(overheadDoor, "contact", handler_AwayAlert)
@@ -193,7 +194,7 @@ def deviceHandler_LightAlert(evt) {
     
     unschedule("lightAlert")
     if (garageLight.currentValue("switch") == "on") {
-        if (person.currentValue("status") != "sleep") {
+        if (person.currentValue("sleeping") == "not sleeping") {
             runIn(60*10, lightAlert)
         }
     }
@@ -202,7 +203,7 @@ def deviceHandler_LightAlert(evt) {
 def personHandler_LightAlert(evt) {
     logDebug("personHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "sleep") {
+    if (evt.value == "sleeping") {
         unschedule("lightAlert")
         
         if (garageLight.currentValue("switch") == "on") {
@@ -220,7 +221,9 @@ def overheadDoorHandler_DoorAlert(evt) {
     logDebug("overheadDoorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        runIn(60*5, overheadDoorAlert)
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+            runIn(60*5, overheadDoorAlert)
+        }
     } else {
         unschedule("overheadDoorAlert")
     }
@@ -235,7 +238,9 @@ def entryDoorHandler_DoorAlert(evt) {
     logDebug("entryDoorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        runIn(60*5, entryDoorAlert)
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+            runIn(60*5, entryDoorAlert)
+        }
     } else {
         unschedule("entryDoorAlert")
     }
@@ -250,7 +255,9 @@ def sideDoorHandler_DoorAlert(evt) {
     logDebug("sideDoorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        runIn(60*5, sideDoorAlert)
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+            runIn(60*5, sideDoorAlert)
+        }
     } else {
         unschedule("sideDoorAlert")
     }
@@ -264,7 +271,7 @@ def sideDoorAlert() {
 def personHandler_DoorAlert(evt) {
     logDebug("personHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
 
-    if (evt.value != "home") {
+    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
         unschedule("overheadDoorAlert")
         unschedule("entryDoorAlert")
         unschedule("sideDoorAlert")
