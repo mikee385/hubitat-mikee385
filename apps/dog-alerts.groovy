@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.3.0" }
+String getVersionNum() { return "1.3.1" }
 String getVersionLabel() { return "Dog Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -79,7 +79,7 @@ def logDebug(msg) {
 def backyardDoorHandler(evt) {
     logDebug("backyardDoorHandler: ${evt.device} changed to ${evt.value}")
     
-    if (person.isSleep() && state.backyardAlertSent == false) {
+    if (person.currentValue("sleeping") == "sleeping" && state.backyardAlertSent == false) {
         person.deviceNotification("Dogs have gone out!")
         state.backyardAlertSent = true
     }
@@ -88,7 +88,7 @@ def backyardDoorHandler(evt) {
 def foodDoorHandler(evt) {
     logDebug("foodDoorHandler: ${evt.device} changed to ${evt.value}")
     
-    if (person.isSleep() && state.foodAlertSent == false) {
+    if (person.currentValue("sleeping") == "sleeping" && state.foodAlertSent == false) {
         person.deviceNotification("Dogs have been fed!")
         state.foodAlertSent = true
     }
