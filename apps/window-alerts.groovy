@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -55,7 +55,8 @@ def initialize() {
     for (window in windows) {
         subscribe(window, "contact", windowHandler_WindowAlert)
     }
-    subscribe(person, "status", personHandler_WindowAlert)
+    subscribe(person, "presence", personHandler_WindowAlert)
+    subscribe(person, "sleeping", personHandler_WindowAlert)
     
     // Away Alert
     for (window in windows) {
@@ -73,7 +74,7 @@ def windowHandler_WindowAlert(evt) {
     logDebug("windowHandler_WindowAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("status") == "home") {
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
             unschedule("windowAlert")
             runIn(60*5, windowAlert)
         }
@@ -94,7 +95,7 @@ def windowHandler_WindowAlert(evt) {
 def personHandler_WindowAlert(evt) {
     logDebug("personHandler_WindowAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "home") {
+    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
         unschedule("windowAlert")
         
         for (window in windows) {
