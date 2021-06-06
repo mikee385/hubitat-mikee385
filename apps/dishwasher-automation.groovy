@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.3.0" }
+String getVersionNum() { return "4.4.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -93,7 +93,8 @@ def initialize() {
     // Reminder Switch
     subscribe(reminderRoutine, "switch.on", routineHandler_ReminderSwitch)
     subscribe(appliance, "status", applianceHandler_ReminderSwitch)
-    subscribe(person, "status", personHandler_ReminderSwitch)
+    subscribe(person, "presence", personHandler_ReminderSwitch)
+    subscribe(person, "sleeping", personHandler_ReminderSwitch)
     
     // Reminder Alert
     subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
@@ -203,7 +204,7 @@ def applianceHandler_ReminderSwitch(evt) {
 def personHandler_ReminderSwitch(evt) {
     logDebug("personHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
 
-    if (evt.value != "home") {
+    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
         if (reminderSwitch.currentValue("switch") == "on") {
             reminderSwitch.off()
             person.deviceNotification("Dishwasher Reminder has been canceled!")
