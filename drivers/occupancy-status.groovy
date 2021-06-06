@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.1" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -28,7 +28,6 @@ metadata {
         capability "Sensor"
 
         attribute "status", "enum", ["occupied", "vacant", "checking", "blind"]
-        attribute "occupancy", "enum", ["occupied", "unoccupied"]
 
         command "occupied"
         command "vacant"
@@ -92,22 +91,18 @@ def resumeFromChecking() {
 
 private def setStatusToOccupied() {
     sendEvent(name: "status", value: "occupied", descriptionText: "$device.displayName changed to occupied")
-    sendEvent(name: "occupancy", value: "occupied")
     unschedule()
 }
 
 private def setStatusToVacant() {
     sendEvent(name: "status", value: "vacant", descriptionText: "$device.displayName changed to vacant")
-    sendEvent(name: "occupancy", value: "unoccupied")
     unschedule()
 }
 
 private def setStatusToChecking() {
     sendEvent(name: "status", value: "checking", descriptionText: "$device.displayName changed to checking")
-    sendEvent(name: "occupancy", value: "occupied")
 }
 
 private def setStatusToBlind() {
     sendEvent(name: "status", value: "blind", descriptionText: "$device.displayName changed to blind")
-    sendEvent(name: "occupancy", value: "occupied")
 }

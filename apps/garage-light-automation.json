@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use presence and sleeping, not status, for Person",
-    "dateReleased": "2021-06-05",
+    "releaseNotes": "Remove occupancy attribute from Occupancy Status",
+    "dateReleased": "2021-06-06",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
