@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "2.3.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -79,12 +79,14 @@ def initialize() {
     
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
-    subscribe(person, "status", personHandler_DoorAlert)
+    subscribe(person, "presence", personHandler_DoorAlert)
+    subscribe(person, "sleeping", personHandler_DoorAlert)
     
     // Lock Alert
     if (lock) {
         subscribe(lock, "lock", lockHandler_LockAlert)
-        subscribe(person, "status", personHandler_LockAlert)
+        subscribe(person, "presence", personHandler_LockAlert)
+        subscribe(person, "sleeping", personHandler_LockAlert)
     }
     
     // Away Alert
@@ -168,7 +170,7 @@ def doorHandler_DoorAlert(evt) {
     logDebug("doorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("status") == "home") {
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, doorAlert)
         }
     } else {
@@ -179,7 +181,7 @@ def doorHandler_DoorAlert(evt) {
 def personHandler_DoorAlert(evt) {
     logDebug("personHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "home") {
+    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
         unschedule("doorAlert")
         
         if (door.currentValue("contact") == "open") {
@@ -197,7 +199,7 @@ def lockHandler_LockAlert(evt) {
     logDebug("lockHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "unlocked") {
-        if (person.currentValue("status") == "home") {
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, lockAlert)
         }
     } else {
@@ -208,7 +210,7 @@ def lockHandler_LockAlert(evt) {
 def personHandler_LockAlert(evt) {
     logDebug("personHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "home") {
+    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
         unschedule("lockAlert")
         
         if (lock.currentValue("lock") == "unlocked") {
