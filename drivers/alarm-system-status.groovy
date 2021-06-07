@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Alarm System Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -27,7 +27,7 @@ metadata {
         capability "Actuator"
         capability "Sensor"
 
-        attribute "status", "enum", ["disarmed", "armed home", "armed away"]
+        attribute "alarm", "enum", ["disarmed", "armed home", "armed away"]
         
         command "disarm"
         command "armHome"
@@ -45,19 +45,19 @@ def updated() {
 }
 
 def initialize() {
-    if (!device.currentValue("status")) {
+    if (!device.currentValue("alarm")) {
         disarm()
     }
 }
 
 def disarm() {
-    sendEvent(name: "status", value: "disarmed", descriptionText: "$device.displayName changed to disarmed")
+    sendEvent(name: "alarm", value: "disarmed")
 }
 
 def armHome() {
-    sendEvent(name: "status", value: "armed home", descriptionText: "$device.displayName changed to armed home")
+    sendEvent(name: "alarm", value: "armed home")
 }
     
 def armAway() {
-    sendEvent(name: "status", value: "armed away", descriptionText: "$device.displayName changed to armed away")
+    sendEvent(name: "alarm", value: "armed away")
 }

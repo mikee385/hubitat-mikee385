@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Camera Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -61,7 +61,7 @@ def initialize() {
     // Camera Switch
     subscribe(location, "mode", modeHandler_CameraSwitch)
     if (alarmPanel) {
-        subscribe(alarmPanel, "status", alarmPanelHandler_CameraSwitch)
+        subscribe(alarmPanel, "alarm", alarmPanelHandler_CameraSwitch)
     }
     if (backupButton) {
         subscribe(backupButton, "pushed", buttonHandler_CameraSwitch)
@@ -94,7 +94,7 @@ def modeHandler_CameraSwitch(evt) {
 
     if (evt.value == "Home") {
         if (alarmPanel) {
-            if (alarmPanel.currentValue("status") == "disarmed") {
+            if (alarmPanel.currentValue("alarm") == "disarmed") {
                 for (camera in cameras) {
                     camera.off()
                 }
