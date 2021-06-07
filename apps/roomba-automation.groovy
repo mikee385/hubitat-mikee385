@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.4.0" }
+String getVersionNum() { return "6.4.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -170,10 +170,9 @@ def rechrgTmHandler(evt) {
             initialTm = rechrgTm - 15*1000
             if (initialTm > now()) {
                 runOnce(new Date(initialTm), initialCheck)
-                person.deviceNotification("$roomba will be checked at ${new Date(initialTm)}!")
             }
             
-            finalTm = rechrgTm + 2*1000
+            finalTm = rechrgTm + 5*1000
             if (finalTm > now()) {
                 runOnce(new Date(finalTm), finalCheck)
             } else {
