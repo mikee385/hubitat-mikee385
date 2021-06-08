@@ -24,13 +24,6 @@
             "tags": [ "Automations & Groups", "Bathroom", "Shower", "Temperature & Humidity" ]
         },
         {
-            "name": "Camera Automation",
-            "category": "Control",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/camera-automation.json",
-            "description": "Turns on/off the cameras and reminders based on modes and other devices.",
-            "tags": [ "Automations & Groups", "Lights & Switches", "Safety & Security" ]
-        },
-        {
             "name": "Christmas Tree Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/christmas-tree-automation.json",
@@ -120,6 +113,13 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/presence-urls.json",
             "description": "Provides URLs to control the status of child presence sensor from an external source (e.g. Locative).",
             "tags": [ "Automations & Groups", "Presence & Location" ]
+        },
+        {
+            "name": "Security Automation",
+            "category": "Security",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/security-automation.json",
+            "description": "Turns on/off the cameras and sends alerts based on the alarm system and mode.",
+            "tags": [ "Automations & Groups", "Lights & Switches", "Safety & Security" ]
         },
         {
             "name": "System Alerts",

@@ -1,0 +1,20 @@
+{
+    "packageName": "Security Automation",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Change Camera Automation to Security Automation",
+    "dateReleased": "2021-06-07",
+    "apps": [
+        {
+            "id": "0df93513-7fb1-42d7-995a-3bf8204dcd78",
+            "name": "Security Automation",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/security-automation.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ]
+}
