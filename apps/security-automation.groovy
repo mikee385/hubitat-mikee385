@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -119,7 +119,9 @@ def alarmPanelHandler_CameraSwitch(evt) {
 def modeHandler_AlarmAlert(evt) {
     logDebug("modeHandler_AlarmAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "Home") {
+    if (evt.value == "Away") {
+        checkAlarm()
+    } else if (evt.value == "Sleep") {
         runIn(60, checkAlarm)
     } else {
         unschedule("checkAlarm")

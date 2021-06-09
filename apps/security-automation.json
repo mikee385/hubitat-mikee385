@@ -1,11 +1,11 @@
 {
     "packageName": "Security Automation",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change Camera Automation to Security Automation",
-    "dateReleased": "2021-06-07",
+    "releaseNotes": "Remove delay for alarm check when Away",
+    "dateReleased": "2021-06-08",
     "apps": [
         {
             "id": "0df93513-7fb1-42d7-995a-3bf8204dcd78",
