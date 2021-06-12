@@ -1,11 +1,11 @@
 {
     "packageName": "Presence URLs",
     "author": "Michael Pierce",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add support for POST requests",
-    "dateReleased": "2021-04-05",
+    "releaseNotes": "Fix null error when recreating a deleted device",
+    "dateReleased": "2021-06-12",
     "apps": [
         {
             "id": "abb11855-aaa8-46b3-8864-d8a44c862f45",

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.3.0" }
+String getVersionNum() { return "1.3.1" }
 String getVersionLabel() { return "Presence URLs, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -89,7 +89,7 @@ def childDevice() {
     def childID = "presence:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        addChildDevice("hubitat", "Virtual Presence", childID, 1234, [name: app.label, isComponent: false])
+        child = addChildDevice("hubitat", "Virtual Presence", childID, 1234, [name: app.label, isComponent: false])
     }
     return child
 }
