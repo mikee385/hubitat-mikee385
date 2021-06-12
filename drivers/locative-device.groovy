@@ -1,5 +1,5 @@
 /**
- *  Locative Presence Driver
+ *  Locative Integration Driver
  *
  *  Copyright 2021 Michael Pierce
  *
@@ -14,17 +14,16 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
-String getVersionLabel() { return "Locative Presence, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "2.0.0" }
+String getVersionLabel() { return "Locative Device, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
     definition (
-		name: "Locative Presence", 
+		name: "Locative Device", 
 		namespace: "mikee385", 
 		author: "Michael Pierce", 
-		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-presence.groovy"
+		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-device.groovy"
 	) {
-        capability "PresenceSensor"
         capability "Sensor"
         
         attribute "latitude", "number"
@@ -38,6 +37,12 @@ String getVersionLabel() { return "Locative Presence, version ${getVersionNum()}
     }
 }
 
+def uninstalled() {
+    for (device in getChildDevices()) {
+        deleteChildDevice(device.deviceNetworkId)
+    }
+}
+
 def update(mapParams) {
     sendEvent(name: "latitude", value:      mapParams["latitude"].toBigDecimal(), unit: '°')
     sendEvent(name: "longitude", value: Numbers.parseDecimal(mapParams["longitude"].toBigDecimal(), unit: '°')
@@ -48,9 +53,19 @@ def update(mapParams) {
     sendEvent(name: "trigger", value: mapParams["trigger"])
     sendEvent(name: "timestamp", value: new Date((mapParams["timestamp"]).toBigDecimal()*1000).longValue()))
     
+    def child = childDevice(mapParams["id"])
     if (mapParams["trigger"] == "enter") {
-        sendEvent(name: "presence", value: "present")
+        child.arrived()
     } else if (mapParams["trigger"] == "exit") {
-        sendEvent(name: "presence", value: "not present")
+        child.departed()
     }
+}
+
+def childDevice(locationID) {
+    def childID = device.getDeviceNetworkId() + ":" + locationID
+    def child = getChildDevice(childID)
+    if (!child) {
+        child = addChildDevice("hubitat", "Virtual Presence", childID, [name: "Locative Presence", label: "${parent.getUserName()} $locationID", isComponent: false])
+    }
+    return child
 }

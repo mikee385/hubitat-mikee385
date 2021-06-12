@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix number and date parsing",
+    "releaseNotes": "Create child presence devices for each location",
     "dateReleased": "2021-06-12",
     "apps": [
         {
             "id": "ac4a5dbb-642b-4c6b-9caf-d6320f596513",
             "name": "Locative Integration",
-            "version": "1.0.1",
+            "version": "2.0.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/locative-integration.groovy",
             "required": true,
@@ -20,10 +20,10 @@
     "drivers": [
         {
             "id": "7ef7b321-0e46-4ce2-965e-0b2820b9db30",
-            "name": "Locative Presence",
-            "version": "1.0.1",
+            "name": "Locative Device",
+            "version": "2.0.0",
             "namespace": "mikee385",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-presence.groovy",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-device.groovy",
             "required": true
         }
     ]

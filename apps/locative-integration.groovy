@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Locative Integration, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -29,6 +29,9 @@ definition(
 
 preferences {
     page(name: "settings", title: "Locative Integration", install: true, uninstall: true) {
+        section {
+            input "user_name", type: "string", title: "Name of User", required: true
+        }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
@@ -77,11 +80,15 @@ def logDebug(msg) {
     }
 }
 
+def getUserName() {
+    return user_name
+}
+
 def childDevice() {
     def childID = "locative:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        addChildDevice("mikee385", "Locative Presence", childID, 1234, [name: app.label, isComponent: false])
+        child = addChildDevice("mikee385", "Locative Device", childID, 1234, [label: "$user_name Locative", isComponent: false])
     }
     return child
 }
