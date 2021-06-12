@@ -44,8 +44,8 @@ def uninstalled() {
 }
 
 def update(mapParams) {
-    sendEvent(name: "latitude", value:      mapParams["latitude"].toBigDecimal(), unit: '°')
-    sendEvent(name: "longitude", value: Numbers.parseDecimal(mapParams["longitude"].toBigDecimal(), unit: '°')
+    sendEvent(name: "latitude", value: mapParams["latitude"].toBigDecimal(), unit: '°')
+    sendEvent(name: "longitude", value: mapParams["longitude"].toBigDecimal(), unit: '°')
     sendEvent(name: "id", value: mapParams["id"])
     sendEvent(name: "device", value: mapParams["device"])
     sendEvent(name: "device_type", value: mapParams["device_type"])
