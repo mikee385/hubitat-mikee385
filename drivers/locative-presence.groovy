@@ -24,7 +24,7 @@ String getVersionLabel() { return "Locative Presence, version ${getVersionNum()}
 		author: "Michael Pierce", 
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-presence.groovy"
 	) {
-        capability "Presence"
+        capability "PresenceSensor"
         capability "Sensor"
         
         attribute "latitude", "number"
