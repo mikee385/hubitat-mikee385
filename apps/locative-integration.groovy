@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Locative Integration", install: true, uninstall: true) {
         section {
-            input "user_name", type: "string", title: "Name of User", required: true
+            input name: "user_name", type: "string", title: "Name of User", required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
