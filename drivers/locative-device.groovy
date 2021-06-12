@@ -51,7 +51,7 @@ def update(mapParams) {
     sendEvent(name: "device_type", value: mapParams["device_type"])
     sendEvent(name: "device_model", value: mapParams["device_model"])
     sendEvent(name: "trigger", value: mapParams["trigger"])
-    sendEvent(name: "timestamp", value: new Date((mapParams["timestamp"]).toBigDecimal()*1000).longValue()))
+    sendEvent(name: "timestamp", value: new Date((mapParams["timestamp"].toBigDecimal()*1000).longValue()))
     
     def child = childDevice(mapParams["id"])
     if (mapParams["trigger"] == "enter") {
