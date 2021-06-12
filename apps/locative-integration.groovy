@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Locative Integration, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -81,7 +81,7 @@ def childDevice() {
     def childID = "locative:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        addChildDevice("hubitat", "Locative Presence", childID, 1234, [name: app.label, isComponent: false])
+        addChildDevice("mikee385", "Locative Presence", childID, 1234, [name: app.label, isComponent: false])
     }
     return child
 }
