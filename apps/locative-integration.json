@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix namepsace of child device",
+    "releaseNotes": "Fix number and date parsing",
     "dateReleased": "2021-06-12",
     "apps": [
         {
@@ -21,7 +21,7 @@
         {
             "id": "7ef7b321-0e46-4ce2-965e-0b2820b9db30",
             "name": "Locative Presence",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-presence.groovy",
             "required": true

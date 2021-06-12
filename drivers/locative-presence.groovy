@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Locative Presence, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -39,14 +39,14 @@ String getVersionLabel() { return "Locative Presence, version ${getVersionNum()}
 }
 
 def update(mapParams) {
-    sendEvent(name: "latitude", value:      Numbers.parseDecimal(mapParams["latitude"]), unit: '°')
-    sendEvent(name: "longitude", value: Numbers.parseDecimal(mapParams["longitude"]), unit: '°')
+    sendEvent(name: "latitude", value:      mapParams["latitude"].toBigDecimal(), unit: '°')
+    sendEvent(name: "longitude", value: Numbers.parseDecimal(mapParams["longitude"].toBigDecimal(), unit: '°')
     sendEvent(name: "id", value: mapParams["id"])
     sendEvent(name: "device", value: mapParams["device"])
     sendEvent(name: "device_type", value: mapParams["device_type"])
     sendEvent(name: "device_model", value: mapParams["device_model"])
     sendEvent(name: "trigger", value: mapParams["trigger"])
-    sendEvent(name: "timestamp", value: new Date(Numbers.parseDecimal(mapParams["timestamp"])))
+    sendEvent(name: "timestamp", value: new Date((mapParams["timestamp"]).toBigDecimal()*1000).longValue()))
     
     if (mapParams["trigger"] == "enter") {
         sendEvent(name: "presence", value: "present")
