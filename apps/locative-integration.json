@@ -1,6 +1,6 @@
 {
     "packageName": "Locative Integration",
-    "author": "Michael Pierce"
+    "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
     "releaseNotes": "Initial release",
