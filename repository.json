@@ -82,7 +82,7 @@
         {
             "name": "Locative Integration",
             "category": "Integrations",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/locative-integrations.json",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/locative-integration.json",
             "description": "Provides a URL endpoint for Locative and parses the response to trigger presence devices for each location.",
             "tags": [ "Presence & Location" ]
         },
