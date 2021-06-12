@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove separate child devices",
+    "releaseNotes": "Add device commands for arrived and departed",
     "dateReleased": "2021-06-12",
     "apps": [
         {
@@ -21,7 +21,7 @@
         {
             "id": "7ef7b321-0e46-4ce2-965e-0b2820b9db30",
             "name": "Locative Device",
-            "version": "3.0.0",
+            "version": "3.1.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-device.groovy",
             "required": true

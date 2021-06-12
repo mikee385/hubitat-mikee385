@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Locative Device, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -35,6 +35,9 @@ String getVersionLabel() { return "Locative Device, version ${getVersionNum()} o
         attribute "device_model", "string"
         attribute "trigger", "enum", ["enter", "exit"]
         attribute "timestamp", "string"
+        
+        command "arrived"
+        command "departed"
     }
 }
 
@@ -50,9 +53,17 @@ def update(mapParams) {
     
     if (mapParams["id"] == parent.getPresenceId()) {
         if (mapParams["trigger"] == "enter") {
-            sendEvent(name: "presence", value: "present")
+            arrived()
         } else if (mapParams["trigger"] == "exit") {
-            sendEvent(name: "presence", value: "not present")
+            departed()
         }
     }
+}
+
+def arrived() {
+    sendEvent(name: "presence", value: "present")
+}
+
+def departed() {
+    sendEvent(name: "presence", value: "not present")
 }
