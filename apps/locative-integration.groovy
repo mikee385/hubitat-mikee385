@@ -14,14 +14,14 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Locative Integration, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
     name: "Locative Integration",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Provides a URL endpoint for Locative and parses the response to trigger presence devices for each location.",
+    description: "Provides a URL endpoint for Locative and parses the response into device attributes.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Locative Integration", install: true, uninstall: true) {
         section {
-            input name: "user_name", type: "string", title: "Name of User", required: true
+            input name: "presenceId", type: "string", title: "ID to use for presence", required: true
         }
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
@@ -80,15 +80,15 @@ def logDebug(msg) {
     }
 }
 
-def getUserName() {
-    return user_name
+def getPresenceId() {
+    return presenceId
 }
 
 def childDevice() {
     def childID = "locative:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        child = addChildDevice("mikee385", "Locative Device", childID, 1234, [label: "$user_name Locative", isComponent: false])
+        child = addChildDevice("mikee385", "Locative Device", childID, 1234, [label: app.label, isComponent: false])
     }
     return child
 }

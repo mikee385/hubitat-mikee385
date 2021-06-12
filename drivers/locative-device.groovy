@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Locative Device, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -24,6 +24,7 @@ String getVersionLabel() { return "Locative Device, version ${getVersionNum()} o
 		author: "Michael Pierce", 
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/locative-device.groovy"
 	) {
+        capability "Presence Sensor"
         capability "Sensor"
         
         attribute "latitude", "number"
@@ -37,12 +38,6 @@ String getVersionLabel() { return "Locative Device, version ${getVersionNum()} o
     }
 }
 
-def uninstalled() {
-    for (device in getChildDevices()) {
-        deleteChildDevice(device.deviceNetworkId)
-    }
-}
-
 def update(mapParams) {
     sendEvent(name: "latitude", value: mapParams["latitude"].toBigDecimal(), unit: '°')
     sendEvent(name: "longitude", value: mapParams["longitude"].toBigDecimal(), unit: '°')
@@ -53,19 +48,11 @@ def update(mapParams) {
     sendEvent(name: "trigger", value: mapParams["trigger"])
     sendEvent(name: "timestamp", value: new Date((mapParams["timestamp"].toBigDecimal()*1000).longValue()))
     
-    def child = childDevice(mapParams["id"])
-    if (mapParams["trigger"] == "enter") {
-        child.arrived()
-    } else if (mapParams["trigger"] == "exit") {
-        child.departed()
+    if (mapParams["id"] == parent.getPresenceId()) {
+        if (mapParams["trigger"] == "enter") {
+            sendEvent(name: "presence", value: "present")
+        } else if (mapParams["trigger"] == "exit") {
+            sendEvent(name: "presence", value: "not present")
+        }
     }
-}
-
-def childDevice(locationID) {
-    def childID = device.getDeviceNetworkId() + ":" + locationID
-    def child = getChildDevice(childID)
-    if (!child) {
-        child = addChildDevice("hubitat", "Virtual Presence", childID, [name: "Locative Presence", label: "${parent.getUserName()} $locationID", isComponent: false])
-    }
-    return child
 }
