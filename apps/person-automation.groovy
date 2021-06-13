@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,12 +31,15 @@ preferences {
     page(name: "settings", title: "Person Automation", install: true, uninstall: true) {
         section {
             input "person", "device.PersonStatus", title: "Person Status", multiple: false, required: true
+        }
+        section {
             input "primarySensors", "capability.presenceSensor", title: "Primary Presence (Arrival & Departure)", multiple: true, required: false
             input "secondarySensors", "capability.presenceSensor", title: "Secondary Presence (Arrival Only)", multiple: true, required: false
             input "sleepSwitch", "capability.switch", title: "Sleep Switch", multiple: false, required: false
-            input "notificationDevices", "capability.notification", title: "Notification Devices", multiple: true, required: false
+            input "locationDevice", "device.LocativeDevice", title: "Location Device", multiple: false, required: false
         }
         section("Alerts") {
+            input "notificationDevices", "capability.notification", title: "Notification Devices", multiple: true, required: false
             input "alertInconsistent", "bool", title: "Alert when Presence is Inconsistent?", required: true, defaultValue: false
             input "alertAsleepWhenAway", "bool", title: "Alert when Asleep while Away?", required: true, defaultValue: false
         }
@@ -110,6 +113,11 @@ def initialize() {
     
         // Away Alert
         subscribe(sleepSwitch, "switch.on", handler_AwayAlert)
+    }
+    
+    if (locationDevice) {
+        // Location
+        subscribe(locationDevice, "trigger", triggerHandler_Location)
     }
     
     if (notificationDevices) {
@@ -191,6 +199,16 @@ def modeHandler_Switch(evt) {
     
     if (evt.value == "Away") {
         sleepSwitch.off()
+    }
+}
+
+def triggerHandler_Location(evt) {
+    logDebug("triggerHandler_Location: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "enter") {
+        person.setLocation(locationDevice.currentValue("id"))
+    } else {
+        person.setLocation("")
     }
 }
 
