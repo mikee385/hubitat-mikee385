@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.8.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -132,7 +132,7 @@ def modeHandler_LightSwitch(evt) {
 def doorHandler_LightTimeout(evt) {
     logDebug("doorHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
     
-    light.setLightTimeout("5 minutes (default)")
+    light.setLightTimeout("5 minutes")
     subscribe(light, "switch.off", lightHandler_LightTimeout)
 }
 
