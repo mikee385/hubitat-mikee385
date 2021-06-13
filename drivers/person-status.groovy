@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.1" }
+String getVersionNum() { return "4.1.2" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -38,7 +38,7 @@ metadata {
         command "arrived"
         command "departed"
         
-        command "setLocation", "string"
+        command "setLocation", ["string"]
     }
 }
 
@@ -83,7 +83,7 @@ def setLocation(locationName) {
     if (locationName) {
         sendEvent(name: "location", value: "${locationName}")
     } else {
-        sendEvent(name: "location", value: "")
+        sendEvent(name: "location", value: "none")
     }
 }
 

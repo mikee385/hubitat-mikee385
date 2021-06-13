@@ -1,7 +1,7 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "4.1.1",
+    "version": "4.1.2",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
     "releaseNotes": "Fix missing argument for setLocation",
