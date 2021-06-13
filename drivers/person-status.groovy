@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -30,12 +30,15 @@ metadata {
         capability "Sensor"
         capability "Sleep Sensor"
 
+        attribute "location", "string"
         attribute "message", "string"
         
         command "awake"
         command "asleep"
         command "arrived"
         command "departed"
+        
+        command "setLocation"
     }
 }
 
@@ -55,6 +58,9 @@ def initialize() {
     if (!device.currentValue("sleeping")) {
         awake()
     }
+    if (!device.currentValue("location")) {
+        setLocation("")
+    }
 }
 
 def awake() {
@@ -71,6 +77,10 @@ def arrived() {
 
 def departed() {
     sendEvent(name: "presence", value: "not present")
+}
+
+def setLocation(locationName) {
+    sendEvent(name: "location", value: "${locationName}")
 }
 
 def deviceNotification(message) {
