@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.1" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Virtual Alexa Button, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -57,7 +57,6 @@ def push(button) {
     sendEvent(name: "switch", value: "on", isStateChange: true)
     sendEvent(name: "contact", value: "open", isStateChange: true)
 
-    sendEvent(name: "momentary", value: "pushed", isStateChange: true)    
     sendEvent(name: "pushed", value: "${button}", isStateChange: true, type: "digital")
     
     runIn(1, toggleOff)
