@@ -1,0 +1,26 @@
+{
+    "packageName": "Echo Glow Device",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial release",
+    "dateReleased": "2021-06-26",
+    "drivers": [
+        {
+            "id": "e7b898cb-e8bd-45c9-ace8-f86e2b93204a",
+            "name": "Echo Glow Device",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-device.groovy",
+            "required": true
+        },
+        {
+            "id": "6acbdc17-1cc7-4902-9d79-0778be181eae",
+            "name": "Echo Glow Scene",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-scene.groovy",
+            "required": true
+        }
+    ]
+}

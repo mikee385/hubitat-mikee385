@@ -192,6 +192,13 @@
             "tags": [ "Appliances", "Misc. Devices" ]
         },
         {
+            "name": "Echo Glow Device",
+            "category": "Utility",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-device.json",
+            "description": "Driver providing buttons representing different scenes that can be shared with Alexa to create routines that interact with physical Echo Glow devices.",
+            "tags": [ "Lights & Switches", "Misc. Devices", "Voice Assistants" ]
+        },
+        {
             "name": "Occupancy Status",
             "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.json",
