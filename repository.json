@@ -59,10 +59,10 @@
             "tags": [ "Automations & Groups", "Doors & Windows", "Garage Doors", "Lights & Switches", "Motion Control" ]
         },
         {
-            "name": "Glows Automation",
+            "name": "Echo Glow Automation",
             "category": "Control",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/glows-automation.json",
-            "description": "Triggers Alexa virtual buttons using various mechanisms.",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/echo-glow-automation.json",
+            "description": "Provides routines to control Echo Glow devices when triggered from various mechanisms.",
             "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
