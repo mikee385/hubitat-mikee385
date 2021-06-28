@@ -45,6 +45,13 @@
             "tags": [ "Notifications", "Pets & Animals" ]
         },
         {
+            "name": "Echo Glow Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/echo-glow-automation.json",
+            "description": "Provides routines to control Echo Glow devices when triggered from various mechanisms.",
+            "tags": [ "Automations & Groups", "Lights & Switches" ]
+        },
+        {
             "name": "Front Porch Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.json",
@@ -57,13 +64,6 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.json",
             "description": "Turns the garage light on and off based on the occupancy of the garage and the status of the doors.",
             "tags": [ "Automations & Groups", "Doors & Windows", "Garage Doors", "Lights & Switches", "Motion Control" ]
-        },
-        {
-            "name": "Echo Glow Automation",
-            "category": "Control",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/echo-glow-automation.json",
-            "description": "Provides routines to control Echo Glow devices when triggered from various mechanisms.",
-            "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
             "name": "Holiday Lights Automation",
