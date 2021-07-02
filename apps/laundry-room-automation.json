@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Update timeout values for new driver",
-    "dateReleased": "2021-06-12",
+    "releaseNotes": "Add gate and timeout for light",
+    "dateReleased": "2021-07-02",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

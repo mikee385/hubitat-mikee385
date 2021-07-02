@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -32,6 +32,7 @@ preferences {
         section {
             input "light", "device.GEZ-WavePlusMotionSwitch", title: "Light", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
+            input "gate", "capability.contactSensor", title: "Gate", multiple: false, required: false
         }
         section("Laundry") {
             input "laundry", "device.ApplianceStatus", title: "Laundry", multiple: false, required: true
@@ -70,7 +71,14 @@ def updated() {
 def initialize() {
     // Light Switch
     subscribe(door, "contact.open", doorHandler_LightSwitch)
+    if (gate) {
+        subscribe(gate, "contact.open", doorHandler_LightSwitch)
+    }
     subscribe(location, "mode", modeHandler_LightSwitch)
+    
+    // Light Timer
+    subscribe(light, "switch.on", lightHandler_LightTimer)
+    subscribe(light, "motion.active", motionHandler_LightTimer)
     
     // Light Timeout
     subscribe(door, "contact.open", doorHandler_LightTimeout)
@@ -127,6 +135,24 @@ def modeHandler_LightSwitch(evt) {
     if (evt.value != "Home") {
         light.off()
     }
+}
+
+def lightHandler_LightTimer(evt) {
+    logDebug("lightHandler_LightTimer: ${evt.device} changed to ${evt.value}")
+    
+    if (light.currentValue("motion") == "inactive") {
+        runIn(60*1, lightOff)
+    }
+}
+
+def motionHandler_LightTimer(evt) {
+    logDebug("motionHandler_LightTimer: ${evt.device} changed to ${evt.value}")
+    
+    unschedule("lightOff")
+}
+
+def lightOff() {
+    light.off()
 }
 
 def doorHandler_LightTimeout(evt) {
