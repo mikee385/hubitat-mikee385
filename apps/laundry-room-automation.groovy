@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -81,7 +81,7 @@ def initialize() {
     subscribe(light, "motion.active", motionHandler_LightTimer)
     
     // Light Timeout
-    subscribe(door, "contact.open", doorHandler_LightTimeout)
+    subscribe(door, "contact", doorHandler_LightTimeout)
     
     // Laundry Status
     subscribe(washer, "currentState", washerHandler_LaundryStatus)
@@ -158,8 +158,11 @@ def lightOff() {
 def doorHandler_LightTimeout(evt) {
     logDebug("doorHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
     
-    light.setLightTimeout("5 minutes")
-    subscribe(light, "switch.off", lightHandler_LightTimeout)
+    if (evt.value == "closed") {
+        light.setLightTimeout("5 minutes")
+    } else {
+        subscribe(light, "switch.off", lightHandler_LightTimeout)
+    }
 }
 
 def lightHandler_LightTimeout(evt) {
