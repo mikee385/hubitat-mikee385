@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Parent" }
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -35,6 +35,9 @@ def installed() {
 def updated() {
     unschedule()
     initialize()
+}
+
+def initialize() {
 }
 
 def uninstalled() {

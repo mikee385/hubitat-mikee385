@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Initial release",
+    "releaseNotes": "Fix missing initialize method",
     "dateReleased": "2021-07-10",
     "apps": [
         {
@@ -31,7 +31,7 @@
         {
             "id": "ec3f21d2-2c68-41cf-9d27-719e4da7a7ed",
             "name": "Zone Parent",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-parent.groovy",
             "required": true
