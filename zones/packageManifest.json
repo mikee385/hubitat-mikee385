@@ -1,0 +1,48 @@
+{
+    "packageName": "Zone Builder",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
+    "releaseNotes": "Initial release",
+    "dateReleased": "2021-07-10",
+    "apps": [
+        {
+            "id": "cfef5ab9-208a-46cd-8d61-2c14a9c8ddae",
+            "name": "Zone Builder",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-builder.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        },
+        {
+            "id": "9b2505e8-9ad2-4c66-89b8-a810174c56c4",
+            "name": "Zone App",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-app.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": false
+        }
+    ],
+    "drivers": [
+        {
+            "id": "ec3f21d2-2c68-41cf-9d27-719e4da7a7ed",
+            "name": "Zone Parent",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-parent.groovy",
+            "required": true
+        },
+        {
+            "id": "f5840aec-58c3-4571-9799-bd641774095c",
+            "name": "Zone Device",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-device.groovy",
+            "required": true
+        }
+    ]
+}
