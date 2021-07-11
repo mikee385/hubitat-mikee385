@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -48,12 +48,16 @@ def mainPage() {
 
         } else if (zoneType == "Standard") {
             section {
-                input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false
-                input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
+                input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false, submitOnChange: true
+                if (entryDoors) {
+                    input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
+                }
             }
             section {
-                input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false
-                input "motionSeconds", "number", title: "Additional time that zone will remain active after a motion sensor has changed to inactive (seconds)", required: true, defaultValue: 60
+                input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false, submitOnChange: true
+                if (motionSensors) {
+                    input "motionSeconds", "number", title: "Additional time that zone will remain active after a motion sensor has changed to inactive (seconds)", required: true, defaultValue: 60
+                }
             }
             section("ENGAGED - Zone will stay occupied while:") {
                 input "engagedDoors_Open", "capability.contactSensor", title: "Door is Open", multiple: true, required: false
