@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.3.0" }
+String getVersionNum() { return "1.4.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -201,16 +201,20 @@ def childZoneHandler(evt) {
     if (evt.value == "occupied") {
         logDebug("$debugContext - engaged")
         setZoneEngaged()
-    } else if (!anyDeviceIsEngaged() && !anyChildZoneIsOccupied()) {
-        if (zoneIsOpen()) {
-            logDebug("$debugContext - unsure (open)")
-            //setZoneActive()
+    } else if (evt.value == "checking") {
+        if (!anyDeviceIsEngaged() && !anyChildZoneIsOccupied()) {
+            if (zoneIsOpen()) {
+                logDebug("$debugContext - active (${activeSeconds}s)")
+                setZoneActive()
+            } else {
+                logDebug("$debugContext - engaged")
+                setZoneEngaged()
+            }
         } else {
-            logDebug("$debugContext - unsure (closed)")
-            //setZoneEngaged()
+            logDebug("$debugContext - ignored (engaged)")
         }
     } else {
-        logDebug("$debugContext - ignored (engaged)")
+        logDebug("$debugContext - ignored (vacant)")
     }
 }
 

@@ -3,8 +3,8 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Add preliminary handler for child zone occupancy",
-    "dateReleased": "2021-07-10",
+    "releaseNotes": "Better handle child zone occupancy",
+    "dateReleased": "2021-07-11",
     "apps": [
         {
             "id": "cfef5ab9-208a-46cd-8d61-2c14a9c8ddae",
@@ -19,7 +19,7 @@
         {
             "id": "9b2505e8-9ad2-4c66-89b8-a810174c56c4",
             "name": "Zone App",
-            "version": "1.3.0",
+            "version": "1.4.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-app.groovy",
             "required": true,
