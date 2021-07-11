@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "1.3.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -193,6 +193,25 @@ def setZoneVacant() {
     
     def zone = getZoneDevice()
     zone.vacant()
+}
+
+def childZoneHandler(evt) {
+    def debugContext = "Zone ${app.label} - Child Zone - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    
+    if (evt.value == "occupied") {
+        logDebug("$debugContext - engaged")
+        setZoneEngaged()
+    } else if (!anyDeviceIsEngaged() && !anyChildZoneIsOccupied()) {
+        if (zoneIsOpen()) {
+            logDebug("$debugContext - unsure (open)")
+            //setZoneActive()
+        } else {
+            logDebug("$debugContext - unsure (closed)")
+            //setZoneEngaged()
+        }
+    } else {
+        logDebug("$debugContext - ignored (engaged)")
+    }
 }
 
 def simpleDoorHandler(evt) {
