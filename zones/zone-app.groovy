@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.6.0" }
+String getVersionNum() { return "1.6.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -38,16 +38,17 @@ def mainPage() {
         section {
             label title: "Zone Name", required: true
             input "zoneType", "enum", title: "Zone Type", options: ["Simple", "Standard"], multiple: false, required: true, submitOnChange: true
-            input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
         }
         
         if (zoneType == "Simple") {
             section {
+                input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
                 input "simpleDoor", "capability.contactSensor", title: "Door", multiple: false, required: true
             }
 
         } else if (zoneType == "Standard") {
             section {
+                input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
                 input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false, submitOnChange: true
                 if (entryDoors) {
                     input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
@@ -96,9 +97,14 @@ def initialize() {
         for (entryDoor in entryDoors) {
             subscribe(entryDoor, "contact", entryDoorHandler)
         }
+        
         for (motionSensor in motionSensors) {
             subscribe(motionSensor, "motion.active", motionActiveHandler)
         }
+        for (interiorDoor in interiorDoors) {
+            subscribe(interiorDoor, "contact", activityHandler)
+        }
+        
         for (engagedDoor in engagedDoors_Open) {
             subscribe(engagedDoor, "contact.open", engagedActiveHandler)
             subscribe(engagedDoor, "contact.closed", engagedInactiveHandler)
@@ -114,9 +120,6 @@ def initialize() {
         for (engagedSwitch in engagedSwitches_Off) {
             subscribe(engagedSwitch, "switch.off", engagedActiveHandler)
             subscribe(engagedSwitch, "switch.on", engagedInactiveHandler)
-        }
-        for (interiorDoor in interiorDoors) {
-            subscribe(interiorDoor, "contact", activityHandler)
         }
     
     } else {
@@ -140,7 +143,6 @@ def getZoneDevice() {
 
 def setZoneEngaged() {
     unsubscribe("motionInactiveHandler")
-    unschedule("motionTimeout")
     unschedule("activeTimeout")
     unschedule("checkingTimeout")
     
@@ -150,7 +152,6 @@ def setZoneEngaged() {
 
 def setZoneActive() {
     unsubscribe("motionInactiveHandler")
-    unschedule("motionTimeout")
     unschedule("activeTimeout")
     unschedule("checkingTimeout")
     
@@ -166,7 +167,6 @@ def setZoneActive() {
 
 def setZoneChecking() {
     unsubscribe("motionInactiveHandler")
-    unschedule("motionTimeout")
     unschedule("activeTimeout")
     unschedule("checkingTimeout")
     
@@ -182,7 +182,6 @@ def setZoneChecking() {
 
 def setZoneVacant() {
     unsubscribe("motionInactiveHandler")
-    unschedule("motionTimeout")
     unschedule("activeTimeout")
     unschedule("checkingTimeout")
     
@@ -314,21 +313,6 @@ def engagedInactiveHandler(evt) {
         }
     } else {
         logDebug("$debugContext - ignored (engaged)")
-    }
-}
-
-def motionTimeout() {
-    def debugContext = "Zone ${app.label} - Motion Timeout - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
-    
-    if (!anyMotionIsActive()) {
-        if (zoneIsOpen()) {
-            logDebug("$debugContext - vacant")
-            setZoneVacant()
-        } else {
-            logDebug("$debugContext - ignored (closed)")
-        }
-    } else {
-        logDebug("$debugContext - ignored (motion active)")
     }
 }
 
