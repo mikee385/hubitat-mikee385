@@ -15,7 +15,7 @@
  */
 
 String getName() { return "Zone Builder" }
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -29,9 +29,19 @@ definition(
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-builder.groovy")
 
 preferences {
-    page(name: "mainPage", title: "${getVersionLabel()}", uninstall: false, install: true) {
-        section() {
-            app(name: "childApps", appName: "Zone App", namespace: "mikee385", title: "New Zone...", multiple: true)
+    page(name: "mainPage", title: "${getVersionLabel()}", uninstall: false, install: true)
+}
+
+def mainPage() {
+    dynamicPage(name: "mainPage") {
+        if (app.getInstallationState() != "COMPLETE") {
+		    section {
+		        paragraph "Please click 'Done' to finish installation."
+		    }
+  	    } else {
+            section {
+                app(name: "childApps", appName: "Zone App", namespace: "mikee385", title: "New Zone...", multiple: true)
+            }
         }
     }
 }
