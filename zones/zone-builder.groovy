@@ -15,7 +15,7 @@
  */
 
 String getName() { return "Zone Builder" }
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -51,7 +51,7 @@ def initialize() {
 }
 
 def uninstalled() {
-    deleteAllDevices()
+    deleteAllZones()
 }
 
 def logDebug(msg) {
