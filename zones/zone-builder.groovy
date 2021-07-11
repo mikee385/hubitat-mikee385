@@ -29,11 +29,11 @@ definition(
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-builder.groovy")
 
 preferences {
-    page(name: "mainPage", title: "${getVersionLabel()}", uninstall: false, install: true)
+    page(name: "mainPage")
 }
 
 def mainPage() {
-    dynamicPage(name: "mainPage") {
+    dynamicPage(name: "mainPage", title: "${getVersionLabel()}", install: true, uninstall: true) {
         if (app.getInstallationState() != "COMPLETE") {
 		    section {
 		        paragraph "Please click 'Done' to finish installation."

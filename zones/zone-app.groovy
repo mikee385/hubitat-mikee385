@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -30,30 +30,43 @@ definition(
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-app.groovy")
 
 preferences {
-    page(name: "settings", title: "${getVersionLabel()}", install: true, uninstall: true) {
+    page(name: "mainPage")
+}
+
+def mainPage() {
+    dynamicPage(name: "mainPage", title: "${getVersionLabel()}", install: true, uninstall: true) {
         section {
             label title: "Zone Name", required: true
-            input "zoneType", "enum", title: "Zone Type", options: ["Simple", "Standard"], multiple: false, required: true
+            input "zoneType", "enum", title: "Zone Type", options: ["Simple", "Standard"], multiple: false, required: true, submitOnChange: true
             input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
         }
-        section {
-            input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false
-            input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
+        
+        if (zoneType == "Simple") {
+            section {
+                input "simpleDoor", "capability.contactSensor", title: "Door", multiple: false, required: true
+            }
+
+        } else if (zoneType == "Standard") {
+            section {
+                input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false
+                input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
+            }
+            section {
+                input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false
+                input "motionSeconds", "number", title: "Additional time that zone will remain active after a motion sensor has changed to inactive (seconds)", required: true, defaultValue: 60
+            }
+            section("ENGAGED - Zone will stay occupied while:") {
+                input "engagedDoors_Open", "capability.contactSensor", title: "Door is Open", multiple: true, required: false
+                input "engagedDoors_Closed", "capability.contactSensor", title: "Door is Closed", multiple: true, required: false
+                input "engagedSwitches_On", "capability.switch", title: "Switch is On", multiple: true, required: false
+                input "engagedSwitches_Off", "capability.switch", title: "Switch is Off", multiple: true, required: false
+            }
+            section("ACTIVE - Zone will be occupied briefly when device state changes") {
+                input "interiorDoors", "capability.contactSensor", title: "Interior Doors", multiple: true, required: false
+                input "activeSeconds", "number", title: "Time that zone will remain active after device state changes (seconds)", required: true, defaultValue: 60
+            }
         }
-        section {
-            input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false
-            input "motionSeconds", "number", title: "Additional time that zone will remain active after a motion sensor has changed to inactive (seconds)", required: true, defaultValue: 60
-        }
-        section("ENGAGED - Zone will stay occupied while:") {
-            input "engagedDoors_Open", "capability.contactSensor", title: "Door is Open", multiple: true, required: false
-            input "engagedDoors_Closed", "capability.contactSensor", title: "Door is Closed", multiple: true, required: false
-            input "engagedSwitches_On", "capability.switch", title: "Switch is On", multiple: true, required: false
-            input "engagedSwitches_Off", "capability.switch", title: "Switch is Off", multiple: true, required: false
-        }
-        section("ACTIVE - Zone will be occupied briefly when device state changes") {
-            input "interiorDoors", "capability.contactSensor", title: "Interior Doors", multiple: true, required: false
-            input "activeSeconds", "number", title: "Time that zone will remain active after device state changes (seconds)", required: true, defaultValue: 60
-        }
+        
         section {
             input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
         }
@@ -78,9 +91,7 @@ def initialize() {
     }
     
     if (zoneType == "Simple") {
-        for (entryDoor in entryDoors) {
-            subscribe(entryDoor, "contact", simpleDoorHandler)
-        }
+        subscribe(simpleDoor, "contact", simpleDoorHandler)
     
     } else if (zoneType == "Standard") {
         for (entryDoor in entryDoors) {
