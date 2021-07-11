@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.5.0" }
+String getVersionNum() { return "1.6.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -53,21 +53,16 @@ def mainPage() {
                     input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
                 }
             }
-            section {
+            section("ACTIVE - Zone will be occupied briefly when device state changes") {
                 input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false, submitOnChange: true
-                if (motionSensors) {
-                    input "motionSeconds", "number", title: "Additional time that zone will remain active after a motion sensor has changed to inactive (seconds)", required: true, defaultValue: 60
-                }
+                input "interiorDoors", "capability.contactSensor", title: "Interior Doors", multiple: true, required: false
+                input "activeSeconds", "number", title: "Time that zone will remain active after any device state changes (seconds)", required: true, defaultValue: 60
             }
             section("ENGAGED - Zone will stay occupied while:") {
                 input "engagedDoors_Open", "capability.contactSensor", title: "Door is Open", multiple: true, required: false
                 input "engagedDoors_Closed", "capability.contactSensor", title: "Door is Closed", multiple: true, required: false
                 input "engagedSwitches_On", "capability.switch", title: "Switch is On", multiple: true, required: false
                 input "engagedSwitches_Off", "capability.switch", title: "Switch is Off", multiple: true, required: false
-            }
-            section("ACTIVE - Zone will be occupied briefly when device state changes") {
-                input "interiorDoors", "capability.contactSensor", title: "Interior Doors", multiple: true, required: false
-                input "activeSeconds", "number", title: "Time that zone will remain active after device state changes (seconds)", required: true, defaultValue: 60
             }
         }
         
@@ -292,11 +287,11 @@ def motionActiveHandler(evt) {
 def motionInactiveHandler(evt) {
     def debugContext = "Zone ${app.label} - Motion Sensor - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     
-    logDebug("$debugContext - motion timeout scheduled (${motionSeconds}s)")
-    if (motionSeconds > 0) {
-        runIn(motionSeconds, motionTimeout)
+    logDebug("$debugContext - motion timeout scheduled (${activeSeconds}s)")
+    if (activeSeconds > 0) {
+        runIn(activeSeconds, activeTimeout)
     } else {
-        motionTimeout()
+        activeTimeout()
     }
 }
 
