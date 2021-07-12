@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.7.1" }
+String getVersionNum() { return "1.7.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -258,7 +258,7 @@ def activeTimeout() {
 def inactiveEvent(debugContext) {
     if (!anyDeviceIsEngaged() && !anyChildZoneIsOccupied() && !anyMotionIsActive() && !state.anyDeviceIsActive) {
         if (zoneIsOpen()) {
-            if (anyChildIsChecking()) {
+            if (anyChildZoneIsChecking()) {
                 checkingEvent(debugContext)
             } else {
                 def zone = getZoneDevice()
