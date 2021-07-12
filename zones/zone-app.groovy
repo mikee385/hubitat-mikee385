@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.8.0" }
+String getVersionNum() { return "1.8.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -99,11 +99,18 @@ def initialize() {
         subscribe(simpleDoor, "contact", simpleDoorHandler)
     
     } else if (zoneType == "Standard") {
+        entryDoorIds = entryDoors.collect{ it.id }
+        engagedDoorIds_Open = engagedDoors_Open.collect{ it.id }
+        engagedDoorIds_Closed = engagedDoors_Closed.collect{ it.id }
+        engagedSwitchIds_On = engagedSwitches_On.collect{ it.id }
+        engagedSwitchIds_Off = engagedSwitches_Off.collect{ it.id }
+    
         for (childZone in childZones) {
             subscribe(childZone, "occupancy", childZoneHandler)
         }
+        
         for (entryDoor in entryDoors) {
-            if (!(entryDoor in engagedDoors_Open) && !(entryDoor in engagedDoors_Closed)) {
+            if (!(entryDoor.id in engagedDoorIds_Open) && !(entryDoor.id in engagedDoorIds_Closed)) {
                 subscribe(entryDoor, "contact", entryDoorHandler)
             }
         }
@@ -111,35 +118,52 @@ def initialize() {
         for (motionSensor in motionSensors) {
             subscribe(motionSensor, "motion", motionSensorHandler)
         }
+        
         for (interiorDoor in interiorDoors) {
-            if (!(interiorDoor in engagedDoors_Open) && !(interiorDoor in engagedDoors_Closed) && !(interiorDoor in entryDoors)) {
+            if (!(interiorDoor.id in entryDoorIds) && !(interiorDoor.id in engagedDoorIds_Open) && !(interiorDoor.id in engagedDoorIds_Closed)) {
                 subscribe(interiorDoor, "contact", activeDeviceHandler)
             }
         }
         
         for (engagedDoor in engagedDoors_Open) {
             subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
-            if (engagedDoor in entryDoors) {
+            
+            if (engagedDoor.Id in engagedDoorIds_Closed) {
+                subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
+            } else if (engagedDoor.Id in entryDoorIds) {
                 subscribe(engagedDoor, "contact.closed", entryDoorHandler)
             } else {
                 subscribe(engagedDoor, "contact.closed", activeDeviceHandler)
             }
         }
+        
         for (engagedDoor in engagedDoors_Closed) {
-            subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
-            if (engagedDoor in entryDoors) {
-                subscribe(engagedDoor, "contact.open", entryDoorHandler)
-            } else {
-                subscribe(engagedDoor, "contact.open", activeDeviceHandler)
+            if (!(engagedDoor.Id in engagedDoorIds_Open)) { 
+                subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
+            
+                if (engagedDoor.Id in entryDoorIds) {
+                    subscribe(engagedDoor, "contact.open", entryDoorHandler)
+                } else {
+                    subscribe(engagedDoor, "contact.open", activeDeviceHandler)
+                }
             }
         }
+        
         for (engagedSwitch in engagedSwitches_On) {
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
-            subscribe(engagedSwitch, "switch.off", activeDeviceHandler)
+            
+            if (engagedSwitch.Id in engagedSwitchIds_Off) {
+                subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
+            } else {
+                subscribe(engagedSwitch, "switch.off", activeDeviceHandler)
+            }
         }
+        
         for (engagedSwitch in engagedSwitches_Off) {
-            subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
-            subscribe(engagedSwitch, "switch.on", activeDeviceHandler)
+            if (!(engagedSwitch.Id in engagedSwitchIds_On)) {
+                subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
+                subscribe(engagedSwitch, "switch.on", activeDeviceHandler)
+            }
         }
     
     } else {
