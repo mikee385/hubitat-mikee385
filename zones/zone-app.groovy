@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.8.1" }
+String getVersionNum() { return "1.8.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -128,9 +128,9 @@ def initialize() {
         for (engagedDoor in engagedDoors_Open) {
             subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
             
-            if (engagedDoor.Id in engagedDoorIds_Closed) {
+            if (engagedDoor.id in engagedDoorIds_Closed) {
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
-            } else if (engagedDoor.Id in entryDoorIds) {
+            } else if (engagedDoor.id in entryDoorIds) {
                 subscribe(engagedDoor, "contact.closed", entryDoorHandler)
             } else {
                 subscribe(engagedDoor, "contact.closed", activeDeviceHandler)
@@ -138,10 +138,10 @@ def initialize() {
         }
         
         for (engagedDoor in engagedDoors_Closed) {
-            if (!(engagedDoor.Id in engagedDoorIds_Open)) { 
+            if (!(engagedDoor.id in engagedDoorIds_Open)) { 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
             
-                if (engagedDoor.Id in entryDoorIds) {
+                if (engagedDoor.id in entryDoorIds) {
                     subscribe(engagedDoor, "contact.open", entryDoorHandler)
                 } else {
                     subscribe(engagedDoor, "contact.open", activeDeviceHandler)
@@ -152,7 +152,7 @@ def initialize() {
         for (engagedSwitch in engagedSwitches_On) {
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
             
-            if (engagedSwitch.Id in engagedSwitchIds_Off) {
+            if (engagedSwitch.id in engagedSwitchIds_Off) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
             } else {
                 subscribe(engagedSwitch, "switch.off", activeDeviceHandler)
@@ -160,7 +160,7 @@ def initialize() {
         }
         
         for (engagedSwitch in engagedSwitches_Off) {
-            if (!(engagedSwitch.Id in engagedSwitchIds_On)) {
+            if (!(engagedSwitch.id in engagedSwitchIds_On)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
                 subscribe(engagedSwitch, "switch.on", activeDeviceHandler)
             }

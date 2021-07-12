@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Parent" }
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.0.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -44,26 +44,26 @@ def uninstalled() {
     deleteAllZones()
 }
 
-def addZoneDevice(appID, name) {
-    def zoneID = "zone:" + appID
-    def zone = getChildDevice(zoneID)
+def addZoneDevice(appId, name) {
+    def zoneId = "zone:" + appId
+    def zone = getChildDevice(zoneId)
     if (!zone) {
-        addChildDevice("mikee385", "Zone Device", zoneID, [name: "Zone Device", label: name, isComponent: true])
+        addChildDevice("mikee385", "Zone Device", zoneId, [name: "Zone Device", label: name, isComponent: true])
     }
 }
 
-def getZoneDevice(appID) {
-    def zoneID = "zone:" + appID
-    return getChildDevice(zoneID)
+def getZoneDevice(appId) {
+    def zoneId = "zone:" + appId
+    return getChildDevice(zoneId)
 }
 
-def deleteZoneDevice(appID) {
-    def zoneID = "zone:" + appID
-    def zone = getChildDevice(zoneID)
+def deleteZoneDevice(appId) {
+    def zoneId = "zone:" + appId
+    def zone = getChildDevice(zoneId)
     if (zone) {
-        deleteChildDevice(zoneID)
+        deleteChildDevice(zoneId)
     } else {
-        log.error "No Zone Device found for $zoneID."
+        log.error "No Zone Device found for $zoneId."
     }
 }
 

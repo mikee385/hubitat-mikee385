@@ -15,7 +15,7 @@
  */
 
 String getName() { return "Zone Builder" }
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.1.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -70,54 +70,54 @@ def logDebug(msg) {
     }
 }
 
-def getParentID() {
+def getParentId() {
     return "zone:" + app.getId()
 }
 
 def createParentDevice() {
-    def parentID = getParentID()
-    def parent = getChildDevice(parentID)
+    def parentId = getParentId()
+    def parent = getChildDevice(parentId)
     if (!parent) {
-        parent = addChildDevice("mikee385", "Zone Parent", parentID, [label:"Zones", isComponent:true, name:"Zone Parent"])
+        parent = addChildDevice("mikee385", "Zone Parent", parentId, [label:"Zones", isComponent:true, name:"Zone Parent"])
     }
 }
 
-def addZoneDevice(appID, name) {
-    def parentID = getParentID()
-    def parent = getChildDevice(parentID)
+def addZoneDevice(appId, name) {
+    def parentId = getParentId()
+    def parent = getChildDevice(parentId)
     if (parent) {
-        parent.addZoneDevice(appID, name)
+        parent.addZoneDevice(appId, name)
     } else {
         log.error "No Parent Device Found."
     }
 }
 
-def getZoneDevice(appID) {
-    def parentID = getParentID()
-    def parent = getChildDevice(parentID)
+def getZoneDevice(appId) {
+    def parentId = getParentId()
+    def parent = getChildDevice(parentId)
     if (parent) {
-        return parent.getZoneDevice(appID)
+        return parent.getZoneDevice(appId)
     } else {
         log.error "No Parent Device Found."
     }
 }
 
-def deleteZoneDevice(appID) {
-    def parentID = getParentID()
-    def parent = getChildDevice(parentID)
+def deleteZoneDevice(appId) {
+    def parentId = getParentId()
+    def parent = getChildDevice(parentId)
     if (parent) {
-        parent.deleteZoneDevice(appID)
+        parent.deleteZoneDevice(appId)
     } else {
         log.error "No Parent Device Found."
     }
 }
 
 def deleteAllZones() {
-    def parentID = getParentID()
-    def parent = getChildDevice(parentID)
+    def parentId = getParentId()
+    def parent = getChildDevice(parentId)
     if (parent) {
         parent.deleteAllZones()
-        deleteChildDevice(parentID)
+        deleteChildDevice(parentId)
     } else {
         log.error "No Parent Device Found."
     }
