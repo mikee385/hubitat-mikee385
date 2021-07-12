@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.7.5" }
+String getVersionNum() { return "1.7.6" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -288,7 +288,7 @@ def motionActiveEvent(debugContext) {
 def motionInactiveEvent(debugContext) {
     state.anyDeviceIsActive = true
     
-    logDebug("$debugContext - Motion Inactive Event - active (${activeSeconds}s)")
+    logDebug("$debugContext - Motion Inactive Event - waiting (${activeSeconds}s)")
     
     if (activeSeconds > 0) {
         runIn(activeSeconds, activeTimeout)
