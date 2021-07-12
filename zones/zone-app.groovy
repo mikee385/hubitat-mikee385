@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.7.6" }
+String getVersionNum() { return "1.8.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -103,23 +103,35 @@ def initialize() {
             subscribe(childZone, "occupancy", childZoneHandler)
         }
         for (entryDoor in entryDoors) {
-            subscribe(entryDoor, "contact", entryDoorHandler)
+            if (!(entryDoor in engagedDoors_Open) && !(entryDoor in engagedDoors_Closed)) {
+                subscribe(entryDoor, "contact", entryDoorHandler)
+            }
         }
         
         for (motionSensor in motionSensors) {
             subscribe(motionSensor, "motion", motionSensorHandler)
         }
         for (interiorDoor in interiorDoors) {
-            subscribe(interiorDoor, "contact", activeDeviceHandler)
+            if (!(interiorDoor in engagedDoors_Open) && !(interiorDoor in engagedDoors_Closed) && !(interiorDoor in entryDoors)) {
+                subscribe(interiorDoor, "contact", activeDeviceHandler)
+            }
         }
         
         for (engagedDoor in engagedDoors_Open) {
             subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
-            subscribe(engagedDoor, "contact.closed", activeDeviceHandler)
+            if (engagedDoor in entryDoors) {
+                subscribe(engagedDoor, "contact.closed", entryDoorHandler)
+            } else {
+                subscribe(engagedDoor, "contact.closed", activeDeviceHandler)
+            }
         }
         for (engagedDoor in engagedDoors_Closed) {
             subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
-            subscribe(engagedDoor, "contact.open", activeDeviceHandler)
+            if (engagedDoor in entryDoors) {
+                subscribe(engagedDoor, "contact.open", entryDoorHandler)
+            } else {
+                subscribe(engagedDoor, "contact.open", activeDeviceHandler)
+            }
         }
         for (engagedSwitch in engagedSwitches_On) {
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
