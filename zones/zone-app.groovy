@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.7.3" }
+String getVersionNum() { return "1.7.4" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -47,7 +47,7 @@ def mainPage() {
 
         } else if (zoneType == "Standard") {
             section {
-                input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
+                input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false, submitOnChange: true
                 input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false, submitOnChange: true
                 if (childZones || entryDoors) {
                     input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
