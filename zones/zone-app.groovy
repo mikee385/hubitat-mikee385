@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.8.2" }
+String getVersionNum() { return "1.8.3" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -334,17 +334,21 @@ def motionInactiveEvent(debugContext) {
 }
 
 def checkingEvent(debugContext) {
-    unschedule("checkingTimeout")
+    if (!anyDeviceIsEngaged() && !anyChildZoneIsOccupied()) {
+        unschedule("checkingTimeout")
     
-    def zone = getZoneDevice()
-    zone.checking()
+        def zone = getZoneDevice()
+        zone.checking()
     
-    logDebug("$debugContext - Checking Event - checking (${checkingSeconds}s)")
+        logDebug("$debugContext - Checking Event - checking (${checkingSeconds}s)")
     
-    if (checkingSeconds > 0) {
-        runIn(checkingSeconds, checkingTimeout)
+        if (checkingSeconds > 0) {
+            runIn(checkingSeconds, checkingTimeout)
+        } else {
+            checkingTimeout()
+        }
     } else {
-        checkingTimeout()
+        logDebug("$debugContext - Checking Event - ignored (engaged)")
     }
 }
 
