@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "1.8.3" }
+String getVersionNum() { return "1.9.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -56,6 +56,7 @@ def mainPage() {
             section("ACTIVE - Zone will be occupied briefly when device state changes") {
                 input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false, submitOnChange: true
                 input "interiorDoors", "capability.contactSensor", title: "Interior Doors", multiple: true, required: false
+                input "buttons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
                 input "activeSeconds", "number", title: "Time that zone will remain active after any device state changes (seconds)", required: true, defaultValue: 60
             }
             section("ENGAGED - Zone will stay occupied while:") {
@@ -123,6 +124,10 @@ def initialize() {
             if (!(interiorDoor.id in entryDoorIds) && !(interiorDoor.id in engagedDoorIds_Open) && !(interiorDoor.id in engagedDoorIds_Closed)) {
                 subscribe(interiorDoor, "contact", activeDeviceHandler)
             }
+        }
+        
+        for (button in buttons) {
+            subscribe(button, "pushed", activeDeviceHandler)
         }
         
         for (engagedDoor in engagedDoors_Open) {
