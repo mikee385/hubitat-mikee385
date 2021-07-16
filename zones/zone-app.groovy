@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "2.0.4" }
+String getVersionNum() { return "2.0.5" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -240,7 +240,7 @@ Device Active Event (${activeSeconds}s)""")
 }
 
 def activeTimeout() {
-    def debugContext = """Zone ${app.label} - Active Timeout"""
+    def debugContext = """Zone ${app.label} - Active Timeout (${activeSeconds}s)"""
     
     def zone = getZoneDevice()
     zone.activityInactive()
@@ -318,7 +318,7 @@ Zone Closed Event (${checkingSeconds}s)""")
 }
 
 def checkingTimeout() {
-    def debugContext = """Zone ${app.label} - Checking Timeout"""
+    def debugContext = """Zone ${app.label} - Checking Timeout (${checkingSeconds}s)"""
     
     def zone = getZoneDevice()
     if (anyMotionSensorIsActive()) {
