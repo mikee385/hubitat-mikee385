@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -95,7 +95,7 @@ def initialize() {
         zone.activityInactive()
     }
     
-    def debugContext = "Zone ${app.label} - Initial - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${childOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = "Zone ${app.label} - Initial - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     
     updateOccupancy(debugContext)
     
@@ -182,7 +182,7 @@ def simpleDoorHandler(evt) {
 }
 
 def entryDoorHandler(evt) {
-    def debugContext = "Zone ${app.label} - Entry Door - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${childOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = "Zone ${app.label} - Entry Door - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     
     if (zoneIsOpen()) {
         deviceActiveEvent(debugContext)
@@ -192,7 +192,7 @@ def entryDoorHandler(evt) {
 }
 
 def motionSensorHandler(evt) {
-    def debugContext = "Zone ${app.label} - Motion Sensor - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${childOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = "Zone ${app.label} - Motion Sensor - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     if (evt.value == "active") {
         motionActiveEvent(debugContext)
     } else {
@@ -201,13 +201,13 @@ def motionSensorHandler(evt) {
 }
 
 def activeDeviceHandler(evt) {
-    def debugContext = "Zone ${app.label} - Active Device - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${childOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = "Zone ${app.label} - Active Device - ${evt.device} is ${evt.value} - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     
     deviceActiveEvent(debugContext)
 }
 
 def childZoneHandler(evt) {
-    def debugContext = "Zone ${app.label} - Child Zone - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${childOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = "Zone ${app.label} - Child Zone - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     
     updateOccupancy(debugContext)
 }
@@ -231,7 +231,7 @@ def deviceActiveEvent(debugContext) {
 }
 
 def activeTimeout() {
-    def debugContext = "Zone ${app.label} - Active Timeout - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${childOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = "Zone ${app.label} - Active Timeout - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     
     def zone = getZoneDevice()
     zone.activityInactive()
@@ -300,7 +300,7 @@ def zoneClosedEvent(debugContext) {
 }
 
 def checkingTimeout() {
-    def debugContext = "Zone ${app.label} - Checking Timeout - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${childOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = "Zone ${app.label} - Checking Timeout - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
     
     def zone = getZoneDevice()
     if (anyMotionSensorIsActive()) {
