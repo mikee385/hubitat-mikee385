@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "2.0.5" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -147,6 +147,8 @@ def initialize() {
         for (engagedSwitch in engagedSwitches_Off) {
             subscribe(engagedSwitch, "switch", activeDeviceHandler)
         }
+        
+        subscribe(zone, "activity.unknown", activityUnknownHandler)
     
     } else {
         log.error "Unknown zone type: $zoneType"
@@ -220,6 +222,24 @@ ${evt.device} is ${evt.value}"""
     updateOccupancy(debugContext)
 }
 
+def activityUnknownHandler(evt) {
+    def debugContext = """Zone ${app.label} - Activity Unknown
+"""
+
+    for (childZone in childZones) {
+        childZone.activityUnknown()
+    }
+    
+    updateOccupancy("""$debugContext
+Activity Unknown Event (${checkingSeconds}s)""")
+        
+    if (checkingSeconds > 0) {
+        runIn(checkingSeconds, checkingTimeout)
+    } else {
+        checkingTimeout()
+    }
+}
+
 //-----------------------------------------
 
 def deviceActiveEvent(debugContext) {
@@ -255,24 +275,16 @@ def motionActiveEvent(debugContext) {
     def zone = getZoneDevice()
     if (zoneIsOpen()) {
         zone.activityActive()
-        
         updateOccupancy("""$debugContext
 Motion Active Event""")
     } else {
         if (zone.currentValue("occupancy") == "vacant") {
+            logDebug(updateOccupancy("""$debugContext
+Motion Active Event
+ => unknown""")
             zone.activityUnknown()
-        
-            updateOccupancy("""$debugContext
-Motion Active Event (${checkingSeconds}s)""")
-        
-            if (checkingSeconds > 0) {
-                runIn(checkingSeconds, checkingTimeout)
-            } else {
-                checkingTimeout()
-            }
         } else {
             zone.activityActive()
-        
             updateOccupancy("""$debugContext
 Motion Active Event""")
         }
@@ -304,17 +316,12 @@ def zoneClosedEvent(debugContext) {
     unschedule("activeTimeout")
     unschedule("unknownTimeout")
     
+    logDebug(updateOccupancy("""$debugContext
+Zone Closed Event
+ => unknown""")
+    
     def zone = getZoneDevice()
     zone.activityUnknown()
-        
-    updateOccupancy("""$debugContext
-Zone Closed Event (${checkingSeconds}s)""")
-        
-    if (checkingSeconds > 0) {
-        runIn(checkingSeconds, checkingTimeout)
-    } else {
-        checkingTimeout()
-    }
 }
 
 def checkingTimeout() {
