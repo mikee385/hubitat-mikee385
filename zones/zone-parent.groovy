@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Parent" }
-String getVersionNum() { return "1.0.2" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {

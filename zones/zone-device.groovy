@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -28,11 +28,18 @@ metadata {
         capability "Actuator"
         capability "Sensor"
 
-        attribute "occupancy", "enum", ["vacant", "checking", "occupied"]
-
-        command "vacant"
-        command "checking"
-        command "occupied"
+        attribute "occupancy", "enum", ["engaged", "active", "checking", "vacant"]
+        
+        command "occupancyEngaged"
+        command "occupancyActive"
+        command "occupancyChecking"
+        command "occupancyVacant"
+        
+        attribute "activity", "enum", ["active", "unknown", "inactive"]
+        
+        command "activityActive"
+        command "activityUnknown"
+        command "activityInactive"
     }
 }
 
@@ -47,21 +54,37 @@ def updated() {
 
 def initialize() {
     if (!device.currentValue("occupancy")) {
-        vacant()
+        occupancyVacant()
+    }
+    if (!device.currentValue("activity")) {
+        activityInactive()
     }
 }
 
-def vacant() {
-    unschedule()
-    sendEvent(name: "occupancy", value: "vacant")
+def occupancyEngaged() {
+    sendEvent(name: "occupancy", value: "engaged")
 }
 
-def checking() {
-    unschedule()
+def occupancyActive() {
+    sendEvent(name: "occupancy", value: "active")
+}
+
+def occupancyChecking() {
     sendEvent(name: "occupancy", value: "checking")
 }
 
-def occupied() {
-    unschedule()
-    sendEvent(name: "occupancy", value: "occupied")
+def occupancyVacant() {
+    sendEvent(name: "occupancy", value: "vacant")
+}
+
+def activityActive() {
+    sendEvent(name: "activity", value: "active")
+}
+
+def activityUnknown() {
+    sendEvent(name: "activity", value: "unknown")
+}
+
+def activityInactive() {
+    sendEvent(name: "activity", value: "inactive")
 }
