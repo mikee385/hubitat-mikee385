@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "2.0.2" }
+String getVersionNum() { return "2.0.3" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -95,7 +95,8 @@ def initialize() {
         zone.activityInactive()
     }
     
-    def debugContext = "Zone ${app.label} - Initial - [${anyDeviceIsEngaged() ? 'engaged' : 'not engaged'} - child ${getChildOccupancy()} - ${getZoneDevice().currentValue('activity')} - ${zoneIsOpen() ? 'open' : 'closed'} - ${getZoneDevice().currentValue('occupancy')}]"
+    def debugContext = """Zone ${app.label} - Initial
+"""
     
     updateOccupancy(debugContext)
     
@@ -169,23 +170,22 @@ def getZoneDevice() {
 //-----------------------------------------
 
 def simpleDoorHandler(evt) {
-    def debugContext = "Zone ${app.label}
-Simple Door
-${evt.device} is ${evt.value}"""
+    def debugContext = """Zone ${app.label} - Simple Door
+${evt.device} is ${evt.value}
+"""
     
     def zone = getZoneDevice()
     if (evt.value == "open") {
         zone.occupancyEngaged()
-        logDebug("$debugContext - engaged")
+        logDebug("$debugContext => engaged (1)")
     } else {
         zone.occupancyVacant()
-        logDebug("$debugContext - vacant") 
+        logDebug("$debugContext => vacant (2)") 
     }
 }
 
 def entryDoorHandler(evt) {
-    def debugContext = """Zone ${app.label}
-Entry Door
+    def debugContext = """Zone ${app.label} - Entry Door
 ${evt.device} is ${evt.value}"""
     
     if (zoneIsOpen()) {
@@ -196,8 +196,7 @@ ${evt.device} is ${evt.value}"""
 }
 
 def motionSensorHandler(evt) {
-    def debugContext = """Zone ${app.label}
-Motion Sensor
+    def debugContext = """Zone ${app.label} - Motion Sensor
 ${evt.device} is ${evt.value}"""
     
     if (evt.value == "active") {
@@ -208,16 +207,14 @@ ${evt.device} is ${evt.value}"""
 }
 
 def activeDeviceHandler(evt) {
-    def debugContext = """Zone ${app.label}
-Active Device
+    def debugContext = """Zone ${app.label} - Active Device
 ${evt.device} is ${evt.value}"""
     
     deviceActiveEvent(debugContext)
 }
 
 def childZoneHandler(evt) {
-    def debugContext = """Zone ${app.label}
-Child Zone
+    def debugContext = """Zone ${app.label} - Child Zone
 ${evt.device} is ${evt.value}"""
     
     updateOccupancy(debugContext)
@@ -243,8 +240,7 @@ Device Active Event""")
 }
 
 def activeTimeout() {
-    def debugContext = """Zone ${app.label}
-Active Timeout"""
+    def debugContext = """Zone ${app.label} - Active Timeout"""
     
     def zone = getZoneDevice()
     zone.activityInactive()
@@ -322,8 +318,7 @@ Zone Closed Event""")
 }
 
 def checkingTimeout() {
-    def debugContext = """Zone ${app.label}
-Checking Timeout"""
+    def debugContext = """Zone ${app.label} - Checking Timeout"""
     
     def zone = getZoneDevice()
     if (anyMotionSensorIsActive()) {
@@ -354,19 +349,11 @@ occupancy = $zoneOccupancy
 
     if (anyDeviceIsEngaged()) {
         zone.occupancyEngaged()
-        logDebug("$debugContext => engaged (1)")
+        logDebug("$debugContext => engaged (3)")
     } else if (childOccupancy == "engaged") {
         zone.occupancyEngaged()
-        logDebug("$debugContext => engaged (2)")
+        logDebug("$debugContext => engaged (4)")
     } else if (zoneActivity == "active") {
-        if (zoneIsOpen()) {
-            zone.occupancyActive()
-            logDebug("$debugContext => active (3)")
-        } else {
-            zone.occupancyEngaged()
-            logDebug("$debugContext => engaged (4)")
-        }
-    } else if (childOccupancy == "active") {
         if (zoneIsOpen()) {
             zone.occupancyActive()
             logDebug("$debugContext => active (5)")
@@ -374,19 +361,27 @@ occupancy = $zoneOccupancy
             zone.occupancyEngaged()
             logDebug("$debugContext => engaged (6)")
         }
+    } else if (childOccupancy == "active") {
+        if (zoneIsOpen()) {
+            zone.occupancyActive()
+            logDebug("$debugContext => active (7)")
+        } else {
+            zone.occupancyEngaged()
+            logDebug("$debugContext => engaged (8)")
+        }
     } else if (zoneActivity == "unknown") {
         zone.occupancyChecking()
-        logDebug("$debugContext => checking (7)")
+        logDebug("$debugContext => checking (9)")
     } else if (zoneIsOpen() || zoneOccupancy == "checking" || zoneOccupancy == "vacant") {
         if (childOccupancy == "checking") {
             zone.occupancyChecking()
-            logDebug("$debugContext => checking (8)")
+            logDebug("$debugContext => checking (10)")
         } else {
             zone.occupancyVacant()
-            logDebug("$debugContext => vacant (9)")
+            logDebug("$debugContext => vacant (11)")
         }
     } else {
-        logDebug("$debugContext => ignored (10)")
+        logDebug("$debugContext => ignored (12)")
     }
 }
 
