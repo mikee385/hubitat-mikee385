@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "2.0.3" }
+String getVersionNum() { return "2.0.4" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -230,7 +230,7 @@ def deviceActiveEvent(debugContext) {
     zone.activityActive()
     
     updateOccupancy("""$debugContext
-Device Active Event""")
+Device Active Event (${activeSeconds}s)""")
     
     if (activeSeconds > 0) {
         runIn(activeSeconds, activeTimeout)
@@ -263,7 +263,7 @@ Motion Active Event""")
             zone.activityUnknown()
         
             updateOccupancy("""$debugContext
-Motion Active Event""")
+Motion Active Event (${checkingSeconds}s)""")
         
             if (checkingSeconds > 0) {
                 runIn(checkingSeconds, checkingTimeout)
@@ -286,7 +286,7 @@ def motionInactiveEvent(debugContext) {
         
         logDebug("""$debugContext
 Motion Inactive Event
-waiting (${activeSeconds}s)""")
+ => waiting (${activeSeconds}s)""")
         
         if (activeSeconds > 0) {
             runIn(activeSeconds, activeTimeout)
@@ -296,7 +296,7 @@ waiting (${activeSeconds}s)""")
     } else {
         logDebug("""$debugContext
 Motion Inactive Event
-ignored (not active)""")
+ => ignored (not active)""")
     }
 }
 
@@ -308,7 +308,7 @@ def zoneClosedEvent(debugContext) {
     zone.activityUnknown()
         
     updateOccupancy("""$debugContext
-Zone Closed Event""")
+Zone Closed Event (${checkingSeconds}s)""")
         
     if (checkingSeconds > 0) {
         runIn(checkingSeconds, checkingTimeout)
