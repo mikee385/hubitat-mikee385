@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "3.2.1" }
+String getVersionNum() { return "3.3.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -185,6 +185,10 @@ occupancy = ${zone.currentValue('occupancy')}
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
                 subscribe(engagedSwitch, "switch.on", activeDeviceHandler)
             }
+        }
+        
+        for (childZone in childZones) {
+            subscribe(childZone, "occupancy.engaged", engagedDeviceHandler)
         }
     
     } else {
@@ -474,6 +478,14 @@ occupancy = ${zone.currentValue('occupancy')}
 //-----------------------------------------
 
 def anyDeviceIsEngaged() {
+    if (childZones) {
+        for (childZone in childZones) {
+            if (childZone.currentValue("occupancy") == "engaged") {
+                return true
+            }
+        }
+    }
+
     def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
     if (allEngagedDoors_Open) {
         for (engagedDoor in allEngagedDoors_Open) {
