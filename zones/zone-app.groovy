@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -105,11 +105,19 @@ def initialize() {
         subscribe(simpleDoor, "contact", simpleDoorHandler)
     
     } else if (zoneType == "Standard") {
+        def allMotionSensors = getAllDevices("motionSensors")
+        def allInteriorDoors = getAllDevices("entryDoors") + getAllDevices("interiorDoors")
+        def allButtons = getAllDevices("buttons")
+        def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
+        def allEngagedDoors_Closed = getAllDevices("engagedDoors_Closed")
+        def allEngagedSwitches_On = getAllDevices("engagedSwitches_On")
+        def allEngagedSwitches_Off = getAllDevices("engagedSwitches_Off")
+    
         entryDoorIds = entryDoors.collect{ it.id }
-        engagedDoorIds_Open = engagedDoors_Open.collect{ it.id }
-        engagedDoorIds_Closed = engagedDoors_Closed.collect{ it.id }
-        engagedSwitchIds_On = engagedSwitches_On.collect{ it.id }
-        engagedSwitchIds_Off = engagedSwitches_Off.collect{ it.id }
+        engagedDoorIds_Open = allEngagedDoors_Open.collect{ it.id }
+        engagedDoorIds_Closed = allEngagedDoors_Closed.collect{ it.id }
+        engagedSwitchIds_On = allEngagedSwitches_On.collect{ it.id }
+        engagedSwitchIds_Off = allEngagedSwitches_Off.collect{ it.id }
         
         for (entryDoor in entryDoors) {
             if (!(entryDoor.id in engagedDoorIds_Open) && !(entryDoor.id in engagedDoorIds_Closed)) {
@@ -117,21 +125,21 @@ def initialize() {
             }
         }
         
-        for (motionSensor in motionSensors) {
+        for (motionSensor in allMotionSensors) {
             subscribe(motionSensor, "motion", motionSensorHandler)
         }
         
-        for (interiorDoor in interiorDoors) {
+        for (interiorDoor in allInteriorDoors) {
             if (!(interiorDoor.id in entryDoorIds) && !(interiorDoor.id in engagedDoorIds_Open) && !(interiorDoor.id in engagedDoorIds_Closed)) {
                 subscribe(interiorDoor, "contact", activeDeviceHandler)
             }
         }
         
-        for (button in buttons) {
+        for (button in allButtons) {
             subscribe(button, "pushed", activeDeviceHandler)
         }
         
-        for (engagedDoor in engagedDoors_Open) {
+        for (engagedDoor in allEngagedDoors_Open) {
             subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
             
             if (engagedDoor.id in engagedDoorIds_Closed) {
@@ -143,7 +151,7 @@ def initialize() {
             }
         }
         
-        for (engagedDoor in engagedDoors_Closed) {
+        for (engagedDoor in allEngagedDoors_Closed) {
             if (!(engagedDoor.id in engagedDoorIds_Open)) { 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
             
@@ -155,7 +163,7 @@ def initialize() {
             }
         }
         
-        for (engagedSwitch in engagedSwitches_On) {
+        for (engagedSwitch in allEngagedSwitches_On) {
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
             
             if (engagedSwitch.id in engagedSwitchIds_Off) {
@@ -165,7 +173,7 @@ def initialize() {
             }
         }
         
-        for (engagedSwitch in engagedSwitches_Off) {
+        for (engagedSwitch in allEngagedSwitches_Off) {
             if (!(engagedSwitch.id in engagedSwitchIds_On)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
                 subscribe(engagedSwitch, "switch.on", activeDeviceHandler)
@@ -187,8 +195,33 @@ def logDebug(msg) {
     }
 }
 
+//-----------------------------------------
+
 def getZoneDevice() {
     return parent.getZoneDevice(app.getId())
+}
+
+def getZoneAppId(zone) {
+    def networkId = zone.getDeviceNetworkId()
+    def appId = networkId.replace("zone:", "")
+    return appId as int
+}
+
+def getAllDevices(settingName) {
+    if (childZones) {
+        def allDevices = settings[deviceType].collect()
+        for (childZone in childZones) {
+            def childAppId = getZoneAppId(childZone)
+            def childApp = parent.getChildAppById(childAppId)
+            def childDevices = childApp.getAllDevices(settingName)
+            if (childDevices) {
+                allDevices.addAll(childDevices)
+            }
+        }
+        return allDevices
+    } else {
+        return settings[settingName]
+    }
 }
 
 //-----------------------------------------
