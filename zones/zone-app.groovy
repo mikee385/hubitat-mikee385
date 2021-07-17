@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.1.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -209,7 +209,7 @@ def getZoneAppId(zone) {
 
 def getAllDevices(settingName) {
     if (childZones) {
-        def allDevices = settings[deviceType].collect()
+        def allDevices = settings[settingName].collect()
         for (childZone in childZones) {
             def childAppId = getZoneAppId(childZone)
             def childApp = parent.getChildAppById(childAppId)
@@ -220,7 +220,7 @@ def getAllDevices(settingName) {
         }
         return allDevices
     } else {
-        return settings[settingName]
+        return settings[settingName] ?: []
     }
 }
 
@@ -455,32 +455,36 @@ occupancy = ${zone.currentValue('occupancy')}
 //-----------------------------------------
 
 def anyDeviceIsEngaged() {
-    if (engagedDoors_Open) {
-        for (engagedDoor in engagedDoors_Open) {
+    def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
+    if (allEngagedDoors_Open) {
+        for (engagedDoor in allEngagedDoors_Open) {
             if (engagedDoor.currentValue("contact") == "open") {
                 return true
             }
         }
     }
     
-    if (engagedDoors_Closed) {
-        for (engagedDoor in engagedDoors_Closed) {
+    def allEngagedDoors_Closed = getAllDevices("engagedDoors_Closed")
+    if (allEngagedDoors_Closed) {
+        for (engagedDoor in allEngagedDoors_Closed) {
             if (engagedDoor.currentValue("contact") == "closed") {
                 return true
             }
         }
     }
     
-    if (engagedSwitches_On) {
-        for (engagedSwitch in engagedSwitches_On) {
+    def allEngagedSwitches_On = getAllDevices("engagedSwitches_On")
+    if (allEngagedSwitches_On) {
+        for (engagedSwitch in allEngagedSwitches_On) {
             if (engagedSwitch.currentValue("switch") == "on") {
                 return true
             }
         }
     }
     
-    if (engagedSwitches_Off) {
-        for (engagedSwitch in engagedSwitches_Off) {
+    def allEngagedSwitches_Off = getAllDevices("engagedSwitches_Off")
+    if (allEngagedSwitches_Off) {
+        for (engagedSwitch in allEngagedSwitches_Off) {
             if (engagedSwitch.currentValue("switch") == "off") {
                 return true
             }
@@ -491,8 +495,9 @@ def anyDeviceIsEngaged() {
 }
 
 def anyMotionSensorIsActive() {
-    if (motionSensors) {
-        for (motionSensor in motionSensors) {
+    def allMotionSensors = getAllDevices("motionSensors")
+    if (allMotionSensors) {
+        for (motionSensor in allMotionSensors) {
             if (motionSensor.currentValue("motion") == "active") {
                 return true
             }
