@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -30,16 +30,10 @@ metadata {
 
         attribute "occupancy", "enum", ["engaged", "active", "checking", "vacant"]
         
-        command "occupancyEngaged"
-        command "occupancyActive"
-        command "occupancyChecking"
-        command "occupancyVacant"
-        
-        attribute "activity", "enum", ["active", "unknown", "inactive"]
-        
-        command "activityActive"
-        command "activityUnknown"
-        command "activityInactive"
+        command "engaged"
+        command "active"
+        command "checking"
+        command "vacant"
     }
 }
 
@@ -54,37 +48,22 @@ def updated() {
 
 def initialize() {
     if (!device.currentValue("occupancy")) {
-        occupancyVacant()
-    }
-    if (!device.currentValue("activity")) {
-        activityInactive()
+        vacant()
     }
 }
 
-def occupancyEngaged() {
+def engaged() {
     sendEvent(name: "occupancy", value: "engaged")
 }
 
-def occupancyActive() {
+def active() {
     sendEvent(name: "occupancy", value: "active")
 }
 
-def occupancyChecking() {
+def checking() {
     sendEvent(name: "occupancy", value: "checking")
 }
 
-def occupancyVacant() {
+def vacant() {
     sendEvent(name: "occupancy", value: "vacant")
-}
-
-def activityActive() {
-    sendEvent(name: "activity", value: "active")
-}
-
-def activityUnknown() {
-    sendEvent(name: "activity", value: "unknown")
-}
-
-def activityInactive() {
-    sendEvent(name: "activity", value: "inactive")
 }
