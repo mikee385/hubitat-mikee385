@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "3.1.1" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -101,6 +101,13 @@ def initialize() {
         zone.vacant()
     }
     
+    logDebug("""Zone ${app.label} - Initial
+engaged = ${anyDeviceIsEngaged()}
+motion = ${anyMotionSensorIsActive()}
+open = ${zoneIsOpen()}
+occupancy = ${zone.currentValue('occupancy')}
+""")
+    
     if (zoneType == "Simple") {
         subscribe(simpleDoor, "contact", simpleDoorHandler)
     
@@ -182,6 +189,18 @@ def initialize() {
     
     } else {
         log.error "Unknown zone type: $zoneType"
+    }
+    
+    def zoneId = zone.getId()
+    for (parentApp in parent.getChildApps()) {
+        if (parentApp.getId() != app.getId()) {
+            for (parentZone in parentApp.childZones) {
+                if (childZone.getId() == zoneId) {
+                    parentApp.initialize()
+                    break
+                }
+            }
+        }
     }
 }
 
