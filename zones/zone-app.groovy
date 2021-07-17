@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "3.2.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -97,7 +97,7 @@ def initialize() {
         } else {
             zone.engaged()
         }
-    } else {
+    } else if (zoneIsOpen()) {
         zone.vacant()
     }
     
@@ -195,7 +195,7 @@ occupancy = ${zone.currentValue('occupancy')}
     for (parentApp in parent.getChildApps()) {
         if (parentApp.getId() != app.getId()) {
             for (parentZone in parentApp.childZones) {
-                if (childZone.getId() == zoneId) {
+                if (parentZone.getId() == zoneId) {
                     parentApp.initialize()
                     break
                 }
