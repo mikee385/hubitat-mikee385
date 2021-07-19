@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Improve reliability of longer timeout",
-    "dateReleased": "2021-07-04",
+    "releaseNotes": "Keep light on while motion is active",
+    "dateReleased": "2021-07-18",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",
