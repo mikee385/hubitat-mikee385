@@ -3,8 +3,8 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Minor title changes",
-    "dateReleased": "2021-07-18",
+    "releaseNotes": "Remove using occupancy of child zones, since it was unreliable",
+    "dateReleased": "2021-07-19",
     "apps": [
         {
             "id": "cfef5ab9-208a-46cd-8d61-2c14a9c8ddae",
@@ -19,7 +19,7 @@
         {
             "id": "9b2505e8-9ad2-4c66-89b8-a810174c56c4",
             "name": "Zone App",
-            "version": "3.3.1",
+            "version": "3.4.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-app.groovy",
             "required": true,
