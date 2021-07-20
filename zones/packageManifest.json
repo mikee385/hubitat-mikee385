@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Rework logic to improve behavior of nested zones",
+    "releaseNotes": "Fix missing parameter to scheduleCheckingTimeout",
     "dateReleased": "2021-07-20",
     "apps": [
         {
             "id": "cfef5ab9-208a-46cd-8d61-2c14a9c8ddae",
             "name": "Zone Builder",
-            "version": "4.0.0",
+            "version": "4.0.1",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-builder.groovy",
             "required": true,
