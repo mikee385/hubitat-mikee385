@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -28,10 +28,9 @@ metadata {
         capability "Actuator"
         capability "Sensor"
 
-        attribute "occupancy", "enum", ["engaged", "active", "checking", "vacant"]
+        attribute "occupancy", "enum", ["occupied", "checking", "vacant"]
         
-        command "engaged"
-        command "active"
+        command "occupied"
         command "checking"
         command "vacant"
     }
@@ -52,12 +51,8 @@ def initialize() {
     }
 }
 
-def engaged() {
-    sendEvent(name: "occupancy", value: "engaged")
-}
-
-def active() {
-    sendEvent(name: "occupancy", value: "active")
+def occupied() {
+    sendEvent(name: "occupancy", value: "occupied")
 }
 
 def checking() {

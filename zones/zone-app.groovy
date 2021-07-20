@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "3.5.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -47,24 +47,21 @@ def mainPage() {
 
         } else if (zoneType == "Standard") {
             section {
-                input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false, submitOnChange: true
-                input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false, submitOnChange: true
-                if (childZones || entryDoors) {
-                    input "checkingSeconds", "number", title: "Time that zone will check for activity after all entry doors are closed (seconds)", required: true, defaultValue: 60
-                }
-            }
-            section("ACTIVE - Zone will be occupied briefly when device state changes") {
-                input "presenceSensors", "capability.presenceSensor", title: "Presence Sensors", multiple: true, required: false
-                input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false
-                input "interiorDoors", "capability.contactSensor", title: "Doors & Windows", multiple: true, required: false
-                input "buttons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
-                input "activeSeconds", "number", title: "Time that zone will remain active after any device state changes (seconds)", required: true, defaultValue: 60
+                input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
+                input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false
+                input "checkingSeconds", "number", title: "Time that zone will check for activity before returning to vacant (seconds)", required: true, defaultValue: 60
             }
             section("ENGAGED - Zone will stay occupied while:") {
+                input "presenceSensors", "capability.presenceSensor", title: "Presence Sensor is present", multiple: true, required: false
+                input "motionSensors", "capability.motionSensor", title: "Motion Sensor is active", multiple: true, required: false
                 input "engagedDoors_Open", "capability.contactSensor", title: "Door/Window is Open", multiple: true, required: false
                 input "engagedDoors_Closed", "capability.contactSensor", title: "Door/Window is Closed", multiple: true, required: false
                 input "engagedSwitches_On", "capability.switch", title: "Switch is On", multiple: true, required: false
                 input "engagedSwitches_Off", "capability.switch", title: "Switch is Off", multiple: true, required: false
+            }
+            section("ACTIVE - Zone will be occupied briefly when device state changes") {
+                input "interiorDoors", "capability.contactSensor", title: "Doors & Windows", multiple: true, required: false
+                input "buttons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
             }
         }
         
@@ -90,24 +87,19 @@ def initialize() {
     parent.addZoneDevice(app.getId(), app.label)
     
     def zone = getZoneDevice()
-    if (anyDeviceIsEngaged()) {
-        zone.engaged()
-    } else if (anySensorIsActive()) {
-        if (zoneIsOpen()) {
-            zone.active()
-        } else {
-            zone.engaged()
-        }
-    } else if (zoneIsOpen()) {
+    if (zoneIsEngaged()) {
+        zone.occupied()
+    } else {
         zone.vacant()
     }
     
     logDebug("""Zone ${app.label} - Initial
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
+engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """)
+    
+    subscribe(zone, "occupancy.checking", scheduleCheckingTimeout)
     
     if (zoneType == "Simple") {
         subscribe(simpleDoor, "contact", simpleDoorHandler)
@@ -115,13 +107,13 @@ occupancy = ${zone.currentValue('occupancy')}
     } else if (zoneType == "Standard") {
         def allPresenceSensors = getAllDevices("presenceSensors")
         def allMotionSensors = getAllDevices("motionSensors")
-        def allInteriorDoors = getAllDevices("entryDoors") + getAllDevices("interiorDoors")
-        def allButtons = getAllDevices("buttons")
         def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
         def allEngagedDoors_Closed = getAllDevices("engagedDoors_Closed")
         def allEngagedSwitches_On = getAllDevices("engagedSwitches_On")
         def allEngagedSwitches_Off = getAllDevices("engagedSwitches_Off")
-    
+        def allInteriorDoors = getAllDevices("entryDoors") + getAllDevices("interiorDoors")
+        def allButtons = getAllDevices("buttons")
+        
         entryDoorIds = entryDoors.collect{ it.id }
         engagedDoorIds_Open = allEngagedDoors_Open.collect{ it.id }
         engagedDoorIds_Closed = allEngagedDoors_Closed.collect{ it.id }
@@ -140,16 +132,6 @@ occupancy = ${zone.currentValue('occupancy')}
         
         for (motionSensor in allMotionSensors) {
             subscribe(motionSensor, "motion", motionSensorHandler)
-        }
-        
-        for (interiorDoor in allInteriorDoors) {
-            if (!(interiorDoor.id in entryDoorIds) && !(interiorDoor.id in engagedDoorIds_Open) && !(interiorDoor.id in engagedDoorIds_Closed)) {
-                subscribe(interiorDoor, "contact", activeDeviceHandler)
-            }
-        }
-        
-        for (button in allButtons) {
-            subscribe(button, "pushed", activeDeviceHandler)
         }
         
         for (engagedDoor in allEngagedDoors_Open) {
@@ -191,6 +173,23 @@ occupancy = ${zone.currentValue('occupancy')}
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
                 subscribe(engagedSwitch, "switch.on", activeDeviceHandler)
             }
+        }
+        
+        for (interiorDoor in allInteriorDoors) {
+            if (!(interiorDoor.id in entryDoorIds) && !(interiorDoor.id in engagedDoorIds_Open) && !(interiorDoor.id in engagedDoorIds_Closed)) {
+                subscribe(interiorDoor, "contact", activeDeviceHandler)
+            }
+        }
+        
+        for (button in allButtons) {
+            subscribe(button, "pushed", activeDeviceHandler)
+            subscribe(button, "doubleTapped", activeDeviceHandler)
+            subscribe(button, "held", activeDeviceHandler)
+            subscribe(button, "released", activeDeviceHandler)
+        }
+        
+        for (childZone in childZones) {
+            subscribe(childZone, "occupancy", childZoneHandler)
         }
     
     } else {
@@ -258,11 +257,11 @@ ${evt.device} is ${evt.value}
     
     def zone = getZoneDevice()
     if (evt.value == "open") {
-        zone.engaged()
-        logDebug("$debugContext => engaged (1)")
+        zone.occupied()
+        logDebug("$debugContext => occupied")
     } else {
         zone.vacant()
-        logDebug("$debugContext => vacant (2)") 
+        logDebug("$debugContext => vacant")
     }
 }
 
@@ -271,9 +270,9 @@ def entryDoorHandler(evt) {
 ${evt.device} is ${evt.value}"""
     
     if (zoneIsOpen()) {
-        deviceActiveEvent(debugContext)
+        activeEvent(debugContext)
     } else {
-        zoneClosedEvent(debugContext)
+        closedEvent(debugContext)
     }
 }
 
@@ -282,9 +281,9 @@ def presenceSensorHandler(evt) {
 ${evt.device} is ${evt.value}"""
     
     if (evt.value == "present") {
-        sensorActiveEvent(debugContext)
+        engagedEvent(debugContext)
     } else {
-        sensorInactiveEvent(debugContext)
+        inactiveEvent(debugContext)
     }
 }
 
@@ -293,204 +292,172 @@ def motionSensorHandler(evt) {
 ${evt.device} is ${evt.value}"""
     
     if (evt.value == "active") {
-        sensorActiveEvent(debugContext)
+        engagedEvent(debugContext)
     } else {
-        sensorInactiveEvent(debugContext)
+        inactiveEvent(debugContext)
     }
-}
-
-def activeDeviceHandler(evt) {
-    def debugContext = """Zone ${app.label} - Active Device
-${evt.device} is ${evt.value}"""
-    
-    deviceActiveEvent(debugContext)
 }
 
 def engagedDeviceHandler(evt) {
     def debugContext = """Zone ${app.label} - Engaged Device
 ${evt.device} is ${evt.value}"""
     
-    deviceEngagedEvent(debugContext)
+    engagedEvent(debugContext)
+}
+
+def activeDeviceHandler(evt) {
+    def debugContext = """Zone ${app.label} - Active Device
+${evt.device} is ${evt.value}"""
+    
+    activeEvent(debugContext)
+}
+
+def childZoneHandler(evt) {
+    def debugContext = """Zone ${app.label} - Child Zone
+${evt.device} is ${evt.value}"""
+    
+    if (evt.value == "occupied") {
+        engagedEvent(debugContext)
+    } else {
+        inactiveEvent(debugContext)
+    }
 }
 
 //-----------------------------------------
 
-def deviceEngagedEvent(debugContext) {
-    unschedule("activeTimeout")
+def engagedEvent(debugContext) {
     unschedule("unknownTimeout")
     
     def zone = getZoneDevice()
     debugContext = """$debugContext
-Device Engaged Event
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
+Engaged Event
+engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
-    zone.engaged()
-    logDebug("$debugContext => engaged")
+    zone.occupied()
+    logDebug("$debugContext => occupied (engaged)")
 }
 
-def deviceActiveEvent(debugContext) {
-    unschedule("activeTimeout")
+def activeEvent(debugContext) {
     unschedule("checkingTimeout")
     
     def zone = getZoneDevice()
     debugContext = """$debugContext
-Device Active Event
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
+Active Event
+engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """
     
-    if (!anyDeviceIsEngaged()) {
+    if (zoneIsEngaged()) {
+        zone.occupied()
+        logDebug("$debugContext => occupied (engaged)")
+    } else {
         if (zoneIsOpen()) {
-            zone.active()
-        
-            if (!anySensorIsActive()) {
-                logDebug("$debugContext => active (${activeSeconds}s)")
-        
-                if (activeSeconds > 0) {
-                    runIn(activeSeconds, activeTimeout)
-                } else {
-                    activeTimeout()
-                }
-            } else {
-                logDebug("$debugContext => ignored (sensor active)")
-            }
+            zone.checking()
+            logDebug("$debugContext => checking (${checkingSeconds}s)")
+            scheduleCheckingTimeout()
         } else {
-            zone.engaged()
-            logDebug("$debugContext => engaged")
+            zone.occupied()
+            logDebug("$debugContext => occupied (closed)")
         }
-    } else {
-        logDebug("$debugContext => ignored (engaged)")
     }
 }
 
-def activeTimeout() {
-    def zone = getZoneDevice()
-    def debugContext = """Zone ${app.label} - Active Timeout (${activeSeconds}s)
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
-open = ${zoneIsOpen()}
-occupancy = ${zone.currentValue('occupancy')}
-"""
-    
-    if (!anyDeviceIsEngaged()) {
-        zone.vacant()
-        logDebug("$debugContext => vacant")
-    } else {
-        logDebug("$debugContext => ignored (engaged)")
-    }
-}
-
-def sensorActiveEvent(debugContext) {
-    unschedule("activeTimeout")
-    unschedule("checkingTimeout")
-    
+def inactiveEvent(debugContext) {
     def zone = getZoneDevice()
     debugContext = """$debugContext
-Sensor Active Event
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
+Inactive Event
+engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """
-    
-    if (!anyDeviceIsEngaged()) {
-        if (zoneIsOpen()) {
-            zone.active()
-            logDebug("$debugContext => active")
-        } else {
-            zone.engaged()
-            logDebug("$debugContext => engaged")
-        }
+
+    if (zoneIsEngaged()) {
+        zone.occupied()
+        logDebug("$debugContext => occupied (engaged)")
     } else {
-        logDebug("$debugContext => ignored (engaged)")
-    }
-}
-
-def sensorInactiveEvent(debugContext) {
-    def zone = getZoneDevice()
-    debugContext = """$debugContext
-Sensor Inactive Event
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
-open = ${zoneIsOpen()}
-occupancy = ${zone.currentValue('occupancy')}
-"""
-
-    if (!anyDeviceIsEngaged()) {
-        if (zoneIsOpen()) {
-            logDebug("$debugContext => waiting (${activeSeconds}s)")
-        
-            if (activeSeconds > 0) {
-                runIn(activeSeconds, activeTimeout)
-            } else {
-                activeTimeout()
-            }
+        if (zoneIsOpen() && zone.currentValue("occupancy") == "occupied") {
+            zone.checking()
+            logDebug("$debugContext => checking (${checkingSeconds}s)")
+            scheduleCheckingTimeout()
         } else {
             logDebug("$debugContext => ignored (closed)")
         }
-    } else {
-        logDebug("$debugContext => ignored (engaged)")
     }
 }
 
-def zoneClosedEvent(debugContext) {
-    unschedule("activeTimeout")
+def closedEvent(debugContext) {
     unschedule("checkingTimeout")
     
     def zone = getZoneDevice()
     debugContext = """$debugContext
-Zone Closed Event
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
+Closed Event
+engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
-    if (!anyDeviceIsEngaged()) {
+    if (zoneIsEngaged()) {
+        zone.occupied()
+        logDebug("$debugContext => occupied (engaged)")
+    } else {
         zone.checking()
         logDebug("$debugContext => checking (${checkingSeconds}s)")
-        
-        if (checkingSeconds > 0) {
-            runIn(checkingSeconds, checkingTimeout)
-        } else {
-            checkingTimeout()
-        }
+        scheduleCheckingTimeout()
+    }
+}
+
+//-----------------------------------------
+
+def scheduleCheckingTimeout() {
+    if (checkingSeconds > 0) {
+        runIn(checkingSeconds, checkingTimeout)
     } else {
-        logDebug("$debugContext => ignored (engaged)")
+        checkingTimeout()
     }
 }
 
 def checkingTimeout() {
     def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Checking Timeout (${activeSeconds}s)
-engaged = ${anyDeviceIsEngaged()}
-active = ${anySensorIsActive()}
+engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
-    if (!anyDeviceIsEngaged()) {
-        if (anySensorIsActive()) {
-            zone.engaged()
-            logDebug("$debugContext => engaged")
-        } else {
-            zone.vacant()
-            logDebug("$debugContext => vacant")
-        }
+    if (zoneIsEngaged()) {
+        zone.occupied()
+        logDebug("$debugContext => occupied (engaged)")
     } else {
-        logDebug("$debugContext => ignored (engaged)")
+        zone.vacant()
+        logDebug("$debugContext => vacant")
     }
 }
 
 //-----------------------------------------
 
-def anyDeviceIsEngaged() {
+def zoneIsEngaged() {
+    def allPresenceSensors = getAllDevices("presenceSensors")
+    if (allPresenceSensors) {
+        for (presenceSensor in allPresenceSensors) {
+            if (presenceSensor.currentValue("presence") == "present") {
+                return true
+            }
+        }
+    }
+    
+    def allMotionSensors = getAllDevices("motionSensors")
+    if (allMotionSensors) {
+        for (motionSensor in allMotionSensors) {
+            if (motionSensor.currentValue("motion") == "active") {
+                return true
+            }
+        }
+    }
+    
     def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
     if (allEngagedDoors_Open) {
         for (engagedDoor in allEngagedDoors_Open) {
@@ -527,28 +494,12 @@ def anyDeviceIsEngaged() {
         }
     }
     
-    return false
-}
-
-def anySensorIsActive() {
-    def allPresenceSensors = getAllDevices("presenceSensors")
-    if (allPresenceSensors) {
-        for (presenceSensor in allPresenceSensors) {
-            if (presenceSensor.currentValue("presence") == "present") {
+    if (childZones) {
+        for (childZone in childZones) {
+            if (childZone.currentValue("occupancy") == "occupied") {
                 return true
             }
         }
-        return false
-    }
-    
-    def allMotionSensors = getAllDevices("motionSensors")
-    if (allMotionSensors) {
-        for (motionSensor in allMotionSensors) {
-            if (motionSensor.currentValue("motion") == "active") {
-                return true
-            }
-        }
-        return false
     }
     
     return false
