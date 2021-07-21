@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.0.3" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -438,7 +438,7 @@ def zoneIsEngaged() {
     if (allPresenceSensors) {
         for (presenceSensor in allPresenceSensors) {
             if (presenceSensor.currentValue("presence") == "present") {
-                return true
+                return "$presenceSensor is present"
             }
         }
     }
@@ -447,7 +447,7 @@ def zoneIsEngaged() {
     if (allMotionSensors) {
         for (motionSensor in allMotionSensors) {
             if (motionSensor.currentValue("motion") == "active") {
-                return true
+                return "$motionSensor is active"
             }
         }
     }
@@ -456,7 +456,7 @@ def zoneIsEngaged() {
     if (allEngagedDoors_Open) {
         for (engagedDoor in allEngagedDoors_Open) {
             if (engagedDoor.currentValue("contact") == "open") {
-                return true
+                return "$engagedDoor is open"
             }
         }
     }
@@ -465,7 +465,7 @@ def zoneIsEngaged() {
     if (allEngagedDoors_Closed) {
         for (engagedDoor in allEngagedDoors_Closed) {
             if (engagedDoor.currentValue("contact") == "closed") {
-                return true
+                return "$engagedDoor is closed"
             }
         }
     }
@@ -474,7 +474,7 @@ def zoneIsEngaged() {
     if (allEngagedSwitches_On) {
         for (engagedSwitch in allEngagedSwitches_On) {
             if (engagedSwitch.currentValue("switch") == "on") {
-                return true
+                return "$engagedSwitch is on"
             }
         }
     }
@@ -483,7 +483,7 @@ def zoneIsEngaged() {
     if (allEngagedSwitches_Off) {
         for (engagedSwitch in allEngagedSwitches_Off) {
             if (engagedSwitch.currentValue("switch") == "off") {
-                return true
+                return "$engagedSwitch is off"
             }
         }
     }
@@ -491,7 +491,7 @@ def zoneIsEngaged() {
     if (childZones) {
         for (childZone in childZones) {
             if (childZone.currentValue("occupancy") == "occupied") {
-                return true
+                return "$childZone is occupied"
             }
         }
     }
@@ -503,11 +503,11 @@ def zoneIsOpen() {
     if (entryDoors) {
         for (entryDoor in entryDoors) {
             if (entryDoor.currentValue("contact") == "open") {
-                return true
+                return "$entryDoor is open"
             }
         }
         return false
     }
     
-    return true
+    return "No entry doors"
 }
