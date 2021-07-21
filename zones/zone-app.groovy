@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.0.2" }
+String getVersionNum() { return "4.0.3" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -376,8 +376,7 @@ occupancy = ${zone.currentValue('occupancy')}
 """
 
     if (zoneIsEngaged()) {
-        zone.occupied()
-        logDebug("$debugContext => occupied (engaged)")
+        logDebug("$debugContext => ignored (engaged)")
     } else {
         if (zoneIsOpen() && zone.currentValue("occupancy") == "occupied") {
             zone.checking()
