@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.1.1" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -403,9 +403,13 @@ open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
-    zone.checking()
-    logDebug("$debugContext => checking (${checkingSeconds}s)")
-    scheduleCheckingTimeout(evt)
+    if (anyDoorOrSwitchIsEngaged()) {
+        logDebug("$debugContext => ignored (engaged)")
+    } else {
+        zone.checking()
+        logDebug("$debugContext => checking (${checkingSeconds}s)")
+        scheduleCheckingTimeout(evt)
+    }
 }
 
 //-----------------------------------------
@@ -437,25 +441,7 @@ occupancy = ${zone.currentValue('occupancy')}
 
 //-----------------------------------------
 
-def zoneIsEngaged() {
-    def allPresenceSensors = getAllDevices("presenceSensors")
-    if (allPresenceSensors) {
-        for (presenceSensor in allPresenceSensors) {
-            if (presenceSensor.currentValue("presence") == "present") {
-                return "$presenceSensor is present"
-            }
-        }
-    }
-    
-    def allMotionSensors = getAllDevices("motionSensors")
-    if (allMotionSensors) {
-        for (motionSensor in allMotionSensors) {
-            if (motionSensor.currentValue("motion") == "active") {
-                return "$motionSensor is active"
-            }
-        }
-    }
-    
+def anyDoorOrSwitchIsEngaged() {
     def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
     if (allEngagedDoors_Open) {
         for (engagedDoor in allEngagedDoors_Open) {
@@ -488,6 +474,33 @@ def zoneIsEngaged() {
         for (engagedSwitch in allEngagedSwitches_Off) {
             if (engagedSwitch.currentValue("switch") == "off") {
                 return "$engagedSwitch is off"
+            }
+        }
+    }
+    
+    return false
+}
+
+def zoneIsEngaged() {
+    def engagedDoorOrSwitch = anyDoorOrSwitchIsEngaged()
+    if (engagedDoorOrSwitch) {
+        return engagedDoorOrSwitch
+    }
+    
+    def allPresenceSensors = getAllDevices("presenceSensors")
+    if (allPresenceSensors) {
+        for (presenceSensor in allPresenceSensors) {
+            if (presenceSensor.currentValue("presence") == "present") {
+                return "$presenceSensor is present"
+            }
+        }
+    }
+    
+    def allMotionSensors = getAllDevices("motionSensors")
+    if (allMotionSensors) {
+        for (motionSensor in allMotionSensors) {
+            if (motionSensor.currentValue("motion") == "active") {
+                return "$motionSensor is active"
             }
         }
     }
