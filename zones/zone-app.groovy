@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "4.3.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -326,7 +326,8 @@ ${evt.device} is ${evt.value}"""
 //-----------------------------------------
 
 def engagedEvent(evt, debugContext) {
-    unschedule("unknownTimeout")
+    unschedule("checkForSustainedMotion")
+    unschedule("checkingTimeout")
     
     def zone = getZoneDevice()
     debugContext = """$debugContext
@@ -341,6 +342,7 @@ occupancy = ${zone.currentValue('occupancy')}
 }
 
 def activeEvent(evt, debugContext) {
+    unschedule("checkForSustainedMotion")
     unschedule("checkingTimeout")
     
     def zone = getZoneDevice()
@@ -393,6 +395,7 @@ occupancy = ${zone.currentValue('occupancy')}
 }
 
 def closedEvent(evt, debugContext) {
+    unschedule("checkForSustainedMotion")
     unschedule("checkingTimeout")
     
     def zone = getZoneDevice()
@@ -408,11 +411,25 @@ occupancy = ${zone.currentValue('occupancy')}
     } else {
         zone.checking()
         logDebug("$debugContext => checking (${checkingSeconds}s)")
+        runIn(30, checkForSustainedMotion)
         scheduleCheckingTimeout(evt)
     }
 }
 
 //-----------------------------------------
+
+def checkForSustainedMotion() {
+    def zone = getZoneDevice()
+    def debugContext = """Zone ${app.label} - Motion Check (30s)
+engaged = ${zoneIsEngaged()}
+open = ${zoneIsOpen()}
+occupancy = ${zone.currentValue('occupancy')}
+"""
+    if (anyMotionSensorIsActive()) {
+        zone.occupied()
+        logDebug("$debugContext => occupied")
+    }
+}
 
 def scheduleCheckingTimeout(evt) {
     if (checkingSeconds > 0) {
@@ -481,6 +498,19 @@ def anyDoorOrSwitchIsEngaged() {
     return false
 }
 
+def anyMotionSensorIsActive() {
+    def allMotionSensors = getAllDevices("motionSensors")
+    if (allMotionSensors) {
+        for (motionSensor in allMotionSensors) {
+            if (motionSensor.currentValue("motion") == "active") {
+                return "$motionSensor is active"
+            }
+        }
+    }
+    
+    return false
+}
+
 def zoneIsEngaged() {
     def engagedDoorOrSwitch = anyDoorOrSwitchIsEngaged()
     if (engagedDoorOrSwitch) {
@@ -496,13 +526,9 @@ def zoneIsEngaged() {
         }
     }
     
-    def allMotionSensors = getAllDevices("motionSensors")
-    if (allMotionSensors) {
-        for (motionSensor in allMotionSensors) {
-            if (motionSensor.currentValue("motion") == "active") {
-                return "$motionSensor is active"
-            }
-        }
+    def activeMotionSensor = anyMotionSensorIsActive()
+    if (activeMotionSensor) {
+        return activeMotionSensor
     }
     
     if (childZones) {
