@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.3.0" }
+String getVersionNum() { return "4.3.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -426,6 +426,7 @@ open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
 """
     if (anyMotionSensorIsActive()) {
+        unschedule("checkingTimeout")
         zone.occupied()
         logDebug("$debugContext => occupied")
     }
