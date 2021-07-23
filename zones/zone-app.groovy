@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.6.1" }
+String getVersionNum() { return "4.6.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -436,7 +436,7 @@ occupancy = ${zone.currentValue('occupancy')}
 
 def checkForSustainedMotion() {
     def zone = getZoneDevice()
-    def debugContext = """Zone ${app.label} - Motion Check (30s)
+    def debugContext = """Zone ${app.label} - Motion Check (${motionSeconds}s)
 engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}
@@ -458,7 +458,7 @@ def scheduleCheckingTimeout(evt) {
 
 def checkingTimeout() {
     def zone = getZoneDevice()
-    def debugContext = """Zone ${app.label} - Checking Timeout (${activeSeconds}s)
+    def debugContext = """Zone ${app.label} - Checking Timeout (${checkingSeconds}s)
 engaged = ${zoneIsEngaged()}
 open = ${zoneIsOpen()}
 occupancy = ${zone.currentValue('occupancy')}

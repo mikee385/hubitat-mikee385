@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Ignore checking for sustained motion if time is not defined",
+    "releaseNotes": "Fix incorrect debugging messages",
     "dateReleased": "2021-07-23",
     "apps": [
         {
@@ -19,7 +19,7 @@
         {
             "id": "9b2505e8-9ad2-4c66-89b8-a810174c56c4",
             "name": "Zone App",
-            "version": "4.6.1",
+            "version": "4.6.2",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-app.groovy",
             "required": true,
