@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.7.0" }
+String getVersionNum() { return "4.7.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -244,7 +244,7 @@ def getZoneAppId(zone) {
 
 def getAllDevices(settingName) {
     if (zoneType == "Simple") {
-        if (settingsName == "engagedDoors_Open") {
+        if (settingName == "engagedDoors_Open") {
             return [settings["simpleDoor"]]
         } else {
             return []
