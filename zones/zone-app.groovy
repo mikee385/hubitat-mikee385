@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.5.1" }
+String getVersionNum() { return "4.6.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -38,6 +38,12 @@ def mainPage() {
         section {
             label title: "Zone Name", required: true
             input "zoneType", "enum", title: "Zone Type", options: ["Simple", "Standard"], multiple: false, required: true, submitOnChange: true
+            
+            if (zoneType == "Simple") {
+                paragraph "Simple Zones only include a single door. The zone will be occupied when the door is open and will be vacant when the door is closed. This can be used for closets and other small rooms. The main benefit is that it will transition immediately to vacant when the door is closed. Unlike the Standard Zone, it will not use the checking state or the associated timeout before changing to vacant."
+            } else if (zoneType == "Standard") {
+                paragraph "Standard Zones utilize every device within the zone to determine its occupancy. This is the most common case and can be used in most scenarios. The zone can be either open or closed, depending on the status of the entry doors, and will change its behavior accordingly to accurately determine if the zone is occupied. It also supports nested child zones, so it can be used for larger, more generic zones, like 'Downstairs' or 'Home', which then contain smaller, more specific zones, like 'Bedroom' and 'Kitchen'."
+            }
         }
         
         if (zoneType == "Simple") {
