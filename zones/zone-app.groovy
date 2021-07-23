@@ -63,7 +63,7 @@ def mainPage() {
                 input "interiorDoors", "capability.contactSensor", title: "Doors & Windows", multiple: true, required: false
                 input "buttons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
             }
-            section {
+            section("RETRIGGER") {
                 input "motionSeconds", "number", title: "Time that it takes for motion sensors to return to inactive after detecting motion. This should be slightly longer than the longest retrigger time of any motion sensor in the zone (seconds)", required: true, defaultValue: 20
             }
         }
