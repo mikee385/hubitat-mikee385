@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.3.1" }
+String getVersionNum() { return "4.4.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -62,6 +62,9 @@ def mainPage() {
             section("ACTIVE - Zone will be occupied briefly when device state changes") {
                 input "interiorDoors", "capability.contactSensor", title: "Doors & Windows", multiple: true, required: false
                 input "buttons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
+            }
+            section {
+                input "motionSeconds", "number", title: "Time that it takes for motion sensors to return to inactive after detecting motion. This should be slightly longer than the longest retrigger time of any motion sensor in the zone (seconds)", required: true, defaultValue: 20
             }
         }
         
@@ -411,7 +414,7 @@ occupancy = ${zone.currentValue('occupancy')}
     } else {
         zone.checking()
         logDebug("$debugContext => checking (${checkingSeconds}s)")
-        runIn(30, checkForSustainedMotion)
+        runIn(motionSeconds, checkForSustainedMotion)
         scheduleCheckingTimeout(evt)
     }
 }
