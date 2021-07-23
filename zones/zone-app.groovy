@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.6.0" }
+String getVersionNum() { return "4.6.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -425,7 +425,9 @@ occupancy = ${zone.currentValue('occupancy')}
     } else {
         zone.checking()
         logDebug("$debugContext => checking (${checkingSeconds}s)")
-        runIn(motionSeconds, checkForSustainedMotion)
+        if (motionSeconds) {
+            runIn(motionSeconds, checkForSustainedMotion)
+        }
         scheduleCheckingTimeout(evt)
     }
 }
