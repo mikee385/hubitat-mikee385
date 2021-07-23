@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.4.0" }
+String getVersionNum() { return "4.5.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -43,6 +43,8 @@ def mainPage() {
         if (zoneType == "Simple") {
             section {
                 input "simpleDoor", "capability.contactSensor", title: "Door", multiple: false, required: true
+                input "checkingSeconds", "number", title: "Time that zone will check for activity when manually set to checking (seconds)", required: true, defaultValue: 60
+                paragraph "Simple Zones will not automatically transition to the checking state, but it can be triggered manually from the device page or by other automations (e.g. Rule Machine)."
             }
 
         } else if (zoneType == "Standard") {
