@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.6.2" }
+String getVersionNum() { return "4.7.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -243,19 +243,27 @@ def getZoneAppId(zone) {
 }
 
 def getAllDevices(settingName) {
-    if (childZones) {
-        def allDevices = settings[settingName].collect()
-        for (childZone in childZones) {
-            def childAppId = getZoneAppId(childZone)
-            def childApp = parent.getChildAppById(childAppId)
-            def childDevices = childApp.getAllDevices(settingName)
-            if (childDevices) {
-                allDevices.addAll(childDevices)
-            }
+    if (zoneType == "Simple") {
+        if (settingsName == "engagedDoors_Open") {
+            return [settings["simpleDoor"]]
+        } else {
+            return []
         }
-        return allDevices
     } else {
-        return settings[settingName] ?: []
+        if (childZones) {
+            def allDevices = settings[settingName].collect()
+            for (childZone in childZones) {
+                def childAppId = getZoneAppId(childZone)
+                def childApp = parent.getChildAppById(childAppId)
+                def childDevices = childApp.getAllDevices(settingName)
+                if (childDevices) {
+                    allDevices.addAll(childDevices)
+                }
+            }
+            return allDevices
+        } else {
+            return settings[settingName] ?: []
+        }
     }
 }
 
