@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.5.0" }
+String getVersionNum() { return "4.5.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -256,11 +256,14 @@ def getAllDevices(settingName) {
 //-----------------------------------------
 
 def simpleDoorHandler(evt) {
+    unschedule("checkForSustainedMotion")
+    unschedule("checkingTimeout")
+    
+    def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Simple Door
 ${evt.device} is ${evt.value}
 """
     
-    def zone = getZoneDevice()
     if (evt.value == "open") {
         zone.occupied()
         logDebug("$debugContext => occupied")
