@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.7.1" }
+String getVersionNum() { return "4.7.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -251,7 +251,10 @@ def getAllDevices(settingName) {
         }
     } else {
         if (childZones) {
-            def allDevices = settings[settingName].collect()
+            def allDevices = []
+            if (zoneType == "Standard") { 
+                allDevices.addAll(settings[settingName])
+            }
             for (childZone in childZones) {
                 def childAppId = getZoneAppId(childZone)
                 def childApp = parent.getChildAppById(childAppId)
@@ -262,7 +265,11 @@ def getAllDevices(settingName) {
             }
             return allDevices
         } else {
-            return settings[settingName] ?: []
+            if (zoneType == "Standard") {
+                return settings[settingName] ?: []
+            } else {
+                return []
+            }
         }
     }
 }
