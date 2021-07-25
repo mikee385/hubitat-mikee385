@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.3.0" }
+String getVersionNum() { return "3.4.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -152,9 +152,7 @@ def motionHandler_LightTimer(evt) {
 }
 
 def lightOff() {
-    if (light.currentValue("motion") == "inactive") {
-        light.off()
-    }
+    light.off()
 }
 
 def doorHandler_LightTimeout(evt) {
