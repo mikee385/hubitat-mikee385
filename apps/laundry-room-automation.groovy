@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.4.0" }
+String getVersionNum() { return "3.5.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -140,6 +140,10 @@ def modeHandler_LightSwitch(evt) {
 def lightHandler_LightTimer(evt) {
     logDebug("lightHandler_LightTimer: ${evt.device} changed to ${evt.value}")
     
+    runIn(1, checkForMotion)
+}
+
+def checkForMotion() {
     if (light.currentValue("motion") == "inactive") {
         runIn(60*1, lightOff)
     }
