@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,6 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Pantry Automation", install: true, uninstall: true) {
         section {
+            input "zone", "device.ZoneDevice", title: "Zone", multiple: false, required: true
             input "lights", "capability.switch", title: "Lights", multiple: true, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
             input "minutes", "number", title: "Turn off after (minutes)", required: true
@@ -53,11 +54,11 @@ def updated() {
 }
 
 def initialize() {
+    // Initialize State
+    state.previousOccupancy = zone.currentValue("occupancy")
+    
     // Light Switch
-    subscribe(motionSensor, "motion", motionHandler_LightSwitch)
-    for (light in lights) {
-        subscribe(light, "switch", switchHandler_LightSwitch)
-    }
+    subscribe(zone, "occupancy", occupancyHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Away Alert
@@ -73,39 +74,20 @@ def logDebug(msg) {
     }
 }
 
-def motionHandler_LightSwitch(evt) {
-    logDebug("motionHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def occupancyHandler_LightSwitch(evt) {
+    logDebug("occupancyHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "active") {
-        unschedule()
-        if (location.mode != "Away") {
-            for (light in lights) {
-                light.on()
-            }
+    if (evt.value == "vacant") {
+        for (light in lights) {
+            light.off()
         }
-    } else {
-        runIn(60*minutes, turnOff)
-    }
-}
-
-def switchHandler_LightSwitch(evt) {
-    logDebug("switchHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "on") {
-        if (motionSensor.currentValue("motion") == "inactive") {
-            runIn(60*minutes, turnOff)
+    } else if (state.previousOccupancy == "vacant") {
+        for (light in lights) {
+            light.on()
         }
-    } else {
-        unschedule()
     }
-}
-
-def turnOff() {
-    logDebug("Received turn off")
     
-    for (light in lights) {
-        light.off()
-    }
+    state.previousOccupancy = evt.value
 }
 
 def modeHandler_LightSwitch(evt) {
