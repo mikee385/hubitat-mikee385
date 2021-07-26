@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "3.4.0",
+    "version": "4.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename 'status' to  'occupancy'",
-    "dateReleased": "2021-06-06",
+    "releaseNotes": "Use Zone Device instead of Occupancy Status",
+    "dateReleased": "2021-07-26",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
