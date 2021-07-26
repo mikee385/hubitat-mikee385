@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -61,11 +61,10 @@ def initialize() {
     state.previousOccupancy = zone.currentValue("occupancy")
     
     // Occupancy
-    subscribe(entryDoor, "contact.closed", doorHandler_Occupancy)
-    subscribe(sideDoor, "contact.closed", doorHandler_Occupancy)
+    subscribe(zone, "occupancy.checking", checkingHandler_Occupancy)
 
     // Light Switch
-    subscribe(zone, "occupancy", occupancyHandler_LightSwitch)
+    subscribe(zone, "occupancy", zoneHandler_LightSwitch)
     subscribe(overheadDoor, "contact", overheadDoorHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
@@ -99,22 +98,16 @@ def logDebug(msg) {
     }
 }
 
-def doorHandler_Occupancy(evt) {
-    logDebug("doorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+def checkingHandler_Occupancy(evt) {
+    logDebug("checkingHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
-    if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
-        if (garageLight.currentValue("switch") == "off") {
-            runIn(1, setToVacant)
-        }
+    if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed" && garageLight.currentValue("switch") == "off") {
+        zone.vacant()
     }
 }
 
-def setToVacant() {
-    zone.vacant()
-}
-
-def occupancyHandler_LightSwitch(evt) {
-    logDebug("occupancyHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def zoneHandler_LightSwitch(evt) {
+    logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (overheadDoor.currentValue("contact") == "closed") {
         if (evt.value == "vacant") {

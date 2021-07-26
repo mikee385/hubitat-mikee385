@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "4.0.0",
+    "version": "4.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use Zone Device instead of Occupancy Status",
-    "dateReleased": "2021-07-24",
+    "releaseNotes": "Using checking status instead of door events for vacancy",
+    "dateReleased": "2021-07-26",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
