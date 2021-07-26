@@ -66,6 +66,13 @@
             "tags": [ "Automations & Groups", "Doors & Windows", "Garage Doors", "Lights & Switches", "Motion Control" ]
         },
         {
+            "name": "Geofency Integration",
+            "category": "Integrations",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/geofency-integration.json",
+            "description": "Provides a URL endpoint for Geofency and parses the response into device attributes.",
+            "tags": [ "Presence & Location" ]
+        },
+        {
             "name": "Holiday Lights Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/holiday-lights-automation.json",

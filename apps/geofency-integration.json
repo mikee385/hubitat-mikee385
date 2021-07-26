@@ -1,0 +1,30 @@
+{
+    "packageName": "Geofency Integration",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2021-07-25",
+    "apps": [
+        {
+            "id": "807ff6cf-b6ad-4d4d-9cd5-36362cdc5b8c",
+            "name": "Geofency Integration",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/geofency-integration.groovy",
+            "required": true,
+            "oauth": true,
+            "primary": true
+        }
+    ],
+    "drivers": [
+        {
+            "id": "8240579e-f743-46e1-a110-fa56f9a518f2",
+            "name": "Geofency Device",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/geofency-device.groovy",
+            "required": true
+        }
+    ]
+}
