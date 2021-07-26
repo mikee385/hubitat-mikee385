@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -62,12 +62,12 @@ def initialize() {
     
     // Occupancy
     subscribe(zone, "occupancy.checking", checkingHandler_Occupancy)
+    subscribe(location, "mode", modeHandler_Occupancy)
 
     // Light Switch
     subscribe(zone, "occupancy", zoneHandler_LightSwitch)
     subscribe(overheadDoor, "contact", overheadDoorHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
-    subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Light Alert
     subscribe(overheadDoor, "contact", deviceHandler_LightAlert)
@@ -106,13 +106,21 @@ def checkingHandler_Occupancy(evt) {
     }
 }
 
+def modeHandler_Occupancy(evt) {
+    logDebug("modeHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value != "Home") {
+        zone.vacant()
+    }
+}
+
 def zoneHandler_LightSwitch(evt) {
     logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (overheadDoor.currentValue("contact") == "closed") {
-        if (evt.value == "vacant") {
-            garageLight.off()
-        } else if (state.previousOccupancy == "vacant") {
+    if (evt.value == "vacant") {
+        garageLight.off()
+    } else if (state.previousOccupancy == "vacant") {
+        if (overheadDoor.currentValue("contact") == "closed") {
             garageLight.on()
         }
     }
@@ -143,14 +151,6 @@ def sunlightHandler_LightSwitch(evt) {
         } else {
             garageLight.on()
         }
-    }
-}
-
-def modeHandler_LightSwitch(evt) {
-    logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value != "Home") {
-        garageLight.off()
     }
 }
 
