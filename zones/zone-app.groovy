@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.8.0" }
+String getVersionNum() { return "4.9.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -51,7 +51,9 @@ def mainPage() {
         if (zoneType == "Simple") {
             section {
                 input "simpleDoor", "capability.contactSensor", title: "Door", multiple: false, required: true
-                input "checkingSeconds", "number", title: "Time that zone will check for activity when manually set to checking (seconds)", required: true, defaultValue: 60
+            }
+            section {
+                input "checkingSeconds", "number", title: "CHECKING - Time that zone will check for activity when manually set to checking (seconds)", required: true, defaultValue: 60
                 paragraph "Simple Zones will not automatically transition to the checking state, but it can be triggered manually from the device page or by other automations (e.g. Rule Machine)."
             }
 
@@ -59,8 +61,7 @@ def mainPage() {
             section {
                 input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
                 input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false
-                input "checkingSeconds", "number", title: "Time that zone will check for activity before returning to vacant (seconds)", required: true, defaultValue: 60
-            }
+                }
             section("ENGAGED - Zone will stay occupied while:") {
                 input "presenceSensors", "capability.presenceSensor", title: "Presence Sensor is present", multiple: true, required: false
                 input "motionSensors", "capability.motionSensor", title: "Motion Sensor is active", multiple: true, required: false
@@ -74,11 +75,12 @@ def mainPage() {
                 input "buttons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
             }
             section {
+                input "checkingSeconds", "number", title: "CHECKING - Time that zone will check for activity before returning to vacant (seconds)", required: true, defaultValue: 60
                 input "motionSeconds", "number", title: "RETRIGGER - Time that it takes for motion sensors to return to inactive after detecting motion. This should be slightly longer than the longest retrigger time of any motion sensor in the zone (seconds)", required: true, defaultValue: 20
             }
         } else if (zoneType == "Manual") {
             section {
-                input "checkingSeconds", "number", title: "Time that zone will check for activity when manually set to checking (seconds)", required: true, defaultValue: 60
+                input "checkingSeconds", "number", title: "CHECKING - Time that zone will check for activity when manually set to checking (seconds)", required: true, defaultValue: 60
                 paragraph "Manual Zones will not automatically transition to the checking state, but it can be triggered manually from the device page or by other automations (e.g. Rule Machine)."
             }
         }
