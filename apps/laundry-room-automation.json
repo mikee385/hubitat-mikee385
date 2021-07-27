@@ -4,7 +4,7 @@
     "version": "4.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add slight delay before checking for motion",
+    "releaseNotes": "Use Zone Device to determine occupancy",
     "dateReleased": "2021-07-26",
     "apps": [
         {
