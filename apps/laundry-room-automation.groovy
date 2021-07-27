@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.0.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -70,6 +70,9 @@ def updated() {
 }
 
 def initialize() {
+    // Initialize State
+    state.previousOccupancy = zone.currentValue("occupancy")
+    
     // Occupancy
     subscribe(location, "mode", modeHandler_Occupancy)
 
