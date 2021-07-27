@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "3.5.0",
+    "version": "4.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
     "releaseNotes": "Add slight delay before checking for motion",
-    "dateReleased": "2021-07-25",
+    "dateReleased": "2021-07-26",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

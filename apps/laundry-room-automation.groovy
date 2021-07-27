@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.5.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,6 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Laundry Room Automation", install: true, uninstall: true) {
         section {
+            input "zone", "device.ZoneDevice", title: "Zone", multiple: false, required: true
             input "light", "device.GEZ-WavePlusMotionSwitch", title: "Light", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "gate", "capability.contactSensor", title: "Gate", multiple: false, required: false
@@ -69,16 +70,12 @@ def updated() {
 }
 
 def initialize() {
+    // Occupancy
+    subscribe(location, "mode", modeHandler_Occupancy)
+
     // Light Switch
-    subscribe(door, "contact.open", doorHandler_LightSwitch)
-    if (gate) {
-        subscribe(gate, "contact.open", doorHandler_LightSwitch)
-    }
-    subscribe(location, "mode", modeHandler_LightSwitch)
-    
-    // Light Timer
-    subscribe(light, "switch.on", lightHandler_LightTimer)
-    subscribe(light, "motion.active", motionHandler_LightTimer)
+    subscribe(zone, "occupancy", zoneHandler_LightSwitch)
+    subscribe(light, "motion.active", motionHandler_LightSwitch)
     
     // Light Timeout
     subscribe(door, "contact", doorHandler_LightTimeout)
@@ -93,6 +90,9 @@ def initialize() {
     
     // Light Alert
     subscribe(door, "contact", deviceHandler_LightAlert)
+    if (gate) {
+        subscribe(gate, "contact", deviceHandler_LightAlert)
+    }
     subscribe(light, "motion", deviceHandler_LightAlert)
     subscribe(light, "switch", deviceHandler_LightAlert)
     subscribe(person, "sleeping", personHandler_LightAlert)
@@ -115,6 +115,9 @@ def initialize() {
     // Away Alert
     subscribe(light, "switch.on", handler_AwayAlert)
     subscribe(door, "contact", handler_AwayAlert)
+    if (gate) {
+        subscribe(gate, "contact", handler_AwayAlert)
+    }
 }
 
 def logDebug(msg) {
@@ -123,40 +126,38 @@ def logDebug(msg) {
     }
 }
 
-def doorHandler_LightSwitch(evt) {
-    logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    light.on()
-}
-
-def modeHandler_LightSwitch(evt) {
-    logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def modeHandler_Occupancy(evt) {
+    logDebug("modeHandler_Occupancy: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "Home") {
+        zone.vacant()
         light.off()
     }
 }
 
-def lightHandler_LightTimer(evt) {
-    logDebug("lightHandler_LightTimer: ${evt.device} changed to ${evt.value}")
+def zoneHandler_LightSwitch(evt) {
+    logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    runIn(1, checkForMotion)
-}
-
-def checkForMotion() {
-    if (light.currentValue("motion") == "inactive") {
-        runIn(60*1, lightOff)
+    if (evt.value != "vacant" && state.previousOccupancy == "vacant") {
+        if (light.currentValue("motion") == "inactive") {
+            light.on()
+            subscribe(zone, "occupancy.vacant", vacantHandler_LightSwitch)
+        }
     }
-}
-
-def motionHandler_LightTimer(evt) {
-    logDebug("motionHandler_LightTimer: ${evt.device} changed to ${evt.value}")
     
-    unschedule("lightOff")
+    state.previousOccupancy = evt.value
 }
 
-def lightOff() {
+def vacantHandler_LightSwitch(evt) {
+    logDebug("vacantHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
     light.off()
+}
+
+def motionHandler_LightSwitch(evt) {
+    logDebug("motionHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    
+    unsubscribe("vacantHandler_LightSwitch")
 }
 
 def doorHandler_LightTimeout(evt) {
