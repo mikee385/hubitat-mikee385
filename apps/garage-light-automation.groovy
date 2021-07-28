@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "4.3.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -61,7 +61,7 @@ def initialize() {
     state.previousOccupancy = zone.currentValue("occupancy")
     
     // Occupancy
-    subscribe(zone, "occupancy.checking", checkingHandler_Occupancy)
+    subscribe(entryDoor, "contact.closed", entryDoorHandler_Occupancy)
     subscribe(location, "mode", modeHandler_Occupancy)
 
     // Light Switch
@@ -98,9 +98,13 @@ def logDebug(msg) {
     }
 }
 
-def checkingHandler_Occupancy(evt) {
-    logDebug("checkingHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+def entryDoorHandler_Occupancy(evt) {
+    logDebug("entryDoorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
+    runInMillis(250, checkForVacant)
+}
+
+def checkForVacant() {
     if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed" && garageLight.currentValue("switch") == "off") {
         zone.vacant()
     }
