@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -114,7 +114,7 @@ def initialize() {
             zone.open()
             zone.occupied()
         } else {
-            zone.closed()
+            zone.close()
             zone.vacant()
         }
         
@@ -125,7 +125,7 @@ def initialize() {
             if (zoneIsOpen()) {
                 zone.open()
             } else {
-                zone.closed()
+                zone.close()
             }
         }   
         if (zoneIsEngaged()) {
