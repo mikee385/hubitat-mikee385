@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "5.0.2" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -582,11 +582,13 @@ def anyDoorOrSwitchIsEngaged() {
 }
 
 def anyMotionSensorIsActive() {
-    def allMotionSensors = getAllDevices("motionSensors")
-    if (allMotionSensors) {
-        for (motionSensor in allMotionSensors) {
-            if (motionSensor.currentValue("motion") == "active") {
-                return "$motionSensor is active"
+    if (zoneType == "Standard") {
+        def allMotionSensors = getAllDevices("motionSensors")
+        if (allMotionSensors) {
+            for (motionSensor in allMotionSensors) {
+                if (motionSensor.currentValue("motion") == "active") {
+                    return "$motionSensor is active"
+                }
             }
         }
     }
@@ -595,29 +597,36 @@ def anyMotionSensorIsActive() {
 }
 
 def zoneIsEngaged() {
-    def engagedDoorOrSwitch = anyDoorOrSwitchIsEngaged()
-    if (engagedDoorOrSwitch) {
-        return engagedDoorOrSwitch
-    }
-    
-    def allPresenceSensors = getAllDevices("presenceSensors")
-    if (allPresenceSensors) {
-        for (presenceSensor in allPresenceSensors) {
-            if (presenceSensor.currentValue("presence") == "present") {
-                return "$presenceSensor is present"
+    if (zoneType == "Simple") {
+        if (simpleDoor.currentValue("contact") == "open") {
+            return "$simpleDoor is open"
+        }
+        
+    } else if (zoneType == "Standard") {
+        def engagedDoorOrSwitch = anyDoorOrSwitchIsEngaged()
+        if (engagedDoorOrSwitch) {
+            return engagedDoorOrSwitch
+        }
+        
+        def allPresenceSensors = getAllDevices("presenceSensors")
+        if (allPresenceSensors) {
+            for (presenceSensor in allPresenceSensors) {
+                if (presenceSensor.currentValue("presence") == "present") {
+                    return "$presenceSensor is present"
+                }
             }
         }
-    }
-    
-    def activeMotionSensor = anyMotionSensorIsActive()
-    if (activeMotionSensor) {
-        return activeMotionSensor
-    }
-    
-    if (childZones) {
-        for (childZone in childZones) {
-            if (childZone.currentValue("occupancy") == "occupied") {
-                return "$childZone is occupied"
+        
+        def activeMotionSensor = anyMotionSensorIsActive()
+        if (activeMotionSensor) {
+            return activeMotionSensor
+        }
+        
+        if (childZones) {
+            for (childZone in childZones) {
+                if (childZone.currentValue("occupancy") == "occupied") {
+                    return "$childZone is occupied"
+                }
             }
         }
     }
@@ -626,13 +635,22 @@ def zoneIsEngaged() {
 }
 
 def zoneIsOpen() {
-    if (entryDoors) {
-        for (entryDoor in entryDoors) {
-            if (entryDoor.currentValue("contact") == "open") {
-                return "$entryDoor is open"
-            }
+    if (zoneType == "Simple") {
+        if (simpleDoor.currentValue("contact") == "open") {
+            return "$simpleDoor is open"
+        } else {
+            return false
         }
-        return false
+        
+    } else if (zoneType == "Standard") {
+        if (entryDoors) {
+            for (entryDoor in entryDoors) {
+                if (entryDoor.currentValue("contact") == "open") {
+                    return "$entryDoor is open"
+                }
+            }
+            return false
+        }
     }
     
     return "No entry doors"
