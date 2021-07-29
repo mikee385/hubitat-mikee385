@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "5.0.1" }
+String getVersionNum() { return "5.0.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -318,6 +318,7 @@ ${evt.device} is ${evt.value}
 }
 
 def entryDoorHandler(evt) {
+    def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Entry Door
 ${evt.device} is ${evt.value}"""
     
