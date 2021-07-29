@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "4.9.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -107,24 +107,33 @@ def initialize() {
     parent.addZoneDevice(app.getId(), app.label)
     
     def zone = getZoneDevice()
-    if (zoneIsEngaged()) {
-        zone.occupied()
-    } else {
-        zone.vacant()
-    }
-    
-    logDebug("""Zone ${app.label} - Initial
-engaged = ${zoneIsEngaged()}
-open = ${zoneIsOpen()}
-occupancy = ${zone.currentValue('occupancy')}
-""")
-    
     subscribe(zone, "occupancy", occupancyHandler)
     
     if (zoneType == "Simple") {
+        if (simpleDoor.currentValue("contact") == "open") {
+            zone.open()
+            zone.occupied()
+        } else {
+            zone.closed()
+            zone.vacant()
+        }
+        
         subscribe(simpleDoor, "contact", simpleDoorHandler)
     
     } else if (zoneType == "Standard") {
+        if (entryDoors) {
+            if (zoneIsOpen()) {
+                zone.open()
+            } else {
+                zone.closed()
+            }
+        }   
+        if (zoneIsEngaged()) {
+            zone.occupied()
+        } else {
+            zone.vacant()
+        }
+    
         def allPresenceSensors = getAllDevices("presenceSensors")
         def allMotionSensors = getAllDevices("motionSensors")
         def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
@@ -141,9 +150,7 @@ occupancy = ${zone.currentValue('occupancy')}
         engagedSwitchIds_Off = allEngagedSwitches_Off.collect{ it.id }
         
         for (entryDoor in entryDoors) {
-            if (!(entryDoor.id in engagedDoorIds_Open) && !(entryDoor.id in engagedDoorIds_Closed)) {
-                subscribe(entryDoor, "contact", entryDoorHandler)
-            }
+            subscribe(entryDoor, "contact", entryDoorHandler)
         }
         
         for (presenceSensor in allPresenceSensors) {
@@ -155,26 +162,21 @@ occupancy = ${zone.currentValue('occupancy')}
         }
         
         for (engagedDoor in allEngagedDoors_Open) {
-            subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
+            if (!(engagedDoor.id in entryDoorIds)) {
+                subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
             
-            if (engagedDoor.id in engagedDoorIds_Closed) {
-                subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
-            } else if (engagedDoor.id in entryDoorIds) {
-                subscribe(engagedDoor, "contact.closed", entryDoorHandler)
-            } else {
-                subscribe(engagedDoor, "contact.closed", activeDeviceHandler)
+                if (engagedDoor.id in engagedDoorIds_Closed) {
+                    subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
+                } else {
+                    subscribe(engagedDoor, "contact.closed", activeDeviceHandler)
+                }
             }
         }
         
         for (engagedDoor in allEngagedDoors_Closed) {
-            if (!(engagedDoor.id in engagedDoorIds_Open)) { 
+            if (!(engagedDoor.id in entryDoorIds) && !(engagedDoor.id in engagedDoorIds_Open)) { 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
-            
-                if (engagedDoor.id in entryDoorIds) {
-                    subscribe(engagedDoor, "contact.open", entryDoorHandler)
-                } else {
-                    subscribe(engagedDoor, "contact.open", activeDeviceHandler)
-                }
+                subscribe(engagedDoor, "contact.open", activeDeviceHandler)
             }
         }
         
@@ -215,6 +217,12 @@ occupancy = ${zone.currentValue('occupancy')}
     } else if (zoneType != "Manual") {
         log.error "Unknown zone type: $zoneType"
     }
+    
+    logDebug("""Zone ${app.label} - Initial
+engaged = ${zoneIsEngaged()}
+entry = ${zone.currentValue('entry')}
+occupancy = ${zone.currentValue('occupancy')}
+""")
     
     def zoneId = zone.getId()
     for (parentApp in parent.getChildApps()) {
@@ -299,9 +307,11 @@ ${evt.device} is ${evt.value}
 """
     
     if (evt.value == "open") {
+        zone.open()
         zone.occupied()
         logDebug("$debugContext => occupied")
     } else {
+        zone.close()
         zone.vacant()
         logDebug("$debugContext => vacant")
     }
@@ -312,9 +322,29 @@ def entryDoorHandler(evt) {
 ${evt.device} is ${evt.value}"""
     
     if (zoneIsOpen()) {
-        activeEvent(debugContext)
+        zone.open()
+        
+        if (evt.value == "open") {
+            if (engagedDoors_Open.any{ it.id == evt.device.id }) {
+                engagedEvent(debugContext)
+            } else {
+                activeEvent(debugContext)
+            }
+        } else {
+            if (engagedDoors_Closed.any{ it.id == evt.device.id }) {
+                engagedEvent(debugContext)
+            } else {
+                activeEvent(debugContext)
+            }
+        }
     } else {
-        closedEvent(debugContext)
+        zone.close()
+        
+        if (engagedDoors_Closed.any{ it.id == evt.device.id }) {
+            engagedEvent(debugContext)
+        } else {
+            closedEvent(debugContext)
+        }
     }
 }
 
@@ -375,7 +405,7 @@ def engagedEvent(debugContext) {
     debugContext = """$debugContext
 Engaged Event
 engaged = ${zoneIsEngaged()}
-open = ${zoneIsOpen()}
+entry = ${zone.currentValue('entry')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
@@ -391,7 +421,7 @@ def activeEvent(debugContext) {
     debugContext = """$debugContext
 Active Event
 engaged = ${zoneIsEngaged()}
-open = ${zoneIsOpen()}
+entry = ${zone.currentValue('entry')}
 occupancy = ${zone.currentValue('occupancy')}
 """
     
@@ -399,7 +429,7 @@ occupancy = ${zone.currentValue('occupancy')}
         zone.occupied()
         logDebug("$debugContext => occupied (engaged)")
     } else {
-        if (zoneIsOpen()) {
+        if (zone.currentValue("entry") == "open") {
             zone.checking()
             logDebug("$debugContext => checking (${checkingSeconds}s)")
             scheduleCheckingTimeout()
@@ -415,14 +445,14 @@ def inactiveEvent(debugContext) {
     debugContext = """$debugContext
 Inactive Event
 engaged = ${zoneIsEngaged()}
-open = ${zoneIsOpen()}
+entry = ${zone.currentValue('entry')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
     if (zoneIsEngaged()) {
         logDebug("$debugContext => ignored (engaged)")
     } else {
-        if (zoneIsOpen()) {
+        if (zone.currentValue("entry") == "open") {
             if (zone.currentValue("occupancy") == "occupied") {
                 zone.checking()
                 logDebug("$debugContext => checking (${checkingSeconds}s)")
@@ -444,7 +474,7 @@ def closedEvent(debugContext) {
     debugContext = """$debugContext
 Closed Event
 engaged = ${zoneIsEngaged()}
-open = ${zoneIsOpen()}
+entry = ${zone.currentValue('entry')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
@@ -466,7 +496,7 @@ def checkForSustainedMotion() {
     def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Motion Check (${motionSeconds}s)
 engaged = ${zoneIsEngaged()}
-open = ${zoneIsOpen()}
+entry = ${zone.currentValue('entry')}
 occupancy = ${zone.currentValue('occupancy')}
 """
     if (anyMotionSensorIsActive()) {
@@ -488,7 +518,7 @@ def checkingTimeout() {
     def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Checking Timeout (${checkingSeconds}s)
 engaged = ${zoneIsEngaged()}
-open = ${zoneIsOpen()}
+entry = ${zone.currentValue('entry')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
@@ -504,38 +534,45 @@ occupancy = ${zone.currentValue('occupancy')}
 //-----------------------------------------
 
 def anyDoorOrSwitchIsEngaged() {
-    def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
-    if (allEngagedDoors_Open) {
-        for (engagedDoor in allEngagedDoors_Open) {
-            if (engagedDoor.currentValue("contact") == "open") {
-                return "$engagedDoor is open"
+    if (zoneType == "Simple") {
+        if (simpleDoor.currentValue("contact") == "open") {
+            return "$simpleDoor is open"
+        }
+        
+    } else if (zoneType == "Standard") {
+        def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
+        if (allEngagedDoors_Open) {
+            for (engagedDoor in allEngagedDoors_Open) {
+                if (engagedDoor.currentValue("contact") == "open") {
+                    return "$engagedDoor is open"
+                }
             }
         }
-    }
-    
-    def allEngagedDoors_Closed = getAllDevices("engagedDoors_Closed")
-    if (allEngagedDoors_Closed) {
-        for (engagedDoor in allEngagedDoors_Closed) {
-            if (engagedDoor.currentValue("contact") == "closed") {
-                return "$engagedDoor is closed"
+        
+        def allEngagedDoors_Closed = getAllDevices("engagedDoors_Closed")
+        if (allEngagedDoors_Closed) {
+            for (engagedDoor in allEngagedDoors_Closed) {
+                if (engagedDoor.currentValue("contact") == "closed") {
+                    return "$engagedDoor is closed"
+                }
             }
         }
-    }
-    
-    def allEngagedSwitches_On = getAllDevices("engagedSwitches_On")
-    if (allEngagedSwitches_On) {
-        for (engagedSwitch in allEngagedSwitches_On) {
-            if (engagedSwitch.currentValue("switch") == "on") {
-                return "$engagedSwitch is on"
+        
+        def allEngagedSwitches_On = getAllDevices("engagedSwitches_On")
+        if (allEngagedSwitches_On) {
+            for (engagedSwitch in allEngagedSwitches_On) {
+                if (engagedSwitch.currentValue("switch") == "on") {
+                    return "$engagedSwitch is on"
+                }
             }
         }
-    }
-    
-    def allEngagedSwitches_Off = getAllDevices("engagedSwitches_Off")
-    if (allEngagedSwitches_Off) {
-        for (engagedSwitch in allEngagedSwitches_Off) {
-            if (engagedSwitch.currentValue("switch") == "off") {
-                return "$engagedSwitch is off"
+        
+        def allEngagedSwitches_Off = getAllDevices("engagedSwitches_Off")
+        if (allEngagedSwitches_Off) {
+            for (engagedSwitch in allEngagedSwitches_Off) {
+                if (engagedSwitch.currentValue("switch") == "off") {
+                    return "$engagedSwitch is off"
+                }
             }
         }
     }

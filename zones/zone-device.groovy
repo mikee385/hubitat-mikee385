@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -33,6 +33,11 @@ metadata {
         command "occupied"
         command "checking"
         command "vacant"
+        
+        attribute "entry", "enum", ["open", "closed"]
+        
+        command "open"
+        command "close"
     }
 }
 
@@ -49,6 +54,9 @@ def initialize() {
     if (!device.currentValue("occupancy")) {
         vacant()
     }
+    if (!device.currentValue("entry")) {
+        open()
+    }
 }
 
 def occupied() {
@@ -61,4 +69,12 @@ def checking() {
 
 def vacant() {
     sendEvent(name: "occupancy", value: "vacant")
+}
+
+def open() {
+    sendEvent(name: "entry", value: "open")
+}
+
+def close() {
+    sendEvent(name: "entry", value: "closed")
 }
