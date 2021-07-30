@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -26,18 +26,15 @@ metadata {
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-device.groovy"
 	) {
         capability "Actuator"
+        capability "ContactSensor"
         capability "Sensor"
+        capability "Switch"
 
         attribute "occupancy", "enum", ["occupied", "checking", "vacant"]
         
         command "occupied"
         command "checking"
         command "vacant"
-        
-        attribute "entry", "enum", ["open", "closed"]
-        
-        command "open"
-        command "close"
     }
 }
 
@@ -51,30 +48,41 @@ def updated() {
 }
 
 def initialize() {
-    if (!device.currentValue("occupancy")) {
+    if (!device.currentValue("occupancy") || !device.currentValue("switch")) {
         vacant()
     }
-    if (!device.currentValue("entry")) {
+    if (!device.currentValue("contact")) {
         open()
     }
 }
 
 def occupied() {
     sendEvent(name: "occupancy", value: "occupied")
+    sendEvent(name: "switch", value: "on")
 }
 
 def checking() {
     sendEvent(name: "occupancy", value: "checking")
+    sendEvent(name: "switch", value: "on")
 }
 
 def vacant() {
     sendEvent(name: "occupancy", value: "vacant")
+    sendEvent(name: "switch", value: "off")
+}
+
+def on() {
+    occupied()
+}
+
+def off() {
+    vacant()
 }
 
 def open() {
-    sendEvent(name: "entry", value: "open")
+    sendEvent(name: "contact", value: "open")
 }
 
 def close() {
-    sendEvent(name: "entry", value: "closed")
+    sendEvent(name: "contact", value: "closed")
 }

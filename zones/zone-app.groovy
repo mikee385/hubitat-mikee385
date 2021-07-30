@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "5.1.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -37,27 +37,16 @@ def mainPage() {
     dynamicPage(name: "mainPage", title: "${getVersionLabel()}", install: true, uninstall: true) {
         section {
             label title: "Zone Name", required: true
-            input "zoneType", "enum", title: "Zone Type", options: ["Simple", "Standard", "Manual"], multiple: false, required: true, submitOnChange: true
+            input "zoneType", "enum", title: "Zone Type", options: ["Automated", "Manual"], multiple: false, required: true, submitOnChange: true
             
-            if (zoneType == "Simple") {
-                paragraph "Simple Zones only include a single door. The zone will be occupied when the door is open and will be vacant when the door is closed. This can be used for closets and other small rooms. The main benefit is that it will transition immediately to vacant when the door is closed. Unlike the Standard Zone, it will not use the checking state or the associated timeout before changing to vacant."
-            } else if (zoneType == "Standard") {
-                paragraph "Standard Zones utilize every device within the zone to determine its occupancy. This is the most common case and can be used in most scenarios. The zone can be either open or closed, depending on the status of the entry doors, and will change its behavior accordingly to accurately determine if the zone is occupied. It also supports nested child zones, so it can be used for larger, more generic zones, like 'Downstairs' or 'Home', which then contain smaller, more specific zones, like 'Bedroom' and 'Kitchen'."
+            if (zoneType == "Automated") {
+                paragraph "Automated Zones utilize every device within the zone to determine its occupancy. This is the most common case and can be used in most scenarios. The zone can be either open or closed, depending on the status of the entry doors, and will change its behavior accordingly to accurately determine if the zone is occupied. It also supports nested child zones, so it can be used for larger, more generic zones, like 'Downstairs' or 'Home', which then contain smaller, more specific zones, like 'Bedroom' and 'Kitchen'."
             } else if (zoneType == "Manual") {
                 paragraph "Manual Zones are intended to be controlled by some other automation, e.g. Rule Machine. There is no automatic behavior, except for the time-based transition from checking to vacant."
             }
         }
         
-        if (zoneType == "Simple") {
-            section {
-                input "simpleDoor", "capability.contactSensor", title: "Door", multiple: false, required: true
-            }
-            section {
-                input "checkingSeconds", "number", title: "CHECKING - Time that zone will check for activity when manually set to checking (seconds)", required: true, defaultValue: 60
-                paragraph "Simple Zones will not automatically transition to the checking state, but it can be triggered manually from the device page or by other automations (e.g. Rule Machine)."
-            }
-
-        } else if (zoneType == "Standard") {
+        if (zoneType == "Automated") {
             section {
                 input "childZones", "device.ZoneDevice", title: "Child Zones", multiple: true, required: false
                 input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false
@@ -109,18 +98,7 @@ def initialize() {
     def zone = getZoneDevice()
     subscribe(zone, "occupancy", occupancyHandler)
     
-    if (zoneType == "Simple") {
-        if (simpleDoor.currentValue("contact") == "open") {
-            zone.open()
-            zone.occupied()
-        } else {
-            zone.close()
-            zone.vacant()
-        }
-        
-        subscribe(simpleDoor, "contact", simpleDoorHandler)
-    
-    } else if (zoneType == "Standard") {
+    if (zoneType == "Automated") {
         if (entryDoors) {
             if (zoneIsOpen()) {
                 zone.open()
@@ -220,7 +198,7 @@ def initialize() {
     
     logDebug("""Zone ${app.label} - Initial
 engaged = ${zoneIsEngaged()}
-entry = ${zone.currentValue('entry')}
+contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """)
     
@@ -260,13 +238,7 @@ def getZoneAppId(zone) {
 }
 
 def getAllDevices(settingName) {
-    if (zoneType == "Simple") {
-        if (settingName == "engagedDoors_Open") {
-            return [settings["simpleDoor"]]
-        } else {
-            return []
-        }
-    } else if (zoneType == "Standard") {
+    if (zoneType == "Automated") {
         if (childZones) {
             def allDevices = settings[settingName].collect()
             for (childZone in childZones) {
@@ -294,26 +266,6 @@ def occupancyHandler(evt) {
     
     if (evt.value == "checking") {
         scheduleCheckingTimeout()
-    }
-}
-
-def simpleDoorHandler(evt) {
-    unschedule("checkForSustainedMotion")
-    unschedule("checkingTimeout")
-    
-    def zone = getZoneDevice()
-    def debugContext = """Zone ${app.label} - Simple Door
-${evt.device} is ${evt.value}
-"""
-    
-    if (evt.value == "open") {
-        zone.open()
-        zone.occupied()
-        logDebug("$debugContext => occupied")
-    } else {
-        zone.close()
-        zone.vacant()
-        logDebug("$debugContext => vacant")
     }
 }
 
@@ -406,7 +358,7 @@ def engagedEvent(debugContext) {
     debugContext = """$debugContext
 Engaged Event
 engaged = ${zoneIsEngaged()}
-entry = ${zone.currentValue('entry')}
+contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
@@ -422,7 +374,7 @@ def activeEvent(debugContext) {
     debugContext = """$debugContext
 Active Event
 engaged = ${zoneIsEngaged()}
-entry = ${zone.currentValue('entry')}
+contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
     
@@ -430,7 +382,7 @@ occupancy = ${zone.currentValue('occupancy')}
         zone.occupied()
         logDebug("$debugContext => occupied (engaged)")
     } else {
-        if (zone.currentValue("entry") == "open") {
+        if (zone.currentValue("contact") == "open") {
             zone.checking()
             logDebug("$debugContext => checking (${checkingSeconds}s)")
             scheduleCheckingTimeout()
@@ -446,14 +398,14 @@ def inactiveEvent(debugContext) {
     debugContext = """$debugContext
 Inactive Event
 engaged = ${zoneIsEngaged()}
-entry = ${zone.currentValue('entry')}
+contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
     if (zoneIsEngaged()) {
         logDebug("$debugContext => ignored (engaged)")
     } else {
-        if (zone.currentValue("entry") == "open") {
+        if (zone.currentValue("contact") == "open") {
             if (zone.currentValue("occupancy") == "occupied") {
                 zone.checking()
                 logDebug("$debugContext => checking (${checkingSeconds}s)")
@@ -475,7 +427,7 @@ def closedEvent(debugContext) {
     debugContext = """$debugContext
 Closed Event
 engaged = ${zoneIsEngaged()}
-entry = ${zone.currentValue('entry')}
+contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
@@ -497,7 +449,7 @@ def checkForSustainedMotion() {
     def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Motion Check (${motionSeconds}s)
 engaged = ${zoneIsEngaged()}
-entry = ${zone.currentValue('entry')}
+contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
     if (anyMotionSensorIsActive()) {
@@ -519,7 +471,7 @@ def checkingTimeout() {
     def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Checking Timeout (${checkingSeconds}s)
 engaged = ${zoneIsEngaged()}
-entry = ${zone.currentValue('entry')}
+contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
@@ -535,12 +487,7 @@ occupancy = ${zone.currentValue('occupancy')}
 //-----------------------------------------
 
 def anyDoorOrSwitchIsEngaged() {
-    if (zoneType == "Simple") {
-        if (simpleDoor.currentValue("contact") == "open") {
-            return "$simpleDoor is open"
-        }
-        
-    } else if (zoneType == "Standard") {
+    if (zoneType == "Automated") {
         def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
         if (allEngagedDoors_Open) {
             for (engagedDoor in allEngagedDoors_Open) {
@@ -582,7 +529,7 @@ def anyDoorOrSwitchIsEngaged() {
 }
 
 def anyMotionSensorIsActive() {
-    if (zoneType == "Standard") {
+    if (zoneType == "Automated") {
         def allMotionSensors = getAllDevices("motionSensors")
         if (allMotionSensors) {
             for (motionSensor in allMotionSensors) {
@@ -597,12 +544,7 @@ def anyMotionSensorIsActive() {
 }
 
 def zoneIsEngaged() {
-    if (zoneType == "Simple") {
-        if (simpleDoor.currentValue("contact") == "open") {
-            return "$simpleDoor is open"
-        }
-        
-    } else if (zoneType == "Standard") {
+    if (zoneType == "Automated") {
         def engagedDoorOrSwitch = anyDoorOrSwitchIsEngaged()
         if (engagedDoorOrSwitch) {
             return engagedDoorOrSwitch
@@ -635,14 +577,7 @@ def zoneIsEngaged() {
 }
 
 def zoneIsOpen() {
-    if (zoneType == "Simple") {
-        if (simpleDoor.currentValue("contact") == "open") {
-            return "$simpleDoor is open"
-        } else {
-            return false
-        }
-        
-    } else if (zoneType == "Standard") {
+    if (zoneType == "Automated") {
         if (entryDoors) {
             for (entryDoor in entryDoors) {
                 if (entryDoor.currentValue("contact") == "open") {

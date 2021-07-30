@@ -15,7 +15,7 @@
  */
 
 String getName() { return "Zone Builder" }
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
