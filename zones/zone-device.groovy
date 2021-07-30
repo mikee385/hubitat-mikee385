@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -35,6 +35,9 @@ metadata {
         command "occupied"
         command "checking"
         command "vacant"
+        
+        command "open"
+        command "close"
     }
 }
 

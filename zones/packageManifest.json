@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Remove Simple Zones and add Switch and Contact Sensor capabilities",
+    "releaseNotes": "Add missing open & close commands to Zone Device",
     "dateReleased": "2021-07-31",
     "apps": [
         {
@@ -39,7 +39,7 @@
         {
             "id": "f5840aec-58c3-4571-9799-bd641774095c",
             "name": "Zone Device",
-            "version": "6.0.0",
+            "version": "6.0.1",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-device.groovy",
             "required": true
