@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.1.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -489,7 +489,7 @@ contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
-    if (anyDoorOrSwitchIsEngaged()) {
+    if (anyDoorSwitchLockIsEngaged()) {
         logDebug("$debugContext => ignored (engaged)")
     } else {
         zone.checking()
@@ -550,7 +550,7 @@ occupancy = ${zone.currentValue('occupancy')}
 
 //-----------------------------------------
 
-def anyDoorOrSwitchIsEngaged() {
+def anyDoorSwitchLockIsEngaged() {
     if (zoneType == "Automated") {
         def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
         if (allEngagedDoors_Open) {
@@ -587,6 +587,24 @@ def anyDoorOrSwitchIsEngaged() {
                 }
             }
         }
+        
+        def allEngagedLocks_Unlocked = getAllDevices("engagedLocks_Unlocked")
+        if (allEngagedLocks_Unlocked) {
+            for (engagedLock in allEngagedLocks_Unlocked) {
+                if (engagedLock.currentValue("lock") == "unlocked") {
+                    return "$engagedLock is unlocked"
+                }
+            }
+        }
+        
+        def allEngagedLocks_Locked = getAllDevices("engagedLocks_Locked")
+        if (allEngagedLocks_Locked) {
+            for (engagedLock in allEngagedLocks_Locked) {
+                if (engagedLock.currentValue("lock") == "locked") {
+                    return "$engagedLock is locked"
+                }
+            }
+        }
     }
     
     return false
@@ -609,9 +627,9 @@ def anyMotionSensorIsActive() {
 
 def zoneIsEngaged() {
     if (zoneType == "Automated") {
-        def engagedDoorOrSwitch = anyDoorOrSwitchIsEngaged()
-        if (engagedDoorOrSwitch) {
-            return engagedDoorOrSwitch
+        def engagedDoorSwitchLock = anyDoorSwitchLockIsEngaged()
+        if (engagedDoorSwitchLock) {
+            return engagedDoorSwitchLock
         }
         
         def allPresenceSensors = getAllDevices("presenceSensors")
@@ -626,6 +644,15 @@ def zoneIsEngaged() {
         def activeMotionSensor = anyMotionSensorIsActive()
         if (activeMotionSensor) {
             return activeMotionSensor
+        }
+        
+        def allAccelerationSensors = getAllDevices("accelerationSensors")
+        if (allAccelerationSensors) {
+            for (accelerationSensor in allAccelerationSensors) {
+                if (accelerationSensor.currentValue("acceleration") == "active") {
+                    return "$accelerationSensor is active"
+                }
+            }
         }
         
         if (childZones) {
