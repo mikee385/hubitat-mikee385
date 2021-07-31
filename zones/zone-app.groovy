@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "6.1.1" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -146,15 +146,18 @@ def initialize() {
         }
         
         for (presenceSensor in allPresenceSensors) {
-            subscribe(presenceSensor, "presence", presenceSensorHandler)
+            subscribe(presenceSensor, "presence.present", engagedDeviceHandler)
+            subscribe(presenceSensor, "presence.not present", inactiveDeviceHandler)
         }
         
         for (motionSensor in allMotionSensors) {
-            subscribe(motionSensor, "motion", motionSensorHandler)
+            subscribe(motionSensor, "motion.active", engagedDeviceHandler)
+            subscribe(motionSensor, "motion.inactive", inactiveDeviceHandler)
         }
         
         for (accelerationSensor in allAccelerationSensors) {
-            subscribe(accelerationSensor, "acceleration", accelerationSensorHandler)
+            subscribe(accelerationSensor, "acceleration.active", engagedDeviceHandler)
+            subscribe(accelerationSensor, "acceleration.inactive", inactiveDeviceHandler)
         }
         
         for (engagedDoor in allEngagedDoors_Open) {
@@ -236,7 +239,9 @@ def initialize() {
         }
         
         for (childZone in childZones) {
-            subscribe(childZone, "occupancy", childZoneHandler)
+            subscribe(childZone, "occupancy.occupied", engagedDeviceHandler)
+            subscribe(childZone, "occupancy.checking", inactiveDeviceHandler)
+            subscribe(childZone, "occupancy.vacant", inactiveDeviceHandler)
         }
     
     } else if (zoneType != "Manual") {
@@ -348,39 +353,6 @@ ${evt.device} is ${evt.value}"""
     }
 }
 
-def presenceSensorHandler(evt) {
-    def debugContext = """Zone ${app.label} - Presence Sensor
-${evt.device} is ${evt.value}"""
-    
-    if (evt.value == "present") {
-        engagedEvent(debugContext)
-    } else {
-        inactiveEvent(debugContext)
-    }
-}
-
-def motionSensorHandler(evt) {
-    def debugContext = """Zone ${app.label} - Motion Sensor
-${evt.device} is ${evt.value}"""
-    
-    if (evt.value == "active") {
-        engagedEvent(debugContext)
-    } else {
-        inactiveEvent(debugContext)
-    }
-}
-
-def accelerationSensorHandler(evt) {
-    def debugContext = """Zone ${app.label} - Acceleration Sensor
-${evt.device} is ${evt.value}"""
-    
-    if (evt.value == "active") {
-        engagedEvent(debugContext)
-    } else {
-        inactiveEvent(debugContext)
-    }
-}
-
 def engagedDeviceHandler(evt) {
     def debugContext = """Zone ${app.label} - Engaged Device
 ${evt.device} is ${evt.value}"""
@@ -395,15 +367,11 @@ ${evt.device} is ${evt.value}"""
     activeEvent(debugContext)
 }
 
-def childZoneHandler(evt) {
-    def debugContext = """Zone ${app.label} - Child Zone
+def inactiveDeviceHandler(evt) {
+    def debugContext = """Zone ${app.label} - Inactive Device
 ${evt.device} is ${evt.value}"""
     
-    if (evt.value == "occupied") {
-        engagedEvent(debugContext)
-    } else {
-        inactiveEvent(debugContext)
-    }
+    inactiveEvent(debugContext)
 }
 
 //-----------------------------------------
