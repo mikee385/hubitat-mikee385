@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "6.0.1" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -52,16 +52,21 @@ def mainPage() {
                 input "entryDoors", "capability.contactSensor", title: "Entry Doors", multiple: true, required: false
                 }
             section("ENGAGED - Zone will stay occupied while:") {
-                input "presenceSensors", "capability.presenceSensor", title: "Presence Sensor is present", multiple: true, required: false
-                input "motionSensors", "capability.motionSensor", title: "Motion Sensor is active", multiple: true, required: false
+                input "presenceSensors", "capability.presenceSensor", title: "Presence Sensor is Present", multiple: true, required: false
+                input "motionSensors", "capability.motionSensor", title: "Motion Sensor is Active", multiple: true, required: false
+                input "accelerationSensors", "capability.accelerationSensor", title: "Acceleration Sensor is Active", multiple: true, required: false
                 input "engagedDoors_Open", "capability.contactSensor", title: "Door/Window is Open", multiple: true, required: false
                 input "engagedDoors_Closed", "capability.contactSensor", title: "Door/Window is Closed", multiple: true, required: false
                 input "engagedSwitches_On", "capability.switch", title: "Switch is On", multiple: true, required: false
                 input "engagedSwitches_Off", "capability.switch", title: "Switch is Off", multiple: true, required: false
+                input "engagedLocks_Unlocked", "capability.lock", title: "Lock is Unlocked", multiple: true, required: false
+                input "engagedLocks_Locked", "capability.switch", title: "Lock is Locked", multiple: true, required: false
             }
             section("ACTIVE - Zone will be occupied briefly when device state changes") {
-                input "interiorDoors", "capability.contactSensor", title: "Doors & Windows", multiple: true, required: false
-                input "buttons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
+                input "activeDoors", "capability.contactSensor", title: "Doors & Windows", multiple: true, required: false
+                input "activeButtons", "capability.pushableButton", title: "Buttons", multiple: true, required: false
+                input "activeSwitches", "capability.switch", title: "Switches", multiple: true, required: false
+                input "activeLocks", "capability.lock", title: "Locks", multiple: true, required: false
             }
             section {
                 input "checkingSeconds", "number", title: "CHECKING - Time that zone will check for activity before returning to vacant (seconds)", required: true, defaultValue: 60
@@ -114,18 +119,27 @@ def initialize() {
     
         def allPresenceSensors = getAllDevices("presenceSensors")
         def allMotionSensors = getAllDevices("motionSensors")
+        def allAccelerationSensors = getAllDevices("accelerationSensors")
+        
         def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
         def allEngagedDoors_Closed = getAllDevices("engagedDoors_Closed")
         def allEngagedSwitches_On = getAllDevices("engagedSwitches_On")
         def allEngagedSwitches_Off = getAllDevices("engagedSwitches_Off")
-        def allInteriorDoors = getAllDevices("entryDoors") + getAllDevices("interiorDoors")
-        def allButtons = getAllDevices("buttons")
+        def allEngagedLocks_Unlocked = getAllDevices("engagedLocks_Unlocked")
+        def allEngagedLocks_Locked = getAllDevices("engagedLocks_Locked")
+        
+        def allActiveDoors = getAllDevices("entryDoors") + getAllDevices("activeDoors")
+        def allActiveButtons = getAllDevices("activeButtons")
+        def allActiveSwitches = getAllDevices("activeSwitches")
+        def allActiveLocks = getAllDevices("activeLocks")
         
         entryDoorIds = entryDoors.collect{ it.id }
         engagedDoorIds_Open = allEngagedDoors_Open.collect{ it.id }
         engagedDoorIds_Closed = allEngagedDoors_Closed.collect{ it.id }
         engagedSwitchIds_On = allEngagedSwitches_On.collect{ it.id }
         engagedSwitchIds_Off = allEngagedSwitches_Off.collect{ it.id }
+        engagedLockIds_Unlocked = allEngagedLocks_Unlocked.collect{ it.id }
+        engagedLockIds_Locked = allEngagedLocks_Locked.collect{ it.id }
         
         for (entryDoor in entryDoors) {
             subscribe(entryDoor, "contact", entryDoorHandler)
@@ -137,6 +151,10 @@ def initialize() {
         
         for (motionSensor in allMotionSensors) {
             subscribe(motionSensor, "motion", motionSensorHandler)
+        }
+        
+        for (accelerationSensor in allAccelerationSensors) {
+            subscribe(accelerationSensor, "acceleration", accelerationSensorHandler)
         }
         
         for (engagedDoor in allEngagedDoors_Open) {
@@ -175,17 +193,46 @@ def initialize() {
             }
         }
         
-        for (interiorDoor in allInteriorDoors) {
-            if (!(interiorDoor.id in entryDoorIds) && !(interiorDoor.id in engagedDoorIds_Open) && !(interiorDoor.id in engagedDoorIds_Closed)) {
-                subscribe(interiorDoor, "contact", activeDeviceHandler)
+        for (engagedLock in allEngagedLocks_Unlocked) {
+            subscribe(engagedLock, "lock.unlocked", engagedDeviceHandler)
+            
+            if (engagedLock.id in engagedLockIds_Locked) {
+                subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
+            } else {
+                subscribe(engagedLock, "lock.locked", activeDeviceHandler)
             }
         }
         
-        for (button in allButtons) {
-            subscribe(button, "pushed", activeDeviceHandler)
-            subscribe(button, "doubleTapped", activeDeviceHandler)
-            subscribe(button, "held", activeDeviceHandler)
-            subscribe(button, "released", activeDeviceHandler)
+        for (engagedLock in allEngagedLocks_Locked) {
+            if (!(engagedLock.id in engagedLockIds_Unlocked)) {
+                subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
+                subscribe(engagedLock, "lock.unlocked", activeDeviceHandler)
+            }
+        }
+        
+        for (activeDoor in allActiveDoors) {
+            if (!(activeDoor.id in entryDoorIds) && !(activeDoor.id in engagedDoorIds_Open) && !(activeDoor.id in engagedDoorIds_Closed)) {
+                subscribe(activeDoor, "contact", activeDeviceHandler)
+            }
+        }
+        
+        for (activeButton in allActiveButtons) {
+            subscribe(activeButton, "pushed", activeDeviceHandler)
+            subscribe(activeButton, "doubleTapped", activeDeviceHandler)
+            subscribe(activeButton, "held", activeDeviceHandler)
+            subscribe(activeButton, "released", activeDeviceHandler)
+        }
+        
+        for (activeSwitch in allActiveSwitches) {
+            if (!(activeSwitch.id in engagedSwitchIds_On) && !(activeSwitch.id in engagedSwitchIds_Off)) {
+                subscribe(activeSwitch, "switch", activeDeviceHandler)
+            }
+        }
+        
+        for (activeLock in allActiveLocks) {
+            if (!(activeLock.id in engagedLockIds_Unlocked) && !(activeLock.id in engagedLockIds_Locked)) {
+                subscribe(activeLock, "lock", activeDeviceHandler)
+            }
         }
         
         for (childZone in childZones) {
@@ -314,6 +361,17 @@ ${evt.device} is ${evt.value}"""
 
 def motionSensorHandler(evt) {
     def debugContext = """Zone ${app.label} - Motion Sensor
+${evt.device} is ${evt.value}"""
+    
+    if (evt.value == "active") {
+        engagedEvent(debugContext)
+    } else {
+        inactiveEvent(debugContext)
+    }
+}
+
+def accelerationSensorHandler(evt) {
+    def debugContext = """Zone ${app.label} - Acceleration Sensor
 ${evt.device} is ${evt.value}"""
     
     if (evt.value == "active") {
