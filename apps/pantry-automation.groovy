@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -33,7 +33,6 @@ preferences {
             input "zone", "device.ZoneDevice", title: "Zone", multiple: false, required: true
             input "lights", "capability.switch", title: "Lights", multiple: true, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
-            input "minutes", "number", title: "Turn off after (minutes)", required: true
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true

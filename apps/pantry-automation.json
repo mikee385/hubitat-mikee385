@@ -1,10 +1,10 @@
 {
     "packageName": "Pantry Automation",
     "author": "Michael Pierce",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use zone switch attribute instead of occupancy",
+    "releaseNotes": "Remove unused input",
     "dateReleased": "2021-07-30",
     "apps": [
         {
