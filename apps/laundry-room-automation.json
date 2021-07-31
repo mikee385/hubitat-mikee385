@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "4.0.1",
+    "version": "4.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix issue where previousOccupancy not initialized",
-    "dateReleased": "2021-07-26",
+    "releaseNotes": "Use zone switch attribute instead of occupancy",
+    "dateReleased": "2021-07-30",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

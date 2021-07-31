@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -54,11 +54,8 @@ def updated() {
 }
 
 def initialize() {
-    // Initialize State
-    state.previousOccupancy = zone.currentValue("occupancy")
-    
     // Light Switch
-    subscribe(zone, "occupancy", occupancyHandler_LightSwitch)
+    subscribe(zone, "switch", zoneHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Away Alert
@@ -74,20 +71,18 @@ def logDebug(msg) {
     }
 }
 
-def occupancyHandler_LightSwitch(evt) {
-    logDebug("occupancyHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def zoneHandler_LightSwitch(evt) {
+    logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "vacant") {
-        for (light in lights) {
-            light.off()
-        }
-    } else if (state.previousOccupancy == "vacant") {
+    if (evt.value == "on") {
         for (light in lights) {
             light.on()
         }
+    } else {
+        for (light in lights) {
+            light.off()
+        }
     }
-    
-    state.previousOccupancy = evt.value
 }
 
 def modeHandler_LightSwitch(evt) {

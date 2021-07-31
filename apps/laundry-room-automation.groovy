@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.1" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -70,14 +70,11 @@ def updated() {
 }
 
 def initialize() {
-    // Initialize State
-    state.previousOccupancy = zone.currentValue("occupancy")
-    
     // Occupancy
     subscribe(location, "mode", modeHandler_Occupancy)
 
     // Light Switch
-    subscribe(zone, "occupancy", zoneHandler_LightSwitch)
+    subscribe(zone, "switch.on", zoneOccupiedHandler_LightSwitch)
     subscribe(light, "motion.active", motionHandler_LightSwitch)
     
     // Light Timeout
@@ -138,21 +135,17 @@ def modeHandler_Occupancy(evt) {
     }
 }
 
-def zoneHandler_LightSwitch(evt) {
-    logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def zoneOccupiedHandler_LightSwitch(evt) {
+    logDebug("zoneOccupiedHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "vacant" && state.previousOccupancy == "vacant") {
-        if (light.currentValue("motion") == "inactive") {
-            light.on()
-            subscribe(zone, "occupancy.vacant", vacantHandler_LightSwitch)
-        }
+    if (light.currentValue("motion") == "inactive") {
+        light.on()
+        subscribe(zone, "switch.off", zoneVacantHandler_LightSwitch)
     }
-    
-    state.previousOccupancy = evt.value
 }
 
-def vacantHandler_LightSwitch(evt) {
-    logDebug("vacantHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def zoneVacantHandler_LightSwitch(evt) {
+    logDebug("zoneVacantHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     light.off()
 }
@@ -160,7 +153,7 @@ def vacantHandler_LightSwitch(evt) {
 def motionHandler_LightSwitch(evt) {
     logDebug("motionHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    unsubscribe("vacantHandler_LightSwitch")
+    unsubscribe("zoneVacantHandler_LightSwitch")
 }
 
 def doorHandler_LightTimeout(evt) {

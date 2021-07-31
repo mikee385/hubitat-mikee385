@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "4.3.0",
+    "version": "4.4.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Improve reliability of vacant check",
-    "dateReleased": "2021-07-27",
+    "releaseNotes": "Use zone switch attribute instead of occupancy",
+    "dateReleased": "2021-07-30",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",

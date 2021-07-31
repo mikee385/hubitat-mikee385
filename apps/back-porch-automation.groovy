@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -69,13 +69,13 @@ def initialize() {
     subscribe(location, "mode", modeHandler_Occupancy)
     
     // Light Switch
-    subscribe(zone, "occupancy", zoneHandler_LightSwitch)
+    subscribe(zone, "switch", zoneHandler_LightSwitch)
     
     // Camera Notification
-    subscribe(zone, "occupancy", zoneHandler_CameraNotification)
+    subscribe(zone, "switch", zoneHandler_CameraNotification)
     
     // Sprinkler Zones
-    subscribe(zone, "occupancy", zoneHandler_SprinklerZones)
+    subscribe(zone, "switch", zoneHandler_SprinklerZones)
     
     // Light Alert
     for (light in lights) {
@@ -89,7 +89,7 @@ def initialize() {
     subscribe(person, "sleeping", personHandler_DoorAlert)
     
     // Lock Alert
-    subscribe(zone, "occupancy", zoneHandler_LockAlert)
+    subscribe(zone, "switch", zoneHandler_LockAlert)
     subscribe(person, "presence", personHandler_LockAlert)
     subscribe(person, "sleeping", personHandler_LockAlert)
     
@@ -136,7 +136,7 @@ def modeHandler_Occupancy(evt) {
 def zoneHandler_LightSwitch(evt) {
     logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "vacant") {
+    if (evt.value == "on") {
         if (sunlight.currentValue("switch") == "off") {
             for (light in lights) {
                 light.on()
@@ -152,7 +152,7 @@ def zoneHandler_LightSwitch(evt) {
 def zoneHandler_CameraNotification(evt) {
     logDebug("zoneHandler_CameraNotification: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "vacant") {
+    if (evt.value == "on") {
         cameraNotification.off()
     } else {
         runIn(15, turnOn_CameraNotification)
@@ -166,7 +166,7 @@ def turnOn_CameraNotification() {
 def zoneHandler_SprinklerZones(evt) {
     logDebug("zoneHandler_SprinklerZones: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "vacant") {
+    if (evt.value == "on") {
         for (sprinklerZone in sprinklerZones) {
             if (sprinklerZone.currentValue("switch") == "on") {
                 state.sprinklersPaused = true
@@ -247,7 +247,7 @@ def doorAlert() {
 def zoneHandler_LockAlert(evt) {
     logDebug("zoneHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "vacant") {
+    if (evt.value == "on") {
         if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, lockAlert)
         }
@@ -262,7 +262,7 @@ def personHandler_LockAlert(evt) {
     if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
         unschedule("lockAlert")
         
-        if (zone.currentValue("occupancy") != "vacant") {
+        if (zone.currentValue("switch") == "on") {
             person.deviceNotification("$lock is still unlocked!")
         }
     }
