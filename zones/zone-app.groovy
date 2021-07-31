@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -436,14 +436,26 @@ occupancy = ${zone.currentValue('occupancy')}
     } else {
         zone.checking()
         logDebug("$debugContext => checking (${checkingSeconds}s)")
-        if (motionSeconds) {
-            runIn(motionSeconds, checkForSustainedMotion)
-        }
         scheduleCheckingTimeout()
     }
 }
 
 //-----------------------------------------
+
+def scheduleCheckingTimeout() {
+    def zone = getZoneDevice()
+    if (zone.currentValue("contact") == "closed") {
+        if (motionSeconds) {
+            runIn(motionSeconds, checkForSustainedMotion)
+        }
+    }
+    
+    if (checkingSeconds > 0) {
+        runIn(checkingSeconds, checkingTimeout)
+    } else {
+        checkingTimeout()
+    }
+}
 
 def checkForSustainedMotion() {
     def zone = getZoneDevice()
@@ -456,14 +468,8 @@ occupancy = ${zone.currentValue('occupancy')}
         unschedule("checkingTimeout")
         zone.occupied()
         logDebug("$debugContext => occupied")
-    }
-}
-
-def scheduleCheckingTimeout() {
-    if (checkingSeconds > 0) {
-        runIn(checkingSeconds, checkingTimeout)
     } else {
-        checkingTimeout()
+        logDebug("$debugContext => ignored (no motion)")
     }
 }
 
