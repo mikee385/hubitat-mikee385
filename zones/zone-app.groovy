@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "6.2.0" }
+String getVersionNum() { return "6.3.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -239,9 +239,11 @@ def initialize() {
         }
         
         for (childZone in childZones) {
-            subscribe(childZone, "occupancy.occupied", engagedDeviceHandler)
-            subscribe(childZone, "occupancy.checking", inactiveDeviceHandler)
-            subscribe(childZone, "occupancy.vacant", inactiveDeviceHandler)
+            if (childZone.id != zone.id) {
+                subscribe(childZone, "occupancy.occupied", engagedDeviceHandler)
+                subscribe(childZone, "occupancy.checking", inactiveDeviceHandler)
+                subscribe(childZone, "occupancy.vacant", inactiveDeviceHandler)
+            }
         }
     
     } else if (zoneType != "Manual") {
@@ -292,13 +294,16 @@ def getZoneAppId(zone) {
 def getAllDevices(settingName) {
     if (zoneType == "Automated") {
         if (childZones) {
+            def zone = getZoneDevice()
             def allDevices = settings[settingName].collect()
             for (childZone in childZones) {
-                def childAppId = getZoneAppId(childZone)
-                def childApp = parent.getChildAppById(childAppId)
-                def childDevices = childApp.getAllDevices(settingName)
-                if (childDevices) {
-                    allDevices.addAll(childDevices)
+                if (childZone.id != zone.id) {
+                    def childAppId = getZoneAppId(childZone)
+                    def childApp = parent.getChildAppById(childAppId)
+                    def childDevices = childApp.getAllDevices(settingName)
+                    if (childDevices) {
+                        allDevices.addAll(childDevices)
+                    }
                 }
             }
             return allDevices
@@ -624,9 +629,12 @@ def zoneIsEngaged() {
         }
         
         if (childZones) {
+            def zone = getZoneDevice()
             for (childZone in childZones) {
-                if (childZone.currentValue("occupancy") == "occupied") {
-                    return "$childZone is occupied"
+                if (childZone.id != zone.id) {
+                    if (childZone.currentValue("occupancy") == "occupied") {
+                        return "$childZone is occupied"
+                    }
                 }
             }
         }
