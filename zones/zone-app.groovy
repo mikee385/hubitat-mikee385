@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "6.3.0" }
+String getVersionNum() { return "6.4.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -142,7 +142,15 @@ def initialize() {
         engagedLockIds_Locked = allEngagedLocks_Locked.collect{ it.id }
         
         for (entryDoor in entryDoors) {
-            subscribe(entryDoor, "contact", entryDoorHandler)
+            if (entryDoor.id in engagedDoorIds_Open && entryDoor.id in engagedDoorIds_Closed) {
+                subscribe(entryDoor, "contact", entryDoorHandler_Engaged)
+            } else if (entryDoor.id in engagedDoorIds_Open) {
+                subscribe(entryDoor, "contact", entryDoorHandler_Engaged_Open)
+            } else if (entryDoor.id in engagedDoorIds_Closed) {
+                subscribe(entryDoor, "contact", entryDoorHandler_Engaged_Closed)
+            } else {
+                subscribe(entryDoor, "contact", entryDoorHandler_Active)
+            }
         }
         
         for (presenceSensor in allPresenceSensors) {
@@ -326,7 +334,21 @@ def occupancyHandler(evt) {
     }
 }
 
-def entryDoorHandler(evt) {
+def entryDoorHandler_Engaged(evt) {
+    def zone = getZoneDevice()
+    def debugContext = """Zone ${app.label} - Entry Door
+${evt.device} is ${evt.value}"""
+    
+    if (zoneIsOpen()) {
+        zone.open()
+        engagedEvent(debugContext)
+    } else {
+        zone.close()
+        engagedEvent(debugContext)
+    }
+}
+
+def entryDoorHandler_Engaged_Open(evt) {
     def zone = getZoneDevice()
     def debugContext = """Zone ${app.label} - Entry Door
 ${evt.device} is ${evt.value}"""
@@ -335,26 +357,46 @@ ${evt.device} is ${evt.value}"""
         zone.open()
         
         if (evt.value == "open") {
-            if (engagedDoors_Open.any{ it.id == evt.device.id }) {
-                engagedEvent(debugContext)
-            } else {
-                activeEvent(debugContext)
-            }
+            engagedEvent(debugContext)
         } else {
-            if (engagedDoors_Closed.any{ it.id == evt.device.id }) {
-                engagedEvent(debugContext)
-            } else {
-                activeEvent(debugContext)
-            }
+            activeEvent(debugContext)
         }
     } else {
         zone.close()
+        closedEvent(debugContext)
+    }
+}
+
+def entryDoorHandler_Engaged_Closed(evt) {
+    def zone = getZoneDevice()
+    def debugContext = """Zone ${app.label} - Entry Door
+${evt.device} is ${evt.value}"""
+    
+    if (zoneIsOpen()) {
+        zone.open()
         
-        if (engagedDoors_Closed.any{ it.id == evt.device.id }) {
-            engagedEvent(debugContext)
+        if (evt.value == "open") {
+            activeEvent(debugContext)
         } else {
-            closedEvent(debugContext)
+            engagedEvent(debugContext)
         }
+    } else {
+        zone.close()
+        engagedEvent(debugContext)
+    }
+}
+
+def entryDoorHandler_Active(evt) {
+    def zone = getZoneDevice()
+    def debugContext = """Zone ${app.label} - Entry Door
+${evt.device} is ${evt.value}"""
+    
+    if (zoneIsOpen()) {
+        zone.open()
+        activeEvent(debugContext)
+    } else {
+        zone.close()
+        closedEvent(debugContext)
     }
 }
 
