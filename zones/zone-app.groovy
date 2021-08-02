@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "6.4.0" }
+String getVersionNum() { return "6.5.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -116,6 +116,9 @@ def initialize() {
         } else {
             zone.vacant()
         }
+        
+        def allChildZones = childZones?.collectEntries{ [(it.id): it] } ?: [:]
+        def allEntryDoors = entryDoors?.collectEntries{ [(it.id): it] } ?: [:]
     
         def allPresenceSensors = getAllDevices("presenceSensors")
         def allMotionSensors = getAllDevices("motionSensors")
@@ -133,46 +136,38 @@ def initialize() {
         def allActiveSwitches = getAllDevices("activeSwitches")
         def allActiveLocks = getAllDevices("activeLocks")
         
-        entryDoorIds = entryDoors.collect{ it.id }
-        engagedDoorIds_Open = allEngagedDoors_Open.collect{ it.id }
-        engagedDoorIds_Closed = allEngagedDoors_Closed.collect{ it.id }
-        engagedSwitchIds_On = allEngagedSwitches_On.collect{ it.id }
-        engagedSwitchIds_Off = allEngagedSwitches_Off.collect{ it.id }
-        engagedLockIds_Unlocked = allEngagedLocks_Unlocked.collect{ it.id }
-        engagedLockIds_Locked = allEngagedLocks_Locked.collect{ it.id }
-        
-        for (entryDoor in entryDoors) {
-            if (entryDoor.id in engagedDoorIds_Open && entryDoor.id in engagedDoorIds_Closed) {
+        for (entryDoor in allEntryDoors.values()) {
+            if (allEngagedDoors_Open.containsKey(entryDoor.id) && allEngagedDoors_Closed.containsKey(entryDoor.id)) {
                 subscribe(entryDoor, "contact", entryDoorHandler_Engaged)
-            } else if (entryDoor.id in engagedDoorIds_Open) {
+            } else if (allEngagedDoors_Open.containsKey(entryDoor.id)) {
                 subscribe(entryDoor, "contact", entryDoorHandler_Engaged_Open)
-            } else if (entryDoor.id in engagedDoorIds_Closed) {
+            } else if (allEngagedDoors_Closed.containsKey(entryDoor.id)) {
                 subscribe(entryDoor, "contact", entryDoorHandler_Engaged_Closed)
             } else {
                 subscribe(entryDoor, "contact", entryDoorHandler_Active)
             }
         }
         
-        for (presenceSensor in allPresenceSensors) {
+        for (presenceSensor in allPresenceSensors.values()) {
             subscribe(presenceSensor, "presence.present", engagedDeviceHandler)
             subscribe(presenceSensor, "presence.not present", inactiveDeviceHandler)
         }
         
-        for (motionSensor in allMotionSensors) {
+        for (motionSensor in allMotionSensors.values()) {
             subscribe(motionSensor, "motion.active", engagedDeviceHandler)
             subscribe(motionSensor, "motion.inactive", inactiveDeviceHandler)
         }
         
-        for (accelerationSensor in allAccelerationSensors) {
+        for (accelerationSensor in allAccelerationSensors.values()) {
             subscribe(accelerationSensor, "acceleration.active", engagedDeviceHandler)
             subscribe(accelerationSensor, "acceleration.inactive", inactiveDeviceHandler)
         }
         
-        for (engagedDoor in allEngagedDoors_Open) {
-            if (!(engagedDoor.id in entryDoorIds)) {
+        for (engagedDoor in allEngagedDoors_Open.values()) {
+            if (!allEntryDoors.containsKey(engagedDoor.id)) {
                 subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
             
-                if (engagedDoor.id in engagedDoorIds_Closed) {
+                if (allEngagedDoors_Closed.containsKey(engagedDoor.id)) {
                     subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
                 } else {
                     subscribe(engagedDoor, "contact.closed", activeDeviceHandler)
@@ -180,73 +175,73 @@ def initialize() {
             }
         }
         
-        for (engagedDoor in allEngagedDoors_Closed) {
-            if (!(engagedDoor.id in entryDoorIds) && !(engagedDoor.id in engagedDoorIds_Open)) { 
+        for (engagedDoor in allEngagedDoors_Closed.values()) {
+            if (!allEntryDoors.containsKey(engagedDoor.id) && !allEngagedDoors_Open.containsKey(engagedDoor.id)) { 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
                 subscribe(engagedDoor, "contact.open", activeDeviceHandler)
             }
         }
         
-        for (engagedSwitch in allEngagedSwitches_On) {
+        for (engagedSwitch in allEngagedSwitches_On.values()) {
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
             
-            if (engagedSwitch.id in engagedSwitchIds_Off) {
+            if (allEngagedSwitches_Off.containsKey(engagedSwitch.id)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
             } else {
                 subscribe(engagedSwitch, "switch.off", activeDeviceHandler)
             }
         }
         
-        for (engagedSwitch in allEngagedSwitches_Off) {
-            if (!(engagedSwitch.id in engagedSwitchIds_On)) {
+        for (engagedSwitch in allEngagedSwitches_Off.values()) {
+            if (!allEngagedSwitches_On.containsKey(engagedSwitch.id)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
                 subscribe(engagedSwitch, "switch.on", activeDeviceHandler)
             }
         }
         
-        for (engagedLock in allEngagedLocks_Unlocked) {
+        for (engagedLock in allEngagedLocks_Unlocked.values()) {
             subscribe(engagedLock, "lock.unlocked", engagedDeviceHandler)
             
-            if (engagedLock.id in engagedLockIds_Locked) {
+            if (allEngagedLocks_Locked.containsKey(engagedLock.id)) {
                 subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
             } else {
                 subscribe(engagedLock, "lock.locked", activeDeviceHandler)
             }
         }
         
-        for (engagedLock in allEngagedLocks_Locked) {
-            if (!(engagedLock.id in engagedLockIds_Unlocked)) {
+        for (engagedLock in allEngagedLocks_Locked.values()) {
+            if (!allEngagedLocks_Unlocked.containsKey(engagedLock.id)) {
                 subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
                 subscribe(engagedLock, "lock.unlocked", activeDeviceHandler)
             }
         }
         
-        for (activeDoor in allActiveDoors) {
-            if (!(activeDoor.id in entryDoorIds) && !(activeDoor.id in engagedDoorIds_Open) && !(activeDoor.id in engagedDoorIds_Closed)) {
+        for (activeDoor in allActiveDoors.values()) {
+            if (!allEntryDoors.containsKey(activeDoor.id) && !allEngagedDoors_Open.containsKey(activeDoor.id) && !allEngagedDoors_Closed.containsKey(activeDoor.id)) {
                 subscribe(activeDoor, "contact", activeDeviceHandler)
             }
         }
         
-        for (activeButton in allActiveButtons) {
+        for (activeButton in allActiveButtons.values()) {
             subscribe(activeButton, "pushed", activeDeviceHandler)
             subscribe(activeButton, "doubleTapped", activeDeviceHandler)
             subscribe(activeButton, "held", activeDeviceHandler)
             subscribe(activeButton, "released", activeDeviceHandler)
         }
         
-        for (activeSwitch in allActiveSwitches) {
-            if (!(activeSwitch.id in engagedSwitchIds_On) && !(activeSwitch.id in engagedSwitchIds_Off)) {
+        for (activeSwitch in allActiveSwitches.values()) {
+            if (!allEngagedSwitches_On.containsKey(activeSwitch.id) && !allEngagedSwitches_Off.containsKey(activeSwitch.id)) {
                 subscribe(activeSwitch, "switch", activeDeviceHandler)
             }
         }
         
-        for (activeLock in allActiveLocks) {
-            if (!(activeLock.id in engagedLockIds_Unlocked) && !(activeLock.id in engagedLockIds_Locked)) {
+        for (activeLock in allActiveLocks.values()) {
+            if (!allEngagedLocks_Unlocked.containsKey(activeLock.id) && !allEngagedLocks_Locked.containsKey(activeLock.id)) {
                 subscribe(activeLock, "lock", activeDeviceHandler)
             }
         }
         
-        for (childZone in childZones) {
+        for (childZone in allChildZones.values()) {
             if (childZone.id != zone.id) {
                 subscribe(childZone, "occupancy.occupied", engagedDeviceHandler)
                 subscribe(childZone, "occupancy.checking", inactiveDeviceHandler)
@@ -301,25 +296,23 @@ def getZoneAppId(zone) {
 
 def getAllDevices(settingName) {
     if (zoneType == "Automated") {
+        def allDevices = settings[settingName]?.collectEntries{ [(it.id): it] } ?: [:]
         if (childZones) {
             def zone = getZoneDevice()
-            def allDevices = settings[settingName].collect()
             for (childZone in childZones) {
                 if (childZone.id != zone.id) {
                     def childAppId = getZoneAppId(childZone)
                     def childApp = parent.getChildAppById(childAppId)
                     def childDevices = childApp.getAllDevices(settingName)
                     if (childDevices) {
-                        allDevices.addAll(childDevices)
+                        allDevices.putAll(childDevices)
                     }
                 }
             }
-            return allDevices
-        } else {
-            return settings[settingName] ?: []
         }
+        return allDevices
     } else {
-        return []
+        return [:]
     }
 }
 
@@ -569,7 +562,7 @@ def anyDoorSwitchLockIsEngaged() {
     if (zoneType == "Automated") {
         def allEngagedDoors_Open = getAllDevices("engagedDoors_Open")
         if (allEngagedDoors_Open) {
-            for (engagedDoor in allEngagedDoors_Open) {
+            for (engagedDoor in allEngagedDoors_Open.values()) {
                 if (engagedDoor.currentValue("contact") == "open") {
                     return "$engagedDoor is open"
                 }
@@ -578,7 +571,7 @@ def anyDoorSwitchLockIsEngaged() {
         
         def allEngagedDoors_Closed = getAllDevices("engagedDoors_Closed")
         if (allEngagedDoors_Closed) {
-            for (engagedDoor in allEngagedDoors_Closed) {
+            for (engagedDoor in allEngagedDoors_Closed.values()) {
                 if (engagedDoor.currentValue("contact") == "closed") {
                     return "$engagedDoor is closed"
                 }
@@ -587,7 +580,7 @@ def anyDoorSwitchLockIsEngaged() {
         
         def allEngagedSwitches_On = getAllDevices("engagedSwitches_On")
         if (allEngagedSwitches_On) {
-            for (engagedSwitch in allEngagedSwitches_On) {
+            for (engagedSwitch in allEngagedSwitches_On.values()) {
                 if (engagedSwitch.currentValue("switch") == "on") {
                     return "$engagedSwitch is on"
                 }
@@ -596,7 +589,7 @@ def anyDoorSwitchLockIsEngaged() {
         
         def allEngagedSwitches_Off = getAllDevices("engagedSwitches_Off")
         if (allEngagedSwitches_Off) {
-            for (engagedSwitch in allEngagedSwitches_Off) {
+            for (engagedSwitch in allEngagedSwitches_Off.values()) {
                 if (engagedSwitch.currentValue("switch") == "off") {
                     return "$engagedSwitch is off"
                 }
@@ -605,7 +598,7 @@ def anyDoorSwitchLockIsEngaged() {
         
         def allEngagedLocks_Unlocked = getAllDevices("engagedLocks_Unlocked")
         if (allEngagedLocks_Unlocked) {
-            for (engagedLock in allEngagedLocks_Unlocked) {
+            for (engagedLock in allEngagedLocks_Unlocked.values()) {
                 if (engagedLock.currentValue("lock") == "unlocked") {
                     return "$engagedLock is unlocked"
                 }
@@ -614,7 +607,7 @@ def anyDoorSwitchLockIsEngaged() {
         
         def allEngagedLocks_Locked = getAllDevices("engagedLocks_Locked")
         if (allEngagedLocks_Locked) {
-            for (engagedLock in allEngagedLocks_Locked) {
+            for (engagedLock in allEngagedLocks_Locked.values()) {
                 if (engagedLock.currentValue("lock") == "locked") {
                     return "$engagedLock is locked"
                 }
@@ -629,7 +622,7 @@ def anyMotionSensorIsActive() {
     if (zoneType == "Automated") {
         def allMotionSensors = getAllDevices("motionSensors")
         if (allMotionSensors) {
-            for (motionSensor in allMotionSensors) {
+            for (motionSensor in allMotionSensors.values()) {
                 if (motionSensor.currentValue("motion") == "active") {
                     return "$motionSensor is active"
                 }
@@ -649,7 +642,7 @@ def zoneIsEngaged() {
         
         def allPresenceSensors = getAllDevices("presenceSensors")
         if (allPresenceSensors) {
-            for (presenceSensor in allPresenceSensors) {
+            for (presenceSensor in allPresenceSensors.values()) {
                 if (presenceSensor.currentValue("presence") == "present") {
                     return "$presenceSensor is present"
                 }
@@ -663,7 +656,7 @@ def zoneIsEngaged() {
         
         def allAccelerationSensors = getAllDevices("accelerationSensors")
         if (allAccelerationSensors) {
-            for (accelerationSensor in allAccelerationSensors) {
+            for (accelerationSensor in allAccelerationSensors.values()) {
                 if (accelerationSensor.currentValue("acceleration") == "active") {
                     return "$accelerationSensor is active"
                 }
