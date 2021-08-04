@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -109,8 +109,8 @@ def initializeZone(initializedAppIds) {
     subscribe(zone, "occupancy", occupancyHandler)
     
     def zoneApps = getAllChildZoneApps(zone)
-    log.debug(zoneApps.values().collect{ "${it.id}:${it.label}" })
-        
+    //log.debug(zoneApps.values().collect{ "${it.id}:${it.label}" })
+    
     if (zoneType == "Automated") {
         if (entryDoors) {
             if (zoneIsOpen(zone)) {
