@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "7.2.0" }
+String getVersionNum() { return "7.3.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -159,17 +159,17 @@ def initializeZone(initializedAppIds) {
         }
         
         for (presenceSensor in allPresenceSensors.values()) {
-            subscribe(presenceSensor, "presence.present", engagedDeviceHandler)
+            subscribe(presenceSensor, "presence.present", activeDeviceHandler)
             subscribe(presenceSensor, "presence.not present", inactiveDeviceHandler)
         }
         
         for (motionSensor in allMotionSensors.values()) {
-            subscribe(motionSensor, "motion.active", engagedDeviceHandler)
+            subscribe(motionSensor, "motion.active", activeDeviceHandler)
             subscribe(motionSensor, "motion.inactive", inactiveDeviceHandler)
         }
         
         for (accelerationSensor in allAccelerationSensors.values()) {
-            subscribe(accelerationSensor, "acceleration.active", engagedDeviceHandler)
+            subscribe(accelerationSensor, "acceleration.active", activeDeviceHandler)
             subscribe(accelerationSensor, "acceleration.inactive", inactiveDeviceHandler)
         }
         
@@ -474,13 +474,9 @@ occupancy = ${zone.currentValue('occupancy')}
         zone.occupied()
         logDebug("$debugContext => occupied (engaged)")
     } else if (zoneIsActive(zone, zoneApps)) {
-        zone.occupied()
-        logDebug("$debugContext => occupied (active)")
-    } else {
         if (zone.currentValue("contact") == "open") {
-            zone.checking()
-            logDebug("$debugContext => checking (${checkingSeconds}s)")
-            scheduleCheckingTimeout(zone)
+            zone.occupied()
+            logDebug("$debugContext => occupied (active)")
         } else {
             if (zone.currentValue("occupancy") == "vacant") {
                 zone.checking()
@@ -488,8 +484,17 @@ occupancy = ${zone.currentValue('occupancy')}
                 scheduleCheckingTimeout(zone)
             } else {
                 zone.occupied()
-                logDebug("$debugContext => occupied (closed)")
+                logDebug("$debugContext => occupied (active)")
             }
+        }
+    } else {
+        if (zone.currentValue("contact") == "open") {
+            zone.checking()
+            logDebug("$debugContext => checking (${checkingSeconds}s)")
+            scheduleCheckingTimeout(zone)
+        } else {
+            zone.occupied()
+            logDebug("$debugContext => occupied (closed)")
         }
     }
 }
