@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Differentiate between active and momentary devices",
+    "releaseNotes": "Fix inconsistent version numbers",
     "dateReleased": "2021-08-06",
     "apps": [
         {
