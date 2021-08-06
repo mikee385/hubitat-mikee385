@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "7.1.0" }
+String getVersionNum() { return "7.2.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -120,6 +120,8 @@ def initializeZone(initializedAppIds) {
             }
         }   
         if (zoneIsEngaged(zone, zoneApps)) {
+            zone.occupied()
+        } else if (zoneIsActive(zone, zoneApps)) {
             zone.occupied()
         } else {
             zone.vacant()
@@ -265,6 +267,7 @@ def initializeZone(initializedAppIds) {
     
     logDebug("""Zone ${app.label} - Initial
 engaged = ${zoneIsEngaged(zone, zoneApps)}
+active = ${zoneIsActive(zone, zoneApps)}
 contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """)
@@ -445,6 +448,7 @@ def engagedEvent(zone, debugContext) {
     debugContext = """$debugContext
 Engaged Event
 engaged = ${zoneIsEngaged(zone, zoneApps)}
+active = ${zoneIsActive(zone, zoneApps)}
 contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
@@ -461,6 +465,7 @@ def activeEvent(zone, debugContext) {
     debugContext = """$debugContext
 Active Event
 engaged = ${zoneIsEngaged(zone, zoneApps)}
+active = ${zoneIsActive(zone, zoneApps)}
 contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
@@ -468,6 +473,9 @@ occupancy = ${zone.currentValue('occupancy')}
     if (zoneIsEngaged(zone, zoneApps)) {
         zone.occupied()
         logDebug("$debugContext => occupied (engaged)")
+    } else if (zoneIsActive(zone, zoneApps)) {
+        zone.occupied()
+        logDebug("$debugContext => occupied (active)")
     } else {
         if (zone.currentValue("contact") == "open") {
             zone.checking()
@@ -491,12 +499,15 @@ def inactiveEvent(zone, debugContext) {
     debugContext = """$debugContext
 Inactive Event
 engaged = ${zoneIsEngaged(zone, zoneApps)}
+active = ${zoneIsActive(zone, zoneApps)}
 contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
     if (zoneIsEngaged(zone, zoneApps)) {
         logDebug("$debugContext => ignored (engaged)")
+    } else if (zoneIsActive(zone, zoneApps)) {
+        logDebug("$debugContext => ignored (active)")
     } else {
         if (zone.currentValue("contact") == "open") {
             if (zone.currentValue("occupancy") == "occupied") {
@@ -520,11 +531,12 @@ def closedEvent(zone, debugContext) {
     debugContext = """$debugContext
 Closed Event
 engaged = ${zoneIsEngaged(zone, zoneApps)}
+active = ${zoneIsActive(zone, zoneApps)}
 contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
 
-    if (anyDoorSwitchLockIsEngaged(zone, zoneApps)) {
+    if (zoneIsEngaged(zone, zoneApps)) {
         logDebug("$debugContext => ignored (engaged)")
     } else {
         zone.checking()
@@ -554,10 +566,11 @@ def checkForSustainedMotion() {
     def zoneApps = getAllChildZoneApps(zone)
     def debugContext = """Zone ${app.label} - Motion Check (${motionSeconds}s)
 engaged = ${zoneIsEngaged(zone, zoneApps)}
+active = ${zoneIsActive(zone, zoneApps)}
 contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
-    if (anyMotionSensorIsActive(zone, zoneApps)) {
+    if (motionIsActive(zone, zoneApps)) {
         unschedule("checkingTimeout")
         zone.occupied()
         logDebug("$debugContext => occupied")
@@ -571,6 +584,7 @@ def checkingTimeout() {
     def zoneApps = getAllChildZoneApps(zone)
     def debugContext = """Zone ${app.label} - Checking Timeout (${checkingSeconds}s)
 engaged = ${zoneIsEngaged(zone, zoneApps)}
+active = ${zoneIsActive(zone, zoneApps)}
 contact = ${zone.currentValue('contact')}
 occupancy = ${zone.currentValue('occupancy')}
 """
@@ -578,6 +592,9 @@ occupancy = ${zone.currentValue('occupancy')}
     if (zoneIsEngaged(zone, zoneApps)) {
         zone.occupied()
         logDebug("$debugContext => occupied (engaged)")
+    } else if (zoneIsActive(zone, zoneApps)) {
+        zone.occupied()
+        logDebug("$debugContext => occupied (active)")
     } else {
         zone.vacant()
         logDebug("$debugContext => vacant")
@@ -586,7 +603,7 @@ occupancy = ${zone.currentValue('occupancy')}
 
 //-----------------------------------------
 
-def anyDoorSwitchLockIsEngaged(zone, zoneApps) {
+def zoneIsEngaged(zone, zoneApps) {
     if (zoneType == "Automated") {
         def allEngagedDoors_Open = getAllDevices(zone, zoneApps, "engagedDoors_Open")
         if (allEngagedDoors_Open) {
@@ -646,28 +663,8 @@ def anyDoorSwitchLockIsEngaged(zone, zoneApps) {
     return false
 }
 
-def anyMotionSensorIsActive(zone, zoneApps) {
+def zoneIsActive(zone, zoneApps) {
     if (zoneType == "Automated") {
-        def allMotionSensors = getAllDevices(zone, zoneApps, "motionSensors")
-        if (allMotionSensors) {
-            for (motionSensor in allMotionSensors.values()) {
-                if (motionSensor.currentValue("motion") == "active") {
-                    return "$motionSensor is active"
-                }
-            }
-        }
-    }
-    
-    return false
-}
-
-def zoneIsEngaged(zone, zoneApps) {
-    if (zoneType == "Automated") {
-        def engagedDoorSwitchLock = anyDoorSwitchLockIsEngaged(zone, zoneApps)
-        if (engagedDoorSwitchLock) {
-            return engagedDoorSwitchLock
-        }
-        
         def allPresenceSensors = getAllDevices(zone, zoneApps, "presenceSensors")
         if (allPresenceSensors) {
             for (presenceSensor in allPresenceSensors.values()) {
@@ -677,7 +674,7 @@ def zoneIsEngaged(zone, zoneApps) {
             }
         }
         
-        def activeMotionSensor = anyMotionSensorIsActive(zone, zoneApps)
+        def activeMotionSensor = motionIsActive(zone, zoneApps)
         if (activeMotionSensor) {
             return activeMotionSensor
         }
@@ -697,6 +694,21 @@ def zoneIsEngaged(zone, zoneApps) {
                     if (childZone.currentValue("occupancy") == "occupied") {
                         return "$childZone is occupied"
                     }
+                }
+            }
+        }
+    }
+        
+    return false
+}
+
+def motionIsActive(zone, zoneApps) {
+    if (zoneType == "Automated") {
+        def allMotionSensors = getAllDevices(zone, zoneApps, "motionSensors")
+        if (allMotionSensors) {
+            for (motionSensor in allMotionSensors.values()) {
+                if (motionSensor.currentValue("motion") == "active") {
+                    return "$motionSensor is active"
                 }
             }
         }
