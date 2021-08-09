@@ -1,0 +1,18 @@
+{
+    "packageName": "MQTT Presence",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2021-08-09",
+    "drivers": [
+        {
+            "id": "f5531550-f700-4e6a-a8f4-f92772c264b1",
+            "name": "MQTT Presence",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/mqtt-presence.groovy",
+            "required": true
+        }
+    ]
+}

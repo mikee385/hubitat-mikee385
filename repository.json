@@ -206,6 +206,13 @@
             "tags": [ "Lights & Switches", "Misc. Devices", "Voice Assistants" ]
         },
         {
+            "name": "MQTT Presence",
+            "category": "Convenience",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/mqtt-presence.json",
+            "description": "Driver to connect to an MQTT topic representing a presence sensor.",
+            "tags": [ "Misc. Devices", "Presence & Location"]
+        },
+        {
             "name": "Occupancy Status",
             "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.json",
