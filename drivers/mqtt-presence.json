@@ -1,11 +1,11 @@
 {
     "packageName": "MQTT Presence",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial commit",
-    "dateReleased": "2021-08-09",
+    "releaseNotes": "Fix misspelled variable name",
+    "dateReleased": "2021-08-10",
     "drivers": [
         {
             "id": "f5531550-f700-4e6a-a8f4-f92772c264b1",

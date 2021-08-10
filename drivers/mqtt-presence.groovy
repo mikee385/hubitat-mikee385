@@ -15,7 +15,7 @@
  */
  
 String getName() { return "MQTT Presence" }
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
  metadata {
@@ -87,10 +87,10 @@ def parse(String description) {
 	response = interfaces.mqtt.parseMessage(description)
 	logDebug("Recieved: $response")
 	
-	state.topic = reponse.topic
-	state.payload = reponse.payload
+	state.topic = response.topic
+	state.payload = response.payload
 	
-	if (reponse.topic == subscribedTopic) {
+	if (response.topic == subscribedTopic) {
 		logDebug("Subscribed topic: ${response.topic}")
 		
 		if (response.payload == presentPayload) {
