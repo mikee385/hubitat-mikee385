@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "8.0.0" }
+String getVersionNum() { return "8.0.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -702,6 +702,11 @@ def zoneIsEngaged(zone, zoneApps) {
 
 def zoneIsActive(zone, zoneApps) {
     if (zoneType == "Automated") {
+        def activeMotionSensor = motionIsActive(zone, zoneApps)
+        if (activeMotionSensor) {
+            return activeMotionSensor
+        }
+        
         def allPresenceSensors = getAllDevices(zone, zoneApps, "presenceSensors")
         if (allPresenceSensors) {
             for (presenceSensor in allPresenceSensors.values()) {
@@ -709,11 +714,6 @@ def zoneIsActive(zone, zoneApps) {
                     return "$presenceSensor is present"
                 }
             }
-        }
-        
-        def activeMotionSensor = motionIsActive(zone, zoneApps)
-        if (activeMotionSensor) {
-            return activeMotionSensor
         }
         
         def allAccelerationSensors = getAllDevices(zone, zoneApps, "accelerationSensors")
