@@ -1,0 +1,18 @@
+{
+    "packageName": "MQTT Switch",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2021-08-15",
+    "drivers": [
+        {
+            "id": "089b6fef-3978-4154-914a-499fd345f5ca",
+            "name": "MQTT Switch",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/mqtt-switch.groovy",
+            "required": true
+        }
+    ]
+}

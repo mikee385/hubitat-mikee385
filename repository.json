@@ -213,6 +213,13 @@
             "tags": [ "Misc. Devices", "Presence & Location"]
         },
         {
+            "name": "MQTT Switch",
+            "category": "Convenience",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/mqtt-switch.json",
+            "description": "Driver to connect to MQTT topics representing a switch.",
+            "tags": [ "Misc. Devices"]
+        },
+        {
             "name": "Occupancy Status",
             "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/occupancy-status.json",
