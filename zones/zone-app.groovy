@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.1.0" }
+String getVersionNum() { return "9.2.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -307,7 +307,9 @@ def openEngagedHandler(evt) {
     def debugContext = """Zone ${app.label} - Entry Door
 ${evt.device} is ${evt.value}"""
 
-    zone.open()
+    if (zone.currentValue("contact") == "closed") {
+        zone.open()
+    }
     engagedEvent(zone, debugContext)
 }
 
@@ -316,8 +318,12 @@ def openDisengagedHandler(evt) {
     def debugContext = """Zone ${app.label} - Entry Door
 ${evt.device} is ${evt.value}"""
 
-    zone.open()
-    openEvent(zone, debugContext)
+    if (zone.currentValue("contact") == "closed") {
+        zone.open()
+        openDisengagedEvent(zone, debugContext)
+    } else {
+        disengagedEvent(zone, debugContext)
+    }
 }
 
 def openMomentaryHandler(evt) {
@@ -327,7 +333,11 @@ ${evt.device} is ${evt.value}"""
 
     if (zone.currentValue("contact") == "closed") {
         zone.open()
-        openEvent(zone, debugContext)
+        if (zone.currentValue("occupancy") == "engaged") {
+            openDisengagedEvent(zone, debugContext)
+        } else {
+            openMomentaryEvent(zone, debugContext)
+        }
     } else {
         momentaryEvent(zone, debugContext)
     }
@@ -351,7 +361,7 @@ ${evt.device} is ${evt.value}"""
 
     if (!zoneIsOpen(zone)) {
         zone.close()
-        closedEvent(zone, debugContext)
+        closedDisengagedEvent(zone, debugContext)
     } else {
         disengagedEvent(zone, debugContext)
     }
@@ -364,7 +374,7 @@ ${evt.device} is ${evt.value}"""
 
     if (!zoneIsOpen(zone)) {
         zone.close()
-        closedEvent(zone, debugContext)
+        closedMomentaryEvent(zone, debugContext)
     } else {
         momentaryEvent(zone, debugContext)
     }
@@ -427,14 +437,8 @@ ${evt.device} is ${evt.value}"""
         inactiveEvent(zone, debugContext)
     } else if (evt.data == "momentary") {
         momentaryEvent(zone, debugContext)
-    } else if (evt.data == "open" || evt.data == "closed") {
-        if (zone.currentValue("occupancy") == "engaged") {
-            disengagedEvent(zone, debugContext)
-        } else {
-            momentaryEvent(zone, debugContext)
-        }
     } else if (evt.value != "vacant") {
-        logDebug("Unknown event type: ${evt.data} (${evt.value})")
+        log.warn "Unknown event type: ${evt.data} (${evt.value})"
     }
 }
 
@@ -555,12 +559,14 @@ occupancy = ${zone.currentValue('occupancy')}
     }
 }
 
-def openEvent(zone, debugContext) {
+//-----------------------------------------
+
+def openDisengagedEvent(zone, debugContext) {
     unschedule("checkForSustainedMotion")
     unschedule("checkingTimeout")
     
     debugContext = """$debugContext
-Open Event
+Open, Disengaged Event
 engaged = ${zoneIsEngaged(zone)}
 active = ${zoneIsActive(zone)}
 contact = ${zone.currentValue('contact')}
@@ -568,24 +574,46 @@ occupancy = ${zone.currentValue('occupancy')}
 """
 
     if (zoneIsEngaged(zone)) {
-        setToEngaged(zone, "open")
-        logDebug("$debugContext => engaged")
+        logDebug("$debugContext => ignored (engaged)")
     } else if (zoneIsActive(zone)) {
-        setToActive(zone, "open")
+        setToActive(zone, "disengaged")
         logDebug("$debugContext => active")
     } else {
-        setToChecking(zone, "open")
+        setToChecking(zone, "disengaged")
         logDebug("$debugContext => checking (${checkingSeconds}s)")
         scheduleCheckingTimeout(zone)
     }
 }
 
-def closedEvent(zone, debugContext) {
+def openMomentaryEvent(zone, debugContext) {
     unschedule("checkForSustainedMotion")
     unschedule("checkingTimeout")
     
     debugContext = """$debugContext
-Closed Event
+Open, Momentary Event
+engaged = ${zoneIsEngaged(zone)}
+active = ${zoneIsActive(zone)}
+contact = ${zone.currentValue('contact')}
+occupancy = ${zone.currentValue('occupancy')}
+"""
+
+    if (zone.currentValue("occupancy") == "engaged") {
+        logDebug("$debugContext => ignored (engaged)")
+    } else if (zone.currentValue("occupancy") == "active") {
+        logDebug("$debugContext => ignored (active)")
+    } else {
+        setToChecking(zone, "momentary")
+        logDebug("$debugContext => checking (${checkingSeconds}s)")
+        scheduleCheckingTimeout(zone)
+    }
+}
+
+def closedDisengagedEvent(zone, debugContext) {
+    unschedule("checkForSustainedMotion")
+    unschedule("checkingTimeout")
+    
+    debugContext = """$debugContext
+Closed, Disengaged Event
 engaged = ${zoneIsEngaged(zone)}
 active = ${zoneIsActive(zone)}
 contact = ${zone.currentValue('contact')}
@@ -593,10 +621,30 @@ occupancy = ${zone.currentValue('occupancy')}
 """
 
     if (zoneIsEngaged(zone)) {
-        setToEngaged(zone, "closed")
-        logDebug("$debugContext => engaged")
+        logDebug("$debugContext => ignored (engaged)")
     } else {
-        setToChecking(zone, "closed")
+        setToChecking(zone, "disengaged")
+        logDebug("$debugContext => checking (${checkingSeconds}s)")
+        scheduleCheckingTimeout(zone)
+    }
+}
+
+def closedMomentaryEvent(zone, debugContext) {
+    unschedule("checkForSustainedMotion")
+    unschedule("checkingTimeout")
+    
+    debugContext = """$debugContext
+Closed, Momentary Event
+engaged = ${zoneIsEngaged(zone)}
+active = ${zoneIsActive(zone)}
+contact = ${zone.currentValue('contact')}
+occupancy = ${zone.currentValue('occupancy')}
+"""
+
+    if (zone.currentValue("occupancy") == "engaged") {
+        logDebug("$debugContext => ignored (engaged)")
+    } else {
+        setToChecking(zone, "momentary")
         logDebug("$debugContext => checking (${checkingSeconds}s)")
         scheduleCheckingTimeout(zone)
     }

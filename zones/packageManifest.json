@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Improve event types for manual occupancy changes",
+    "releaseNotes": "Separate event types for open/closed events",
     "dateReleased": "2021-08-17",
     "apps": [
         {
@@ -19,7 +19,7 @@
         {
             "id": "9b2505e8-9ad2-4c66-89b8-a810174c56c4",
             "name": "Zone App",
-            "version": "9.1.0",
+            "version": "9.2.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-app.groovy",
             "required": true,
