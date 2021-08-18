@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "9.1.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -61,22 +61,38 @@ def initialize() {
 }
 
 def engaged() {
-    sendEvent(name: "occupancy", value: "engaged", data: "manual")
+    sendEvent(name: "occupancy", value: "engaged", data: "engaged")
     sendEvent(name: "switch", value: "on")
 }
 
 def active() {
-    sendEvent(name: "occupancy", value: "active", data: "manual")
+    if (device.currentValue("occupancy") == "engaged") {
+        sendEvent(name: "occupancy", value: "active", data: "disengaged")
+    } else {
+        sendEvent(name: "occupancy", value: "active", data: "active")
+    }
     sendEvent(name: "switch", value: "on")
 }
 
 def checking() {
-    sendEvent(name: "occupancy", value: "checking", data: "manual")
+    if (device.currentValue("occupancy") == "engaged") {
+        sendEvent(name: "occupancy", value: "checking", data: "disengaged")
+    } else if (device.currentValue("occupancy") == "active") {
+        sendEvent(name: "occupancy", value: "checking", data: "inactive")
+    } else {
+        sendEvent(name: "occupancy", value: "checking", data: "manual")
+    }
     sendEvent(name: "switch", value: "on")
 }
 
 def vacant() {
-    sendEvent(name: "occupancy", value: "vacant", data: "manual")
+    if (device.currentValue("occupancy") == "engaged") {
+        sendEvent(name: "occupancy", value: "vacant", data: "disengaged")
+    } else if (device.currentValue("occupancy") == "active") {
+        sendEvent(name: "occupancy", value: "vacant", data: "inactive")
+    } else {
+        sendEvent(name: "occupancy", value: "vacant", data: "manual")
+    }
     sendEvent(name: "switch", value: "off")
 }
 
