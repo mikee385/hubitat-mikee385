@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.4.0" }
+String getVersionNum() { return "4.5.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -157,7 +157,7 @@ def deviceHandler_LightAlert(evt) {
     logDebug("deviceHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("lightAlert")
-    if (garageLight.currentValue("switch") == "on") {
+    if (garageLight.currentValue("switch") == "on" || (motionSensor.currentValue("illuminance") > 0 && overheadDoor.currentValue("contact") == "closed")) {
         if (person.currentValue("sleeping") == "not sleeping") {
             runIn(60*10, lightAlert)
         }
@@ -170,7 +170,7 @@ def personHandler_LightAlert(evt) {
     if (evt.value == "sleeping") {
         unschedule("lightAlert")
         
-        if (garageLight.currentValue("switch") == "on") {
+        if (garageLight.currentValue("switch") == "on" || (motionSensor.currentValue("illuminance") > 0 && overheadDoor.currentValue("contact") == "closed")) {
             person.deviceNotification("$garageLight is still on!")
         }
     }
