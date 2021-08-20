@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.3.0" }
+String getVersionNum() { return "9.4.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -124,6 +124,7 @@ def initialize() {
         
         def allChildZones = getDevices(zone, "childZones")
         def allEntryDoors = getDevices(zone, "entryDoors")
+        state.entryDoorIds = allEntryDoors.collect{ it.id }
     
         def allPresenceSensors = getDevices(zone, "presenceSensors")
         def allMotionSensors = getDevices(zone, "motionSensors")
@@ -494,6 +495,17 @@ No source data"""
 
     if (evt.value == "engaged") {
         engagedEvent(zone, data, debugContext)
+    } else if (data.sourceId in state.entryDoorIds && data.sourceValue == "closed" && zone.currentValue("contact") == "closed") {
+        log.warn "Duplicate closed event!"
+        if (data.eventType == "disengaged") {
+            closedDisengagedEvent(zone, data, debugContext)
+        } else if (evt.value == "active") {
+            activeEvent(zone, data, debugContext)
+        } else if (data.eventType == "inactive") {
+            inactiveEvent(zone, data, debugContext)
+        } else if (data.eventType == "momentary") {
+            closedMomentaryEvent(zone, data, debugContext)
+        }
     } else if (data.eventType == "disengaged") {
         disengagedEvent(zone, data, debugContext)
     } else if (evt.value == "active") {
