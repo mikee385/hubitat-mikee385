@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.4.0" }
+String getVersionNum() { return "9.4.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -124,7 +124,7 @@ def initialize() {
         
         def allChildZones = getDevices(zone, "childZones")
         def allEntryDoors = getDevices(zone, "entryDoors")
-        state.entryDoorIds = allEntryDoors.collect{ it.id }
+        state.entryDoorIds = allEntryDoors.keySet().collect()
     
         def allPresenceSensors = getDevices(zone, "presenceSensors")
         def allMotionSensors = getDevices(zone, "motionSensors")
