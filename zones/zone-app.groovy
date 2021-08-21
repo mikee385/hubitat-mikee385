@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.6.0" }
+String getVersionNum() { return "9.6.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -502,7 +502,7 @@ No source data"""
     
     logDebug("""Entry Door Debugging
 sourceId = ${data.sourceId} (${data.sourceId != null})
-entryDoors = ${entryDoors} (${entryDoors.any{ it.id == data.sourceId }})
+entryDoors = ${entryDoors} (${entryDoors.any{ (it.id as int) == data.sourceId }})
 sourceValue = ${data.sourceValue} (${data.sourceValue == "closed"})
 contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "closed"})""")
 
@@ -510,7 +510,7 @@ contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "cl
         engagedEvent(zone, data, debugContext)
     } else if (
         data.sourceId != null 
-        && entryDoors.any{ it.id == data.sourceId } 
+        && entryDoors.any{ (it.id as int) == data.sourceId } 
         && data.sourceValue == "closed" 
         && zone.currentValue("contact") == "closed"
     ) {
