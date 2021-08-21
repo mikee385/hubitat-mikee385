@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.5.1" }
+String getVersionNum() { return "9.6.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -124,8 +124,7 @@ def initialize() {
         
         def allChildZones = getDevices(zone, "childZones")
         def allEntryDoors = getDevices(zone, "entryDoors")
-        state.entryDoorIds = allEntryDoors.keySet().collect()
-    
+        
         def allPresenceSensors = getDevices(zone, "presenceSensors")
         def allMotionSensors = getDevices(zone, "motionSensors")
         def allAccelerationSensors = getDevices(zone, "accelerationSensors")
@@ -500,10 +499,21 @@ ${data.sourceName} is ${data.sourceValue}"""
         debugContext = """$debugContext
 No source data"""
     }
+    
+    logDebug("""Entry Door Debugging
+sourceId = ${data.sourceId} (${data.sourceId != null})
+entryDoors = ${entryDoors} (${entryDoors.any{ it.id == data.sourceId }})
+sourceValue = ${data.sourceValue} (${data.sourceValue == "closed"})
+contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "closed"})""")
 
     if (evt.value == "engaged") {
         engagedEvent(zone, data, debugContext)
-    } else if (data.sourceId in state.entryDoorIds && data.sourceValue == "closed" && zone.currentValue("contact") == "closed") {
+    } else if (
+        data.sourceId != null 
+        && entryDoors.any{ it.id == data.sourceId } 
+        && data.sourceValue == "closed" 
+        && zone.currentValue("contact") == "closed"
+    ) {
         log.warn "Duplicate closed event!"
         if (data.eventType == "disengaged") {
             closedDisengagedEvent(zone, data, debugContext)
