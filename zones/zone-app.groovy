@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.5.0" }
+String getVersionNum() { return "9.5.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -298,7 +298,7 @@ def occupancyHandler(evt) {
     unschedule("checkForSustainedMotion")
     unschedule("checkingTimeout")
     
-    def data = parseJson(evt.data)
+    def data = new LinkedHashMap(parseJson(evt.data))
     if (data.eventType == "manual") {
         logDebug("""Zone ${app.label}
 Manual Event
@@ -492,7 +492,7 @@ def childZoneHandler(evt) {
     def debugContext = """Zone ${app.label} - Child Zone
 ${evt.device} is ${evt.value}"""
 
-    def data = parseJson(evt.data)
+    def data = new LinkedHashMap(parseJson(evt.data))
     if (data.sourceId != null) {
         debugContext = """$debugContext
 ${data.sourceName} is ${data.sourceValue}"""
