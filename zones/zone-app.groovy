@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.4.1" }
+String getVersionNum() { return "9.5.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -297,6 +297,14 @@ def getDevices(zone, settingName) {
 def occupancyHandler(evt) {
     unschedule("checkForSustainedMotion")
     unschedule("checkingTimeout")
+    
+    def data = parseJson(evt.data)
+    if (data.eventType == "manual") {
+        logDebug("""Zone ${app.label}
+Manual Event
+ => ${evt.value}
+""")
+    }
     
     def zone = getZoneDevice()
     if (evt.value == "checking") {
