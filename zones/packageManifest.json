@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-vivint/master/LICENSE",
-    "releaseNotes": "Fix issue with collecting entry door IDs",
+    "releaseNotes": "Update manual events to include the new metadata",
     "dateReleased": "2021-08-20",
     "apps": [
         {
@@ -39,7 +39,7 @@
         {
             "id": "f5840aec-58c3-4571-9799-bd641774095c",
             "name": "Zone Device",
-            "version": "9.1.0",
+            "version": "9.2.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/zones/zone-device.groovy",
             "required": true

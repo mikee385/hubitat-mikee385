@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "9.1.0" }
+String getVersionNum() { return "9.2.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -61,38 +61,49 @@ def initialize() {
 }
 
 def engaged() {
-    sendEvent(name: "occupancy", value: "engaged", data: "engaged")
+    def data = [eventType: "engaged"]
+    
+    sendEvent(name: "occupancy", value: "engaged", data: data)
     sendEvent(name: "switch", value: "on")
 }
 
 def active() {
+    def data = [:]
     if (device.currentValue("occupancy") == "engaged") {
-        sendEvent(name: "occupancy", value: "active", data: "disengaged")
+        data["eventType"] = "disengaged"
     } else {
-        sendEvent(name: "occupancy", value: "active", data: "active")
+        data["eventType"] = "active"
     }
+    
+    sendEvent(name: "occupancy", value: "active", data: data)
     sendEvent(name: "switch", value: "on")
 }
 
 def checking() {
+    def data = [:]
     if (device.currentValue("occupancy") == "engaged") {
-        sendEvent(name: "occupancy", value: "checking", data: "disengaged")
+        data["eventType"] = "disengaged"
     } else if (device.currentValue("occupancy") == "active") {
-        sendEvent(name: "occupancy", value: "checking", data: "inactive")
+        data["eventType"] = "inactive"
     } else {
-        sendEvent(name: "occupancy", value: "checking", data: "manual")
+        data["eventType"] = "manual"
     }
+
+    sendEvent(name: "occupancy", value: "checking", data: data)
     sendEvent(name: "switch", value: "on")
 }
 
 def vacant() {
+    def data = [:]
     if (device.currentValue("occupancy") == "engaged") {
-        sendEvent(name: "occupancy", value: "vacant", data: "disengaged")
+        data["eventType"] = "disengaged"
     } else if (device.currentValue("occupancy") == "active") {
-        sendEvent(name: "occupancy", value: "vacant", data: "inactive")
+        data["eventType"] = "inactive"
     } else {
-        sendEvent(name: "occupancy", value: "vacant", data: "manual")
+        data["eventType"] = "manual"
     }
+    
+    sendEvent(name: "occupancy", value: "vacant", data: data)
     sendEvent(name: "switch", value: "off")
 }
 
