@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.6.1" }
+String getVersionNum() { return "9.7.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -500,11 +500,13 @@ ${data.sourceName} is ${data.sourceValue}"""
 No source data"""
     }
     
-    logDebug("""Entry Door Debugging
-sourceId = ${data.sourceId} (${data.sourceId != null})
+    if (data.sourceId != null && entryDoors) {
+        logDebug("""Zone ${app.label} - Entry Debugging
+sourceName = ${data.sourceName} (${data.sourceId != null})
 entryDoors = ${entryDoors} (${entryDoors.any{ (it.id as int) == data.sourceId }})
 sourceValue = ${data.sourceValue} (${data.sourceValue == "closed"})
 contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "closed"})""")
+    }
 
     if (evt.value == "engaged") {
         engagedEvent(zone, data, debugContext)
@@ -517,12 +519,10 @@ contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "cl
         log.warn "Duplicate closed event!"
         if (data.eventType == "disengaged") {
             closedDisengagedEvent(zone, data, debugContext)
-        } else if (evt.value == "active") {
-            activeEvent(zone, data, debugContext)
-        } else if (data.eventType == "inactive") {
-            inactiveEvent(zone, data, debugContext)
         } else if (data.eventType == "momentary") {
             closedMomentaryEvent(zone, data, debugContext)
+        } else {
+            log.warn "Unknown event type: ${data.eventType} (${evt.value})"
         }
     } else if (data.eventType == "disengaged") {
         disengagedEvent(zone, data, debugContext)
