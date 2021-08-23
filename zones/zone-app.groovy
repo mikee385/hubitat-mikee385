@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.7.0" }
+String getVersionNum() { return "9.8.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -966,7 +966,7 @@ def setToActive(zone, data, eventType) {
 
 def setToChecking(zone, data, eventType) {
     data["eventType"] = eventType
-    zone.sendEvent(name: "occupancy", value: "checking", data: data)
+    zone.sendEvent(name: "occupancy", value: "checking", data: data, isStateChange: true)
     zone.sendEvent(name: "switch", value: "on")
 }
 

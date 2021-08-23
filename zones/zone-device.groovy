@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "9.2.0" }
+String getVersionNum() { return "9.3.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -89,7 +89,7 @@ def checking() {
         data["eventType"] = "manual"
     }
 
-    sendEvent(name: "occupancy", value: "checking", data: data)
+    sendEvent(name: "occupancy", value: "checking", data: data, isStateChange: true)
     sendEvent(name: "switch", value: "on")
 }
 
