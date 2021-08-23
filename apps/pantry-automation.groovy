@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,6 @@ definition(
 preferences {
     page(name: "settings", title: "Pantry Automation", install: true, uninstall: true) {
         section {
-            input "zone", "device.ZoneDevice", title: "Zone", multiple: false, required: true
             input "lights", "capability.switch", title: "Lights", multiple: true, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
         }
@@ -54,7 +53,6 @@ def updated() {
 
 def initialize() {
     // Light Switch
-    subscribe(zone, "switch", zoneHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Away Alert
@@ -67,20 +65,6 @@ def initialize() {
 def logDebug(msg) {
     if (logEnable) {
         log.debug msg
-    }
-}
-
-def zoneHandler_LightSwitch(evt) {
-    logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "on") {
-        for (light in lights) {
-            light.on()
-        }
-    } else {
-        for (light in lights) {
-            light.off()
-        }
     }
 }
 
