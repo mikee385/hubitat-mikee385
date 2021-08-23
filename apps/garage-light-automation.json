@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "4.5.0",
+    "version": "4.6.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add illuminance to light alert logic",
-    "dateReleased": "2021-08-17",
+    "releaseNotes": "Remove illuminance from light alert logic",
+    "dateReleased": "2021-08-22",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
