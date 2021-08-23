@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "9.3.0" }
+String getVersionNum() { return "9.4.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -86,7 +86,7 @@ def checking() {
     } else if (device.currentValue("occupancy") == "active") {
         data["eventType"] = "inactive"
     } else {
-        data["eventType"] = "manual"
+        data["eventType"] = "momentary"
     }
 
     sendEvent(name: "occupancy", value: "checking", data: data, isStateChange: true)
@@ -100,7 +100,7 @@ def vacant() {
     } else if (device.currentValue("occupancy") == "active") {
         data["eventType"] = "inactive"
     } else {
-        data["eventType"] = "manual"
+        data["eventType"] = "vacant"
     }
     
     sendEvent(name: "occupancy", value: "vacant", data: data)

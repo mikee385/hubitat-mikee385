@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.8.0" }
+String getVersionNum() { return "9.9.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -113,13 +113,12 @@ def initialize() {
                 zone.close()
             }
         }
-        def data = [:]
         if (zoneIsEngaged(zone)) {
-            setToEngaged(zone, data, "initial")
+            zone.engaged()
         } else if (zoneIsActive(zone)) {
-            setToActive(zone, data, "initial")
+            zone.active()
         } else {
-            setToVacant(zone, data, "initial")
+            zone.vacant()
         }
         
         def allChildZones = getDevices(zone, "childZones")
@@ -773,7 +772,7 @@ occupancy = ${zone.currentValue('occupancy')}
     def data = [:]
     if (motionIsActive(zone)) {
         unschedule("checkingTimeout")
-        setToEngaged(zone, data, "motionCheck")
+        setToEngaged(zone, data, "active")
         logDebug("$debugContext => engaged (motion)")
     } else {
         logDebug("$debugContext => ignored (no motion)")
@@ -791,18 +790,18 @@ occupancy = ${zone.currentValue('occupancy')}
 
     def data = [:]
     if (zoneIsEngaged(zone)) {
-        setToEngaged(zone, data, "checkingTimeout")
+        setToEngaged(zone, data, "engaged")
         logDebug("$debugContext => engaged")
     } else if (zoneIsActive(zone)) {
         if (zone.currentValue("contact") == "closed") {
-            setToEngaged(zone, data, "checkingTimeout")
+            setToEngaged(zone, data, "active")
             logDebug("$debugContext => engaged (closed)")
         } else {
-            setToActive(zone, data, "checkingTimeout")
+            setToActive(zone, data, "active")
             logDebug("$debugContext => active (open)")
         }
     } else {
-        setToVacant(zone, data, "checkingTimeout")
+        setToVacant(zone, data, "vacant")
         logDebug("$debugContext => vacant")
     }
 }
