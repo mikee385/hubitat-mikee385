@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.9.0" }
+String getVersionNum() { return "9.10.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -595,8 +595,14 @@ occupancy = ${zone.currentValue('occupancy')}
     if (zone.currentValue("occupancy") == "engaged") {
         logDebug("$debugContext => ignored (engaged)")
     } else if (zone.currentValue("contact") == "closed") {
-        setToEngaged(zone, data, "active")
-        logDebug("$debugContext => engaged (closed)")
+        if (zone.currentValue("occupancy") == "vacant") {
+            setToChecking(zone, data, "unreliable")
+            logDebug("$debugContext => checking (${checkingSeconds}s)")
+            scheduleCheckingTimeout(zone)
+        } else {
+            setToEngaged(zone, data, "active")
+            logDebug("$debugContext => engaged (closed)")
+        }
     } else {
         setToActive(zone, data, "active")
         logDebug("$debugContext => active (open)")
