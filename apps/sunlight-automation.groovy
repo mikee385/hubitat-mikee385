@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,9 +31,11 @@ preferences {
     page(name: "settings", title: "Sunlight Automation", install: true, uninstall: true) {
         section {
             input "sunlightSwitch", "capability.switch", title: "Sunlight Switch", multiple: false, required: true
-            input "lightSensor", "capability.illuminanceMeasurement", title: "Light Sensor", multiple: false, required: true
-            input "lightLevelForOn", "decimal", title: "Light Level for On", required: true
-            input "lightLevelForOff", "decimal", title: "Light Level for Off", required: true
+        }
+        section {
+            input "lightSensor", "capability.illuminanceMeasurement", title: "Light Sensor", multiple: false, required: false
+            input "lightLevelForOn", "decimal", title: "Light Level for On", required: true, defaultValue: 8
+            input "lightLevelForOff", "decimal", title: "Light Level for Off", required: true, defaultValue: 7
         }
         section("Alerts") {
             input "alertSunrise", "bool", title: "Alert on Sunrise?", required: true, defaultValue: false
@@ -63,7 +65,9 @@ def initialize() {
     subscribe(location, "sunrise", sunriseHandler)
     subscribe(location, "sunset", sunsetHandler)
     
-    subscribe(lightSensor, "illuminance", lightHandler)
+    if (lightSensor) {
+        subscribe(lightSensor, "illuminance", lightHandler)
+    }
 }
 
 def logDebug(msg) {
@@ -75,22 +79,36 @@ def logDebug(msg) {
 def sunriseHandler(evt) {
     logDebug("Received sunrise event")
     
-    if (alertSunrise) {
-        def lightValue = lightSensor.currentValue("illuminance")
-        person.deviceNotification("Sunrise! ($lightValue)")
+    if (lightSensor) {
+        if (alertSunrise) {
+            def lightValue = lightSensor.currentValue("illuminance")
+            person.deviceNotification("Sunrise! ($lightValue)")
+        }
+    } else {
+        sunlightSwitch.on()
+        
+        if (alertSunrise) {
+            person.deviceNotification("Sunrise!")
+        }
     }
 }
 
 def sunsetHandler(evt) {
     logDebug("Received sunset event")
     
-    if (sunlightSwitch.currentValue("switch") == "on") {
-        sunlightSwitch.off()
+    sunlightSwitch.off()
+    
+    if (lightSensor) {
+        if (alertSunset) {
+            def lightValue = lightSensor.currentValue("illuminance")
+            person.deviceNotification("Sunset! ($lightValue)")
+        }
+    } else {
+        if (alertSunset) {
+            person.deviceNotification("Sunset!")
+        }
     }
-    if (alertSunset) {
-        def lightValue = lightSensor.currentValue("illuminance")
-        person.deviceNotification("Sunset! ($lightValue)")
-    }
+    
 }
 
 def lightHandler(evt) {

@@ -1,11 +1,11 @@
 {
     "packageName": "Sunlight Automation",
     "author": "Michael Pierce",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Consolidate person and notification device",
-    "dateReleased": "2021-02-09",
+    "releaseNotes": "Change light sensor to optional",
+    "dateReleased": "2021-08-23",
     "apps": [
         {
             "id": "920bad1a-1cad-4ff6-af30-fa7a910e6197",
