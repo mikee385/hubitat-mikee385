@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.11.0" }
+String getVersionNum() { return "9.11.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -297,7 +297,7 @@ def occupancyHandler(evt) {
     unschedule("checkingTimeout")
     
     def data = new LinkedHashMap(parseJson(evt.data))
-    if (data.eventType == "manual") {
+    if (data.sourceName == "manual") {
         logDebug("""Zone ${app.label}
 Manual Event
  => ${evt.value}
@@ -536,9 +536,11 @@ contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "cl
     } else if (data.eventType == "momentary") {
         momentaryEvent(zone, data, debugContext)
     } else if (data.eventType == "questionable") {
-        logDebug("$debugContext => ignored (questionable)")
+        logDebug("""$debugContext
+ => ignored (questionable)""")
     } else if (evt.value == "vacant") {
-        logDebug("$debugContext => ignored (vacant)")
+        logDebug("""$debugContext
+ => ignored (vacant)""")
     } else {
         log.warn "Unknown event type: ${data.eventType} (${evt.value})"
     }

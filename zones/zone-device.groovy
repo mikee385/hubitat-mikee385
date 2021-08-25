@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "9.5.0" }
+String getVersionNum() { return "9.5.1" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -61,14 +61,17 @@ def initialize() {
 }
 
 def engaged() {
-    def data = [eventType: "engaged"]
+    def data = [
+        sourceName: "manual",
+        eventType: "engaged"
+    ]
     
     sendEvent(name: "occupancy", value: "engaged", data: data)
     sendEvent(name: "switch", value: "on")
 }
 
 def active() {
-    def data = [:]
+    def data = [sourceName: "manual"]
     if (device.currentValue("occupancy") == "engaged") {
         data["eventType"] = "disengaged"
     } else {
@@ -80,7 +83,7 @@ def active() {
 }
 
 def checking() {
-    def data = [:]
+    def data = [sourceName: "manual"]
     if (device.currentValue("occupancy") == "engaged") {
         data["eventType"] = "disengaged"
     } else if (device.currentValue("occupancy") == "active") {
@@ -96,7 +99,7 @@ def checking() {
 }
 
 def vacant() {
-    def data = [:]
+    def data = [sourceName: "manual"]
     if (device.currentValue("occupancy") == "engaged") {
         data["eventType"] = "disengaged"
     } else if (device.currentValue("occupancy") == "active") {
