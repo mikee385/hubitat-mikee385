@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.11.1" }
+String getVersionNum() { return "9.11.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -300,7 +300,7 @@ def occupancyHandler(evt) {
     if (data.sourceName == "manual") {
         logDebug("""Zone ${app.label}
 Manual Event
- => ${evt.value}
+ => ${evt.value} (${data.eventType})
 """)
     }
     
