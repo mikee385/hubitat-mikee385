@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.10.0" }
+String getVersionNum() { return "9.11.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -456,7 +456,11 @@ ${evt.device} is ${evt.value}"""
         sourceName: evt.displayName,
         sourceValue: evt.value
     ]
-    activeEvent(zone, data, debugContext)
+    if (zone.currentValue("occupancy") == "vacant" && zone.currentValue("contact") == "closed") {
+        questionableEvent(zone, data, debugContext)
+    } else {
+        activeEvent(zone, data, debugContext)
+    }
 }
 
 def inactiveDeviceHandler(evt) {
@@ -531,7 +535,11 @@ contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "cl
         inactiveEvent(zone, data, debugContext)
     } else if (data.eventType == "momentary") {
         momentaryEvent(zone, data, debugContext)
-    } else if (evt.value != "vacant") {
+    } else if (data.eventType == "questionable") {
+        logDebug("$debugContext => ignored (questionable)")
+    } else if (evt.value == "vacant") {
+        logDebug("$debugContext => ignored (vacant)")
+    } else {
         log.warn "Unknown event type: ${data.eventType} (${evt.value})"
     }
 }
@@ -595,14 +603,8 @@ occupancy = ${zone.currentValue('occupancy')}
     if (zone.currentValue("occupancy") == "engaged") {
         logDebug("$debugContext => ignored (engaged)")
     } else if (zone.currentValue("contact") == "closed") {
-        if (zone.currentValue("occupancy") == "vacant") {
-            setToChecking(zone, data, "unreliable")
-            logDebug("$debugContext => checking (${checkingSeconds}s)")
-            scheduleCheckingTimeout(zone)
-        } else {
-            setToEngaged(zone, data, "active")
-            logDebug("$debugContext => engaged (closed)")
-        }
+        setToEngaged(zone, data, "active")
+        logDebug("$debugContext => engaged (closed)")
     } else {
         setToActive(zone, data, "active")
         logDebug("$debugContext => active (open)")
@@ -654,6 +656,29 @@ occupancy = ${zone.currentValue('occupancy')}
         logDebug("$debugContext => ignored (active)")
     } else {
         setToChecking(zone, data, "momentary")
+        logDebug("$debugContext => checking (${checkingSeconds}s)")
+        scheduleCheckingTimeout(zone)
+    }
+}
+
+def questionableEvent(zone, data, debugContext) {
+    unschedule("checkForSustainedMotion")
+    unschedule("checkingTimeout")
+    
+    debugContext = """$debugContext
+Questionable Event
+engaged = ${zoneIsEngaged(zone)}
+active = ${zoneIsActive(zone)}
+contact = ${zone.currentValue('contact')}
+occupancy = ${zone.currentValue('occupancy')}
+"""
+
+    if (zone.currentValue("occupancy") == "engaged") {
+        logDebug("$debugContext => ignored (engaged)")
+    } else if (zone.currentValue("occupancy") == "active") {
+        logDebug("$debugContext => ignored (active)")
+    } else {
+        setToChecking(zone, data, "questionable")
         logDebug("$debugContext => checking (${checkingSeconds}s)")
         scheduleCheckingTimeout(zone)
     }

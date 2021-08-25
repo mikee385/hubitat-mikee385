@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "9.4.0" }
+String getVersionNum() { return "9.5.0" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -85,8 +85,10 @@ def checking() {
         data["eventType"] = "disengaged"
     } else if (device.currentValue("occupancy") == "active") {
         data["eventType"] = "inactive"
-    } else {
+    } else if (device.currentValue("contact") == "open") {
         data["eventType"] = "momentary"
+    } else {
+        data["eventType"] = "questionable"
     }
 
     sendEvent(name: "occupancy", value: "checking", data: data, isStateChange: true)
