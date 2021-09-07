@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -54,10 +54,14 @@ def updated() {
 def initialize() {
     // Camera Switch
     subscribe(location, "mode", modeHandler_CameraSwitch)
-    subscribe(alarmPanel, "alarm", alarmPanelHandler_CameraSwitch)
+    if (alarmPanel) {
+        subscribe(alarmPanel, "alarm", alarmPanelHandler_CameraSwitch)
+    }
     
     // Alarm Alert
-    subscribe(location, "mode", modeHandler_AlarmAlert)
+    if (alarmPanel) {
+        subscribe(location, "mode", modeHandler_AlarmAlert)
+    }
     
     // Camera Alert
     subscribe(location, "mode", modeHandler_CameraAlert)
@@ -69,13 +73,17 @@ def initialize() {
     for (camera in cameras) {
         subscribe(camera, "switch.off", handler_AwayAlert)
     }
-    subscribe(alarmPanel, "alarm.disarmed", handler_AwayAlert)
+    if (alarmPanel) {
+        subscribe(alarmPanel, "alarm.disarmed", handler_AwayAlert)
+    }
     
     // Sleep Alert
     for (camera in cameras) {
         subscribe(camera, "switch.off", handler_SleepAlert)
     }
-    subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
+    if (alarmPanel) {
+        subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
+    }
 }
 
 def logDebug(msg) {
@@ -88,7 +96,7 @@ def modeHandler_CameraSwitch(evt) {
     logDebug("modeHandler_CameraSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "Home") {
-        if (alarmPanel.currentValue("alarm") == "disarmed") {
+        if (!alarmPanel || alarmPanel.currentValue("alarm") == "disarmed") {
             for (camera in cameras) {
                 camera.off()
             }
@@ -153,7 +161,7 @@ def cameraHandler_CameraAlert(evt) {
 }
 
 def checkCameras() {
-    if (location.mode == "Home" && alarmPanel.currentValue("alarm") == "disarmed") {
+    if (location.mode == "Home" && (!alarmPanel || alarmPanel.currentValue("alarm") == "disarmed")) {
         def anyCameraOn = false
         for (camera in cameras) {
             if (camera.currentValue("switch") == "on") {
