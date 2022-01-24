@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Child Button, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -63,7 +63,7 @@ def push(button) {
     sendEvent(name: "switch", value: "on", isStateChange: true)
     sendEvent(name: "pushed", value: "${button}", isStateChange: true, type: "digital")
     
-    if (state.method) {
+    if (state.command) {
         parent.runCommand(state.command)
     } else {
         log.warn "Command has not been specified"
