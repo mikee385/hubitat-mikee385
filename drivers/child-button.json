@@ -1,0 +1,18 @@
+{
+    "packageName": "Child Button",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "1.0.0",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2022-01-24",
+    "drivers": [
+        {
+            "id": "09684a59-5146-4744-ade6-f8dadc697fa1",
+            "name": "Child Button",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/child-button.groovy",
+            "required": true
+        }
+    ]
+}

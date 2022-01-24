@@ -199,6 +199,13 @@
             "tags": [ "Appliances", "Misc. Devices" ]
         },
         {
+            "name": "Child Button",
+            "category": "Utility",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/child-button.json",
+            "description": "Driver providing a button device that can be used by parent devices to execute any command on the parent.",
+            "tags": [ "Misc. Devices" ]
+        },
+        {
             "name": "Echo Glow Device",
             "category": "Utility",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-device.json",
