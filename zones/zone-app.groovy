@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "9.11.2" }
+String getVersionNum() { return "9.11.3" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 definition(
@@ -519,7 +519,7 @@ contact = ${zone.currentValue("contact")} (${zone.currentValue("contact") == "cl
         && data.sourceValue == "closed" 
         && zone.currentValue("contact") == "closed"
     ) {
-        log.warn "Duplicate closed event!"
+        //log.warn "Duplicate closed event!"
         if (data.eventType == "disengaged") {
             closedDisengagedEvent(zone, data, debugContext)
         } else if (data.eventType == "momentary") {
