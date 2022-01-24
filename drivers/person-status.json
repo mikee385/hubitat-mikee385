@@ -1,11 +1,11 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "4.1.2",
+    "version": "5.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix missing argument for setLocation",
-    "dateReleased": "2021-06-13",
+    "releaseNotes": "Add child buttons for each command",
+    "dateReleased": "2022-01-24",
     "drivers": [
         {
             "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",

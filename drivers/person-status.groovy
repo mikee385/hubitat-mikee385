@@ -1,7 +1,7 @@
 /**
  *  Person Status Device Handler
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.2" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -46,12 +46,23 @@ def installed() {
     initialize()
 }
 
+def uninstalled() {
+    for (device in getChildDevices()) {
+        deleteChildDevice(device.deviceNetworkId)
+    }
+}
+
 def updated() {
     unschedule()
     initialize()
 }
 
 def initialize() {
+    def awakeButton = childDevice("Awake")
+    def asleepButton = childDevice("Asleep")
+    def arrivedButton = childDevice("Arrived")
+    def departedButton = childDevice("Departed")
+    
     if (!device.currentValue("presence")) {
         arrived()
     }
@@ -61,6 +72,17 @@ def initialize() {
     if (!device.currentValue("location")) {
         setLocation("")
     }
+}
+
+def childDevice(name) {
+    def childID = "person:${device.getId()}:$name"
+    def child = getChildDevice(childID)
+    if (!child) {
+        def childName = "${device.label ?: device.name}"
+        child = addChildDevice("mikee385", "Child Button", childID, [label: "$childName $name", isComponent: true])
+        child.setCommand(name)
+    }
+    return child
 }
 
 def awake() {
@@ -77,6 +99,20 @@ def arrived() {
 
 def departed() {
     sendEvent(name: "presence", value: "not present")
+}
+
+def runCommand(name) {
+    if (name == "Awake") {
+        awake()
+    } else if (name == "Asleep") {
+        asleep()
+    } else if (name == "Arrived") {
+        arrived()
+    } else if (name == "Departed") {
+        departed()
+    } else {
+        log.error "Unknown command name: $name"
+    }
 }
 
 def setLocation(locationName) {
