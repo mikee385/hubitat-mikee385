@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.9.1" }
+String getVersionNum() { return "2.10.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -185,29 +185,40 @@ def sendLevelAlert() {
         return
     }
     state.alert_time = current_time
+    
+    def df = new java.text.DecimalFormat("#.##")
+    def rate = df.format(state.rate.doubleValue())
 
     person.deviceNotification(
 """${state.event_text}!
-Rate: ${state.rate} in./hr"""
+Rate: ${rate} in./hr"""
     )
 }
 
 def sendStoppedAlert() {
     if (state.event_level > 1) {
+        def df = new java.text.DecimalFormat("#.##")
+        def event_total = df.format(state.event_total.doubleValue())
+        def today_total = df.format(state.today_total.doubleValue())
+
         person.deviceNotification(
 """${state.event_text} has stopped!
-Event: ${state.event_total} in.
-Today: ${state.today_total} in."""
+Event: ${event_total} in.
+Today: ${today_total} in."""
         )
     }
 }
 
 def sendAwakeAlert() {
     if (state.sleep_level > 0) {
+        def df = new java.text.DecimalFormat("#.##")
+        def sleep_total = df.format(state.sleep_total.doubleValue())
+        def rate = df.format(state.rate.doubleValue())
+
         person.deviceNotification(
 """${state.sleep_text} during Sleep!
-Total: ${state.sleep_total} in.
-Now: ${state.rate} in./hr"""
+Total: ${sleep_total} in.
+Now: ${rate} in./hr"""
         )
     }
 }
