@@ -1,7 +1,7 @@
 /**
  *  Echo Glow Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -48,7 +48,7 @@ preferences {
             input "harmonyRemote", "capability.pushableButton", title: "Harmony Remote", required: false
         }
         section("Media Devices") {
-            input "rokuRemote", "device.RokuTV", title: "Roku", required: false
+            input "rokuRemotes", "device.RokuTV", title: "Roku", multiple: true, required: false
             input "bedtimeNowPause", "bool", title: "Pause when Bedtime Now?", required: true, defaultValue: false
         }
         section("Alerts") {
@@ -205,8 +205,10 @@ def routineHandler_BedtimeNow(evt) {
             person.deviceNotification("Bedtime Now!")
         }
         
-        if (bedtimeNowPause && rokuRemote) {
-            rokuRemote.queryMediaPlayer()
+        if (bedtimeNowPause && rokuRemotes) {
+            for (rokuRemote in rokuRemotes) {
+                rokuRemote.queryMediaPlayer()
+            }
             runIn(2, pauseRoku)
         }
         
@@ -221,9 +223,11 @@ def downstairsGlowOff() {
 }
 
 def pauseRoku() {
-    if (rokuRemote.currentValue("transportStatus") == "playing") {
-        rokuRemote.pause()
-        rokuRemote.queryMediaPlayer()
+    for (rokuRemote in rokuRemotes) {
+        if (rokuRemote.currentValue("transportStatus") == "playing") {
+            rokuRemote.pause()
+            rokuRemote.queryMediaPlayer()
+        }
     }
 }
 
