@@ -1,7 +1,7 @@
 /**
  *  Roomba Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.4.1" }
+String getVersionNum() { return "6.5.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -40,8 +40,8 @@ preferences {
             input "workFromHomePerson", "capability.presenceSensor", title: "Person", multiple: false, required: true
             input "workStartTime", "time", title: "Start Time", multiple: false, required: true
             input "workEndTime", "time", title: "End Time", multiple: false, required: true
-            input "workAwaySwitch", "device.GCalSwitch", title: "Away Switch", multiple: false, required: true
-            input "workBusySwitch", "device.GCalSwitch", title: "Busy Switch", multiple: false, required: true
+            input "workAwaySwitch", "capability.switch", title: "Away Switch", multiple: false, required: true
+            input "workBusySwitch", "capability.switch", title: "Busy Switch", multiple: false, required: true
         }
         section {
             input "additionalPeople", "capability.presenceSensor", title: "Additional People", multiple: true, required: false
