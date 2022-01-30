@@ -1,7 +1,7 @@
 /**
  *  Laundry Room Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -71,6 +71,11 @@ def updated() {
 
 def initialize() {
     // Occupancy
+    subscribe(door, "contact.open", doorHandler_Occupancy)
+    if (gate) {
+        subscribe(gate, "contact.open", doorHandler_Occupancy)
+    }
+    subscribe(light, "motion", motionHandler_Occupancy)
     subscribe(location, "mode", modeHandler_Occupancy)
 
     // Light Switch
@@ -126,34 +131,42 @@ def logDebug(msg) {
     }
 }
 
+def doorHandler_Occupancy(evt) {
+    logDebug("doorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+
+    if (light.currentValue("motion") == "active") {
+        zone.occupied()
+    } else {
+        zone.checking()
+    }
+}
+
+def motionHandler_Occupancy(evt) {
+    logDebug("motionHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value == "active") {
+        zone.occupied()
+    } else {
+        zone.vacant()
+    }
+}
+
 def modeHandler_Occupancy(evt) {
     logDebug("modeHandler_Occupancy: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "Home") {
         zone.vacant()
-        light.off()
     }
 }
 
-def zoneOccupiedHandler_LightSwitch(evt) {
+def zoneHandler_LightSwitch(evt) {
     logDebug("zoneOccupiedHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (light.currentValue("motion") == "inactive") {
+    if (evt.value == "vacant") {
+        light.off()
+    } else {
         light.on()
-        subscribe(zone, "switch.off", zoneVacantHandler_LightSwitch)
     }
-}
-
-def zoneVacantHandler_LightSwitch(evt) {
-    logDebug("zoneVacantHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    light.off()
-}
-
-def motionHandler_LightSwitch(evt) {
-    logDebug("motionHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    unsubscribe("zoneVacantHandler_LightSwitch")
 }
 
 def doorHandler_LightTimeout(evt) {
@@ -242,7 +255,7 @@ def doorHandler_BedtimeRoutine(evt) {
     
     if (location.mode != "Away" && timeOfDayIsBetween(timeToday(startTime), timeToday(endTime), new Date(), location.timeZone)) {
         routine.on()
-        light.off()
+        zone.vacant()
     }
 }
 
