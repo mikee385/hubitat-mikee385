@@ -1,7 +1,7 @@
 /**
  *  Occupancy Status Device Handler
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -44,14 +44,47 @@ def installed() {
     initialize()
 }
 
+def uninstalled() {
+    for (device in getChildDevices()) {
+        deleteChildDevice(device.deviceNetworkId)
+    }
+}
+
 def updated() {
     unschedule()
     initialize()
 }
 
 def initialize() {
+    def occupiedButton = childDevice("Occupied")
+    def checkingButton = childDevice("Checking")
+    def vacantButton = childDevice("Vacant")
+
     if (!device.currentValue("occupancy")) {
         vacant()
+    }
+}
+
+def childDevice(name) {
+    def childID = "appliance:${device.getId()}:$name"
+    def child = getChildDevice(childID)
+    if (!child) {
+        def childName = "${device.label ?: device.name}"
+        child = addChildDevice("mikee385", "Child Button", childID, [label: "$childName $name", isComponent: true])
+        child.setCommand(name)
+    }
+    return child
+}
+
+def runCommand(name) {
+    if (name == "Occupied") {
+        occupied()
+    } else if (name == "Checking") {
+        checking()
+    } else if (name == "Vacant") {
+        vacant()
+    } else {
+        log.error "Unknown command name: $name"
     }
 }
 
