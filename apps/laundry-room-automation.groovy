@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.0.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -30,7 +30,7 @@ definition(
 preferences {
     page(name: "settings", title: "Laundry Room Automation", install: true, uninstall: true) {
         section {
-            input "zone", "device.ZoneDevice", title: "Zone", multiple: false, required: true
+            input "zone", "device.OccupancyStatus", title: "Zone", multiple: false, required: true
             input "light", "device.GEZ-WavePlusMotionSwitch", title: "Light", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "gate", "capability.contactSensor", title: "Gate", multiple: false, required: false
@@ -71,16 +71,16 @@ def updated() {
 
 def initialize() {
     // Occupancy
-    subscribe(door, "contact.open", doorHandler_Occupancy)
+    subscribe(door, "contact", doorHandler_Occupancy)
     if (gate) {
-        subscribe(gate, "contact.open", doorHandler_Occupancy)
+        subscribe(gate, "contact", doorHandler_Occupancy)
     }
+    subscribe(light, "switch", switchHandler_LightAlert)
     subscribe(light, "motion", motionHandler_Occupancy)
     subscribe(location, "mode", modeHandler_Occupancy)
 
     // Light Switch
-    subscribe(zone, "switch.on", zoneOccupiedHandler_LightSwitch)
-    subscribe(light, "motion.active", motionHandler_LightSwitch)
+    subscribe(zone, "occupancy", zoneHandler_LightSwitch)
     
     // Light Timeout
     subscribe(door, "contact", doorHandler_LightTimeout)
@@ -134,10 +134,26 @@ def logDebug(msg) {
 def doorHandler_Occupancy(evt) {
     logDebug("doorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
 
-    if (light.currentValue("motion") == "active") {
-        zone.occupied()
+    if (evt.value == "open") {
+        if (light.currentValue("motion") == "active") {
+            zone.occupied()
+        } else {
+            zone.checking()
+        }
+    }
+}
+
+def switchHandler_Occupancy(evt) {
+    logDebug("switchHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value == "on") {
+        if (light.currentValue("motion") == "active") {
+            zone.occupied()
+        } else {
+            zone.checking()
+        }
     } else {
-        zone.checking()
+        zone.vacant()
     }
 }
 
@@ -146,8 +162,6 @@ def motionHandler_Occupancy(evt) {
 
     if (evt.value == "active") {
         zone.occupied()
-    } else {
-        zone.vacant()
     }
 }
 
@@ -160,7 +174,7 @@ def modeHandler_Occupancy(evt) {
 }
 
 def zoneHandler_LightSwitch(evt) {
-    logDebug("zoneOccupiedHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+    logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "vacant") {
         light.off()
