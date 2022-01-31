@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.1" }
+String getVersionNum() { return "5.0.2" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -75,7 +75,7 @@ def initialize() {
     if (gate) {
         subscribe(gate, "contact", doorHandler_Occupancy)
     }
-    subscribe(light, "switch", switchHandler_LightAlert)
+    subscribe(light, "switch", switchHandler_Occupancy)
     subscribe(light, "motion", motionHandler_Occupancy)
     subscribe(location, "mode", modeHandler_Occupancy)
 
@@ -146,13 +146,7 @@ def doorHandler_Occupancy(evt) {
 def switchHandler_Occupancy(evt) {
     logDebug("switchHandler_Occupancy: ${evt.device} changed to ${evt.value}")
 
-    if (evt.value == "on") {
-        if (light.currentValue("motion") == "active") {
-            zone.occupied()
-        } else {
-            zone.checking()
-        }
-    } else {
+    if (evt.value == "off") {
         zone.vacant()
     }
 }
