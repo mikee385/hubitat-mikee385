@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.0.1" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -187,7 +187,7 @@ def zoneHandler_SprinklerZones(evt) {
 def lightHandler_LightAlert(evt) {
     logDebug("lightHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value != "vacant") {
+    if (evt.value == "on") {
         if (person.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, lightAlert, [data: [device: "${evt.device}"]])
         }

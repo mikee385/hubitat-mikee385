@@ -1,10 +1,10 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "5.0.0",
+    "version": "5.0.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Revert to using Occupancy Status instead of Zone Device",
+    "releaseNotes": "Fix issue where light alert would not be canceled",
     "dateReleased": "2022-01-30",
     "apps": [
         {
