@@ -1,7 +1,7 @@
 /**
  *  People Alerts
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -98,6 +98,8 @@ def initialize() {
     // Guest Reminder
     subscribe(primaryPerson, "presence.not present", personHandler_GuestReminder)
     subscribe(secondaryPerson, "presence.not present", personHandler_GuestReminder)
+    subscribe(location, "sunrise", sunriseHandler_GuestReminder)
+    subscribe(location, "sunset", sunsetHandler_GuestReminder)
 }
 
 def logDebug(msg) {
@@ -257,9 +259,25 @@ def personHandler_GuestPresenceAlert(evt) {
 def personHandler_GuestReminder(evt) {
     logDebug("personHandler_GuestReminder: ${evt.device} changed to ${evt.value}")
     
+    if (primaryPerson.currentValue("presence") == "not present" && secondaryPerson.currentValue("presence") == "not present") {
+        guestReminder()
+    }
+}
+
+def sunriseHandler_GuestReminder(evt) {
+    logDebug("sunriseHandler_GuestReminder: Received sunrise event")
+    
+    guestReminder()
+}
+
+def sunsetHandler_GuestReminder(evt) {
+    logDebug("sunsetHandler_GuestReminder: Received sunset event")
+    
+    guestReminder()
+}
+
+def guestReminder() {
     if (guest.currentValue("presence") == "present") {
-        if (primaryPerson.currentValue("presence") == "not present" && secondaryPerson.currentValue("presence") == "not present") {
-            personToNotify.deviceNotification("Do you still have guests?")
-        }
+        personToNotify.deviceNotification("Do you still have guests?")
     }
 }

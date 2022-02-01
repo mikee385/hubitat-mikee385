@@ -1,11 +1,11 @@
 {
     "packageName": "People Alerts",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove command attribute from PersonStatus",
-    "dateReleased": "2021-06-05",
+    "releaseNotes": "Add guest reminders at sunrise and sunset",
+    "dateReleased": "2022-01-31",
     "apps": [
         {
             "id": "d1053cf4-db2c-44af-b589-035bde02619d",
