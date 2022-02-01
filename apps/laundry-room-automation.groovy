@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.1.0" }
+String getVersionNum() { return "5.1.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -112,10 +112,20 @@ def initialize() {
     subscribe(person, "presence", personHandler_WasherPauseAlert)
     subscribe(person, "sleeping", personHandler_WasherPauseAlert)
     
+    // Washer Error Alert
+    subscribe(washer, "error", washerHandler_WasherErrorAlert)
+    subscribe(person, "presence", personHandler_WasherErrorAlert)
+    subscribe(person, "sleeping", personHandler_WasherErrorAlert)
+    
     // Dryer Pause Alert
     subscribe(dryer, "currentState", dryerHandler_DryerPauseAlert)
     subscribe(person, "presence", personHandler_DryerPauseAlert)
     subscribe(person, "sleeping", personHandler_DryerPauseAlert)
+    
+    // Dryer Error Alert
+    subscribe(dryer, "error", dryerHandler_DryerErrorAlert)
+    subscribe(person, "presence", personHandler_DryerErrorAlert)
+    subscribe(person, "sleeping", personHandler_DryerErrorAlert)
     
     // Away Alert
     subscribe(light, "switch.on", handler_AwayAlert)
