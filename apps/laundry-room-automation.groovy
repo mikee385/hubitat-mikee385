@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.2" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -339,7 +339,7 @@ def personHandler_LaundryAlert(evt) {
 
 def reminderAlert() {
     person.deviceNotification("Move the laundry!")
-    runIn(60*5, reminderAlert)
+    runIn(60*30, reminderAlert)
 }
 
 def washerHandler_WasherPauseAlert(evt) {
@@ -364,14 +364,46 @@ def personHandler_WasherPauseAlert(evt) {
         unschedule("washerPauseAlert")
         
         if (washer.currentValue("currentState") == "pause") {
-            person.deviceNotification("$washerPauseAlert is still paused!")
+            person.deviceNotification("$washer is still paused!")
         }
     }
 }
 
 def washerPauseAlert(evt) {
     person.deviceNotification("Should the $washer still be paused?")
-    runIn(60*5, washerPauseAlert)
+    runIn(60*30, washerPauseAlert)
+}
+
+def washerHandler_WasherErrorAlert(evt) {
+    logDebug("washerHandler_WasherErrorAlert: ${evt.device} changed to ${evt.value}")
+    if (evt.value != "error_noerror") {
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+            washerErrorAlert()
+        }
+    } else {
+        unschedule("washerErrorAlert")
+    }
+}
+
+def personHandler_WasherErrorAlert(evt) {
+    logDebug("personHandler_WasherErrorAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (washer.currentValue("error") != "error_noerror") {
+            washerErrorAlert()
+        }
+    } else {
+        unschedule("washerErrorAlert")
+        
+        if (washer.currentValue("error") != "error_noerror") {
+            person.deviceNotification("$washer still has an error!")
+        }
+    }
+}
+
+def washerErrorAlert(evt) {
+    person.deviceNotification("$washer has an error!")
+    runIn(60*30, washerErrorAlert)
 }
 
 def dryerHandler_DryerPauseAlert(evt) {
@@ -396,14 +428,46 @@ def personHandler_DryerPauseAlert(evt) {
         unschedule("dryerPauseAlert")
         
         if (dryer.currentValue("currentState") == "pause") {
-            person.deviceNotification("$dryerPauseAlert is still paused!")
+            person.deviceNotification("$dryer is still paused!")
         }
     }
 }
 
 def dryerPauseAlert(evt) {
     person.deviceNotification("Should the $dryer still be paused?")
-    runIn(60*5, dryerPauseAlert)
+    runIn(60*30, dryerPauseAlert)
+}
+
+def dryerHandler_DryerErrorAlert(evt) {
+    logDebug("dryerHandler_WasherErrorAlert: ${evt.device} changed to ${evt.value}")
+    if (evt.value != "error_noerror") {
+        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+            dryerErrorAlert()
+        }
+    } else {
+        unschedule("dryerErrorAlert")
+    }
+}
+
+def personHandler_DryerErrorAlert(evt) {
+    logDebug("personHandler_DryerErrorAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (dryer.currentValue("error") != "error_noerror") {
+            dryerErrorAlert()
+        }
+    } else {
+        unschedule("dryerErrorAlert")
+        
+        if (dryer.currentValue("error") != "error_noerror") {
+            person.deviceNotification("$dryer still has an error!")
+        }
+    }
+}
+
+def dryerErrorAlert(evt) {
+    person.deviceNotification("$dryer has an error!")
+    runIn(60*30, dryerErrorAlert)
 }
 
 def handler_AwayAlert(evt) {

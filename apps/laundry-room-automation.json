@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "5.0.2",
+    "version": "5.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix light switch causing conflicting occupancies",
-    "dateReleased": "2022-01-30",
+    "releaseNotes": "Add alerts for washer and dryer errors",
+    "dateReleased": "2022-02-01",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",
