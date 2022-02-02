@@ -139,7 +139,7 @@ def getInactiveThresholds() {
 
 def getUnchangedThresholds() {
     return [
-        [device: sensor, attribute: "humidity", inactiveHours: 1])
+        [device: sensor, attribute: "humidity", inactiveHours: 1]
     ]
 }
 
