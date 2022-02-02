@@ -1,7 +1,7 @@
 /**
  *  Person Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "4.3.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -125,6 +125,12 @@ def initialize() {
         subscribe(person, "message", handler_Notification)
     }
     
+    def currentTime = new Date()
+
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    
     // URLs
     if(!state.accessToken) {
         createAccessToken()
@@ -133,6 +139,33 @@ def initialize() {
     state.departedUrl = "${getFullLocalApiServerUrl()}/departed?access_token=$state.accessToken"
     state.awakeUrl = "${getFullLocalApiServerUrl()}/awake?access_token=$state.accessToken"
     state.asleepUrl = "${getFullLocalApiServerUrl()}/asleep?access_token=$state.accessToken"
+}
+
+def getInactiveThresholds() {
+    def thresholds = []
+    
+    if (sleepSwitch) {
+        thresholds.add([device: sleepSwitch, inactiveHours: 24])
+    }
+    
+    return thresholds
+}
+
+def getUnchangedThresholds() {
+    def thresholds = []
+    
+    for (primarySensor in primarySensors) {
+        thresholds.add([device: primarySensor, attribute: "presence", inactiveHours: 72])
+    }
+    for (secondarySensor in secondarySensors) {
+        thresholds.add([device: secondarySensor, attribute: "presence", inactiveHours: 72])
+    }
+    
+    if (locationDevice) {
+        thresholds.add([device: locationDevice, attribute: "trigger", inactiveHours: 72])
+    }
+
+    return thresholds
 }
 
 def logDebug(msg) {
@@ -217,6 +250,55 @@ def handler_AwayAlert(evt) {
     
     if (location.mode == "Away") {
         personToNotify.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+
+def handler_InactiveAlert() {
+    logDebug("handler_InactiveAlert")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        def dateTimeFormat = "MMM d, yyyy, h:mm a"
+        def deviceIDs = []
+        def message = ""
+        
+        for (item in getInactiveThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.getLastActivity()) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        for (item in getUnchangedThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                def lastEvent = item.device.events(max: 1).find{it.name == item.attribute}
+                if (lastEvent) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (lastEvent.getDate().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        if (message) {
+            person.deviceNotification("Inactive Devices: $message")
+        }
     }
 }
     

@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "4.2.0",
+    "version": "4.3.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Update location attribute from Locative device",
-    "dateReleased": "2021-06-13",
+    "releaseNotes": "Add alerts for inactivity",
+    "dateReleased": "2022-02-02",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",
