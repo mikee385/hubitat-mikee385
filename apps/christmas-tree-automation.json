@@ -1,11 +1,11 @@
 {
     "packageName": "Christmas Tree Automation",
     "author": "Michael Pierce",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Consolidate person and notification device",
-    "dateReleased": "2021-02-09",
+    "releaseNotes": "Add alerts for inactivity",
+    "dateReleased": "2022-02-02",
     "apps": [
         {
             "id": "1d01b53f-131a-4d47-ac61-7a90bd37288a",
