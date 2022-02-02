@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "5.0.1",
+    "version": "5.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix issue where light alert would not be canceled",
-    "dateReleased": "2022-01-30",
+    "releaseNotes": "Add alerts for low battery and inactivity",
+    "dateReleased": "2022-02-02",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
