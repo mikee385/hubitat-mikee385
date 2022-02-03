@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.3.0" }
+String getVersionNum() { return "4.3.1" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -256,7 +256,7 @@ def handler_AwayAlert(evt) {
 def handler_InactiveAlert() {
     logDebug("handler_InactiveAlert")
     
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+    if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
         def dateTimeFormat = "MMM d, yyyy, h:mm a"
         def deviceIDs = []
         def message = ""
@@ -280,7 +280,7 @@ ${item.device} - No Activity"""
         
         for (item in getUnchangedThresholds()) {
             if (!deviceIDs.contains(item.device.id)) {
-                def lastEvent = item.device.events(max: 1).find{it.name == item.attribute}
+                def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
                 if (lastEvent) {
                     def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                     if (lastEvent.getDate().getTime() <= cutoffTime) {
@@ -297,7 +297,7 @@ ${item.device} - No Activity"""
         }
         
         if (message) {
-            person.deviceNotification("Inactive Devices: $message")
+            personToNotify.deviceNotification("Inactive Devices: $message")
         }
     }
 }
