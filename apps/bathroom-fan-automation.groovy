@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.8.0" }
+String getVersionNum() { return "2.8.1" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -390,7 +390,7 @@ ${item.device} - No Activity"""
         
         for (item in getUnchangedThresholds()) {
             if (!deviceIDs.contains(item.device.id)) {
-                def lastEvent = item.device.events(max: 1).find{it.name == item.attribute}
+                def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
                 if (lastEvent) {
                     def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                     if (lastEvent.getDate().getTime() <= cutoffTime) {
