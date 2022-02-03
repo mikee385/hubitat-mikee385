@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -134,6 +134,12 @@ def initialize() {
     subscribe(bedtimeNowRoutine, "pushed", handler_AwayAlert)
     subscribe(wakeUpRoutine, "pushed", handler_AwayAlert)
     
+    def currentTime = new Date()
+
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    
     // URLs
     if(!state.accessToken) {
         createAccessToken()
@@ -143,6 +149,26 @@ def initialize() {
     state.bedtimeNowUrl = "${getFullLocalApiServerUrl()}/bedtimeNow?access_token=$state.accessToken"
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
+}
+
+def getInactiveThresholds() {
+    def thresholds = []
+    
+    for (rokuRemote in rokuRemotes) {
+        thresholds.add([device: rokuRemote, inactiveHours: 24])
+    }
+    
+    return thresholds
+}
+
+def getUnchangedThresholds() {
+    def thresholds = []
+    
+    for (rokuRemote in rokuRemotes) {
+        thresholds.add([device: rokuRemote, attribute: "application", inactiveHours: 24])
+    }
+
+    return thresholds
 }
 
 def logDebug(msg) {
@@ -326,6 +352,55 @@ def handler_AwayAlert(evt) {
     
     if (location.mode == "Away") {
         person.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+
+def handler_InactiveAlert() {
+    logDebug("handler_InactiveAlert")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        def dateTimeFormat = "MMM d, yyyy, h:mm a"
+        def deviceIDs = []
+        def message = ""
+        
+        for (item in getInactiveThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.getLastActivity()) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        for (item in getUnchangedThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                def lastEvent = item.device.events(max: 1).find{it.name == item.attribute}
+                if (lastEvent) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (lastEvent.getDate().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        if (message) {
+            person.deviceNotification("Inactive Devices: $message")
+        }
     }
 }
 
