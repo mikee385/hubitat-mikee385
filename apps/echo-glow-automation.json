@@ -1,10 +1,10 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "3.2.0",
+    "version": "3.2.1",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add alerts for inactivity",
+    "releaseNotes": "Fix incorrect number of events to check",
     "dateReleased": "2022-02-02",
     "apps": [
         {
