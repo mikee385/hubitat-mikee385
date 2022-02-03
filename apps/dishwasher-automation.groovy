@@ -1,7 +1,7 @@
 /**
  *  Dishwasher Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.4.0" }
+String getVersionNum() { return "4.5.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -102,6 +102,16 @@ def initialize() {
     // Away Alert
     subscribe(contactSensor, "contact", handler_AwayAlert)
     
+    def currentTime = new Date()
+    
+    // Battery Alert
+    def batteryAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    
     // Set initial state
     def deviceRunning = appliance.currentValue("status") == "running"
     def stateRunning = state.endTime < state.startTime
@@ -111,6 +121,18 @@ def initialize() {
     } else if (!deviceRunning && stateRunning) {
         finished()
     }
+}
+
+def getBatteryThresholds() {
+    return [
+        [device: contactSensor, lowBattery: 10]
+    ]
+}
+
+def getInactiveThresholds() {
+    return [
+        [device: contactSensor, inactiveHours: 1]
+    ]
 }
 
 def logDebug(msg) {
@@ -232,5 +254,59 @@ def handler_AwayAlert(evt) {
     
     if (location.mode == "Away") {
         person.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+
+def handler_BatteryAlert() {
+    logDebug("handler_BatteryAlert")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        def deviceIDs = []
+        def message = ""
+        
+        for (item in getBatteryThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.currentValue("battery") <= item.lowBattery) {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - ${item.device.currentValue('battery')}%"""
+                }
+            }
+        }
+        
+        if (message) {
+            person.deviceNotification("Low Battery: $message")
+        }
+    }
+}
+
+def handler_InactiveAlert() {
+    logDebug("handler_InactiveAlert")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        def dateTimeFormat = "MMM d, yyyy, h:mm a"
+        def deviceIDs = []
+        def message = ""
+        
+        for (item in getInactiveThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.getLastActivity()) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        if (message) {
+            person.deviceNotification("Inactive Devices: $message")
+        }
     }
 }
