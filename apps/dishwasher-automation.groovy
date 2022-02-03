@@ -102,8 +102,6 @@ def initialize() {
     // Away Alert
     subscribe(contactSensor, "contact", handler_AwayAlert)
     
-    def currentTime = new Date()
-    
     // Battery Alert
     def batteryAlertTime = timeToday("20:00")
     schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
