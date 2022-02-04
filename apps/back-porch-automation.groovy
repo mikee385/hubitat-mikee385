@@ -14,8 +14,10 @@
  *
  */
  
-String getVersionNum() { return "5.1.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
 
 definition(
     name: "Back Porch Automation",
@@ -25,7 +27,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/back-porch-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/back-porch-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Back Porch Automation", install: true, uninstall: true) {
@@ -45,7 +48,7 @@ preferences {
         }
         section {
             input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -127,12 +130,6 @@ def getInactiveThresholds() {
         thresholds.add([device: light, inactiveHours: 24])
     }
     return thresholds
-}
-
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
 }
 
 def doorHandler_Occupancy(evt) {
