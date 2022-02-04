@@ -1,10 +1,10 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "6.0.0",
+    "version": "6.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Move debug method to external library",
+    "releaseNotes": "Move common alert methods to external library",
     "dateReleased": "2022-02-04",
     "apps": [
         {

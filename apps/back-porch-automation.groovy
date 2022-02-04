@@ -14,10 +14,13 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Back Porch Automation",
@@ -47,7 +50,7 @@ preferences {
             input "sprinklerZones", "device.RachioZone", title: "Sprinkler Zones", multiple: true, required: false
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -84,17 +87,17 @@ def initialize() {
     for (light in lights) {
         subscribe(light, "switch", lightHandler_LightAlert)
     }
-    subscribe(person, "sleeping", personHandler_LightAlert)
+    subscribe(personToNotify, "sleeping", personHandler_LightAlert)
     
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
-    subscribe(person, "presence", personHandler_DoorAlert)
-    subscribe(person, "sleeping", personHandler_DoorAlert)
+    subscribe(personToNotify, "presence", personHandler_DoorAlert)
+    subscribe(personToNotify, "sleeping", personHandler_DoorAlert)
     
     // Lock Alert
     subscribe(zone, "occupancy", zoneHandler_LockAlert)
-    subscribe(person, "presence", personHandler_LockAlert)
-    subscribe(person, "sleeping", personHandler_LockAlert)
+    subscribe(personToNotify, "presence", personHandler_LockAlert)
+    subscribe(personToNotify, "sleeping", personHandler_LockAlert)
     
     // Away Alert
     subscribe(door, "contact", handler_AwayAlert)
@@ -196,7 +199,7 @@ def zoneHandler_SprinklerZones(evt) {
             if (sprinklerZone.currentValue("switch") == "on") {
                 state.sprinklersPaused = true
                 //sprinklerController.pauseZoneRun(1800)
-                person.deviceNotification("Pausing sprinklers!")
+                personToNotify.deviceNotification("Pausing sprinklers!")
                 break
             }
         }
@@ -204,7 +207,7 @@ def zoneHandler_SprinklerZones(evt) {
         if (state.sprinklersPaused) {
             state.sprinklersPaused = false
             //sprinklerController.resumeZoneRun()
-            person.deviceNotification("Resuming sprinklers!")
+            personToNotify.deviceNotification("Resuming sprinklers!")
         }
     }
 }
@@ -213,7 +216,7 @@ def lightHandler_LightAlert(evt) {
     logDebug("lightHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        if (person.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, lightAlert, [data: [device: "${evt.device}"]])
         }
     } else {
@@ -229,14 +232,14 @@ def personHandler_LightAlert(evt) {
         
         for (light in lights) {
             if (light.currentValue("switch") == "on") {
-                person.deviceNotification("$light is still on!")
+                personToNotify.deviceNotification("$light is still on!")
             }
         }
     }
 }
 
 def lightAlert(evt) {
-    person.deviceNotification("Should the ${evt.device} still be on?")
+    personToNotify.deviceNotification("Should the ${evt.device} still be on?")
     runIn(60*30, lightAlert, [data: [device: "${evt.device}"]])
 }
 
@@ -244,7 +247,7 @@ def doorHandler_DoorAlert(evt) {
     logDebug("doorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, doorAlert)
         }
     } else {
@@ -255,17 +258,17 @@ def doorHandler_DoorAlert(evt) {
 def personHandler_DoorAlert(evt) {
     logDebug("personHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
+    if (personToNotify.currentValue("presence") == "not present" || personToNotify.currentValue("sleeping") == "sleeping") {
         unschedule("doorAlert")
         
         if (door.currentValue("contact") == "open") {
-            person.deviceNotification("$door is still open!")
+            personToNotify.deviceNotification("$door is still open!")
         }
     }
 }
 
 def doorAlert() {
-    person.deviceNotification("Should the $door still be open?")
+    personToNotify.deviceNotification("Should the $door still be open?")
     runIn(60*30, doorAlert)
 }
 
@@ -273,7 +276,7 @@ def zoneHandler_LockAlert(evt) {
     logDebug("zoneHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, lockAlert)
         }
     } else {
@@ -284,78 +287,16 @@ def zoneHandler_LockAlert(evt) {
 def personHandler_LockAlert(evt) {
     logDebug("personHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
+    if (personToNotify.currentValue("presence") == "not present" || personToNotify.currentValue("sleeping") == "sleeping") {
         unschedule("lockAlert")
         
         if (zone.currentValue("occupancy") == "on") {
-            person.deviceNotification("$lock is still unlocked!")
+            personToNotify.deviceNotification("$lock is still unlocked!")
         }
     }
 }
 
 def lockAlert() {
-    person.deviceNotification("Should the $lock still be unlocked?")
+    personToNotify.deviceNotification("Should the $lock still be unlocked?")
     runIn(60*30, lockAlert)
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_BatteryAlert() {
-    logDebug("handler_BatteryAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getBatteryThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.currentValue("battery") <= item.lowBattery) {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - ${item.device.currentValue('battery')}%"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Low Battery: $message")
-        }
-    }
-}
-
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Inactive Devices: $message")
-        }
-    }
 }
