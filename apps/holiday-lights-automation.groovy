@@ -1,7 +1,7 @@
 /**
  *  Holiday Lights Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "1.3.0" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -87,6 +87,12 @@ def initialize() {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
     
+    def currentTime = new Date()
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    
     // URLs
     if(!state.accessToken) {
         createAccessToken()
@@ -94,6 +100,14 @@ def initialize() {
     state.onUrl = "${getFullLocalApiServerUrl()}/on?access_token=$state.accessToken"
     state.offUrl = "${getFullLocalApiServerUrl()}/off?access_token=$state.accessToken"
     state.toggleUrl = "${getFullLocalApiServerUrl()}/toggle?access_token=$state.accessToken"
+}
+
+def getInactiveThresholds() {
+    def thresholds = []
+    for (light in lights) {
+        thresholds.add([device: light, inactiveHours: 24])
+    }
+    return thresholds
 }
 
 def logDebug(msg) {
@@ -157,6 +171,37 @@ def handler_AwayAlert(evt) {
     
     if (location.mode == "Away") {
         person.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+
+def handler_InactiveAlert() {
+    logDebug("handler_InactiveAlert")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        def dateTimeFormat = "MMM d, yyyy, h:mm a"
+        def deviceIDs = []
+        def message = ""
+        
+        for (item in getInactiveThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.getLastActivity()) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        if (message) {
+            person.deviceNotification("Inactive Devices: $message")
+        }
     }
 }
 

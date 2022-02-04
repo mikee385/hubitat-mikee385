@@ -1,11 +1,11 @@
 {
     "packageName": "Holiday Lights Automation",
     "author": "Michael Pierce",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Consolidate person and notification device",
-    "dateReleased": "2021-02-09",
+    "releaseNotes": "Add alerts for inactivity",
+    "dateReleased": "2022-02-04",
     "apps": [
         {
             "id": "2c6a175b-4cf6-4336-ba71-eddbedc538a4",
