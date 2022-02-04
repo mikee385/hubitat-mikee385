@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.5.0" }
+String getVersionNum() { return "6.6.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -105,6 +105,14 @@ def initialize() {
     def resetToday = timeToday(roombaResetTime)
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
     
+    // Battery Alert
+    def batteryAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    
     // Initialize state
     def deviceRunning = roomba.currentValue("phase") == "run"
     def stateRunning = state.endTime < state.startTime
@@ -115,6 +123,26 @@ def initialize() {
         state.endTime = now()
         state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     }
+}
+
+def getBatteryThresholds() {
+    return [
+        [device: roomba, lowBattery: 10],
+        [device: pauseButton, lowBattery: 10]
+    ]
+}
+
+def getInactiveThresholds() {
+    return [
+        [device: roomba, inactiveHours: 1],
+        [device: pauseButton, inactiveHours: 24]
+    ]
+}
+
+def getUnchangedThresholds() {
+    return [
+        [device: roomba, attribute: "phase", inactiveHours: 24*7]
+    ]
 }
 
 def logDebug(msg) {
@@ -323,4 +351,76 @@ def dailyReset() {
     logDebug("dailyReset")
     
     state.durationMinutes = 0
+}
+
+def handler_BatteryAlert() {
+    logDebug("handler_BatteryAlert")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        def deviceIDs = []
+        def message = ""
+        
+        for (item in getBatteryThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.currentValue("battery") <= item.lowBattery) {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - ${item.device.currentValue('battery')}%"""
+                }
+            }
+        }
+        
+        if (message) {
+            person.deviceNotification("Low Battery: $message")
+        }
+    }
+}
+
+def handler_InactiveAlert() {
+    logDebug("handler_InactiveAlert")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        def dateTimeFormat = "MMM d, yyyy, h:mm a"
+        def deviceIDs = []
+        def message = ""
+        
+        for (item in getInactiveThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.getLastActivity()) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        for (item in getUnchangedThresholds()) {
+            if (!deviceIDs.contains(item.device.id)) {
+                def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
+                if (lastEvent) {
+                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                    if (lastEvent.getDate().getTime() <= cutoffTime) {
+                        deviceIDs.add(item.device.id)
+                        message += """
+${item.device} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
+                    }
+                } else {
+                    deviceIDs.add(item.device.id)
+                    message += """
+${item.device} - No Activity"""
+                }
+            }
+        }
+        
+        if (message) {
+            person.deviceNotification("Inactive Devices: $message")
+        }
+    }
 }
