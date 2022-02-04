@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Revert to using Occupancy Status instead of Zone Device",
-    "dateReleased": "2022-01-31",
+    "releaseNotes": "Add alerts for low battery and inactivity",
+    "dateReleased": "2022-02-04",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
