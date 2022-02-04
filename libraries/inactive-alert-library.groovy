@@ -1,7 +1,7 @@
 /**
  *  name: Inactive Alert Library
  *  author: Michael Pierce
- *  version: 1.0.0
+ *  version: 1.0.1
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
  *  releaseNotes: Initial commit
@@ -37,37 +37,41 @@ def handler_InactiveAlert() {
         def deviceIDs = []
         def message = ""
         
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
+        if (getInactiveThresholds) {
+            for (item in getInactiveThresholds()) {
+                if (!deviceIDs.contains(item.device.id)) {
+                    if (item.device.getLastActivity()) {
+                        def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                        if (item.device.getLastActivity().getTime() <= cutoffTime) {
+                            deviceIDs.add(item.device.id)
+                            message += """
+${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
+                        }
+                    } else {
                         deviceIDs.add(item.device.id)
                         message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
 ${item.device} - No Activity"""
+                    }
                 }
             }
         }
         
-        for (item in getUnchangedThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
-                if (lastEvent) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (lastEvent.getDate().getTime() <= cutoffTime) {
+        if (getUnchangedThresholds) {
+            for (item in getUnchangedThresholds()) {
+                if (!deviceIDs.contains(item.device.id)) {
+                    def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
+                    if (lastEvent) {
+                        def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+                        if (lastEvent.getDate().getTime() <= cutoffTime) {
+                            deviceIDs.add(item.device.id)
+                            message += """
+${item.device} - ${item.attribute} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
+                        }
+                    } else {
                         deviceIDs.add(item.device.id)
                         message += """
-${item.device} - ${item.attribute} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
 ${item.device} - ${item.attribute} - No Activity"""
+                    }
                 }
             }
         }
