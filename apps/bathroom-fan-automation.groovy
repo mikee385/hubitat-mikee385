@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.8.1" }
+String getVersionNum() { return "2.8.2" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -127,7 +127,7 @@ def initialize() {
 
 def getBatteryThresholds() {
     return [
-        [device: sensor, lowBattery: 10]
+        //[device: sensor, lowBattery: 10] // Disabled since Konke sensors are very unreliable for battery reporting
     ]
 }
 
