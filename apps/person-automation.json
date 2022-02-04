@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "4.3.1",
+    "version": "4.3.2",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix incorrect person to notify and events to check",
-    "dateReleased": "2022-02-02",
+    "releaseNotes": "Change inactive hour format for readability",
+    "dateReleased": "2022-02-03",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

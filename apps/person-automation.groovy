@@ -155,14 +155,14 @@ def getUnchangedThresholds() {
     def thresholds = []
     
     for (primarySensor in primarySensors) {
-        thresholds.add([device: primarySensor, attribute: "presence", inactiveHours: 72])
+        thresholds.add([device: primarySensor, attribute: "presence", inactiveHours: 24*3])
     }
     for (secondarySensor in secondarySensors) {
-        thresholds.add([device: secondarySensor, attribute: "presence", inactiveHours: 72])
+        thresholds.add([device: secondarySensor, attribute: "presence", inactiveHours: 24*3])
     }
     
     if (locationDevice) {
-        thresholds.add([device: locationDevice, attribute: "trigger", inactiveHours: 72])
+        thresholds.add([device: locationDevice, attribute: "trigger", inactiveHours: 24*3])
     }
 
     return thresholds
