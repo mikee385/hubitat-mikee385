@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.5.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -25,7 +25,13 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-automation.groovy"
+)
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Dishwasher Automation", install: true, uninstall: true) {
@@ -53,8 +59,8 @@ preferences {
             input "reminderRoutine", "capability.switch", title: "Turn On When", multiple: false, required: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -93,8 +99,8 @@ def initialize() {
     // Reminder Switch
     subscribe(reminderRoutine, "switch.on", routineHandler_ReminderSwitch)
     subscribe(appliance, "status", applianceHandler_ReminderSwitch)
-    subscribe(person, "presence", personHandler_ReminderSwitch)
-    subscribe(person, "sleeping", personHandler_ReminderSwitch)
+    subscribe(personToNotify, "presence", personHandler_ReminderSwitch)
+    subscribe(personToNotify, "sleeping", personHandler_ReminderSwitch)
     
     // Reminder Alert
     subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
@@ -133,18 +139,12 @@ def getInactiveThresholds() {
     ]
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def started() {
     state.startTime = now()
     runIn(60*runDuration, durationComplete)
         
     if (alertStarted) {
-        person.deviceNotification("Dishwasher has started.")
+        personToNotify.deviceNotification("Dishwasher has started.")
     }
 }
 
@@ -153,13 +153,13 @@ def finished() {
     state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     
     if (alertFinished) {
-        person.deviceNotification("Dishwasher has finished.")
+        personToNotify.deviceNotification("Dishwasher has finished.")
     }
 }
 
 def reset() {
     if (alertReset) {
-        person.deviceNotification("Dishwasher has reset.")
+        personToNotify.deviceNotification("Dishwasher has reset.")
     }
 }
 
@@ -224,10 +224,10 @@ def applianceHandler_ReminderSwitch(evt) {
 def personHandler_ReminderSwitch(evt) {
     logDebug("personHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
 
-    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
+    if (personToNotify.currentValue("presence") == "not present" || personToNotify.currentValue("sleeping") == "sleeping") {
         if (reminderSwitch.currentValue("switch") == "on") {
             reminderSwitch.off()
-            person.deviceNotification("Dishwasher Reminder has been canceled!")
+            personToNotify.deviceNotification("Dishwasher Reminder has been canceled!")
         }
     }
 }
@@ -243,68 +243,6 @@ def reminderHandler_ReminderAlert(evt) {
 }
 
 def reminderAlert() {
-    person.deviceNotification("Start the dishwasher!")
+    personToNotify.deviceNotification("Start the dishwasher!")
     runIn(60*5, reminderAlert)
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_BatteryAlert() {
-    logDebug("handler_BatteryAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getBatteryThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.currentValue("battery") <= item.lowBattery) {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - ${item.device.currentValue('battery')}%"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Low Battery: $message")
-        }
-    }
-}
-
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Inactive Devices: $message")
-        }
-    }
 }

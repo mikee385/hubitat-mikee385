@@ -1,11 +1,11 @@
 {
     "packageName": "Dishwasher Automation",
     "author": "Michael Pierce",
-    "version": "4.5.0",
-    "minimumHEVersion": "1.0.0",
+    "version": "5.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add alerts for low battery and inactivity",
-    "dateReleased": "2022-02-02",
+    "releaseNotes": "Move common methods to external libraries",
+    "dateReleased": "2022-02-05",
     "apps": [
         {
             "id": "97026f47-53ce-4803-b475-2028ca1cbf7c",
