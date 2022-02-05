@@ -17,6 +17,11 @@
 String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
+
 definition(
     name: "Dishwasher Automation",
     namespace: "mikee385",
@@ -27,11 +32,6 @@ definition(
     iconX2Url: "",
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-automation.groovy"
 )
-
-#include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.battery-alert-library
-#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Dishwasher Automation", install: true, uninstall: true) {

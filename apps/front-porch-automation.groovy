@@ -17,6 +17,11 @@
 String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
+
 definition(
     name: "Front Porch Automation",
     namespace: "mikee385",
@@ -27,11 +32,6 @@ definition(
     iconX2Url: "",
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.groovy"
 )
-
-#include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.battery-alert-library
-#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Front Porch Automation", install: true, uninstall: true) {

@@ -17,6 +17,10 @@
 String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.inactive-alert-library
+
 definition(
     name: "Echo Glow Automation",
     namespace: "mikee385",
@@ -27,10 +31,6 @@ definition(
     iconX2Url: "",
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/echo-glow-automation.groovy"
 )
-
-#include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Echo Glow Automation", install: true, uninstall: true) {

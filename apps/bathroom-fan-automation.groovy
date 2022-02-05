@@ -19,6 +19,11 @@ import java.math.RoundingMode
 String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
+
 definition(
     name: "Bathroom Fan Automation",
     namespace: "mikee385",
@@ -29,11 +34,6 @@ definition(
     iconX2Url: "",
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.groovy"
 )
-
-#include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.battery-alert-library
-#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Bathroom Fan Automation", install: true, uninstall: true) {

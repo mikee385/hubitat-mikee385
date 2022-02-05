@@ -17,6 +17,8 @@
 String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Dog Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
+#include mikee385.debug-library
+
 definition(
     name: "Dog Alerts",
     namespace: "mikee385",
@@ -27,8 +29,6 @@ definition(
     iconX2Url: "",
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dog-alerts.groovy"
 )
-
-#include mikee385.debug-library
 
 preferences {
     page(name: "settings", title: "Dog Alerts", install: true, uninstall: true) {
