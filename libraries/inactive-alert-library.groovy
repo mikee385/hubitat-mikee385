@@ -1,7 +1,7 @@
 /**
  *  name: Inactive Alert Library
  *  author: Michael Pierce
- *  version: 1.0.1
+ *  version: 1.0.2
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
  *  releaseNotes: Initial commit
@@ -44,13 +44,11 @@ def handler_InactiveAlert() {
                         def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                         if (item.device.getLastActivity().getTime() <= cutoffTime) {
                             deviceIDs.add(item.device.id)
-                            message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
+                            message += "\n${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"
                         }
                     } else {
                         deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - No Activity"""
+                        message += "\n${item.device} - No Activity"
                     }
                 }
             }
@@ -64,13 +62,11 @@ ${item.device} - No Activity"""
                         def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                         if (lastEvent.getDate().getTime() <= cutoffTime) {
                             deviceIDs.add(item.device.id)
-                            message += """
-${item.device} - ${item.attribute} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
+                            message += "\n${item.device} - ${item.attribute} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"
                         }
                     } else {
                         deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.attribute} - No Activity"""
+                        message += "\n${item.device} - ${item.attribute} - No Activity"
                     }
                 }
             }

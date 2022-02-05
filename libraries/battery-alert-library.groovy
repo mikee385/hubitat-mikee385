@@ -1,7 +1,7 @@
 /**
  *  name: Battery Alert Library
  *  author: Michael Pierce
- *  version: 1.0.1
+ *  version: 1.0.2
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
  *  releaseNotes: Initial commit
@@ -41,8 +41,7 @@ def handler_BatteryAlert() {
                 if (!deviceIDs.contains(item.device.id)) {
                     if (item.device.currentValue("battery") <= item.lowBattery) {
                         deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.currentValue('battery')}%"""
+                        message += "\n${item.device} - ${item.device.currentValue('battery')}%"
                     }
                 }
             }
