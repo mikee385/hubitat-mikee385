@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.2.1" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -25,7 +25,12 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/echo-glow-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/echo-glow-automation.groovy"
+)
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Echo Glow Automation", install: true, uninstall: true) {
@@ -58,9 +63,8 @@ preferences {
             input "glowsOffAlert", "bool", title: "Alert when Glows Off?", required: true, defaultValue: false
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
-            
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -171,12 +175,6 @@ def getUnchangedThresholds() {
     return thresholds
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def routineHandler_BedtimeTimer(evt) {
     logDebug("routineHandler_BedtimeTimer: ${evt.device} changed to ${evt.value}")
 
@@ -203,7 +201,7 @@ def routineHandler_BedtimeSoon(evt) {
     
     if (state.lastRoutine != "BedtimeSoon") {
         if (bedtimeSoonAlert) {
-            person.deviceNotification("Bedtime Soon!")
+            personToNotify.deviceNotification("Bedtime Soon!")
         }
         
         state.lastRoutine = "BedtimeSoon"
@@ -228,7 +226,7 @@ def routineHandler_BedtimeNow(evt) {
     
     if (state.lastRoutine != "BedtimeNow") {
         if (bedtimeNowAlert) {
-            person.deviceNotification("Bedtime Now!")
+            personToNotify.deviceNotification("Bedtime Now!")
         }
         
         if (bedtimeNowPause && rokuRemotes) {
@@ -275,7 +273,7 @@ def routineHandler_WakeUp(evt) {
     
     if (state.lastRoutine != "WakeUp") {
         if (wakeUpAlert) {
-            person.deviceNotification("Wake Up!")
+            personToNotify.deviceNotification("Wake Up!")
         }
         
         state.lastRoutine = "WakeUp"
@@ -302,7 +300,7 @@ def routineHandler_GlowsOff(evt) {
     
     if (state.lastRoutine != "GlowsOff") {
         if (glowsOffAlert) {
-            person.deviceNotification("Glows Off!")
+            personToNotify.deviceNotification("Glows Off!")
         }
     
         state.lastRoutine = "GlowsOff"
@@ -344,63 +342,6 @@ def modeHandler_Routine(evt) {
     
     if (evt.value == "Away") {
         glowsOffRoutine.push()
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        for (item in getUnchangedThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
-                if (lastEvent) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (lastEvent.getDate().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Inactive Devices: $message")
-        }
     }
 }
 
