@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -42,18 +42,18 @@ preferences {
         }
         section("Sensor") {
             input "sensor", "capability.relativeHumidityMeasurement", title: "Bathroom Sensor", multiple: false, required: true
-            input "reportTimeInterval", "number", title: "Reporting Interval (minutes)", required: true
-            input "reportHumidityChange", "decimal", title: "Humidity Change Reported (%)", required: true
+            input "reportTimeInterval", "number", title: "Reporting Interval (minutes)", required: true, defaultValue: 30
+            input "reportHumidityChange", "decimal", title: "Humidity Change Reported (%)", required: true, defaultValue: 5
         }
         section("Turn Fan On") {
-            input "rapidRiseRate", "decimal", title: "Rapid Rising Humidity (% per minute)", required: true
-            input "excessiveIncrease", "decimal", title: "Excessive Increase Between Readings (%)", required: true
-            input "maximumThreshold", "decimal", title: "Above Maximum Humidty (%)", required: true
+            input "rapidRiseRate", "decimal", title: "Rapid Rising Humidity (% per minute)", required: true, defaultValue: 0.5
+            input "excessiveIncrease", "decimal", title: "Excessive Increase Between Readings (%)", required: true, defaultValue: 6
+            input "maximumThreshold", "decimal", title: "Above Maximum Humidty (%)", required: true, defaultValue: 75
         }
         section("Turn Fan Off") {
-            input "rapidFallRate", "decimal", title: "Rapid Falling Humidity (% per minute)", required: true
-            input "percentAboveStart", "decimal", title: "Percent Above Starting Humidity (%)", required: true
-            input "maximumRuntime", "number", title: "Maximum runtime (minutes)", required: true
+            input "rapidFallRate", "decimal", title: "Rapid Falling Humidity (% per minute)", required: true, defaultValue: -0.2
+            input "percentAboveStart", "decimal", title: "Percent Above Starting Humidity (%)", required: true, defaultValue: 25
+            input "maximumRuntime", "number", title: "Maximum runtime (minutes)", required: true, defaultValue: 120
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
