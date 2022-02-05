@@ -14,8 +14,12 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Christmas Tree Automation, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Christmas Tree Automation",
@@ -25,7 +29,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/christmas-tree-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/christmas-tree-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Christmas Tree Automation", install: true, uninstall: true) {
@@ -35,8 +40,8 @@ preferences {
             input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -108,12 +113,6 @@ def getInactiveThresholds() {
     return thresholds
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def onRoutineHandler_LightSwitch(evt) {
     logDebug("onRoutineHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
@@ -136,45 +135,6 @@ def modeHandler_LightSwitch(evt) {
     if (evt.value != "Home") {
         for (light in lights) {
             light.off()
-        }
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Inactive Devices: $message")
         }
     }
 }
