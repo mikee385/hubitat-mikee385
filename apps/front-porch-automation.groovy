@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.4.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -25,7 +25,13 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/front-porch-automation.groovy"
+)
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Front Porch Automation", install: true, uninstall: true) {
@@ -47,8 +53,8 @@ preferences {
             input "buttonNumber", "number", title: "Button Number", required: false
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -79,14 +85,14 @@ def initialize() {
     
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
-    subscribe(person, "presence", personHandler_DoorAlert)
-    subscribe(person, "sleeping", personHandler_DoorAlert)
+    subscribe(personToNotify, "presence", personHandler_DoorAlert)
+    subscribe(personToNotify, "sleeping", personHandler_DoorAlert)
     
     // Lock Alert
     if (lock) {
         subscribe(lock, "lock", lockHandler_LockAlert)
-        subscribe(person, "presence", personHandler_LockAlert)
-        subscribe(person, "sleeping", personHandler_LockAlert)
+        subscribe(personToNotify, "presence", personHandler_LockAlert)
+        subscribe(personToNotify, "sleeping", personHandler_LockAlert)
     }
     
     // Away Alert
@@ -130,12 +136,6 @@ def getInactiveThresholds() {
         thresholds.add([device: light, inactiveHours: 24])
     }
     return thresholds
-}
-
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
 }
 
 def on() {
@@ -194,7 +194,7 @@ def motionHandler_MotionAlert(evt) {
     
     if (evt.value == "active") {
         if (door.currentValue("contact") == "closed") {
-            person.deviceNotification("Motion on the Front Porch!")
+            personToNotify.deviceNotification("Motion on the Front Porch!")
         }
     }
 }
@@ -203,7 +203,7 @@ def doorHandler_DoorAlert(evt) {
     logDebug("doorHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, doorAlert)
         }
     } else {
@@ -214,17 +214,17 @@ def doorHandler_DoorAlert(evt) {
 def personHandler_DoorAlert(evt) {
     logDebug("personHandler_DoorAlert: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
+    if (personToNotify.currentValue("presence") == "not present" || personToNotify.currentValue("sleeping") == "sleeping") {
         unschedule("doorAlert")
         
         if (door.currentValue("contact") == "open") {
-            person.deviceNotification("$door is still open!")
+            personToNotify.deviceNotification("$door is still open!")
         }
     }
 }
 
 def doorAlert() {
-    person.deviceNotification("Should the $door still be open?")
+    personToNotify.deviceNotification("Should the $door still be open?")
     runIn(60*30, doorAlert)
 }
 
@@ -232,7 +232,7 @@ def lockHandler_LockAlert(evt) {
     logDebug("lockHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "unlocked") {
-        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, lockAlert)
         }
     } else {
@@ -243,78 +243,16 @@ def lockHandler_LockAlert(evt) {
 def personHandler_LockAlert(evt) {
     logDebug("personHandler_LockAlert: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
+    if (personToNotify.currentValue("presence") == "not present" || personToNotify.currentValue("sleeping") == "sleeping") {
         unschedule("lockAlert")
         
         if (lock.currentValue("lock") == "unlocked") {
-            person.deviceNotification("$lock is still unlocked!")
+            personToNotify.deviceNotification("$lock is still unlocked!")
         }
     }
 }
 
 def lockAlert() {
-    person.deviceNotification("Should the $lock still be unlocked?")
+    personToNotify.deviceNotification("Should the $lock still be unlocked?")
     runIn(60*30, lockAlert)
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_BatteryAlert() {
-    logDebug("handler_BatteryAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getBatteryThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.currentValue("battery") <= item.lowBattery) {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - ${item.device.currentValue('battery')}%"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Low Battery: $message")
-        }
-    }
-}
-
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Inactive Devices: $message")
-        }
-    }
 }
