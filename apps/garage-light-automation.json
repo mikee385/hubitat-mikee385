@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "5.2.0",
-    "minimumHEVersion": "1.0.0",
+    "version": "6.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unchanged alerts that used unrelated attributes",
-    "dateReleased": "2022-02-04",
+    "releaseNotes": "Move common methods to external libraries",
+    "dateReleased": "2022-02-05",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
