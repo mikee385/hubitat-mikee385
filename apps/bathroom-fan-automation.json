@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "2.8.2",
-    "minimumHEVersion": "1.0.0",
+    "version": "3.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Disable battery check for Konke sensors",
-    "dateReleased": "2022-02-03",
+    "releaseNotes": "Move common methods to external libraries",
+    "dateReleased": "2022-02-04",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

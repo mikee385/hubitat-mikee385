@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "2.8.2" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -27,7 +27,13 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bathroom-fan-automation.groovy"
+)
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
 
 preferences {
     page(name: "settings", title: "Bathroom Fan Automation", install: true, uninstall: true) {
@@ -50,9 +56,9 @@ preferences {
             input "maximumRuntime", "number", title: "Maximum runtime (minutes)", required: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnableInfo", type: "bool", title: "Enable info logging?", defaultValue: false
-            input name: "logEnableDebug", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableInfoLog", type: "bool", title: "Enable info logging?", defaultValue: false
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -144,15 +150,9 @@ def getUnchangedThresholds() {
 }
 
 def logInfo(msg) {
-    if (logEnableInfo) {
+    if (enableInfoLog) {
         log.info msg
-        person.deviceNotification(msg)
-    }
-}
-
-def logDebug(msg) {
-    if (logEnableDebug) {
-        log.debug msg
+        personToNotify.deviceNotification(msg)
     }
 }
 
@@ -329,85 +329,5 @@ def modeHandler_FanSwitch(evt) {
     
     if (evt.value != "Home") {
         fan.off()
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_BatteryAlert() {
-    logDebug("handler_BatteryAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getBatteryThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.currentValue("battery") <= item.lowBattery) {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - ${item.device.currentValue('battery')}%"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Low Battery: $message")
-        }
-    }
-}
-
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
-    
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        for (item in getUnchangedThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
-                if (lastEvent) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (lastEvent.getDate().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        if (message) {
-            person.deviceNotification("Inactive Devices: $message")
-        }
     }
 }
