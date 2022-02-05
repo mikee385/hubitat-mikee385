@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.1.0" }
+String getVersionNum() { return "5.2.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -119,13 +119,6 @@ def getInactiveThresholds() {
         [device: entryDoor, inactiveHours: 2],
         [device: motionSensor, inactiveHours: 24],
         [device: garageLight, inactiveHours: 24]
-    ]
-}
-
-def getUnchangedThresholds() {
-    return [
-        [device: overheadDoor, attribute: "temperature", inactiveHours: 1],
-        [device: motionSensor, attribute: "temperature", inactiveHours: 6]
     ]
 }
 
