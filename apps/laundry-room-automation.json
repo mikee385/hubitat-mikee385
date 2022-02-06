@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "5.1.1",
-    "minimumHEVersion": "1.0.0",
+    "version": "6.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add subsciptions for washer and dryer errors",
-    "dateReleased": "2022-02-01",
+    "releaseNotes": "Add alerts for low battery and inactivity",
+    "dateReleased": "2022-02-06",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",
