@@ -14,8 +14,10 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
 
 definition(
     name: "People Alerts",
@@ -25,7 +27,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/people-alerts.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/people-alerts.groovy"
+)
 
 preferences {
     page(name: "settings", title: "People Alerts", install: true, uninstall: true) {
@@ -57,7 +60,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -100,12 +103,6 @@ def initialize() {
     subscribe(secondaryPerson, "presence.not present", personHandler_GuestReminder)
     subscribe(location, "sunrise", sunriseHandler_GuestReminder)
     subscribe(location, "sunset", sunsetHandler_GuestReminder)
-}
-
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
 }
 
 def personHandler_PrimaryPresenceAlert(evt) {

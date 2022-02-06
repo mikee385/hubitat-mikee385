@@ -1,11 +1,11 @@
 {
     "packageName": "People Alerts",
     "author": "Michael Pierce",
-    "version": "3.1.0",
-    "minimumHEVersion": "1.0.0",
+    "version": "4.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add guest reminders at sunrise and sunset",
-    "dateReleased": "2022-01-31",
+    "releaseNotes": "Move debug method to external library",
+    "dateReleased": "2022-02-06",
     "apps": [
         {
             "id": "d1053cf4-db2c-44af-b589-035bde02619d",
