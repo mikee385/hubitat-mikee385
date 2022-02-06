@@ -17,6 +17,8 @@
 String getVersionNum() { return "1.2.1" }
 String getVersionLabel() { return "Mode Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
+#include mikee385.debug-library
+
 definition(
     name: "Mode Automation",
     namespace: "mikee385",
@@ -25,7 +27,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/mode-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/mode-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Mode Automation", install: true, uninstall: true) {
@@ -48,8 +51,8 @@ preferences {
             input "alertAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -86,23 +89,17 @@ def initialize() {
     }
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def arrivedHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
     if (location.mode == "Away") {
         if (alertArrived) {
-            person.deviceNotification("Welcome Back!")
+            personToNotify.deviceNotification("Welcome Back!")
         }
         location.setMode("Home")
     } else if (location.mode == "Sleep") {
         if (alertAwake) {
-            person.deviceNotification("Good Morning!")
+            personToNotify.deviceNotification("Good Morning!")
         }
         location.setMode("Home")
     }
@@ -132,7 +129,7 @@ def departedHandler(evt) {
     if (anyonePresent == false) {
         if (location.mode != "Away") {
             if (alertDeparted) {
-                person.deviceNotification("Goodbye!")
+                personToNotify.deviceNotification("Goodbye!")
             }
             location.setMode("Away")
             if (alarmAway) {
@@ -142,7 +139,7 @@ def departedHandler(evt) {
     } else if (anyoneAsleep == true && anyoneAwake == false) {
         if (location.mode != "Sleep") {
             if (alertAsleep) {
-                person.deviceNotification("Good Night!")
+                personToNotify.deviceNotification("Good Night!")
             }
             location.setMode("Sleep")
             if (alarmSleep) {
@@ -165,7 +162,7 @@ def asleepHandler(evt) {
         if (anyoneAwake == false) {
             if (location.mode != "Sleep") {
                 if (alertAsleep) {
-                    person.deviceNotification("Good Night!")
+                    personToNotify.deviceNotification("Good Night!")
                 }
                 location.setMode("Sleep")
                 if (alarmSleep) {
@@ -182,7 +179,7 @@ def awakeHandler(evt) {
     if (evt.device.currentValue("presence") == "present") {
         if (location.mode == "Sleep") {
             if (alertAwake) {
-                person.deviceNotification("Good Morning!")
+                personToNotify.deviceNotification("Good Morning!")
             }
             location.setMode("Home")
         }
@@ -194,7 +191,7 @@ def awakeTimeHandler(evt) {
     
     if (location.mode == "Sleep") {
         if (alertAwake) {
-            person.deviceNotification("Good Morning!")
+            personToNotify.deviceNotification("Good Morning!")
         }
         location.setMode("Home")
     }
@@ -205,7 +202,7 @@ def asleepTimeHandler(evt) {
     
     if (location.mode == "Home") {
         if (alertAsleep) {
-            person.deviceNotification("Good Night!")
+            personToNotify.deviceNotification("Good Night!")
         }
         location.setMode("Sleep")
         if (alarmSleep) {
