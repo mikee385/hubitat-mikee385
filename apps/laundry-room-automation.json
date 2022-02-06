@@ -1,10 +1,10 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "6.0.0",
+    "version": "6.0.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add alerts for low battery and inactivity",
+    "releaseNotes": "Fix missing schedules for low battery and inactivity",
     "dateReleased": "2022-02-06",
     "apps": [
         {

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.0.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -139,6 +139,16 @@ def initialize() {
     if (gate) {
         subscribe(gate, "contact", handler_AwayAlert)
     }
+    
+    def currentTime = new Date()
+    
+    // Battery Alert
+    def batteryAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
 }
 
 def getBatteryThresholds() {
