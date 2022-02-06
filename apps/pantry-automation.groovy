@@ -14,8 +14,12 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Pantry Automation",
@@ -25,7 +29,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Pantry Automation", install: true, uninstall: true) {
@@ -34,8 +39,8 @@ preferences {
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -60,12 +65,22 @@ def initialize() {
     for (light in lights) {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
+    
+    def currentTime = new Date()
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
+def getInactiveThresholds() {
+    def thresholds = [
+        [device: motionSensor, inactiveHours: 24]
+    ]
+    for (light in lights) {
+        thresholds.add([device: light, inactiveHours: 24])
     }
+    return thresholds
 }
 
 def modeHandler_LightSwitch(evt) {
@@ -75,13 +90,5 @@ def modeHandler_LightSwitch(evt) {
         for (light in lights) {
             light.off()
         }
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
