@@ -1,15 +1,15 @@
 {
     "packageName": "Locative Integration",
     "author": "Michael Pierce",
-    "minimumHEVersion": "1.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add device commands for arrived and departed",
-    "dateReleased": "2021-06-12",
+    "releaseNotes": "Move debug method to external library",
+    "dateReleased": "2022-02-06",
     "apps": [
         {
             "id": "ac4a5dbb-642b-4c6b-9caf-d6320f596513",
             "name": "Locative Integration",
-            "version": "3.0.0",
+            "version": "4.0.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/locative-integration.groovy",
             "required": true,
