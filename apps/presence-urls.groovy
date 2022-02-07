@@ -14,8 +14,10 @@
  *
  */
  
-String getVersionNum() { return "1.3.1" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Presence URLs, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
 
 definition(
     name: "Presence URLs",
@@ -25,7 +27,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/presence-urls.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/presence-urls.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Presence URLs", install: true, uninstall: true) {
@@ -77,12 +80,6 @@ def initialize() {
     }
     state.arrivedUrl = "${getFullApiServerUrl()}/arrived?access_token=$state.accessToken"
     state.departedUrl = "${getFullApiServerUrl()}/departed?access_token=$state.accessToken"
-}
-
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
 }
 
 def childDevice() {
