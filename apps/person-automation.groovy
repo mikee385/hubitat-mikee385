@@ -14,8 +14,12 @@
  *
  */
  
-String getVersionNum() { return "4.3.1" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Person Automation",
@@ -25,7 +29,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/person-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Person Automation", install: true, uninstall: true) {
@@ -45,8 +50,8 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logPresence", type: "bool", title: "Enable presence logging?", defaultValue: false
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input name: "enablePresenceLog", type: "bool", title: "Enable presence logging?", defaultValue: false
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -168,18 +173,12 @@ def getUnchangedThresholds() {
     return thresholds
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def arrivalHandler_PersonStatus(evt) {
     logDebug("arrivalHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
 
     person.arrived()
     
-    if (logPresence) {
+    if (enablePresenceLog) {
         log.info "${evt.device} is ${evt.value}!"
     }
 }
@@ -189,7 +188,7 @@ def departureHandler_PersonStatus(evt) {
 
     person.departed()
     
-    if (logPresence) {
+    if (enablePresenceLog) {
         log.info "${evt.device} is ${evt.value}!"
     }
 }
@@ -242,63 +241,6 @@ def triggerHandler_Location(evt) {
         person.setLocation(locationDevice.currentValue("id"))
     } else {
         person.setLocation("")
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        personToNotify.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
-    
-    if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
-        def deviceIDs = []
-        def message = ""
-        
-        for (item in getInactiveThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                if (item.device.getLastActivity()) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        for (item in getUnchangedThresholds()) {
-            if (!deviceIDs.contains(item.device.id)) {
-                def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
-                if (lastEvent) {
-                    def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                    if (lastEvent.getDate().getTime() <= cutoffTime) {
-                        deviceIDs.add(item.device.id)
-                        message += """
-${item.device} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"""
-                    }
-                } else {
-                    deviceIDs.add(item.device.id)
-                    message += """
-${item.device} - No Activity"""
-                }
-            }
-        }
-        
-        if (message) {
-            personToNotify.deviceNotification("Inactive Devices: $message")
-        }
     }
 }
     
