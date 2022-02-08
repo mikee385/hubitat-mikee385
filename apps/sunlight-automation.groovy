@@ -1,7 +1,7 @@
 /**
  *  Sunlight Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,8 +14,10 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
 
 definition(
     name: "Sunlight Automation",
@@ -25,7 +27,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/sunlight-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Sunlight Automation", install: true, uninstall: true) {
@@ -44,8 +47,8 @@ preferences {
             input "alertOff", "bool", title: "Alert when Off?", required: true, defaultValue: false
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -70,25 +73,19 @@ def initialize() {
     }
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def sunriseHandler(evt) {
     logDebug("Received sunrise event")
     
     if (lightSensor) {
         if (alertSunrise) {
             def lightValue = lightSensor.currentValue("illuminance")
-            person.deviceNotification("Sunrise! ($lightValue)")
+            personToNotify.deviceNotification("Sunrise! ($lightValue)")
         }
     } else {
         sunlightSwitch.on()
         
         if (alertSunrise) {
-            person.deviceNotification("Sunrise!")
+            personToNotify.deviceNotification("Sunrise!")
         }
     }
 }
@@ -101,11 +98,11 @@ def sunsetHandler(evt) {
     if (lightSensor) {
         if (alertSunset) {
             def lightValue = lightSensor.currentValue("illuminance")
-            person.deviceNotification("Sunset! ($lightValue)")
+            personToNotify.deviceNotification("Sunset! ($lightValue)")
         }
     } else {
         if (alertSunset) {
-            person.deviceNotification("Sunset!")
+            personToNotify.deviceNotification("Sunset!")
         }
     }
     
@@ -119,14 +116,14 @@ def lightHandler(evt) {
             if (sunlightSwitch.currentValue("switch") == "on") {
                 sunlightSwitch.off()
                 if (alertOff) {
-                    person.deviceNotification("It's dark! (${evt.value})")
+                    personToNotify.deviceNotification("It's dark! (${evt.value})")
                 }
             }
         } else if (lightSensor.currentValue("illuminance") >= lightLevelForOn) {
             if (sunlightSwitch.currentValue("switch") == "off") {
                 sunlightSwitch.on()
                 if (alertOn) {
-                    person.deviceNotification("It's light! (${evt.value})")
+                    personToNotify.deviceNotification("It's light! (${evt.value})")
                 }
             }
         }
