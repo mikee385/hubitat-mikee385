@@ -1,7 +1,7 @@
 /**
  *  System Alerts
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,8 +14,10 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "System Alerts, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
 
 definition(
     name: "System Alerts",
@@ -25,7 +27,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/system-alerts.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/system-alerts.groovy"
+)
 
 preferences {
     page(name: "settings", title: "System Alerts", install: true, uninstall: true) {
@@ -34,8 +37,8 @@ preferences {
             input "alertSevereLoad", "bool", title: "Alert when Severe Load?", required: true, defaultValue: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -61,20 +64,14 @@ def initialize() {
     }
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def rebootHandler(evt) {
     logDebug("rebootHandler: ${evt.device} changed to ${evt.value}")
     
-    person.deviceNotification("Hub has rebooted.")
+    personToNotify.deviceNotification("Hub has rebooted.")
 }
 
 def severeLoadHandler(evt) {
     logDebug("severeLoadHandler: ${evt.device} changed to ${evt.value}")
     
-    person.deviceNotification("Hub has severe load!")
+    personToNotify.deviceNotification("Hub has severe load!")
 }
