@@ -14,12 +14,14 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
 #include mikee385.sleep-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Security Automation",
@@ -89,12 +91,32 @@ def initialize() {
     if (alarmPanel) {
         subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
     }
+    
+    def currentTime = new Date()
+    
+    // Battery Alert
+    def batteryAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
+def getBatteryThresholds() {
+    return [
+        [device: alarmPanel, lowBattery: 10]
+    ]
+}
+
+def getInactiveThresholds() {
+    def thresholds = [
+        [device: alarmPanel, inactiveHours: 2]
+    ]
+    for (camera in cameras) {
+        thresholds.add([device: camera, inactiveHours: 24])
     }
+    return thresholds
 }
 
 def modeHandler_CameraSwitch(evt) {
