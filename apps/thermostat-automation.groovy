@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.0.1" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -87,8 +87,6 @@ def initialize() {
         subscribe(sensor, "motion.active", handler_AwayAlert)
     }
 
-    def currentTime = new Date()
-    
     // Battery Alert
     def batteryAlertTime = timeToday("20:00")
     schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)

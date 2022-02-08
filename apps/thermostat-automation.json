@@ -1,11 +1,11 @@
 {
     "packageName": "Thermostat Automation",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Move common methods to external libraries",
-    "dateReleased": "2022-02-07",
+    "releaseNotes": "Remove duplicate code",
+    "dateReleased": "2022-02-08",
     "apps": [
         {
             "id": "a53151e5-9ddf-43c4-af86-440edf88ba24",
