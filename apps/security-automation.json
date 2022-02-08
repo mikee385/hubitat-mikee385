@@ -1,11 +1,11 @@
 {
     "packageName": "Security Automation",
     "author": "Michael Pierce",
-    "version": "1.2.0",
-    "minimumHEVersion": "1.0.0",
+    "version": "2.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Better handle when alarm panel is not provided",
-    "dateReleased": "2021-09-07",
+    "releaseNotes": "Move common methods to external libraries",
+    "dateReleased": "2022-02-07",
     "apps": [
         {
             "id": "0df93513-7fb1-42d7-995a-3bf8204dcd78",

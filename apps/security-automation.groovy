@@ -1,7 +1,7 @@
 /**
  *  Security Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,8 +14,12 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.sleep-alert-library
 
 definition(
     name: "Security Automation",
@@ -25,7 +29,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/security-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/security-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Security Automation", install: true, uninstall: true) {
@@ -34,8 +39,8 @@ preferences {
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -138,7 +143,7 @@ def modeHandler_AlarmAlert(evt) {
 
 def checkAlarm() {
     if (location.mode != "Home" && alarmPanel.currentValue("alarm") == "disarmed") {
-        person.deviceNotification("Set the alarm!")
+        personToNotify.deviceNotification("Set the alarm!")
     }
 }
 
@@ -170,23 +175,7 @@ def checkCameras() {
             }
         }
         if (anyCameraOn) {
-            person.deviceNotification("Should the cameras be on?")
+            personToNotify.deviceNotification("Should the cameras be on?")
         }
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
-    }
-}
-
-def handler_SleepAlert(evt) {
-    logDebug("handler_SleepAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Sleep") {
-        person.deviceNotification("${evt.device} is ${evt.value} during Sleep!")
     }
 }
