@@ -1,7 +1,7 @@
 /**
  *  Trash Reminder
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,8 +14,10 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
 
 definition(
     name: "Trash Reminder",
@@ -25,7 +27,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/trash-reminder.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Trash Reminder", install: true, uninstall: true) {
@@ -35,8 +38,8 @@ preferences {
             input "isRecycleWeek", "bool", title: "Recycle this week?", required: true, defaultValue: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -53,23 +56,17 @@ def updated() {
 }
 
 def initialize() {
-    subscribe(person, "presence", personHandler_TrashReminder)
-    subscribe(person, "sleeping", personHandler_TrashReminder)
+    subscribe(personToNotify, "presence", personHandler_TrashReminder)
+    subscribe(personToNotify, "sleeping", personHandler_TrashReminder)
     
     def currentTime = new Date()
     schedule("$currentTime.seconds 0 0 ? * 1 *", updateRecycleWeek)
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
-}
-
 def personHandler_TrashReminder(evt) {
     logDebug("personHandler_TrashReminder: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+    if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
         if (timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
             def df = new java.text.SimpleDateFormat("EEEE")
             df.setTimeZone(location.timeZone)
@@ -79,11 +76,11 @@ def personHandler_TrashReminder(evt) {
             def isRecycleDay = (recycleDay == day && isRecycleWeek)
             
             if (isTrashDay && isRecycleDay) {
-                person.deviceNotification("Take out the trash and recycle!")
+                personToNotify.deviceNotification("Take out the trash and recycle!")
             } else if (isTrashDay) {
-                person.deviceNotification("Take out the trash!")
+                personToNotify.deviceNotification("Take out the trash!")
             } else if (isRecycleDay) {
-                person.deviceNotification("Take out the recycle!")
+                personToNotify.deviceNotification("Take out the recycle!")
             }
         }
     }
