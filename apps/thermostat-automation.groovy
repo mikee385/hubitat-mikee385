@@ -1,7 +1,7 @@
 /**
  *  Thermostat Automation
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,8 +14,13 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Thermostat Automation",
@@ -25,7 +30,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/thermostat-automation.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/thermostat-automation.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Thermostat Automation", install: true, uninstall: true) {
@@ -38,8 +44,8 @@ preferences {
             input "sleepTime", "time", title: "Sleep Resume Time", required: false
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -80,12 +86,42 @@ def initialize() {
     for (sensor in sensors) {
         subscribe(sensor, "motion.active", handler_AwayAlert)
     }
+
+    def currentTime = new Date()
+    
+    // Battery Alert
+    def batteryAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
+def getInactiveThresholds() {
+    def thresholds = []
+    
+    for (thermostat in thermostats) {
+        thresholds.add([device: thermostat, inactiveHours: 1])
     }
+    for (sensor in sensors) {
+        thresholds.add([device: sensor, inactiveHours: 1])
+    }
+    
+    return thresholds
+}
+
+def getUnchangedThresholds() {
+    def thresholds = []
+    
+    for (thermostat in thermostats) {
+        thresholds.add([device: thermostat, attribute: temperature, inactiveHours: 6])
+    }
+    for (sensor in sensors) {
+        thresholds.add([device: sensor, attribute: temperature, inactiveHours: 6])
+    }
+    
+    return thresholds
 }
 
 def modeHandler_Thermostat(evt) {
@@ -124,13 +160,5 @@ def sleepTimeHandler_Thermostat(evt) {
         for (thermostat in thermostats) {
             thermostat.resumeProgram()
         }
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
