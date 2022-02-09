@@ -1,7 +1,7 @@
 /**
  *  Weather Alerts
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,8 +14,12 @@
  *
  */
  
-String getVersionNum() { return "2.10.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Weather Alerts",
@@ -25,7 +29,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Weather Alerts", install: true, uninstall: true) {
@@ -33,8 +38,8 @@ preferences {
             input "weatherStation", "device.AmbientWeatherDevice", title: "Weather Station", multiple: false, required: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -73,13 +78,25 @@ def initialize() {
     // Rain Alert
     subscribe(weatherStation, "precip_1hr", rainRateHandler_RainAlert)
     subscribe(weatherStation, "precip_today", rainTodayHandler_RainAlert)
-    subscribe(person, "sleeping", personHandler_RainAlert)
+    subscribe(personToNotify, "sleeping", personHandler_RainAlert)
+    
+    def currentTime = new Date()
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
-    }
+def getInactiveThresholds() {
+    return [
+        [device: weatherStation, inactiveHours: 1]
+    ]
+}
+
+def getUnchangedThresholds() {
+    return [
+        [device: weatherStation, attribute: "temperature", inactiveHours: 1]
+    ]
 }
 
 def rainRateHandler_RainAlert(evt) {
@@ -100,7 +117,7 @@ def rainTodayHandler_RainAlert(evt) {
 
 def rainHandler_RainAlert() {
     // Get state variables
-    def asleep = person.currentValue("sleeping") == "sleeping"
+    def asleep = personToNotify.currentValue("sleeping") == "sleeping"
     
     def rate_previous = state.rate
     def total_previous = state.today_total
@@ -189,7 +206,7 @@ def sendLevelAlert() {
     def df = new java.text.DecimalFormat("#.##")
     def rate = df.format(state.rate.doubleValue())
 
-    person.deviceNotification(
+    personToNotify.deviceNotification(
 """${state.event_text}!
 Rate: ${rate} in./hr"""
     )
@@ -201,7 +218,7 @@ def sendStoppedAlert() {
         def event_total = df.format(state.event_total.doubleValue())
         def today_total = df.format(state.today_total.doubleValue())
 
-        person.deviceNotification(
+        personToNotify.deviceNotification(
 """${state.event_text} has stopped!
 Event: ${event_total} in.
 Today: ${today_total} in."""
@@ -215,7 +232,7 @@ def sendAwakeAlert() {
         def sleep_total = df.format(state.sleep_total.doubleValue())
         def rate = df.format(state.rate.doubleValue())
 
-        person.deviceNotification(
+        personToNotify.deviceNotification(
 """${state.sleep_text} during Sleep!
 Total: ${sleep_total} in.
 Now: ${rate} in./hr"""
