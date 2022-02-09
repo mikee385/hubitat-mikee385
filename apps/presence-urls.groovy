@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Presence URLs, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -33,7 +33,7 @@ definition(
 preferences {
     page(name: "settings", title: "Presence URLs", install: true, uninstall: true) {
         section {
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }

@@ -1,11 +1,11 @@
 {
     "packageName": "Presence URLs",
     "author": "Michael Pierce",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Move debug method to external library",
-    "dateReleased": "2022-02-07",
+    "releaseNotes": "Fix misspelled variable name",
+    "dateReleased": "2022-02-09",
     "apps": [
         {
             "id": "abb11855-aaa8-46b3-8864-d8a44c862f45",
