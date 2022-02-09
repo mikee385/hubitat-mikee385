@@ -1,11 +1,11 @@
 {
     "packageName": "Window Alerts",
     "author": "Michael Pierce",
-    "version": "1.2.0",
-    "minimumHEVersion": "1.0.0",
+    "version": "2.0.0",
+    "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use presence and sleeping, not status, for Person",
-    "dateReleased": "2021-06-05",
+    "releaseNotes": "Move common methods to external libraries",
+    "dateReleased": "2022-02-09",
     "apps": [
         {
             "id": "5513b8d1-02cd-4af9-b20c-7fab56c2742d",

@@ -1,7 +1,7 @@
 /**
  *  Window Alerts
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,8 +14,13 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
+
+#include mikee385.debug-library
+#include mikee385.away-alert-library
+#include mikee385.battery-alert-library
+#include mikee385.inactive-alert-library
 
 definition(
     name: "Window Alerts",
@@ -25,7 +30,8 @@ definition(
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/window-alerts.groovy")
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/window-alerts.groovy"
+)
 
 preferences {
     page(name: "settings", title: "Window Alerts", install: true, uninstall: true) {
@@ -33,8 +39,8 @@ preferences {
             input "windows", "capability.contactSensor", title: "Windows", multiple: true, required: true
         }
         section {
-            input "person", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false
+            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -55,26 +61,46 @@ def initialize() {
     for (window in windows) {
         subscribe(window, "contact", windowHandler_WindowAlert)
     }
-    subscribe(person, "presence", personHandler_WindowAlert)
-    subscribe(person, "sleeping", personHandler_WindowAlert)
+    subscribe(personToNotify, "presence", personHandler_WindowAlert)
+    subscribe(personToNotify, "sleeping", personHandler_WindowAlert)
     
     // Away Alert
     for (window in windows) {
         subscribe(window, "contact", handler_AwayAlert)
     }
+    
+    def currentTime = new Date()
+    
+    // Battery Alert
+    def batteryAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    
+    // Inactive Alert
+    def inactiveAlertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
 }
 
-def logDebug(msg) {
-    if (logEnable) {
-        log.debug msg
+def getBatteryThresholds() {
+    def thresholds = []
+    for (window in windows) {
+        thresholds.add([device: window, lowBattery: 10])
     }
+    return thresholds
+}
+
+def getInactiveThresholds() {
+    def thresholds = []
+    for (window in windows) {
+        thresholds.add([device: window, inactiveHours: 2])
+    }
+    return thresholds
 }
 
 def windowHandler_WindowAlert(evt) {
     logDebug("windowHandler_WindowAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
             unschedule("windowAlert")
             runIn(60*5, windowAlert)
         }
@@ -95,12 +121,12 @@ def windowHandler_WindowAlert(evt) {
 def personHandler_WindowAlert(evt) {
     logDebug("personHandler_WindowAlert: ${evt.device} changed to ${evt.value}")
     
-    if (person.currentValue("presence") == "not present" || person.currentValue("sleeping") == "sleeping") {
+    if (personToNotify.currentValue("presence") == "not present" || personToNotify.currentValue("sleeping") == "sleeping") {
         unschedule("windowAlert")
         
         for (window in windows) {
             if (window.currentValue("contact") == "open") {
-                person.deviceNotification("$window is still open!")
+                personToNotify.deviceNotification("$window is still open!")
             }
         }
     }
@@ -110,19 +136,11 @@ def windowAlert() {
     def anyWindowOpen = false
     for (window in windows) {
         if (window.currentValue("contact") == "open") {
-            person.deviceNotification("Should the ${evt.device} still be open?")
+            personToNotify.deviceNotification("Should the ${evt.device} still be open?")
             anyWindowOpen = true
         }
     }
     if (anyWindowOpen) {
         runIn(60*30, windowAlert)
-    }
-}
-
-def handler_AwayAlert(evt) {
-    logDebug("handler_AwayAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (location.mode == "Away") {
-        person.deviceNotification("${evt.device} is ${evt.value} while Away!")
     }
 }
