@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.1" }
+String getVersionNum() { return "3.0.2" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -113,10 +113,10 @@ def getUnchangedThresholds() {
     def thresholds = []
     
     for (thermostat in thermostats) {
-        thresholds.add([device: thermostat, attribute: temperature, inactiveHours: 6])
+        thresholds.add([device: thermostat, attribute: "temperature", inactiveHours: 6])
     }
     for (sensor in sensors) {
-        thresholds.add([device: sensor, attribute: temperature, inactiveHours: 6])
+        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 6])
     }
     
     return thresholds
