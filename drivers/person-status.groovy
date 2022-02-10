@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -25,6 +25,7 @@ metadata {
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy"
 	) {
         capability "Actuator"
+        capability "Configuration"
         capability "Notification"
         capability "Presence Sensor"
         capability "Sensor"
@@ -39,11 +40,14 @@ metadata {
         command "departed"
         
         command "setLocation", ["string"]
+        
+        command "batteryNotification", ["string"]
+        command "inactiveNotification", ["string"]
     }
 }
 
 def installed() {
-    initialize()
+    configure()
 }
 
 def uninstalled() {
@@ -54,10 +58,10 @@ def uninstalled() {
 
 def updated() {
     unschedule()
-    initialize()
+    configure()
 }
 
-def initialize() {
+def configure() {
     def awakeButton = childDevice("Awake")
     def asleepButton = childDevice("Asleep")
     def arrivedButton = childDevice("Arrived")
@@ -72,6 +76,21 @@ def initialize() {
     if (!device.currentValue("location")) {
         setLocation("")
     }
+    
+    if (!atomicState.batteryMessage) {
+        batteryReset()
+    }
+    if (!atomicState.inactiveMessage) {
+        inactiveReset()
+    }
+    
+    schedule("0 0 0 * * ? *", batteryReset)
+    schedule("0 0 0 * * ? *", inactiveReset)
+    
+    def currentTime = new Date()
+    def alertTime = timeToday("20:00")
+    schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", batteryAlert)
+    schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", inactiveAlert)
 }
 
 def childDevice(name) {
@@ -125,4 +144,28 @@ def setLocation(locationName) {
 
 def deviceNotification(message) {
   	sendEvent(name: "message", value: "${message}", isStateChange: true)
+}
+
+def batteryNotification(message) {
+    atomicState.batteryMessage += "\n" + message
+}
+
+def batteryReset() {
+    atomicState.batteryMessage = ""
+}
+
+def batteryAlert() {
+    deviceNotification("Low Battery:${atomicState.batteryMessage}")
+}
+
+def inactiveNotification(message) {
+  	atomicState.inactiveMessage += "\n" + message
+}
+
+def inactiveReset() {
+    atomicState.inactiveMessage = ""
+}
+
+def inactiveAlert() {
+    deviceNotification("Inactive Devices:${atomicState.inactiveMessage}")
 }

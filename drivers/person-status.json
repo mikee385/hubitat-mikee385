@@ -1,11 +1,11 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "5.0.0",
+    "version": "6.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add child buttons for each command",
-    "dateReleased": "2022-01-24",
+    "releaseNotes": "Add alerts for low battery and inactivity",
+    "dateReleased": "2022-02-09",
     "drivers": [
         {
             "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",
