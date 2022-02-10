@@ -1,11 +1,11 @@
 /**
  *  name: Battery Alert Library
  *  author: Michael Pierce
- *  version: 1.0.2
+ *  version: 1.1.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
  *  releaseNotes: Initial commit
- *  dateReleased: 2022-02-04
+ *  dateReleased: 2022-02-10
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -29,26 +29,27 @@ library (
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/battery-alert-library.groovy"
 )
 
+def scheduleBatteryAlert() {
+    def alertTime = timeToday("19:55")
+    def currentTime = new Date()
+    schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", handler_BatteryAlert)
+}
+
 def handler_BatteryAlert() {
     logDebug("handler_BatteryAlert")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
         def deviceIDs = []
-        def message = ""
         
         if (getBatteryThresholds) {
             for (item in getBatteryThresholds()) {
                 if (!deviceIDs.contains(item.device.id)) {
                     if (item.device.currentValue("battery") <= item.lowBattery) {
                         deviceIDs.add(item.device.id)
-                        message += "\n${item.device} - ${item.device.currentValue('battery')}%"
+                        personToNotify.batteryNotification("${item.device} - ${item.device.currentValue('battery')}%")
                     }
                 }
             }
-        }
-        
-        if (message) {
-            personToNotify.deviceNotification("Low Battery: $message")
         }
     }
 }

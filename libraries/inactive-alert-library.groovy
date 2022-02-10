@@ -1,11 +1,11 @@
 /**
  *  name: Inactive Alert Library
  *  author: Michael Pierce
- *  version: 1.0.2
+ *  version: 1.1.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
  *  releaseNotes: Initial commit
- *  dateReleased: 2022-02-04
+ *  dateReleased: 2022-02-10
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -29,13 +29,18 @@ library (
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/inactive-alert-library.groovy"
 )
 
+def scheduleInactiveAlert() {
+    def alertTime = timeToday("19:55")
+    def currentTime = new Date()
+    schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", handler_InactiveAlert)
+}
+
 def handler_InactiveAlert() {
     logDebug("handler_InactiveAlert")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
         def dateTimeFormat = "MMM d, yyyy, h:mm a"
         def deviceIDs = []
-        def message = ""
         
         if (getInactiveThresholds) {
             for (item in getInactiveThresholds()) {
@@ -44,11 +49,11 @@ def handler_InactiveAlert() {
                         def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                         if (item.device.getLastActivity().getTime() <= cutoffTime) {
                             deviceIDs.add(item.device.id)
-                            message += "\n${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}"
+                            personToNotify.inactiveNotification("${item.device} - ${item.device.getLastActivity().format(dateTimeFormat, location.timeZone)}")
                         }
                     } else {
                         deviceIDs.add(item.device.id)
-                        message += "\n${item.device} - No Activity"
+                        personToNotify.inactiveNotification("${item.device} - No Activity")
                     }
                 }
             }
@@ -62,18 +67,14 @@ def handler_InactiveAlert() {
                         def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                         if (lastEvent.getDate().getTime() <= cutoffTime) {
                             deviceIDs.add(item.device.id)
-                            message += "\n${item.device} - ${item.attribute} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}"
+                            personToNotify.inactiveNotification("${item.device} - ${item.attribute} - ${lastEvent.getDate().format(dateTimeFormat, location.timeZone)}")
                         }
                     } else {
                         deviceIDs.add(item.device.id)
-                        message += "\n${item.device} - ${item.attribute} - No Activity"
+                        personToNotify.inactiveNotification("${item.device} - ${item.attribute} - No Activity")
                     }
                 }
             }
-        }
-        
-        if (message) {
-            personToNotify.deviceNotification("Inactive Devices: $message")
         }
     }
 }
