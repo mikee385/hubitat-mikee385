@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.1" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -91,11 +91,8 @@ def initialize() {
         subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
     }
     
-    def currentTime = new Date()
-
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
 }
 
 def getInactiveThresholds() {

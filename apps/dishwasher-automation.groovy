@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -109,12 +109,10 @@ def initialize() {
     subscribe(contactSensor, "contact", handler_AwayAlert)
     
     // Battery Alert
-    def batteryAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    scheduleBatteryAlert()
     
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
     
     // Set initial state
     def deviceRunning = appliance.currentValue("status") == "running"

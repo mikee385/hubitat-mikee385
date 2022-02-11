@@ -1,11 +1,11 @@
 {
     "packageName": "Christmas Tree Automation",
     "author": "Michael Pierce",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Move common methods to external libraries",
-    "dateReleased": "2022-02-05",
+    "releaseNotes": "Simplify scheduling of library alerts",
+    "dateReleased": "2022-02-10",
     "apps": [
         {
             "id": "1d01b53f-131a-4d47-ac61-7a90bd37288a",

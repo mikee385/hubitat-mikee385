@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "3.1.0",
+    "version": "3.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add default values for configuration parameters",
-    "dateReleased": "2022-02-04",
+    "releaseNotes": "Simplify scheduling of library alerts",
+    "dateReleased": "2022-02-10",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

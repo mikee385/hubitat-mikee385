@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -106,15 +106,11 @@ def initialize() {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
     
-    def currentTime = new Date()
-    
     // Battery Alert
-    def batteryAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    scheduleBatteryAlert()
     
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
 }
 
 def getBatteryThresholds() {

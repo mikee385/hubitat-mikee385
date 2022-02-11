@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -130,11 +130,8 @@ def initialize() {
         subscribe(person, "message", handler_Notification)
     }
     
-    def currentTime = new Date()
-
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
     
     // URLs
     if(!state.accessToken) {

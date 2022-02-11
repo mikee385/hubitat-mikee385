@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -117,15 +117,11 @@ def initialize() {
     // Away Alert
     subscribe(fan, "switch.on", handler_AwayAlert)
     
-    def currentTime = new Date()
-    
     // Battery Alert
-    def batteryAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    scheduleBatteryAlert()
     
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
     
     // Initialize state
     handleHumidity(humidity)

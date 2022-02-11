@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.1" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -79,11 +79,8 @@ def initialize() {
     subscribe(weatherStation, "precip_today", rainTodayHandler_RainAlert)
     subscribe(personToNotify, "sleeping", personHandler_RainAlert)
     
-    def currentTime = new Date()
-    
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
 }
 
 def getInactiveThresholds() {

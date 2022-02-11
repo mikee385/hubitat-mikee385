@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Christmas Tree Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -90,11 +90,8 @@ def initialize() {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
     
-    def currentTime = new Date()
-    
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
     
     // URLs
     if(!state.accessToken) {

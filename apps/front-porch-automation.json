@@ -1,11 +1,11 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Move common methods to external libraries",
-    "dateReleased": "2022-02-05",
+    "releaseNotes": "Simplify scheduling of library alerts",
+    "dateReleased": "2022-02-10",
     "apps": [
         {
             "id": "2b643332-38a5-413c-b76e-647edd831fa9",

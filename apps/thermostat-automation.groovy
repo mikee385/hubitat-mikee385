@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.2" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -88,12 +88,10 @@ def initialize() {
     }
 
     // Battery Alert
-    def batteryAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $batteryAlertTime.minutes $batteryAlertTime.hours * * ? *", handler_BatteryAlert)
+    scheduleBatteryAlert()
     
     // Inactive Alert
-    def inactiveAlertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $inactiveAlertTime.minutes $inactiveAlertTime.hours * * ? *", handler_InactiveAlert)
+    scheduleInactiveAlert()
 }
 
 def getInactiveThresholds() {

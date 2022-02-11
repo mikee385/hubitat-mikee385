@@ -1,11 +1,11 @@
 {
     "packageName": "Security Automation",
     "author": "Michael Pierce",
-    "version": "2.1.1",
+    "version": "2.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove battery alerts for devices without batteries",
-    "dateReleased": "2022-02-08",
+    "releaseNotes": "Simplify scheduling of library alerts",
+    "dateReleased": "2022-02-10",
     "apps": [
         {
             "id": "0df93513-7fb1-42d7-995a-3bf8204dcd78",
