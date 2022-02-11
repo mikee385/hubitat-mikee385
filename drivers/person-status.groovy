@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -25,7 +25,7 @@ metadata {
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy"
 	) {
         capability "Actuator"
-        capability "Configuration"
+        capability "Initialize"
         capability "Notification"
         capability "Presence Sensor"
         capability "Sensor"
@@ -47,7 +47,7 @@ metadata {
 }
 
 def installed() {
-    configure()
+    initialize()
 }
 
 def uninstalled() {
@@ -58,10 +58,10 @@ def uninstalled() {
 
 def updated() {
     unschedule()
-    configure()
+    initialize()
 }
 
-def configure() {
+def initialize() {
     def awakeButton = childDevice("Awake")
     def asleepButton = childDevice("Asleep")
     def arrivedButton = childDevice("Arrived")
