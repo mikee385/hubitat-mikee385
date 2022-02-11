@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "3.3.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -118,10 +118,10 @@ def initialize() {
     subscribe(fan, "switch.on", handler_AwayAlert)
     
     // Battery Alert
-    scheduleBatteryAlert()
+    scheduleBatteryCheck()
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
     
     // Initialize state
     handleHumidity(humidity)

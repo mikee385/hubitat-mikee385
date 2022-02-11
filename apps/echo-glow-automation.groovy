@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -139,7 +139,7 @@ def initialize() {
     subscribe(wakeUpRoutine, "pushed", handler_AwayAlert)
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
     
     // URLs
     if(!state.accessToken) {

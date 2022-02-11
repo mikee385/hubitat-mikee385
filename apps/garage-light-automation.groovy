@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -101,10 +101,10 @@ def initialize() {
     subscribe(garageLight, "switch.on", handler_AwayAlert)
     
     // Battery Alert
-    scheduleBatteryAlert()
+    scheduleBatteryCheck()
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
 }
 
 def getBatteryThresholds() {

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -80,7 +80,7 @@ def initialize() {
     subscribe(personToNotify, "sleeping", personHandler_RainAlert)
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
 }
 
 def getInactiveThresholds() {

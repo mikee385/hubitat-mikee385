@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -88,10 +88,10 @@ def initialize() {
     }
 
     // Battery Alert
-    scheduleBatteryAlert()
+    scheduleBatteryCheck()
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
 }
 
 def getInactiveThresholds() {

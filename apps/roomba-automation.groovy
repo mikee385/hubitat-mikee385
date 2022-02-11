@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.1.0" }
+String getVersionNum() { return "7.2.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -111,10 +111,10 @@ def initialize() {
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
     
     // Battery Alert
-    scheduleBatteryAlert()
+    scheduleBatteryCheck()
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
     
     // Initialize state
     def deviceRunning = roomba.currentValue("phase") == "run"

@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "5.1.0",
+    "version": "5.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Simplify scheduling of library alerts",
-    "dateReleased": "2022-02-10",
+    "releaseNotes": "Rename low battery and inactive methods for clarity",
+    "dateReleased": "2022-02-11",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

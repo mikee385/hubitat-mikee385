@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.2.0" }
+String getVersionNum() { return "6.3.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -107,10 +107,10 @@ def initialize() {
     }
     
     // Battery Alert
-    scheduleBatteryAlert()
+    scheduleBatteryCheck()
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
 }
 
 def getBatteryThresholds() {

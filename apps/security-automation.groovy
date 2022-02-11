@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "2.3.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -92,7 +92,7 @@ def initialize() {
     }
     
     // Inactive Alert
-    scheduleInactiveAlert()
+    scheduleInactiveCheck()
 }
 
 def getInactiveThresholds() {

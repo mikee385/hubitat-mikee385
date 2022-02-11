@@ -1,11 +1,11 @@
 {
     "packageName": "Window Alerts",
     "author": "Michael Pierce",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Simplify scheduling of library alerts",
-    "dateReleased": "2022-02-10",
+    "releaseNotes": "Rename low battery and inactive methods for clarity",
+    "dateReleased": "2022-02-11",
     "apps": [
         {
             "id": "5513b8d1-02cd-4af9-b20c-7fab56c2742d",
