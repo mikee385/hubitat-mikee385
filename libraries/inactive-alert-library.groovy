@@ -1,11 +1,11 @@
 /**
  *  name: Inactive Alert Library
  *  author: Michael Pierce
- *  version: 1.1.0
+ *  version: 1.2.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Initial commit
- *  dateReleased: 2022-02-10
+ *  releaseNotes: Rename methods for clarity
+ *  dateReleased: 2022-02-11
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -29,14 +29,14 @@ library (
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/inactive-alert-library.groovy"
 )
 
-def scheduleInactiveAlert() {
-    def alertTime = timeToday("19:55")
+def scheduleInactiveCheck() {
+    def checkTime = timeToday("19:55")
     def currentTime = new Date()
-    schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", handler_InactiveAlert)
+    schedule("$currentTime.seconds $checkTime.minutes $checkTime.hours * * ? *", inactiveCheck)
 }
 
-def handler_InactiveAlert() {
-    logDebug("handler_InactiveAlert")
+def inactiveCheck() {
+    logDebug("inactiveCheck")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
         def dateTimeFormat = "MMM d, yyyy, h:mm a"
