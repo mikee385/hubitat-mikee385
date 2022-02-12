@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.2.0" }
+String getVersionNum() { return "6.3.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -156,7 +156,7 @@ def batteryReset() {
 
 def batteryAlert() {
     if (atomicState.batteryMessage) {
-        deviceNotification("Low Battery:${atomicState.batteryMessage}")
+        deviceNotification("Low Battery:${atomicState.batteryMessage.split('\n').sort().join('\n')}")
     }
 }
 
@@ -170,6 +170,6 @@ def inactiveReset() {
 
 def inactiveAlert() {
     if (atomicState.inactiveMessage) {
-        deviceNotification("Inactive Devices:${atomicState.inactiveMessage}")
+        deviceNotification("Inactive Devices:${atomicState.inactiveMessage.split('\n').sort().join('\n')}")
     }
 }
