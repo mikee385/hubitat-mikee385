@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.2.0" }
+String getVersionNum() { return "6.3.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -65,6 +65,9 @@ def updated() {
 def initialize() {
     // Initialize State
     state.previousOccupancy = zone.currentValue("occupancy")
+    state.lightSwitch = garageLight.currentValue("switch")
+    
+    subscribe(garageLight, "switch.off", lightHandler_State)
 
     // Occupancy
     subscribe(overheadDoor, "contact", overheadDoorHandler_Occupancy)
@@ -124,6 +127,12 @@ def getInactiveThresholds() {
     ]
 }
 
+def lightHandler_State(evt) {
+    logDebug("lightHandler_State: ${evt.device} changed to ${evt.value}")
+    
+    state.lightSwitch = evt.value
+}
+
 def overheadDoorHandler_Occupancy(evt) {
     logDebug("overheadDoorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
@@ -158,7 +167,7 @@ def sideDoorHandler_Occupancy(evt) {
 
 def checkForVacant() {
     if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
-        if (garageLight.currentValue("switch") == "on") {
+        if (state.lightSwitch == "on") {
             zone.checking()
         } else {
             zone.vacant()
@@ -188,9 +197,11 @@ def zoneHandler_LightSwitch(evt) {
     logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "vacant") {
+        state.lightSwitch = "off"
         garageLight.off()
     } else if (state.previousOccupancy == "vacant") {
         if (overheadDoor.currentValue("contact") == "closed") {
+            state.lightSwitch = "on"
             garageLight.on()
         }
     }
@@ -203,11 +214,14 @@ def overheadDoorHandler_LightSwitch(evt) {
     
     if (evt.value == "open") {
         if (sunlight.currentValue("switch") == "on") {
+            state.lightSwitch = "off"
             garageLight.off()
         } else {
+            state.lightSwitch = "on"
             garageLight.on()
         }
     } else {
+        state.lightSwitch = "on"
         garageLight.on()
     }
 }
@@ -217,8 +231,10 @@ def sunlightHandler_LightSwitch(evt) {
     
     if (overheadDoor.currentValue("contact") == "open") {
         if (evt.value == "on") {
+            state.lightSwitch = "off"
             garageLight.off()
         } else {
+            state.lightSwitch = "on"
             garageLight.on()
         }
     }
@@ -228,7 +244,7 @@ def deviceHandler_LightAlert(evt) {
     logDebug("deviceHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("lightAlert")
-    if (garageLight.currentValue("switch") == "on") {
+    if (state.lightSwitch == "on") {
         if (personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*10, lightAlert)
         }
@@ -241,7 +257,7 @@ def personHandler_LightAlert(evt) {
     if (evt.value == "sleeping") {
         unschedule("lightAlert")
         
-        if (garageLight.currentValue("switch") == "on") {
+        if (state.lightSwitch == "on") {
             personToNotify.deviceNotification("$garageLight is still on!")
         }
     }

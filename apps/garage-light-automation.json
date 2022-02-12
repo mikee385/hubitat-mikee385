@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "6.2.0",
+    "version": "6.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename low battery and inactive methods for clarity",
-    "dateReleased": "2022-02-11",
+    "releaseNotes": "Track light switch state separately to improve reliability",
+    "dateReleased": "2022-02-12",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
