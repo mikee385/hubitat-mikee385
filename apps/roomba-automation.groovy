@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.2.0" }
+String getVersionNum() { return "7.3.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -39,7 +39,10 @@ preferences {
             input "roombaStartTime", "time", title: "Start Time", required: true
             input "minimumMinutes", "number", title: "Minimum Duration (in minutes)", required: true
             input "roombaResetTime", "time", title: "Reset Time", required: true
+        }
+        section("Pause") {
             input "pauseButton", "capability.pushableButton", title: "Pause/Resume Button", multiple: false, required: false
+            input "pauseDoors", "capability.contactSensor", title: "Pause when Opened", multiple: true, required: false
         }
         section("Work from Home") {
             input "workFromHomePerson", "capability.presenceSensor", title: "Person", multiple: false, required: true
@@ -95,6 +98,9 @@ def initialize() {
         subscribe(pauseButton, "pushed", buttonPushedHandler)
         subscribe(pauseButton, "doubleTapped", buttonDoubleTappedHandler)
         subscribe(pauseButton, "held", buttonHeldHandler)
+    }
+    for (pauseDoor in pauseDoors) {
+        subscribe(pauseDoor, "contact.open", doorOpenedHandler)
     }
 
     // Runtime Tracking
@@ -223,6 +229,12 @@ def buttonHeldHandler(evt) {
     logDebug("buttonHeldHandler: ${evt.device} changed to ${evt.value}")
 
     roomba.start()
+}
+
+def doorOpenedHandler() {
+    logDebug("doorOpenedHandler: ${evt.device} changed to ${evt.value}")
+
+    roomba.pause()
 }
 
 def duringWorkHours() {
