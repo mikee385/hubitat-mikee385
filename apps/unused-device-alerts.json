@@ -1,0 +1,20 @@
+{
+    "packageName": "Unused Device Alerts",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "2.2.8",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2022-02-13",
+    "apps": [
+        {
+            "id": "be2b90f4-5ea9-4a29-97e1-74378cd3e378",
+            "name": "Unused Device Alerts",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/unused-device-alerts.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ]
+}

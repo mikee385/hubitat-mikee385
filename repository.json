@@ -171,6 +171,13 @@
             "tags": [ "Notifications" ]
         },
         {
+            "name": "Unused Device Alerts",
+            "category": "Notifications",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/unused-device-alerts.json",
+            "description": "Alerts for low battery and inactivity for devices not used in other automations.",
+            "tags": [ "Notifications"]
+        },
+        {
             "name": "Weather Alerts",
             "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.json",
