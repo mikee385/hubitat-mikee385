@@ -1,11 +1,11 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename low battery and inactive methods for clarity",
-    "dateReleased": "2022-02-11",
+    "releaseNotes": "Add support for a doorbell",
+    "dateReleased": "2022-02-13",
     "apps": [
         {
             "id": "2b643332-38a5-413c-b76e-647edd831fa9",

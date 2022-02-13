@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "3.3.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -43,6 +43,10 @@ preferences {
         section("Outdoor Sensors") {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: false
+        }
+        section("Doorbell") {
+            input "doorbell", "capability.pushableButton", title: "Doorbell", multiple: false, required: false
+            input "alertDoorbellRang", "bool", title: "Alert when rang?", required: true, defaultValue: true
         }
         section("Sprinklers") {
             input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
@@ -81,6 +85,11 @@ def initialize() {
     // Motion Alert
     if (motionSensor) {
         subscribe(motionSensor, "motion", motionHandler_MotionAlert)
+    }
+    
+    // Doorbell Alert
+    if (doorbell) {
+        subscribe(doorbell, "pushed", doorbellHandler_DoorbellAlert)
     }
     
     // Door Alert
@@ -130,6 +139,9 @@ def getInactiveThresholds() {
     }
     for (light in lights) {
         thresholds.add([device: light, inactiveHours: 24])
+    }
+    if (doorbell) {
+        thresholds.add([device: doorbell, inactiveHours: 2])
     }
     return thresholds
 }
@@ -192,6 +204,14 @@ def motionHandler_MotionAlert(evt) {
         if (door.currentValue("contact") == "closed") {
             personToNotify.deviceNotification("Motion on the Front Porch!")
         }
+    }
+}
+
+def doorbellHandler_DoorbellAlert(evt) {
+    logDebug("doorbellHandler_DoorbellAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (alertDoorbellRang) {
+        personToNotify.deviceNotification("Someone rang the doorbell!")
     }
 }
 
