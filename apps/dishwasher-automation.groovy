@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.2.0" }
+String getVersionNum() { return "5.3.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -55,8 +55,8 @@ preferences {
             input "alertReset", "bool", title: "Alert when Reset?", required: true, defaultValue: false
         }
         section("Reminder") {
-            input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: true
-            input "reminderRoutine", "capability.switch", title: "Turn On When", multiple: false, required: true
+            input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: false
+            input "reminderRoutine", "capability.switch", title: "Turn On When", multiple: false, required: false
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -96,14 +96,18 @@ def initialize() {
     def currentTime = new Date()
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", resetTimeHandler_ApplianceStatus)
     
-    // Reminder Switch
-    subscribe(reminderRoutine, "switch.on", routineHandler_ReminderSwitch)
-    subscribe(appliance, "status", applianceHandler_ReminderSwitch)
-    subscribe(personToNotify, "presence", personHandler_ReminderSwitch)
-    subscribe(personToNotify, "sleeping", personHandler_ReminderSwitch)
+    if (reminderSwitch) {
+        // Reminder Switch
+        if (reminderRoutine) {
+            subscribe(reminderRoutine, "switch.on", routineHandler_ReminderSwitch)
+        }
+        subscribe(appliance, "status", applianceHandler_ReminderSwitch)
+        subscribe(personToNotify, "presence", personHandler_ReminderSwitch)
+        subscribe(personToNotify, "sleeping", personHandler_ReminderSwitch)
     
-    // Reminder Alert
-    subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
+        // Reminder Alert
+        subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
+    }
     
     // Away Alert
     subscribe(contactSensor, "contact", handler_AwayAlert)
@@ -176,7 +180,7 @@ def applianceHandler_ApplianceStatus(evt) {
 def contactSensorHandler_ApplianceStatus(evt) {
     logDebug("contactSensorHandler_ApplianceStatus: ${evt.device} changed to ${evt.value}")
     
-    if (timeOfDayIsBetween(timeToday(bedtimeStart), timeToday(bedtimeEnd), new Date(), location.timeZone) || reminderSwitch.currentValue("switch") == "on") {
+    if (timeOfDayIsBetween(timeToday(bedtimeStart), timeToday(bedtimeEnd), new Date(), location.timeZone) || (reminderSwitch && reminderSwitch.currentValue("switch") == "on")) {
         appliance.start()
     }
 }
