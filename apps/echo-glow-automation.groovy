@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "4.3.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
+#include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
 definition(
@@ -138,6 +139,9 @@ def initialize() {
     subscribe(bedtimeNowRoutine, "pushed", handler_AwayAlert)
     subscribe(wakeUpRoutine, "pushed", handler_AwayAlert)
     
+    // Battery Alert
+    scheduleBatteryCheck()
+    
     // Inactive Alert
     scheduleInactiveCheck()
     
@@ -150,6 +154,16 @@ def initialize() {
     state.bedtimeNowUrl = "${getFullLocalApiServerUrl()}/bedtimeNow?access_token=$state.accessToken"
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
+}
+
+def getBatteryThresholds() {
+    def thresholds = []
+
+    if (hueRemote) {
+        thresholds.add([device: hueRemote, lowBattery: 10])
+    }
+    
+    return thresholds
 }
 
 def getInactiveThresholds() {
