@@ -14,12 +14,13 @@
  *
  */
  
-String getVersionNum() { return "2.3.0" }
+String getVersionNum() { return "2.4.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
 #include mikee385.sleep-alert-library
+#include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
 definition(
@@ -38,6 +39,8 @@ preferences {
         section {
             input "alarmPanel", "device.VivintPanel", title: "Alarm Panel", multiple: false, required: false
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
+            input "smokeDetectors", "capability.smokeDetector", title: "Smoke Detectors", multiple: true, required: false
+            input "glassBreaks", "capability.shockSensor", title: "Glass Breaks", multiple: true, required: false
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -75,6 +78,16 @@ def initialize() {
         subscribe(camera, "switch.on", cameraHandler_CameraAlert)
     }
     
+    // Smoke Alert
+    for (smokeDetector in smokeDetectors) {
+        subscribe(smokeDetector, "smoke.detected", smokeDetectorHandler_SmokeAlert)
+    }
+    
+    // Glass Break Alert
+    for (glassBreak in glassBreaks) {
+        subscribe(glassBreak, "shock.detected", glassBreakHandler_GlassBreakAlert)
+    }
+    
     // Away Alert
     for (camera in cameras) {
         subscribe(camera, "switch.off", handler_AwayAlert)
@@ -91,8 +104,24 @@ def initialize() {
         subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
     }
     
+    // Battery Alert
+    scheduleBatteryCheck()
+    
     // Inactive Alert
     scheduleInactiveCheck()
+}
+
+def getBatteryThresholds() {
+    def thresholds = []
+    
+    for (smokeDetector in smokeDetectors) {
+        thresholds.add([device: smokeDetector, lowBattery: 10])
+    }
+    for (glassBreak in glassBreaks) {
+        thresholds.add([device: glassBreak, lowBattery: 10])
+    }
+    
+    return thresholds
 }
 
 def getInactiveThresholds() {
@@ -101,6 +130,12 @@ def getInactiveThresholds() {
     ]
     for (camera in cameras) {
         thresholds.add([device: camera, inactiveHours: 24])
+    }
+    for (smokeDetector in smokeDetectors) {
+        thresholds.add([device: smokeDetector, inactiveHours: 2])
+    }
+    for (glassBreak in glassBreaks) {
+        thresholds.add([device: glassBreak, inactiveHours: 2])
     }
     return thresholds
 }
@@ -186,4 +221,16 @@ def checkCameras() {
             personToNotify.deviceNotification("Should the cameras be on?")
         }
     }
+}
+
+def smokeDetectorHandler_SmokeAlert(evt) {
+    logDebug("smokeDetectorHandler_SmokeAlert: ${evt.device} changed to ${evt.value}")
+
+    personToNotify.deviceNotification("Smoke detected by ${evt.device}!")
+}
+
+def glassBreakHandler_GlassBreakAlert(evt) {
+    logDebug("glassBreakHandler_GlassBreakAlert: ${evt.device} changed to ${evt.value}")
+
+    personToNotify.deviceNotification("Glass Break detected by ${evt.device}!")
 }
