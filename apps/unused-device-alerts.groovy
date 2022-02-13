@@ -68,12 +68,12 @@ def getBatteryThresholds() {
     def thresholds = []
     
     for (item in devices_2hr) {
-        if (item.hasCapability("Battery") {
+        if (item.hasCapability("Battery")) {
             thresholds.add([device: item, lowBattery: 10])
         }
     }
     for (item in devices_1day) {
-        if (item.hasCapability("Battery") {
+        if (item.hasCapability("Battery")) {
             thresholds.add([device: item, lowBattery: 10])
         }
     }
