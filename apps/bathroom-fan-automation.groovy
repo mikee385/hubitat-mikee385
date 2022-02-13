@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "3.3.0" }
+String getVersionNum() { return "3.4.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -39,6 +39,8 @@ preferences {
     page(name: "settings", title: "Bathroom Fan Automation", install: true, uninstall: true) {
         section("Fan") {
             input "fan", "capability.switch", title: "Bathroom Fan", multiple: false, required: true
+            input "alertFanOn", "bool", title: "Alert when On?", required: true, defaultValue: true
+            input "alertFanOff", "bool", title: "Alert when Off?", required: true, defaultValue: true
         }
         section("Sensor") {
             input "sensor", "capability.relativeHumidityMeasurement", title: "Bathroom Sensor", multiple: false, required: true
@@ -113,6 +115,9 @@ def initialize() {
     subscribe(sensor, "humidity", humidityHandler_FanSwitch)
     subscribe(fan, "switch", fanHandler_FanSwitch)
     subscribe(location, "mode", modeHandler_FanSwitch)
+    
+    // Fan Alert
+    subscribe(fan, "switch", fanHandler_FanAlert)
     
     // Away Alert
     subscribe(fan, "switch.on", handler_AwayAlert)
@@ -325,5 +330,19 @@ def modeHandler_FanSwitch(evt) {
     
     if (evt.value != "Home") {
         fan.off()
+    }
+}
+
+def fanHandler_FanAlert(evt) {
+    logDebug("fanHandler_FanAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        if (alertFanOn) {
+            personToNotify.deviceNotification("${fan} is on!")
+        }
+    } else {
+        if (alertFanOff) {
+            personToNotify.deviceNotification("${fan} is off!")
+        }
     }
 }
