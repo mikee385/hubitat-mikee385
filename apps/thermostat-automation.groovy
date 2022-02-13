@@ -14,12 +14,11 @@
  *
  */
  
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "3.3.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
-#include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
 definition(
@@ -86,9 +85,6 @@ def initialize() {
     for (sensor in sensors) {
         subscribe(sensor, "motion.active", handler_AwayAlert)
     }
-
-    // Battery Alert
-    scheduleBatteryCheck()
     
     // Inactive Alert
     scheduleInactiveCheck()
