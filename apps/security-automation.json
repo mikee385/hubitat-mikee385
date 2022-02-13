@@ -1,10 +1,10 @@
 {
     "packageName": "Security Automation",
     "author": "Michael Pierce",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add smoke and glass break alerts",
+    "releaseNotes": "Add tamper alerts",
     "dateReleased": "2022-02-13",
     "apps": [
         {
