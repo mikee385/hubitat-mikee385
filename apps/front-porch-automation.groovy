@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "3.3.0" }
+String getVersionNum() { return "3.4.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
+#include mikee385.tamper-alert-library
 #include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
@@ -113,6 +114,9 @@ def initialize() {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
 
+    // Tamper Alert
+    subscribe(door, "tamper.detected", handler_TamperAlert)
+    
     // Battery Alert
     scheduleBatteryCheck()
     

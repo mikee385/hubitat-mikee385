@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "6.3.0" }
+String getVersionNum() { return "6.4.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
+#include mikee385.tamper-alert-library
 #include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
@@ -102,6 +103,9 @@ def initialize() {
     subscribe(sideDoor, "contact", handler_AwayAlert)
     subscribe(motionSensor, "motion.active", handler_AwayAlert)
     subscribe(garageLight, "switch.on", handler_AwayAlert)
+    
+    // Tamper Alert
+    subscribe(entryDoor, "tamper.detected", handler_TamperAlert)
     
     // Battery Alert
     scheduleBatteryCheck()

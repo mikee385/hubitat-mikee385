@@ -14,12 +14,13 @@
  *
  */
  
-String getVersionNum() { return "2.4.0" }
+String getVersionNum() { return "2.5.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
 #include mikee385.sleep-alert-library
+#include mikee385.tamper-alert-library
 #include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
@@ -102,6 +103,20 @@ def initialize() {
     }
     if (alarmPanel) {
         subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
+    }
+    
+    // Tamper Alert
+    for (camera in cameras) {
+        subscribe(camera, "tamper.detected", handler_TamperAlert)
+    }
+    if (alarmPanel) {
+        subscribe(alarmPanel, "tamper.detected", handler_TamperAlert)
+    }
+    for (smokeDetector in smokeDetectors) {
+        subscribe(smokeDetector, "tamper.detected", handler_TamperAlert)
+    }
+    for (glassBreak in glassBreaks) {
+        subscribe(glassBreak, "tamper.detected", handler_TamperAlert)
     }
     
     // Battery Alert

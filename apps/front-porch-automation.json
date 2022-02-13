@@ -1,10 +1,10 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "3.3.0",
+    "version": "3.4.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add support for a doorbell",
+    "releaseNotes": "Add tamper alerts",
     "dateReleased": "2022-02-13",
     "apps": [
         {

@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
+String getVersionNum() { return "2.3.0" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
+#include mikee385.tamper-alert-library
 #include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
@@ -67,6 +68,11 @@ def initialize() {
     // Away Alert
     for (window in windows) {
         subscribe(window, "contact", handler_AwayAlert)
+    }
+    
+    // Tamper Alert
+    for (window in windows) {
+        subscribe(window, "tamper.detected", handler_TamperAlert)
     }
     
     // Battery Alert

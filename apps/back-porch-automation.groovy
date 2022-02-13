@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "6.3.0" }
+String getVersionNum() { return "6.4.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
+#include mikee385.tamper-alert-library
 #include mikee385.battery-alert-library
 #include mikee385.inactive-alert-library
 
@@ -98,6 +99,9 @@ def initialize() {
     subscribe(zone, "occupancy", zoneHandler_LockAlert)
     subscribe(personToNotify, "presence", personHandler_LockAlert)
     subscribe(personToNotify, "sleeping", personHandler_LockAlert)
+    
+    // Tamper Alert
+    subscribe(door, "tamper.detected", handler_TamperAlert)
     
     // Away Alert
     subscribe(door, "contact", handler_AwayAlert)
