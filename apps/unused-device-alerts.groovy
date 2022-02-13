@@ -36,7 +36,7 @@ preferences {
     page(name: "settings", title: "Unused Device Alerts", install: true, uninstall: true) {
         section {
             input "devices_2hr", "capability.sensor", title: "Inactivity threshold: 2 hours", multiple: true, required: false
-            input "devices_1day", "capability.sensor", title: "Inactivity threshold: 1 dat", multiple: true, required: false
+            input "devices_1day", "capability.sensor", title: "Inactivity threshold: 1 day", multiple: true, required: false
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
