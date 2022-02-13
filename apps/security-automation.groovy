@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.5.0" }
+String getVersionNum() { return "2.5.1" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -106,12 +106,6 @@ def initialize() {
     }
     
     // Tamper Alert
-    for (camera in cameras) {
-        subscribe(camera, "tamper.detected", handler_TamperAlert)
-    }
-    if (alarmPanel) {
-        subscribe(alarmPanel, "tamper.detected", handler_TamperAlert)
-    }
     for (smokeDetector in smokeDetectors) {
         subscribe(smokeDetector, "tamper.detected", handler_TamperAlert)
     }
