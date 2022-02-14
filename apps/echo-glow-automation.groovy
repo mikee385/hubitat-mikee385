@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.3.0" }
+String getVersionNum() { return "4.4.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -259,7 +259,7 @@ def downstairsGlowOff() {
 
 def pauseRoku() {
     for (rokuRemote in rokuRemotes) {
-        if (rokuRemote.currentValue("transportStatus") == "playing") {
+        if (rokuRemote.currentValue("transportStatus") == "playing" && rokuRemote.currentValue("application") != "Live TV") {
             rokuRemote.pause()
             rokuRemote.queryMediaPlayer()
         }
