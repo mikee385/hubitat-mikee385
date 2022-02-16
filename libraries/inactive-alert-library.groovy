@@ -1,10 +1,10 @@
 /**
  *  name: Inactive Alert Library
  *  author: Michael Pierce
- *  version: 1.3.0
+ *  version: 1.3.1
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Change timestamp of last activtiy to duration since last activity
+ *  releaseNotes: Add missing call to getTime
  *  dateReleased: 2022-02-16
  *
  *  Copyright 2022 Michael Pierce
@@ -49,7 +49,7 @@ def inactiveCheck() {
                         def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                         if (item.device.getLastActivity().getTime() <= cutoffTime) {
                             deviceIDs.add(item.device.id)
-                            personToNotify.inactiveNotification("${item.device} - ${timeSince(item.device.getLastActivity())}")
+                            personToNotify.inactiveNotification("${item.device} - ${timeSince(item.device.getLastActivity().getTime())}")
                         }
                     } else {
                         deviceIDs.add(item.device.id)
