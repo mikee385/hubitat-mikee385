@@ -1,11 +1,11 @@
 {
     "packageName": "Security Automation",
     "author": "Michael Pierce",
-    "version": "2.5.1",
+    "version": "2.6.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unnecessary tamper alerts",
-    "dateReleased": "2022-02-13",
+    "releaseNotes": "Change cameras to be optional",
+    "dateReleased": "2022-02-15",
     "apps": [
         {
             "id": "0df93513-7fb1-42d7-995a-3bf8204dcd78",

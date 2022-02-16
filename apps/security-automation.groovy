@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.5.1" }
+String getVersionNum() { return "2.6.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -39,7 +39,7 @@ preferences {
     page(name: "settings", title: "Security Automation", install: true, uninstall: true) {
         section {
             input "alarmPanel", "device.VivintPanel", title: "Alarm Panel", multiple: false, required: false
-            input "cameras", "capability.switch", title: "Cameras", multiple: true, required: true
+            input "cameras", "capability.switch", title: "Cameras", multiple: true, required: false
             input "smokeDetectors", "capability.smokeDetector", title: "Smoke Detectors", multiple: true, required: false
             input "glassBreaks", "capability.shockSensor", title: "Glass Breaks", multiple: true, required: false
         }
@@ -63,9 +63,11 @@ def updated() {
 
 def initialize() {
     // Camera Switch
-    subscribe(location, "mode", modeHandler_CameraSwitch)
-    if (alarmPanel) {
-        subscribe(alarmPanel, "alarm", alarmPanelHandler_CameraSwitch)
+    if (cameras) {
+        subscribe(location, "mode", modeHandler_CameraSwitch)
+        if (alarmPanel) {
+            subscribe(alarmPanel, "alarm", alarmPanelHandler_CameraSwitch)
+        }
     }
     
     // Alarm Alert
@@ -74,9 +76,11 @@ def initialize() {
     }
     
     // Camera Alert
-    subscribe(location, "mode", modeHandler_CameraAlert)
-    for (camera in cameras) {
-        subscribe(camera, "switch.on", cameraHandler_CameraAlert)
+    if (cameras) {
+        subscribe(location, "mode", modeHandler_CameraAlert)
+        for (camera in cameras) {
+            subscribe(camera, "switch.on", cameraHandler_CameraAlert)
+        }
     }
     
     // Smoke Alert
