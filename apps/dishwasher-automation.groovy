@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.3.0" }
+String getVersionNum() { return "5.4.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -57,6 +57,7 @@ preferences {
         section("Reminder") {
             input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: false
             input "reminderRoutine", "capability.switch", title: "Turn On When", multiple: false, required: false
+            input "reminderTime", "time", title: "Turn On At        ", required: false
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -100,6 +101,10 @@ def initialize() {
         // Reminder Switch
         if (reminderRoutine) {
             subscribe(reminderRoutine, "switch.on", routineHandler_ReminderSwitch)
+        }
+        if (reminderTime) {
+            def reminderToday = timeToday(reminderTime)
+            schedule("$currentTime.seconds $reminderToday.minutes $reminderToday.hours * * ? *", timeHandler_ReminderSwitch)
         }
         subscribe(appliance, "status", applianceHandler_ReminderSwitch)
         subscribe(personToNotify, "presence", personHandler_ReminderSwitch)
@@ -210,8 +215,20 @@ def resetTimeHandler_ApplianceStatus() {
 def routineHandler_ReminderSwitch(evt) {
     logDebug("routineHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
     
+    turnOnReminderSwitch()
+}
+
+def timeHandler_ReminderSwitch() {
+    logDebug("timeHandler_ReminderSwitch")
+    
+    turnOnReminderSwitch()
+}
+
+def turnOnReminderSwitch() {
     if (appliance.currentValue("status") == "idle") {
-        reminderSwitch.on()
+        if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+            reminderSwitch.on()
+        }
     }
 }
 
