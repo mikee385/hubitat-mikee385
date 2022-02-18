@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.3.0" }
+String getVersionNum() { return "7.4.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -260,7 +260,15 @@ def startCycle() {
     }
 
      if (timeOfDayIsBetween(timeToday(roombaStartTime), location.sunset, new Date(), location.timeZone) && everyoneAway && (workFromHomePerson.currentValue("presence") == "not present" || (duringWorkHours() && !busyWithWork()))) {
-        if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
+        if (roomba.currentValue("consumableStatus") == "maintenance_required") {
+            personToNotify.deviceNotification("$roomba could not start because the bin is full!")
+        } else if (roomba.currentValue("consumableStatus") == "missing") {
+            personToNotify.deviceNotification("$roomba could not start because the bin is missing!")
+        } else if (roomba.currentValue("consumableStatus") != "good") {
+            personToNotify.deviceNotification("$roomba could not start because of an unknown error with the bin!")
+        } else if (roomba.currentValue("battery") <= 10) {
+            personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
+        } else if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
             roomba.start()
         } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
             roomba.resume()
