@@ -1,11 +1,11 @@
 /**
  *  name: Inactive Alert Library
  *  author: Michael Pierce
- *  version: 1.3.1
+ *  version: 1.4.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Add missing call to getTime
- *  dateReleased: 2022-02-16
+ *  releaseNotes: Tweak inactive duration and attribute display
+ *  dateReleased: 2022-02-19
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -39,7 +39,6 @@ def inactiveCheck() {
     logDebug("inactiveCheck")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
-        def dateTimeFormat = "MMM d, yyyy, h:mm a"
         def deviceIDs = []
         
         if (getInactiveThresholds) {
@@ -67,11 +66,11 @@ def inactiveCheck() {
                         def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                         if (lastEvent.getDate().getTime() <= cutoffTime) {
                             deviceIDs.add(item.device.id)
-                            personToNotify.inactiveNotification("${item.device} - ${item.attribute} - ${timeSince(lastEvent.getDate().getTime())}")
+                            personToNotify.inactiveNotification("${item.device}* - ${timeSince(lastEvent.getDate().getTime())}")
                         }
                     } else {
                         deviceIDs.add(item.device.id)
-                        personToNotify.inactiveNotification("${item.device} - ${item.attribute} - No Activity")
+                        personToNotify.inactiveNotification("${item.device}* - No Activity")
                     }
                 }
             }
@@ -80,27 +79,41 @@ def inactiveCheck() {
 }
 
 def timeSince(date) {
-    def seconds = Math.floor((now() - date) / 1000)
+    def seconds = (now() - date) / 1000
+    if (seconds < 45) {
+        return (int)Math.round(seconds) + " seconds"
+    } else if (seconds < 90) {
+        return "1 minute"
+    }
     
-    def interval = seconds / 31536000
-    if (interval > 1) {
-        return (int)Math.floor(interval) + " years"
+    def minutes = seconds / 60
+    if (minutes < 45) {
+        return (int)Math.round(minutes) + " minutes"
+    } else if (minutes < 90) {
+        return "1 hour"
     }
-    interval = seconds / 2592000
-    if (interval > 1) {
-        return (int)Math.floor(interval) + " months"
+    
+    def hours = minutes / 60
+    if (hours < 22) {
+        return (int)Math.round(hours) + " hours"
+    } else if (hours < 36) {
+        return "1 day"
     }
-    interval = seconds / 86400
-    if (interval > 1) {
-        return (int)Math.floor(interval) + " days"
+    
+    def days = hours / 24
+    if (days < 26) {
+        return (int)Math.round(days) + " days"
+    } else if (days < 45) {
+        return "1 month"
     }
-    interval = seconds / 3600
-    if (interval > 1) {
-        return (int)Math.floor(interval) + " hours"
+    
+    def months = days / (365.25 / 12)
+    if (days < 320) {
+        return (int)Math.round(months) + " months"
+    } else if (days < 548) {
+        return "1 year"
     }
-    interval = seconds / 60.
-    if (interval > 1) {
-        return (int)Math.floor(interval) + " minutes"
-    }
-    return (int)Math.floor(seconds) + " seconds"
+    
+    def years = days / 365.25
+    return (int)Math.round(years) + " years"
 }
