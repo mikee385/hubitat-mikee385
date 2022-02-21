@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.0.1" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -231,7 +231,7 @@ def sleepTimeHandler_Thermostat(evt) {
 }
 
 def temperatureHandler_DownstairsTemperatureAlert(evt) {
-    logDebug("temperatureHandler_DownstairsTemperatureAlert")
+    logDebug("temperatureHandler_DownstairsTemperatureAlert: ${evt.device} changed to ${evt.value}")
     
     runIn(5, checkDownstairsTemperatures)
 }
@@ -243,7 +243,7 @@ def checkDownstairsTemperatures() {
 }
 
 def temperatureHandler_UpstairsTemperatureAlert(evt) {
-    logDebug("temperatureHandler_UpstairsTemperatureAlert")
+    logDebug("temperatureHandler_UpstairsTemperatureAlert: ${evt.device} changed to ${evt.value}")
     
     runIn(5, checkUpstairsTemperatures)
 }
@@ -256,6 +256,7 @@ def checkUpstairsTemperatures() {
 
 def checkTemperature(baseline, sensor) {
     def temperatureDifference = sensor.currentValue("temperature") - baseline.currentValue("temperature")
+    log.info "$sensor: ${sensor.currentValue('temperature')} - ${baseline.currentValue('temperature')} = $temperatureDifference"
     if (temperatureDifference >= 2) {
         temperatureAlert(sensor, "${sensor} is too hot! (${temperatureDifference}°)")
     } else if (temperatureDifference <= -2) {
@@ -265,8 +266,15 @@ def checkTemperature(baseline, sensor) {
 
 def temperatureAlert(sensor, message) {
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+        def minutesSincePreviousAlert = Double.MAX_VALUE
         def previousAlertTime = state.lastAlertTime.get(sensor.id)
-        def minutesSincePreviousAlert = (now() - previousAlertTime)/1000.0/60.0
+        if (previousAlertTime != null) {
+            minutesSincePreviousAlert = (now() - previousAlertTime)/1000.0/60.0
+            log.info "$sensor: Previous alert was $minutesSincePreviousAlert minutes ago"
+        } else {
+             log.info "$sensor: No previous alert"
+        }
+            
         if (minutesSincePreviousAlert >= 60) {
             state.lastAlertTime[sensor.id] = now()
             personToNotify.deviceNotification(message)
