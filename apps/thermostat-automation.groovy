@@ -167,7 +167,7 @@ def getUnchangedThresholds() {
     }
     
     if (upstairsThermostat) {
-        thresholds.add([device: upstairsThermostat, attribute: "temperature", inactiveHours: 6)
+        thresholds.add([device: upstairsThermostat, attribute: "temperature", inactiveHours: 6])
     }
     if (upstairsBaseline) {
         thresholds.add([device: upstairsBaseline, attribute: "temperature", inactiveHours: 6])
@@ -266,7 +266,7 @@ def checkTemperature(baseline, sensor) {
 def temperatureAlert(sensor, message) {
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
         def previousAlertTime = state.lastAlertTime.get(sensor.id)
-        def minutesSincePreviousAlert += (now() - previousAlertTime)/1000.0/60.0
+        def minutesSincePreviousAlert = (now() - previousAlertTime)/1000.0/60.0
         if (minutesSincePreviousAlert >= 60) {
             state.lastAlertTime[sensor.id] = now()
             personToNotify.deviceNotification(message)
