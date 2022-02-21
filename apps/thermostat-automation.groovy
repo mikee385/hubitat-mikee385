@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.3.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -34,9 +34,15 @@ definition(
 
 preferences {
     page(name: "settings", title: "Thermostat Automation", install: true, uninstall: true) {
-        section {
-            input "thermostats", "device.EcobeeThermostat", title: "Thermostats", multiple: true, required: true
-            input "sensors", "device.EcobeeSensor", title: "Remote Sensors", multiple: true, required: false
+        section("Downstairs") {
+            input "downstairsThermostat", "device.EcobeeThermostat", title: "Thermostat", multiple: false, required: false
+            input "downstairsBaseline", "device.EcobeeSensor", title: "Baseline Sensor", multiple: false, required: false
+            input "downstairsSensors", "device.EcobeeSensor", title: "Additional Sensors", multiple: true, required: false
+        }
+        section("Upstairs") {
+            input "upstairsThermostat", "device.EcobeeThermostat", title: "Thermostat", multiple: false, required: false
+            input "upstairsBaseline", "device.EcobeeSensor", title: "Baseline Sensor", multiple: false, required: false
+            input "upstairsSensors", "device.EcobeeSensor", title: "Additional Sensors", multiple: true, required: false
         }
         section {
             input "workdayTime", "time", title: "Workday Resume Time", required: false
@@ -62,6 +68,9 @@ def updated() {
 
 def initialize() {
     state.mode = location.mode
+    if (state.lastAlertTime == null) {
+        state.lastAlertTime = [:]
+    }
     
     // Thermostat
     subscribe(location, "mode", modeHandler_Thermostat)
@@ -78,11 +87,39 @@ def initialize() {
         schedule("$currentTime.seconds $sleepToday.minutes $sleepToday.hours * * ? *", sleepTimeHandler_Thermostat)
     }
     
-    // Away Alert
-    for (thermostat in thermostats) {
-        subscribe(thermostat, "motion.active", handler_AwayAlert)
+    // Temperature Alert
+    if (downstairsBaseline && downstairsSensors) {
+        subscribe(downstairsBaseline, "temperature", temperatureHandler_DownstairsTemperatureAlert)
+        for (sensor in downstairsSensors) {
+            subscribe(sensor, "temperature", temperatureHandler_DownstairsTemperatureAlert)
+        }
     }
-    for (sensor in sensors) {
+    
+    if (upstairsBaseline && upstairsSensors) {
+        subscribe(upstairsBaseline, "temperature", temperatureHandler_UpstairsTemperatureAlert)
+        for (sensor in upstairsSensors) {
+            subscribe(sensor, "temperature", temperatureHandler_UpstairsTemperatureAlert)
+        }
+    }
+    
+    // Away Alert
+    if (downstairsThermostat) {
+        subscribe(downstairsThermostat, "motion.active", handler_AwayAlert)
+    }
+    if (downstairsBaseline) {
+        subscribe(downstairsBaseline, "motion.active", handler_AwayAlert)
+    } 
+    for (sensor in downstairsSensors) {
+        subscribe(sensor, "motion.active", handler_AwayAlert)
+    }
+    
+    if (upstairsThermostat) {
+        subscribe(upstairsThermostat, "motion.active", handler_AwayAlert)
+    }
+    if (upstairsBaseline) {
+        subscribe(upstairsBaseline, "motion.active", handler_AwayAlert)
+    } 
+    for (sensor in upstairsSensors) {
         subscribe(sensor, "motion.active", handler_AwayAlert)
     }
     
@@ -93,10 +130,23 @@ def initialize() {
 def getInactiveThresholds() {
     def thresholds = []
     
-    for (thermostat in thermostats) {
-        thresholds.add([device: thermostat, inactiveHours: 1])
+    if (downstairsThermostat) {
+        thresholds.add([device: downstairsThermostat, inactiveHours: 1])
     }
-    for (sensor in sensors) {
+    if (downstairsBaseline) {
+        thresholds.add([device: downstairsBaseline, inactiveHours: 1])
+    }
+    for (sensor in downstairsSensors) {
+        thresholds.add([device: sensor, inactiveHours: 1])
+    }
+    
+    if (upstairsThermostat) {
+        thresholds.add([device: upstairsThermostat, inactiveHours: 1])
+    }
+    if (upstairsBaseline) {
+        thresholds.add([device: upstairsBaseline, inactiveHours: 1])
+    }
+    for (sensor in upstairsSensors) {
         thresholds.add([device: sensor, inactiveHours: 1])
     }
     
@@ -106,10 +156,23 @@ def getInactiveThresholds() {
 def getUnchangedThresholds() {
     def thresholds = []
     
-    for (thermostat in thermostats) {
-        thresholds.add([device: thermostat, attribute: "temperature", inactiveHours: 6])
+    if (downstairsThermostat) {
+        thresholds.add([device: downstairsThermostat, attribute: "temperature", inactiveHours: 6])
     }
-    for (sensor in sensors) {
+    if (downstairsBaseline) {
+        thresholds.add([device: downstairsBaseline, attribute: "temperature", inactiveHours: 6])
+    }
+    for (sensor in downstairsSensors) {
+        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 6])
+    }
+    
+    if (upstairsThermostat) {
+        thresholds.add([device: upstairsThermostat, attribute: "temperature", inactiveHours: 6)
+    }
+    if (upstairsBaseline) {
+        thresholds.add([device: upstairsBaseline, attribute: "temperature", inactiveHours: 6])
+    }
+    for (sensor in upstairsSensors) {
         thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 6])
     }
     
@@ -123,13 +186,19 @@ def modeHandler_Thermostat(evt) {
         def currentTime = new Date()
         def sleepToday = timeToday(sleepTime)
         if (currentTime < sleepToday) {
-            for (thermostat in thermostats) {
-                thermostat.setAway()
+            if (downstairsThermostat) {
+                downstairsThermostat.setAway()
+            }
+            if (upstairsThermostat) {
+                upstairsThermostat.setAway()
             }
         }
     } else if (state.mode == "Away") {
-        for (thermostat in thermostats) {
-            thermostat.resumeProgram()
+        if (downstairsThermostat) {
+            downstairsThermostat.resumeProgram()
+        }
+        if (upstairsThermostat) {
+            upstairsThermostat.resumeProgram()
         }
     }
     state.mode = evt.value
@@ -139,8 +208,11 @@ def workdayTimeHandler_Thermostat(evt) {
     logDebug("workdayTimeHandler_Thermostat")
     
     if (location.mode == "Away") {
-        for (thermostat in thermostats) {
-            thermostat.resumeProgram()
+        if (downstairsThermostat) {
+            downstairsThermostat.resumeProgram()
+        }
+        if (upstairsThermostat) {
+            upstairsThermostat.resumeProgram()
         }
     }
 }
@@ -149,8 +221,55 @@ def sleepTimeHandler_Thermostat(evt) {
     logDebug("sleepTimeHandler_Thermostat")
     
     if (location.mode == "Away") {
-        for (thermostat in thermostats) {
-            thermostat.resumeProgram()
+        if (downstairsThermostat) {
+            downstairsThermostat.resumeProgram()
         }
+        if (upstairsThermostat) {
+            upstairsThermostat.resumeProgram()
+        }
+    }
+}
+
+def temperatureHandler_DownstairsTemperatureAlert(evt) {
+    logDebug("temperatureHandler_DownstairsTemperatureAlert")
+    
+    runIn(5, checkDownstairsTemperatures)
+}
+
+def checkDownstairsTemperatures() {
+    for (sensor in downstairsSensors) {
+        checkTemperature(downstairsBaseline, sensor)
+    }
+}
+
+def temperatureHandler_UpstairsTemperatureAlert(evt) {
+    logDebug("temperatureHandler_UpstairsTemperatureAlert")
+    
+    runIn(5, checkUpstairsTemperatures)
+}
+
+def checkUpstairsTemperatures() {
+    for (sensor in upstairsSensors) {
+        checkTemperature(upstairsBaseline, sensor)
+    }
+}
+
+def checkTemperature(baseline, sensor) {
+    def temperatureDifference = sensor.currentValue("temperature") - baseline.currentValue("temperature")
+    if (temperatureDifference >= 2) {
+        temperatureAlert(sensor, "${sensor} is too hot! (${temperatureDifference}°)")
+    } else if (temperatureDifference <= -2) {
+        temperatureAlert(sensor, "${sensor} is too cold! (${temperatureDifference}°)")
+    } 
+}
+
+def temperatureAlert(sensor, message) {
+    if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+        def previousAlertTime = state.lastAlertTime.get(sensor.id)
+        def minutesSincePreviousAlert += (now() - previousAlertTime)/1000.0/60.0
+        if (minutesSincePreviousAlert >= 60) {
+            state.lastAlertTime[sensor.id] = now()
+            personToNotify.deviceNotification(message)
+        } 
     }
 }
