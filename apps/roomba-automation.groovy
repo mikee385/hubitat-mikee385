@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.4.0" }
+String getVersionNum() { return "7.4.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -231,7 +231,7 @@ def buttonHeldHandler(evt) {
     roomba.start()
 }
 
-def doorOpenedHandler() {
+def doorOpenedHandler(evt) {
     logDebug("doorOpenedHandler: ${evt.device} changed to ${evt.value}")
 
     roomba.pause()

@@ -1,11 +1,11 @@
 {
     "packageName": "Roomba Automation",
     "author": "Michael Pierce",
-    "version": "7.4.0",
+    "version": "7.4.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add additional error alerts when the roomba cannot start",
-    "dateReleased": "2022-02-18",
+    "releaseNotes": "Fix missing argument for event handler",
+    "dateReleased": "2022-02-25",
     "apps": [
         {
             "id": "8f28ae8c-f76b-44de-99bb-42d5b77cbaef",
