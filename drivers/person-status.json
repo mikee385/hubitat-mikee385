@@ -1,11 +1,11 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "6.3.0",
+    "version": "6.4.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Sort low battery and inactive messages",
-    "dateReleased": "2022-02-11",
+    "releaseNotes": "Add preferences for low battery and inactive alerts",
+    "dateReleased": "2022-02-26",
     "drivers": [
         {
             "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",

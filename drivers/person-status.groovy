@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.3.0" }
+String getVersionNum() { return "6.4.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -43,6 +43,11 @@ metadata {
         
         command "batteryNotification", ["string"]
         command "inactiveNotification", ["string"]
+    }
+    
+    preferences {
+        input "alertLowBattery", "bool", title: "Alert for Low Battery Report (8PM)?", required: true, defaultValue: true
+        input "alertInactive", "bool", title: "Alert for Inactive Device Report (8PM)?", required: true, defaultValue: true
     }
 }
 
@@ -89,8 +94,13 @@ def initialize() {
     
     def currentTime = new Date()
     def alertTime = timeToday("20:00")
-    schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", batteryAlert)
-    schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", inactiveAlert)
+    
+    if (alertLowBattery) {
+      schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", batteryAlert)
+    }
+    if (alertInactive) {
+      schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", inactiveAlert)
+    } 
 }
 
 def childDevice(name) {
