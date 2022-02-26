@@ -1,0 +1,20 @@
+{
+    "packageName": "Vacation Alerts",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "2.2.8",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2022-02-26",
+    "apps": [
+        {
+            "id": "e92081fa-b61a-43ba-8e0e-7b63b2c9f4d9",
+            "name": "Vacation Alerts",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/vacation-alerts.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ]
+}

@@ -178,6 +178,13 @@
             "tags": [ "Notifications"]
         },
         {
+            "name": "Vacation Alerts",
+            "category": "Notifications",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/vacation-alerts.json",
+            "description": "Alerts when mode is Away for an extended period of time.",
+            "tags": [ "Notifications", "Presence & Location" ]
+        },
+        {
             "name": "Weather Alerts",
             "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.json",
