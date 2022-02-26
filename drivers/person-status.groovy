@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.4.0" }
+String getVersionNum() { return "6.5.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -46,8 +46,8 @@ metadata {
     }
     
     preferences {
-        input "alertLowBattery", "bool", title: "Alert for Low Battery Report (8PM)?", required: true, defaultValue: true
-        input "alertInactive", "bool", title: "Alert for Inactive Device Report (8PM)?", required: true, defaultValue: true
+        input "alertLowBattery", "bool", title: "Alert for Low Battery Report (8PM)?", required: true, defaultValue: false
+        input "alertInactive", "bool", title: "Alert for Inactive Device Report (8PM)?", required: true, defaultValue: false
     }
 }
 
