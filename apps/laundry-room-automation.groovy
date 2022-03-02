@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,7 +36,7 @@ definition(
 preferences {
     page(name: "settings", title: "Laundry Room Automation", install: true, uninstall: true) {
         section {
-            input "light", "device.GEZ-WavePlusMotionSwitch", title: "Light", multiple: false, required: true
+            input "light", "device.GEZ-WavePlusMotionSwitchComboDriver", title: "Light", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "gate", "capability.contactSensor", title: "Gate", multiple: false, required: false
         }

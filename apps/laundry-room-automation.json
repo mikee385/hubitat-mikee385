@@ -1,10 +1,10 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "7.0.0",
+    "version": "7.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Replace zone and occupancy with direct control of the light switch",
+    "releaseNotes": "Update the driver type for the light switch",
     "dateReleased": "2022-03-02",
     "apps": [
         {
