@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.2.0" }
+String getVersionNum() { return "7.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,7 +36,6 @@ definition(
 preferences {
     page(name: "settings", title: "Laundry Room Automation", install: true, uninstall: true) {
         section {
-            input "zone", "device.OccupancyStatus", title: "Zone", multiple: false, required: true
             input "light", "device.GEZ-WavePlusMotionSwitch", title: "Light", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "gate", "capability.contactSensor", title: "Gate", multiple: false, required: false
@@ -76,25 +75,22 @@ def updated() {
 }
 
 def initialize() {
-    // Occupancy
-    subscribe(door, "contact", doorHandler_Occupancy)
-    if (gate) {
-        subscribe(gate, "contact", doorHandler_Occupancy)
-    }
-    subscribe(light, "switch", switchHandler_Occupancy)
-    subscribe(light, "motion", motionHandler_Occupancy)
-    subscribe(location, "mode", modeHandler_Occupancy)
-
     // Light Switch
-    subscribe(zone, "occupancy", zoneHandler_LightSwitch)
-    
+    subscribe(door, "contact.open", doorHandler_LightSwitch)
+    if (gate) {
+        subscribe(gate, "contact.open", doorHandler_LightSwitch)
+    }
+    subscribe(light, "switch", switchHandler_LightSwitch)
+    subscribe(light, "motion", motionHandler_LightSwitch)
+    subscribe(location, "mode", modeHandler_LightSwitch)
+
     // Light Timeout
     subscribe(door, "contact", doorHandler_LightTimeout)
     
     // Laundry Status
     subscribe(washer, "currentState", washerHandler_LaundryStatus)
     subscribe(dryer, "currentState", dryerHandler_LaundryStatus)
-    subscribe(light, "motion.active", lightHandler_LaundryStatus)
+    subscribe(light, "motion.active", switchHandler_LaundryStatus)
 
     // Bedtime Routine
     subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
@@ -177,50 +173,46 @@ def getUnchangedThresholds() {
     ]
 }
 
-def doorHandler_Occupancy(evt) {
-    logDebug("doorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+def doorHandler_LightSwitch(evt) {
+    logDebug("doorHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
-    if (evt.value == "open") {
-        if (light.currentValue("motion") == "active") {
-            zone.occupied()
-        } else {
-            zone.checking()
+    light.on()
+}
+
+def switchHandler_LightSwitch(evt) {
+    logDebug("switchHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value == "on") {
+        if (light.currentValue("motion") != "active") {
+            runIn(60, lightOff)
         }
-    }
+    } else {
+        unschedule("lightOff")
+    } 
 }
 
-def switchHandler_Occupancy(evt) {
-    logDebug("switchHandler_Occupancy: ${evt.device} changed to ${evt.value}")
-
-    if (evt.value == "off") {
-        zone.vacant()
-    }
-}
-
-def motionHandler_Occupancy(evt) {
-    logDebug("motionHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+def motionHandler_LightSwitch(evt) {
+    logDebug("motionHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "active") {
-        zone.occupied()
+        unschedule("lightOff")
     }
 }
 
-def modeHandler_Occupancy(evt) {
-    logDebug("modeHandler_Occupancy: ${evt.device} changed to ${evt.value}")
+def modeHandler_LightSwitch(evt) {
+    logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "Home") {
-        zone.vacant()
+        light.off()
     }
 }
 
-def zoneHandler_LightSwitch(evt) {
-    logDebug("zoneHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+def lightOff() {
+    logDebug("lightOff")
     
-    if (evt.value == "vacant") {
+    if (light.currentValue("motion") != "active") {
         light.off()
-    } else {
-        light.on()
-    }
+    } 
 }
 
 def doorHandler_LightTimeout(evt) {
@@ -229,14 +221,14 @@ def doorHandler_LightTimeout(evt) {
     if (evt.value == "closed") {
         light.setLightTimeout("5 minutes")
     } else {
-        subscribe(light, "switch.off", lightHandler_LightTimeout)
+        subscribe(light, "switch.off", switchHandler_LightTimeout)
     }
 }
 
-def lightHandler_LightTimeout(evt) {
-    logDebug("lightHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
+def switchHandler_LightTimeout(evt) {
+    logDebug("switchHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
     
-    unsubscribe("lightHandler_LightTimeout")
+    unsubscribe("switchHandler_LightTimeout")
     light.setLightTimeout("1 minute")
 }
 
@@ -296,8 +288,8 @@ def dryerHandler_LaundryStatus(evt) {
     }
 }
 
-def lightHandler_LaundryStatus(evt) {
-    logDebug("lightHandler_LaundryStatus: ${evt.device} changed to ${evt.value}")
+def switchHandler_LaundryStatus(evt) {
+    logDebug("switchHandler_LaundryStatus: ${evt.device} changed to ${evt.value}")
     
     if (laundry.currentValue("status") == "finished") {
         laundry.reset()
