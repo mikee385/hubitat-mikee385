@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.4.0" }
+String getVersionNum() { return "6.5.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -285,8 +285,10 @@ def overheadDoorHandler_DoorAlert(evt) {
 }
 
 def overheadDoorAlert() {
-    personToNotify.deviceNotification("Should the $overheadDoor still be open?")
-    runIn(60*30, overheadDoorAlert)
+    if (overheadDoor.currentValue("contact") == "open") {
+        personToNotify.deviceNotification("Should the $overheadDoor still be open?")
+        runIn(60*30, overheadDoorAlert)
+    } 
 }
 
 def entryDoorHandler_DoorAlert(evt) {
@@ -302,8 +304,10 @@ def entryDoorHandler_DoorAlert(evt) {
 }
 
 def entryDoorAlert() {
-    personToNotify.deviceNotification("Should the $entryDoor still be open?")
-    runIn(60*30, entryDoorAlert)
+    if (entryDoor.currentValue("contact") == "open") {
+        personToNotify.deviceNotification("Should the $entryDoor still be open?")
+        runIn(60*30, entryDoorAlert)
+    }
 }
 
 def sideDoorHandler_DoorAlert(evt) {
@@ -319,8 +323,10 @@ def sideDoorHandler_DoorAlert(evt) {
 }
 
 def sideDoorAlert() {
-    personToNotify.deviceNotification("Should the $sideDoor still be open?")
-    runIn(60*30, sideDoorAlert)
+    if (sideDoor.currentValue("contact") == "open") {
+        personToNotify.deviceNotification("Should the $sideDoor still be open?")
+        runIn(60*30, sideDoorAlert)
+    } 
 }
 
 def personHandler_DoorAlert(evt) {
