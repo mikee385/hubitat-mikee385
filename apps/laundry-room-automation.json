@@ -1,10 +1,10 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "7.1.0",
+    "version": "7.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Update the driver type for the light switch",
+    "releaseNotes": "Turn off loght when Bedtime routine is triggered",
     "dateReleased": "2022-03-02",
     "apps": [
         {

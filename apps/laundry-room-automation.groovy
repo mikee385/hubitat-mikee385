@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.1.0" }
+String getVersionNum() { return "7.2.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -82,6 +82,7 @@ def initialize() {
     }
     subscribe(light, "switch", switchHandler_LightSwitch)
     subscribe(light, "motion", motionHandler_LightSwitch)
+    subscribe(routine, "switch.on", routineHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
 
     // Light Timeout
@@ -199,6 +200,12 @@ def motionHandler_LightSwitch(evt) {
     }
 }
 
+def routineHandler_LightSwitch() {
+    logDebug("routineHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
+
+    light.off()
+}
+
 def modeHandler_LightSwitch(evt) {
     logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
@@ -301,7 +308,6 @@ def doorHandler_BedtimeRoutine(evt) {
     
     if (location.mode != "Away" && timeOfDayIsBetween(timeToday(startTime), timeToday(endTime), new Date(), location.timeZone)) {
         routine.on()
-        zone.vacant()
     }
 }
 
