@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "System Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -35,6 +35,9 @@ preferences {
         section("Alerts") {
             input "alertReboot", "bool", title: "Alert when Rebooted?", required: true, defaultValue: true
             input "alertSevereLoad", "bool", title: "Alert when Severe Load?", required: true, defaultValue: true
+            input "alertZigbeeOff", "bool", title: "Alert when Zigbee Off?", required: true, defaultValue: true
+            input "alertZigbeeOn", "bool", title: "Alert when Zigbee On?", required: true, defaultValue: true
+            input "alertZwaveCrashed", "bool", title: "Alert when Z-Wave Crashed?", required: true, defaultValue: true
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -62,6 +65,18 @@ def initialize() {
     if (alertSevereLoad) {
         subscribe(location, "severeLoad", severeLoadHandler)
     }
+    
+    if (alertZigbeeOff) {
+        subscribe(location, "zigbeeOff", zigbeeOffHandler)
+    }
+    
+    if (alertZigbeeOn) {
+        subscribe(location, "zigbeeOn", zigbeeOnHandler)
+    }
+    
+    if (alertZwaveCrashed) {
+        subscribe(location, "zwaveCrashed", zwaveCrashedHandler)
+    }
 }
 
 def rebootHandler(evt) {
@@ -74,4 +89,22 @@ def severeLoadHandler(evt) {
     logDebug("severeLoadHandler: ${evt.device} changed to ${evt.value}")
     
     personToNotify.deviceNotification("Hub has severe load!")
+}
+
+def zigbeeOffHandler(evt) {
+    logDebug("zigbeeOffHandler: ${evt.device} changed to ${evt.value}")
+    
+    personToNotify.deviceNotification("Zigbee has been turned off!")
+}
+
+def zigbeeOnHandler(evt) {
+    logDebug("zigbeeOnHandler: ${evt.device} changed to ${evt.value}")
+    
+    personToNotify.deviceNotification("Zigbee has been turned on!")
+}
+
+def zwaveCrashedHandler(evt) {
+    logDebug("zwaveCrashedHandler: ${evt.device} changed to ${evt.value}")
+    
+    personToNotify.deviceNotification("Z-Wave has crashed!")
 }

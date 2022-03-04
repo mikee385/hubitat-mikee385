@@ -1,11 +1,11 @@
 {
     "packageName": "System Alerts",
     "author": "Michael Pierce",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Move debug method to external library",
-    "dateReleased": "2022-02-07",
+    "releaseNotes": "Add alerts for Zigbee and Z-Wave",
+    "dateReleased": "2022-03-04",
     "apps": [
         {
             "id": "542f47a7-a210-414b-bd5c-06313db3fe48",
