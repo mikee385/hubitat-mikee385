@@ -14,7 +14,9 @@
  *
  */
  
-String getVersionNum() { return "7.2.0" }
+import groovy.time.TimeCategory
+ 
+String getVersionNum() { return "7.3.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -200,7 +202,7 @@ def motionHandler_LightSwitch(evt) {
     }
 }
 
-def routineHandler_LightSwitch() {
+def routineHandler_LightSwitch(evt) {
     logDebug("routineHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     light.off()
@@ -306,7 +308,16 @@ def switchHandler_LaundryStatus(evt) {
 def doorHandler_BedtimeRoutine(evt) {
     logDebug("doorHandler_BedtimeRoutine: ${evt.device} changed to ${evt.value}")
     
-    if (location.mode != "Away" && timeOfDayIsBetween(timeToday(startTime), timeToday(endTime), new Date(), location.timeZone)) {
+    def startToday = timeToday(startTime)
+    def endToday = timeToday(endTime)
+    if (endToday <= startToday) {
+        use (TimeCategory) {
+            endToday = endToday + 1.day
+        }
+    }
+    personToNotify.deviceNotification("Start: ${startToday}\nEnd: ${endToday}") 
+    
+    if (location.mode != "Away" && timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
         routine.on()
     }
 }

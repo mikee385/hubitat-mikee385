@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "7.2.0",
+    "version": "7.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Turn off loght when Bedtime routine is triggered",
-    "dateReleased": "2022-03-02",
+    "releaseNotes": "Support time ranges that cross midnight",
+    "dateReleased": "2022-03-03",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",
