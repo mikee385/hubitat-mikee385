@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "6.4.0",
+    "version": "7.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add tamper alerts",
-    "dateReleased": "2022-02-13",
+    "releaseNotes": "Replace zone and occupancy with direct control of the light switch",
+    "dateReleased": "2022-03-04",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
