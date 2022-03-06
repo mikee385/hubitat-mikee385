@@ -16,7 +16,7 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "7.3.0" }
+String getVersionNum() { return "7.3.1" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -315,7 +315,6 @@ def doorHandler_BedtimeRoutine(evt) {
             endToday = endToday + 1.day
         }
     }
-    personToNotify.deviceNotification("Start: ${startToday}\nEnd: ${endToday}") 
     
     if (location.mode != "Away" && timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
         routine.on()
