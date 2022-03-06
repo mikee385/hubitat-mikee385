@@ -16,7 +16,7 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "7.3.1" }
+String getVersionNum() { return "7.4.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -228,6 +228,7 @@ def doorHandler_LightTimeout(evt) {
     logDebug("doorHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "closed") {
+        unsubscribe("switchHandler_LightTimeout")
         light.setLightTimeout("5 minutes")
     } else {
         subscribe(light, "switch.off", switchHandler_LightTimeout)
