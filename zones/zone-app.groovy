@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.2" }
+String getVersionNum() { return "10.0.0-beta.3" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -406,7 +406,7 @@ def setActivityFromDevices(zone) {
     }
 }
 
-def setEvent(type) {
+def setEvent(zone, type) {
     zone.sendEvent(name: "event", value: type, isStateChange: true)
 }
 
@@ -423,7 +423,7 @@ activity: ${zone.currentValue('activity')}"""
     cancelClosedTimer()
     setDeviceToActive(evt)
     setActivityToActive(zone)
-    setEvent("engaged")
+    setEvent(zone, "engaged")
     
     debugContext += """
 event => ${zone.currentValue('event')}
@@ -443,10 +443,10 @@ activity: ${zone.currentValue('activity')}"""
     setDeviceToChecking(evt)
     if (zone.currentValue("contact") == "closed") {
         setActivityToActive(zone)
-        setEvent("engaged")
+        setEvent(zone, "engaged")
     } else {
         setActivityFromDevices(zone)
-        setEvent("disengaged")
+        setEvent(zone, "disengaged")
     }
     
     debugContext += """
@@ -468,16 +468,16 @@ activity: ${zone.currentValue('activity')}"""
         if (zone.currentValue("activity") == "idle") {
             setDeviceToQuestionable(evt)
             setActivityFromDevices(zone)
-            setEvent("questionable")
+            setEvent(zone, "questionable")
         } else {
             setDeviceToActive(evt)
             setActivityToActive(zone)
-            setEvent("engaged")
+            setEvent(zone, "engaged")
         }
     } else {
         setDeviceToActive(evt)
         setActivityToActive(zone)
-        setEvent("active")
+        setEvent(zone, "active")
     }
     
     debugContext += """
@@ -498,7 +498,7 @@ activity: ${zone.currentValue('activity')}"""
     if (zone.currentValue("contact") == "open") {
         setActivityFromDevices(zone)
     }
-    setEvent("inactive")
+    setEvent(zone, "inactive")
     
     debugContext += """
 event => ${zone.currentValue('event')}
@@ -519,16 +519,16 @@ activity: ${zone.currentValue('activity')}"""
         if (zone.currentValue("activity") == "idle") {
             setDeviceToQuestionable(evt)
             setActivityFromDevices(zone)
-            setEvent("questionable")
+            setEvent(zone, "questionable")
         } else {
             setDeviceToChecking(evt)
             setActivityToActive(zone)
-            setEvent("engaged")
+            setEvent(zone, "engaged")
         }
     } else {
         setDeviceToChecking(evt)
         setActivityFromDevices(zone)
-        setEvent("momentary")
+        setEvent(zone, "momentary")
     }
     
     debugContext += """
@@ -552,7 +552,7 @@ activity: ${zone.currentValue('activity')}"""
     cancelClosedTimer()
     setDeviceToActive(evt)
     setActivityToActive(zone)
-    setEvent("engaged")
+    setEvent(zone, "engaged")
     
     debugContext += """
 contact => ${zone.currentValue('contact')}
@@ -574,7 +574,7 @@ activity: ${zone.currentValue('activity')}"""
     cancelClosedTimer()
     setDeviceToChecking(evt)
     setActivityFromDevices(zone)
-    setEvent("disengaged")
+    setEvent(zone, "disengaged")
     
     debugContext += """
 contact => ${zone.currentValue('contact')}
@@ -596,7 +596,7 @@ activity: ${zone.currentValue('activity')}"""
     cancelClosedTimer()
     setDeviceToChecking(evt)
     setActivityFromDevices(zone)
-    setEvent("momentary")
+    setEvent(zone, "momentary")
     
     debugContext += """
 contact => ${zone.currentValue('contact')}
@@ -620,7 +620,7 @@ activity: ${zone.currentValue('activity')}"""
     cancelClosedTimer()
     setDeviceToActive(evt)
     setActivityToActive(zone)
-    setEvent("engaged")
+    setEvent(zone, "engaged")
     
     debugContext += """
 contact => ${zone.currentValue('contact')}
@@ -643,13 +643,13 @@ activity: ${zone.currentValue('activity')}"""
         cancelClosedTimer()
         setDeviceToChecking(evt)
         setActivityToChecking(zone)
-        setEvent("disengaged")
+        setEvent(zone, "disengaged")
         startClosedTimer()
     } else {
         cancelClosedTimer()
         setDeviceToChecking(evt)
         setActivityFromDevices(zone)
-        setEvent("disengaged")
+        setEvent(zone, "disengaged")
     }
     
     debugContext += """
@@ -673,13 +673,13 @@ activity: ${zone.currentValue('activity')}"""
         cancelClosedTimer()
         setDeviceToChecking(evt)
         setActivityToChecking(zone)
-        setEvent("momentary")
+        setEvent(zone, "momentary")
         startClosedTimer()
     } else {
         cancelClosedTimer()
         setDeviceToChecking(evt)
         setActivityFromDevices(zone)
-        setEvent("momentary")
+        setEvent(zone, "momentary")
     }
     
     debugContext += """
@@ -721,7 +721,7 @@ activity: ${zone.currentValue('activity')}"""
      || evt.value == "momentary") {
         cancelClosedTimer()
     }
-    setEvent(evt.value)
+    setEvent(zone, evt.value)
     
     debugContext += """
 event => ${zone.currentValue('event')}"""
@@ -741,7 +741,7 @@ activity: ${zone.currentValue('activity')}"""
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
         setActivityFromDevices(zone)
-        setEvent("idle")
+        setEvent(zone, "idle")
         
         debugContext += """
 event => ${zone.currentValue('event')}
@@ -765,7 +765,7 @@ activity: ${zone.currentValue('activity')}"""
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
         setActivityFromDevices(zone)
-        setEvent("idle")
+        setEvent(zone, "idle")
         
         debugContext += """
 event => ${zone.currentValue('event')}
@@ -795,10 +795,10 @@ activity: ${zone.currentValue('activity')}"""
     
     if (anyDeviceActive) {
         setActivityToActive(zone)
-        setEvent("engaged")
+        setEvent(zone, "engaged")
     } else {
         setActivityToIdle(zone)
-        setEvent("idle")
+        setEvent(zone, "idle")
     }
     
     debugContext += """
