@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.1" }
+String getVersionNum() { return "10.0.0-beta.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -75,7 +75,7 @@ def mainPage() {
             section {
                 input "checkingSeconds", "number", title: "CHECKING - Time that zone will stay active after momentary events (seconds)", required: true, defaultValue: 60
                 input "questionableSeconds", "number", title: "QUESTIONABLE - Time that zone will check for additional activity after receiving an unexpected event when closed and vacant (seconds)", required: true, defaultValue: 60
-                input "closedSeconds", "number", title: "CLOSED - Time that zone will check for activity after all entry doors have been closed (seconds)", required: true, defaultValue: 20
+                input "closedSeconds", "number", title: "CLOSED - Time that zone will check for activity after all entry doors have been closed (seconds)", required: true, defaultValue: 60
             }
         } else if (zoneType == "Manual") {
             section {
@@ -87,7 +87,6 @@ def mainPage() {
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
-            label title: "Assign a name", required: true
         }
     }
 }
@@ -298,12 +297,10 @@ def initialize() {
         log.error "Unknown zone type: $zoneType"
     }
     
-    logDebug("""Zone ${app.label} - Initial
-engaged = ${zoneIsEngaged(zone)}
-active = ${zoneIsActive(zone)}
-contact = ${zone.currentValue('contact')}
-occupancy = ${zone.currentValue('occupancy')}
-""")
+    logDebug("""Zone ${app.label}
+Initial
+contact: ${zone.currentValue('contact')}
+activity: ${zone.currentValue('activity')}""")
 }
 
 def uninstalled() {
@@ -336,25 +333,25 @@ def addDevice(device, type, activity) {
 //-----------------------------------------
 
 def setDeviceToActive(evt) {
-    state.devices[evt.deviceId].activity = "active"
-    state.devices[evt.deviceId].timerId = null
+    state.devices["${evt.deviceId}"].activity = "active"
+    state.devices["${evt.deviceId}"].timerId = null
 }
 
 def setDeviceToChecking(evt) {
-    state.devices[evt.deviceId].activity = "checking"
-    state.devices[evt.deviceId].timerId = evt.id
-    runIn(checkingSeconds, checkingTimer, [overwrite: false, data: [id: evt.id, deviceId: evt.deviceId]])
+    state.devices["${evt.deviceId}"].activity = "checking"
+    state.devices["${evt.deviceId}"].timerId = "${evt.id}"
+    runIn(checkingSeconds, checkingTimer, [overwrite: false, data: [id: "${evt.id}", deviceId: "${evt.deviceId}"]])
 }
 
 def setDeviceToQuestionable(evt) {
-    state.devices[evt.deviceId].activity = "questionable"
-    state.devices[evt.deviceId].timerId = evt.id
-    runIn(questionableSeconds, questionableTimer, [overwrite: false, data: [id: evt.id, deviceId: evt.deviceId]])
+    state.devices["${evt.deviceId}"].activity = "questionable"
+    state.devices["${evt.deviceId}"].timerId = "${evt.id}"
+    runIn(questionableSeconds, questionableTimer, [overwrite: false, data: [id: "${evt.id}", deviceId: "${evt.deviceId}"]])
 }
 
 def setDeviceToIdle(evt) {
-    state.devices[evt.deviceId].activity = "idle"
-    state.devices[evt.deviceId].timerId = null
+    state.devices["${evt.deviceId}"].activity = "idle"
+    state.devices["${evt.deviceId}"].timerId = null
 }
 
 //-----------------------------------------
@@ -388,7 +385,7 @@ def setActivityFromDevices(zone) {
     def isChecking = false
     def isQuestionable = false
     
-    for (device in state.devices) {
+    for (device in state.devices.values()) {
         if (device.activity == "active") {
             isActive = true
         } else if (device.activity == "checking") {
@@ -702,7 +699,7 @@ ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
 
-    state.devices[evt.deviceId].activity = evt.value
+    state.devices["${evt.deviceId}"].activity = evt.value
     setActivityFromDevices(zone)
     
     debugContext += """
@@ -741,7 +738,7 @@ ${state.devices[evt.deviceId].name}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
 
-    if (state.devices[evt.deviceId].timerId == evt.id) {
+    if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
         setActivityFromDevices(zone)
         setEvent("idle")
@@ -765,7 +762,7 @@ ${state.devices[evt.deviceId].name}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
 
-    if (state.devices[evt.deviceId].timerId == evt.id) {
+    if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
         setActivityFromDevices(zone)
         setEvent("idle")
@@ -789,7 +786,7 @@ contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
 
     def anyDeviceActive = false
-    for (device in state.devices) {
+    for (device in state.devices.values()) {
         if (device.activity == "active") {
             anyDeviceActive = true
             break 
