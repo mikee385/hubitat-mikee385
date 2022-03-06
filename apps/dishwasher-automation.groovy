@@ -14,7 +14,9 @@
  *
  */
  
-String getVersionNum() { return "5.4.0" }
+import groovy.time.TimeCategory
+ 
+String getVersionNum() { return "5.5.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -185,7 +187,15 @@ def applianceHandler_ApplianceStatus(evt) {
 def contactSensorHandler_ApplianceStatus(evt) {
     logDebug("contactSensorHandler_ApplianceStatus: ${evt.device} changed to ${evt.value}")
     
-    if (timeOfDayIsBetween(timeToday(bedtimeStart), timeToday(bedtimeEnd), new Date(), location.timeZone) || (reminderSwitch && reminderSwitch.currentValue("switch") == "on")) {
+    def startToday = timeToday(bedtimeStart)
+    def endToday = timeToday(bedtimeEnd)
+    if (endToday <= startToday) {
+        use (TimeCategory) {
+            endToday = endToday + 1.day
+        }
+    }
+    
+    if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone) || (reminderSwitch && reminderSwitch.currentValue("switch") == "on")) {
         appliance.start()
     }
 }
