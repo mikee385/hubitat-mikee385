@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.4" }
+String getVersionNum() { return "10.0.0-beta.5" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -109,7 +109,8 @@ def initialize() {
     def zone = getZoneDevice()
     def debugContext = new StringBuilder(
 """Zone ${app.label}
-Initial""")
+Initial"""
+    )
     
     if (zoneType == "Automated") {
         if (entryDoors) {
@@ -488,6 +489,7 @@ Active Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     cancelClosedTimer()
     if (zone.currentValue("contact") == "closed") {
@@ -517,6 +519,7 @@ Inactive Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     setDeviceToChecking(evt)
     if (zone.currentValue("contact") == "open") {
@@ -535,6 +538,7 @@ Momentary Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     cancelClosedTimer()
     if (zone.currentValue("contact") == "closed") {
@@ -566,6 +570,7 @@ Open, Engaged Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     setContactToOpen(zone, debugContext)
     
@@ -585,6 +590,7 @@ Open, Disengaged Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     setContactToOpen(zone, debugContext)
 
@@ -604,6 +610,7 @@ Open, Momentary Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     setContactToOpen(zone, debugContext)
     
@@ -623,6 +630,7 @@ Closed, Engaged Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     if (!zoneIsOpen(zone)) {
         setContactToClosed(zone, debugContext)
@@ -644,6 +652,7 @@ Closed, Disengaged Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     if (!zoneIsOpen(zone)) {
         setContactToClosed(zone, debugContext)
@@ -671,6 +680,7 @@ Closed, Momentary Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     if (!zoneIsOpen(zone)) {
         setContactToClosed(zone, debugContext)
@@ -700,6 +710,7 @@ Child Zone Activity Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     state.devices["${evt.deviceId}"].activity = evt.value
     setActivityFromDevices(zone, debugContext)
@@ -715,6 +726,7 @@ Child Zone Event Handler
 ${evt.device} is ${evt.value}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     if (evt.value == "engaged"
      || evt.value == "disengaged"
@@ -737,6 +749,7 @@ Checking Timer
 ${state.devices[evt.deviceId].name}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
@@ -758,6 +771,7 @@ Questionable Timer
 ${state.devices[evt.deviceId].name}
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
@@ -778,6 +792,7 @@ def closedTimer() {
 Closed Timer
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
+    )
 
     def anyDeviceActive = false
     for (device in state.devices.values()) {
