@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.6" }
+String getVersionNum() { return "10.0.0-beta.7" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -472,13 +472,8 @@ activity: ${zone.currentValue('activity')}"""
 
     cancelClosedTimer()
     setDeviceToChecking(evt)
-    if (zone.currentValue("contact") == "closed") {
-        setActivityToActive(zone, debugContext)
-        setEvent(zone, "engaged", debugContext)
-    } else {
-        setActivityFromDevices(zone, debugContext)
-        setEvent(zone, "disengaged", debugContext)
-    }
+    setActivityFromDevices(zone, debugContext)
+    setEvent(zone, "disengaged", debugContext)
     
     logDebug(debugContext)
 }
@@ -494,16 +489,10 @@ activity: ${zone.currentValue('activity')}"""
     )
 
     cancelClosedTimer()
-    if (zone.currentValue("contact") == "closed") {
-        if (zone.currentValue("activity") == "idle") {
-            setDeviceToQuestionable(evt)
-            setActivityFromDevices(zone, debugContext)
-            setEvent(zone, "questionable", debugContext)
-        } else {
-            setDeviceToActive(evt)
-            setActivityToActive(zone, debugContext)
-            setEvent(zone, "engaged", debugContext)
-        }
+    if (zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "idle") {
+        setDeviceToQuestionable(evt)
+        setActivityFromDevices(zone, debugContext)
+        setEvent(zone, "questionable", debugContext)
     } else {
         setDeviceToActive(evt)
         setActivityToActive(zone, debugContext)
@@ -524,9 +513,7 @@ activity: ${zone.currentValue('activity')}"""
     )
 
     setDeviceToChecking(evt)
-    if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
-        setActivityFromDevices(zone, debugContext)
-    }
+    setActivityFromDevices(zone, debugContext)
     setEvent(zone, "inactive", debugContext)
     
     logDebug(debugContext)
@@ -543,16 +530,10 @@ activity: ${zone.currentValue('activity')}"""
     )
 
     cancelClosedTimer()
-    if (zone.currentValue("contact") == "closed") {
-        if (zone.currentValue("activity") == "idle") {
-            setDeviceToQuestionable(evt)
-            setActivityFromDevices(zone, debugContext)
-            setEvent(zone, "questionable", debugContext)
-        } else {
-            setDeviceToChecking(evt)
-            setActivityToActive(zone, debugContext)
-            setEvent(zone, "engaged", debugContext)
-        }
+    if (zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "idle") {
+        setDeviceToQuestionable(evt)
+        setActivityFromDevices(zone, debugContext)
+        setEvent(zone, "questionable", debugContext)
     } else {
         setDeviceToChecking(evt)
         setActivityFromDevices(zone, debugContext)
@@ -661,7 +642,7 @@ activity: ${zone.currentValue('activity')}"""
         
         cancelClosedTimer()
         setDeviceToChecking(evt)
-        setActivityToChecking(zone, debugContext)
+        setActivityFromDevices(zone, debugContext)
         setEvent(zone, "disengaged", debugContext)
         startClosedTimer()
     } else {
@@ -689,7 +670,7 @@ activity: ${zone.currentValue('activity')}"""
         
         cancelClosedTimer()
         setDeviceToChecking(evt)
-        setActivityToChecking(zone, debugContext)
+        setActivityFromDevices(zone, debugContext)
         setEvent(zone, "momentary", debugContext)
         startClosedTimer()
     } else {
@@ -715,9 +696,7 @@ activity: ${zone.currentValue('activity')}"""
     )
 
     state.devices["${evt.deviceId}"].activity = evt.value
-    if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
-        setActivityFromDevices(zone, debugContext)
-    } 
+    setActivityFromDevices(zone, debugContext)
     
     logDebug(debugContext)
 }
@@ -757,9 +736,7 @@ activity: ${zone.currentValue('activity')}"""
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
-        if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
-            setActivityFromDevices(zone, debugContext)
-        } 
+        setActivityFromDevices(zone, debugContext)
         setEvent(zone, "idle", debugContext)
     } else {
         debugContext.append("""
@@ -781,9 +758,7 @@ activity: ${zone.currentValue('activity')}"""
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
-        if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
-            setActivityFromDevices(zone, debugContext)
-        } 
+        setActivityFromDevices(zone, debugContext)
         setEvent(zone, "idle", debugContext)
     } else {
         debugContext.append("""
@@ -801,7 +776,7 @@ Closed Timer
 contact: ${zone.currentValue('contact')}
 activity: ${zone.currentValue('activity')}"""
     )
-
+    
     def anyDeviceActive = false
     for (device in state.devices.values()) {
         if (device.activity == "active") {
@@ -811,10 +786,8 @@ activity: ${zone.currentValue('activity')}"""
     }
     
     if (anyDeviceActive) {
-        setActivityToActive(zone, debugContext)
         setEvent(zone, "engaged", debugContext)
     } else {
-        setActivityToIdle(zone, debugContext)
         setEvent(zone, "idle", debugContext)
     }
     
