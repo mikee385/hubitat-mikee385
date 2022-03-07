@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.5" }
+String getVersionNum() { return "10.0.0-beta.6" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -119,6 +119,8 @@ Initial"""
             } else {
                 setContactToClosed(zone, debugContext)
             }
+        } else {
+            setContactToOpen(zone, debugContext)
         }
         
         def allChildZones = getDevices(zone, "childZones")
@@ -522,7 +524,7 @@ activity: ${zone.currentValue('activity')}"""
     )
 
     setDeviceToChecking(evt)
-    if (zone.currentValue("contact") == "open") {
+    if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
         setActivityFromDevices(zone, debugContext)
     }
     setEvent(zone, "inactive", debugContext)
@@ -713,7 +715,9 @@ activity: ${zone.currentValue('activity')}"""
     )
 
     state.devices["${evt.deviceId}"].activity = evt.value
-    setActivityFromDevices(zone, debugContext)
+    if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
+        setActivityFromDevices(zone, debugContext)
+    } 
     
     logDebug(debugContext)
 }
@@ -753,7 +757,9 @@ activity: ${zone.currentValue('activity')}"""
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
-        setActivityFromDevices(zone, debugContext)
+        if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
+            setActivityFromDevices(zone, debugContext)
+        } 
         setEvent(zone, "idle", debugContext)
     } else {
         debugContext.append("""
@@ -775,7 +781,9 @@ activity: ${zone.currentValue('activity')}"""
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
-        setActivityFromDevices(zone, debugContext)
+        if (!(zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "active")) {
+            setActivityFromDevices(zone, debugContext)
+        } 
         setEvent(zone, "idle", debugContext)
     } else {
         debugContext.append("""
