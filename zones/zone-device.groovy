@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "10.0.0-beta.1" }
+String getVersionNum() { return "10.0.0-beta.2" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -28,7 +28,8 @@ metadata {
         capability "ContactSensor"
         capability "Sensor"
 
-        attribute "activity", "enum", ["active", "checking", "questionable", "idle"]
+        attribute "occupancy", "enum", ["occupied", "unknown", "not occupied"]
+        attribute "activity", "enum", ["active", "unknown", "not active"]
         attribute "event", "enum", ["engaged", "disengaged", "active", "inactive", "momentary", "questionable", "idle"]
     }
 }
@@ -46,8 +47,11 @@ def initialize() {
     if (!device.currentValue("contact")) {
         sendEvent(name: "contact", value: "open")
     }
+    if (!device.currentValue("occupancy")) {
+        sendEvent(name: "occupancy", value: "not occupied")
+    }
     if (!device.currentValue("activity")) {
-        sendEvent(name: "activity", value: "idle")
+        sendEvent(name: "activity", value: "not active")
     }
     if (!device.currentValue("event")) {
         sendEvent(name: "event", value: "idle")

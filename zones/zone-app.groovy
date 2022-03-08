@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.7" }
+String getVersionNum() { return "10.0.0-beta.8" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -113,15 +113,17 @@ Initial"""
     )
     
     if (zoneType == "Automated") {
+        def contact = "open"
         if (entryDoors) {
             if (zoneIsOpen(zone)) {
-                setContactToOpen(zone, debugContext)
+                contact = "open"
             } else {
-                setContactToClosed(zone, debugContext)
+                contact = "closed"
             }
         } else {
-            setContactToOpen(zone, debugContext)
+            contact = "open"
         }
+        setContact(zone, contact, debugContext)
         
         def allChildZones = getDevices(zone, "childZones")
         def allEntryDoors = getDevices(zone, "entryDoors")
@@ -151,17 +153,17 @@ Initial"""
                 subscribe(entryDoor, "contact.open", openEngagedHandler)
                 subscribe(entryDoor, "contact.closed", closedEngagedHandler)
             } else if (allEngagedDoors_Open.containsKey(entryDoor.id)) {
-                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "open" ? "active" : "idle")
+                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "open" ? "active" : "not active")
             
                 subscribe(entryDoor, "contact.open", openEngagedHandler)
                 subscribe(entryDoor, "contact.closed", closedDisengagedHandler)
             } else if (allEngagedDoors_Closed.containsKey(entryDoor.id)) {
-                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "closed" ? "active" : "idle")
+                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "closed" ? "active" : "not active")
             
                 subscribe(entryDoor, "contact.open", openDisengagedHandler)
                 subscribe(entryDoor, "contact.closed", closedEngagedHandler)
             } else {
-                addDevice(entryDoor, "momentary", "idle")
+                addDevice(entryDoor, "momentary", "not active")
                 
                 subscribe(entryDoor, "contact.open", openMomentaryHandler)
                 subscribe(entryDoor, "contact.closed", closedMomentaryHandler)
@@ -169,21 +171,21 @@ Initial"""
         }
         
         for (presenceSensor in allPresenceSensors.values()) {
-            addDevice(presenceSensor, "active", presenceSensor.currentValue("presence") == "present" ? "active" : "idle")
+            addDevice(presenceSensor, "active", presenceSensor.currentValue("presence") == "present" ? "active" : "not active")
             
             subscribe(presenceSensor, "presence.present", activeDeviceHandler)
             subscribe(presenceSensor, "presence.not present", inactiveDeviceHandler)
         }
         
         for (motionSensor in allMotionSensors.values()) {
-            addDevice(motionSensor, "active", motionSensor.currentValue("motion") == "active" ? "active" : "idle")
+            addDevice(motionSensor, "active", motionSensor.currentValue("motion") == "active" ? "active" : "not active")
             
             subscribe(motionSensor, "motion.active", activeDeviceHandler)
             subscribe(motionSensor, "motion.inactive", inactiveDeviceHandler)
         }
         
         for (accelerationSensor in allAccelerationSensors.values()) {
-            addDevice(accelerationSensor, "active", accelerationSensor.currentValue("acceleration") == "active" ? "active" : "idle")
+            addDevice(accelerationSensor, "active", accelerationSensor.currentValue("acceleration") == "active" ? "active" : "not active")
             
             subscribe(accelerationSensor, "acceleration.active", activeDeviceHandler)
             subscribe(accelerationSensor, "acceleration.inactive", inactiveDeviceHandler)
@@ -191,7 +193,7 @@ Initial"""
         
         for (engagedDoor in allEngagedDoors_Open.values()) {
             if (!allEntryDoors.containsKey(engagedDoor.id)) {
-                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "open" ? "active" : "idle")
+                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "open" ? "active" : "not active")
                 
                 subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
             
@@ -205,7 +207,7 @@ Initial"""
         
         for (engagedDoor in allEngagedDoors_Closed.values()) {
             if (!allEntryDoors.containsKey(engagedDoor.id) && !allEngagedDoors_Open.containsKey(engagedDoor.id)) { 
-                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "closed" ? "active" : "idle")
+                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "closed" ? "active" : "not active")
                 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
                 subscribe(engagedDoor, "contact.open", disengagedDeviceHandler)
@@ -213,7 +215,7 @@ Initial"""
         }
         
         for (engagedSwitch in allEngagedSwitches_On.values()) {
-            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "on" ? "active" : "idle")
+            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "on" ? "active" : "not active")
             
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
             
@@ -225,7 +227,7 @@ Initial"""
         }
         
         for (engagedSwitch in allEngagedSwitches_Off.values()) {
-            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "off" ? "active" : "idle")
+            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "off" ? "active" : "not active")
             
             if (!allEngagedSwitches_On.containsKey(engagedSwitch.id)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
@@ -234,7 +236,7 @@ Initial"""
         }
         
         for (engagedLock in allEngagedLocks_Unlocked.values()) {
-            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "unlocked" ? "active" : "idle")
+            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "unlocked" ? "active" : "not active")
             
             subscribe(engagedLock, "lock.unlocked", engagedDeviceHandler)
             
@@ -246,7 +248,7 @@ Initial"""
         }
         
         for (engagedLock in allEngagedLocks_Locked.values()) {
-            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "locked" ? "active" : "idle")
+            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "locked" ? "active" : "not active")
             
             if (!allEngagedLocks_Unlocked.containsKey(engagedLock.id)) {
                 subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
@@ -256,14 +258,14 @@ Initial"""
         
         for (momentaryDoor in allMomentaryDoors.values()) {
             if (!allEntryDoors.containsKey(momentaryDoor.id) && !allEngagedDoors_Open.containsKey(momentaryDoor.id) && !allEngagedDoors_Closed.containsKey(momentaryDoor.id)) {
-                addDevice(momentaryDoor, "momentary", "idle")
+                addDevice(momentaryDoor, "momentary", "not active")
                 
                 subscribe(momentaryDoor, "contact", momentaryDeviceHandler)
             }
         }
         
         for (momentaryButton in allMomentaryButtons.values()) {
-            addDevice(momentaryButton, "momentary", "idle")
+            addDevice(momentaryButton, "momentary", "not active")
             
             subscribe(momentaryButton, "pushed", momentaryDeviceHandler)
             subscribe(momentaryButton, "doubleTapped", momentaryDeviceHandler)
@@ -273,7 +275,7 @@ Initial"""
         
         for (momentarySwitch in allMomentarySwitches.values()) {
             if (!allEngagedSwitches_On.containsKey(momentarySwitch.id) && !allEngagedSwitches_Off.containsKey(momentarySwitch.id)) {
-                addDevice(momentarySwitch, "momentary", "idle")
+                addDevice(momentarySwitch, "momentary", "not active")
                 
                 subscribe(momentarySwitch, "switch", momentaryDeviceHandler)
             }
@@ -281,7 +283,7 @@ Initial"""
         
         for (momentaryLock in allMomentaryLocks.values()) {
             if (!allEngagedLocks_Unlocked.containsKey(momentaryLock.id) && !allEngagedLocks_Locked.containsKey(momentaryLock.id)) {
-                addDevice(momentaryLock, "momentary", "idle")
+                addDevice(momentaryLock, "momentary", "not active")
                 
                 subscribe(momentaryLock, "lock", momentaryDeviceHandler)
             }
@@ -296,7 +298,9 @@ Initial"""
             }
         }
         
-        setActivityFromDevices(zone, debugContext)
+        def activity = getActivityFromDevices()
+        setActivity(zone, activity, debugContext)
+        setOccupancyFromActivity(zone, contact, activity, debugContext)
     
     } else if (zoneType != "Manual") {
         log.error "Unknown zone type: $zoneType"
@@ -340,121 +344,114 @@ def setDeviceToActive(evt) {
 }
 
 def setDeviceToChecking(evt) {
-    state.devices["${evt.deviceId}"].activity = "checking"
+    state.devices["${evt.deviceId}"].activity = "active"
     state.devices["${evt.deviceId}"].timerId = "${evt.id}"
     runIn(checkingSeconds, checkingTimer, [overwrite: false, data: [id: "${evt.id}", deviceId: "${evt.deviceId}"]])
 }
 
 def setDeviceToQuestionable(evt) {
-    state.devices["${evt.deviceId}"].activity = "questionable"
+    state.devices["${evt.deviceId}"].activity = "unknown"
     state.devices["${evt.deviceId}"].timerId = "${evt.id}"
     runIn(questionableSeconds, questionableTimer, [overwrite: false, data: [id: "${evt.id}", deviceId: "${evt.deviceId}"]])
 }
 
 def setDeviceToIdle(evt) {
-    state.devices["${evt.deviceId}"].activity = "idle"
+    state.devices["${evt.deviceId}"].activity = "not active"
     state.devices["${evt.deviceId}"].timerId = null
 }
 
 //-----------------------------------------
 
-def setContactToOpen(zone, debugContext) {
-    zone.sendEvent(name: "contact", value: "open")
+def setContact(zone, value, debugContext) {
+    zone.sendEvent(name: "contact", value: value)
     
     debugContext.append("""
-contact => open"""
-    )
+contact => $value"""
 }
 
-def setContactToClosed(zone, debugContext) {
-    zone.sendEvent(name: "contact", value: "closed")
+def setActivity(zone, value, debugContext) {
+    zone.sendEvent(name: "activity", value: value)
     
     debugContext.append("""
-contact => closed"""
-    )
+activity => $value"""
 }
 
-def setActivityToActive(zone, debugContext) {
-    zone.sendEvent(name: "activity", value: "active")
+def setOccupancy(zone, value, debugContext) {
+    zone.sendEvent(name: "occupancy", value: value)
     
     debugContext.append("""
-activity => active"""
-    )
+occupancy => $value"""
 }
 
-def setActivityToChecking(zone, debugContext) {
-    zone.sendEvent(name: "activity", value: "checking")
+def setEvent(zone, value, debugContext) {
+    zone.sendEvent(name: "event", value: value, isStateChange: true)
     
     debugContext.append("""
-activity => checking"""
-    )
+event => $value"""
 }
 
-def setActivityToQuestionable(zone, debugContext) {
-    zone.sendEvent(name: "activity", value: "questionable")
-    
-    debugContext.append("""
-activity => questionable"""
-    )
-}
+//-----------------------------------------
 
-def setActivityToIdle(zone, debugContext) {
-    zone.sendEvent(name: "activity", value: "idle")
-    
-    debugContext.append("""
-activity => idle"""
-    )
-}
-
-def setActivityFromDevices(zone, debugContext) {
-    def isActive = false
-    def isChecking = false
-    def isQuestionable = false
+def getActivityFromDevices() {
+    def active = false
+    def unknown = false
     
     for (device in state.devices.values()) {
         if (device.activity == "active") {
-            isActive = true
-        } else if (device.activity == "checking") {
-            isChecking = true
-        } else if (device.activity == "questionable") {
-            isQuestionable = true
+            active = true
+        } else if (device.activity == "unknown") {
+            unknown = true
         }
     }
     
-    if (isActive) {
-        setActivityToActive(zone, debugContext)
-    } else if (isChecking) {
-        setActivityToChecking(zone, debugContext)
-    } else if (isQuestionable) {
-        setActivityToQuestionable(zone, debugContext)
+    if (active) {
+        return "active"
+    } else if (unknown) {
+        return "unknown"
     } else {
-        setActivityToIdle(zone, debugContext)
+        return "not active"
     }
 }
-
-def setEvent(zone, type, debugContext) {
-    zone.sendEvent(name: "event", value: type, isStateChange: true)
     
-    debugContext.append("""
-event => ${type}"""
-    )
+def setOccupancyFromActivity(zone, contact, activity, debugContext) {
+    if (contact == "open") {
+        if (activity == "active") {
+            setOccupancy(zone, "occupied", debugContext)
+        } else if (activity == "unknown") {
+            setOccupancy(zone, "unknown", debugContext)
+        } else {
+            setOccupancy(zone, "not occupied", debugContext)
+        }
+    } else {
+        if (activity == "active") {
+            setOccupancy(zone, "occupied", debugContext)
+        } else if (activity == "unknown") {
+            if (occupancy == "not occupied") {
+                setOccupancy(zone, "unknown", debugContext)
+            }
+        }
+    }
 }
 
 //-----------------------------------------
 
 def engagedDeviceHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Engaged Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     cancelClosedTimer()
     setDeviceToActive(evt)
-    setActivityToActive(zone, debugContext)
+    
+    setActivity(zone, "active", debugContext)
+    setOccupancy(zone, "occupied", debugContext)
     setEvent(zone, "engaged", debugContext)
     
     logDebug(debugContext)
@@ -462,17 +459,21 @@ activity: ${zone.currentValue('activity')}"""
 
 def disengagedDeviceHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Disengaged Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     cancelClosedTimer()
     setDeviceToChecking(evt)
-    setActivityFromDevices(zone, debugContext)
+    
+    setActivity(zone, "active", debugContext)
+    setOccupancy(zone, "occupied", debugContext)
     setEvent(zone, "disengaged", debugContext)
     
     logDebug(debugContext)
@@ -480,22 +481,31 @@ activity: ${zone.currentValue('activity')}"""
 
 def activeDeviceHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Active Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     cancelClosedTimer()
-    if (zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "idle") {
+    
+    if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "not occupied") {
         setDeviceToQuestionable(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        activity = getActivityFromDevices()
+        setActivity(zone, activity, debugContext)
+        setOccupancyFromActivity(zone, contact, activity, debugContext)
         setEvent(zone, "questionable", debugContext)
+    
     } else {
         setDeviceToActive(evt)
-        setActivityToActive(zone, debugContext)
+        
+        setActivity(zone, "active", debugContext)
+        setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "active", debugContext)
     }
     
@@ -504,16 +514,18 @@ activity: ${zone.currentValue('activity')}"""
 
 def inactiveDeviceHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Inactive Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     setDeviceToChecking(evt)
-    setActivityFromDevices(zone, debugContext)
+    
     setEvent(zone, "inactive", debugContext)
     
     logDebug(debugContext)
@@ -521,22 +533,31 @@ activity: ${zone.currentValue('activity')}"""
 
 def momentaryDeviceHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Momentary Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     cancelClosedTimer()
-    if (zone.currentValue("contact") == "closed" && zone.currentValue("activity") == "idle") {
+    
+    if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "not occupied") {
         setDeviceToQuestionable(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        activity = getActivityFromDevices()
+        setActivity(zone, activity, debugContext)
+        setOccupancyFromActivity(zone, contact, activity, debugContext)
         setEvent(zone, "questionable", debugContext)
+
     } else {
         setDeviceToChecking(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        setActivity(zone, "active", debugContext)
+        setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "momentary", debugContext)
     }
     
@@ -547,19 +568,23 @@ activity: ${zone.currentValue('activity')}"""
 
 def openEngagedHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Open, Engaged Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
-    setContactToOpen(zone, debugContext)
-    
+    setContact(zone, "open", debugContext)
+
     cancelClosedTimer()
     setDeviceToActive(evt)
-    setActivityToActive(zone, debugContext)
+    
+    setActivity(zone, "active", debugContext)
+    setOccupancy(zone, "occupied", debugContext)
     setEvent(zone, "engaged", debugContext)
     
     logDebug(debugContext)
@@ -567,19 +592,23 @@ activity: ${zone.currentValue('activity')}"""
 
 def openDisengagedHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Open, Disengaged Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
-    setContactToOpen(zone, debugContext)
+    setContact(zone, "open", debugContext)
 
     cancelClosedTimer()
     setDeviceToChecking(evt)
-    setActivityFromDevices(zone, debugContext)
+    
+    setActivity(zone, "active", debugContext)
+    setOccupancy(zone, "occupied", debugContext)
     setEvent(zone, "disengaged", debugContext)
     
     logDebug(debugContext)
@@ -587,19 +616,23 @@ activity: ${zone.currentValue('activity')}"""
 
 def openMomentaryHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Open, Momentary Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
-    setContactToOpen(zone, debugContext)
-    
+    setContact(zone, "open", debugContext)
+
     cancelClosedTimer()
     setDeviceToChecking(evt)
-    setActivityFromDevices(zone, debugContext)
+    
+    setActivity(zone, "active", debugContext)
+    setOccupancy(zone, "occupied", debugContext)
     setEvent(zone, "momentary", debugContext)
     
     logDebug(debugContext)
@@ -607,21 +640,25 @@ activity: ${zone.currentValue('activity')}"""
 
 def closedEngagedHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed, Engaged Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     if (!zoneIsOpen(zone)) {
-        setContactToClosed(zone, debugContext)
+        setContact(zone, "closed", debugContext)
     }
 
     cancelClosedTimer()
     setDeviceToActive(evt)
-    setActivityToActive(zone, debugContext)
+    
+    setActivity(zone, "active", debugContext)
+    setOccupancy(zone, "occupied", debugContext)
     setEvent(zone, "engaged", debugContext)
     
     logDebug(debugContext)
@@ -629,26 +666,34 @@ activity: ${zone.currentValue('activity')}"""
 
 def closedDisengagedHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed, Disengaged Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     if (!zoneIsOpen(zone)) {
-        setContactToClosed(zone, debugContext)
+        setContact(zone, "closed", debugContext)
         
         cancelClosedTimer()
         setDeviceToChecking(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        setActivity(zone, "unknown", debugContext)
+        setOccupancy(zone, "unknown", debugContext)
         setEvent(zone, "disengaged", debugContext)
+        
         startClosedTimer()
+    
     } else {
         cancelClosedTimer()
         setDeviceToChecking(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        setActivity(zone, "active", debugContext)
+        setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "disengaged", debugContext)
     }
     
@@ -657,26 +702,34 @@ activity: ${zone.currentValue('activity')}"""
 
 def closedMomentaryHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed, Momentary Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     if (!zoneIsOpen(zone)) {
-        setContactToClosed(zone, debugContext)
+        setContact(zone, "closed", debugContext)
         
         cancelClosedTimer()
         setDeviceToChecking(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        setActivity(zone, "unknown", debugContext)
+        setOccupancy(zone, "unknown", debugContext)
         setEvent(zone, "momentary", debugContext)
+        
         startClosedTimer()
+        
     } else {
         cancelClosedTimer()
         setDeviceToChecking(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        setActivity(zone, "active", debugContext)
+        setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "momentary", debugContext)
     }
     
@@ -687,28 +740,35 @@ activity: ${zone.currentValue('activity')}"""
 
 def childZoneActivityHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Child Zone Activity Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     state.devices["${evt.deviceId}"].activity = evt.value
-    setActivityFromDevices(zone, debugContext)
+    
+    activity = getActivityFromDevices()
+    setActivity(zone, activity, debugContext)
+    setOccupancyFromActivity(zone, contact, activity, debugContext)
     
     logDebug(debugContext)
 }
 
 def childZoneEventHandler(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Child Zone Event Handler
 ${evt.device} is ${evt.value}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     if (evt.value == "engaged"
@@ -726,18 +786,24 @@ activity: ${zone.currentValue('activity')}"""
 
 def checkingTimer(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Checking Timer
 ${state.devices[evt.deviceId].name}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        activity = getActivityFromDevices()
+        setActivity(zone, activity, debugContext)
+        setOccupancyFromActivity(zone, contact, activity, debugContext)
         setEvent(zone, "idle", debugContext)
+    
     } else {
         debugContext.append("""
 Expired""")
@@ -748,18 +814,24 @@ Expired""")
 
 def questionableTimer(evt) {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Questionable Timer
 ${state.devices[evt.deviceId].name}
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
-        setActivityFromDevices(zone, debugContext)
+        
+        activity = getActivityFromDevices()
+        setActivity(zone, activity, debugContext)
+        setOccupancyFromActivity(zone, contact, activity, debugContext)
         setEvent(zone, "idle", debugContext)
+    
     } else {
         debugContext.append("""
 Expired""")
@@ -770,11 +842,13 @@ Expired""")
 
 def closedTimer() {
     def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed Timer
-contact: ${zone.currentValue('contact')}
-activity: ${zone.currentValue('activity')}"""
+contact: $contact
+activity: $activity"""
     )
     
     def anyDeviceActive = false
@@ -786,8 +860,13 @@ activity: ${zone.currentValue('activity')}"""
     }
     
     if (anyDeviceActive) {
+        setActivity(zone, "active", debugContext)
+        setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "engaged", debugContext)
+    
     } else {
+        setActivity(zone, "not active", debugContext)
+        setOccupancy(zone, "not occupied", debugContext)
         setEvent(zone, "idle", debugContext)
     }
     
