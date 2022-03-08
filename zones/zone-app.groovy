@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.9" }
+String getVersionNum() { return "10.0.0-beta.10" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -831,9 +831,11 @@ occupancy: $occupancy"""
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
         
-        activity = getActivityFromDevices()
-        setActivity(zone, activity, debugContext)
-        setOccupancyFromActivity(zone, contact, activity, debugContext)
+        if (activity == "active") {
+            activity = getActivityFromDevices()
+            setActivity(zone, activity, debugContext)
+            setOccupancyFromActivity(zone, contact, activity, debugContext)
+        } 
         setEvent(zone, "idle", debugContext)
     
     } else {
@@ -861,9 +863,11 @@ occupancy: $occupancy"""
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
         
-        activity = getActivityFromDevices()
-        setActivity(zone, activity, debugContext)
-        setOccupancyFromActivity(zone, contact, activity, debugContext)
+        if (activity == "unknown        ") {
+            activity = getActivityFromDevices()
+            setActivity(zone, activity, debugContext)
+            setOccupancyFromActivity(zone, contact, activity, debugContext)
+        } 
         setEvent(zone, "idle", debugContext)
     
     } else {
