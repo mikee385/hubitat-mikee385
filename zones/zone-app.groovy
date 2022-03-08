@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.8" }
+String getVersionNum() { return "10.0.0-beta.9" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -443,12 +443,14 @@ def engagedDeviceHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Engaged Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     cancelClosedTimer()
@@ -465,12 +467,14 @@ def disengagedDeviceHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Disengaged Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     cancelClosedTimer()
@@ -487,12 +491,14 @@ def activeDeviceHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Active Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     cancelClosedTimer()
@@ -520,12 +526,14 @@ def inactiveDeviceHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Inactive Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     setDeviceToChecking(evt)
@@ -539,12 +547,14 @@ def momentaryDeviceHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Momentary Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     cancelClosedTimer()
@@ -574,12 +584,14 @@ def openEngagedHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Open, Engaged Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     setContact(zone, "open", debugContext)
@@ -598,12 +610,14 @@ def openDisengagedHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Open, Disengaged Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     setContact(zone, "open", debugContext)
@@ -622,12 +636,14 @@ def openMomentaryHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Open, Momentary Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     setContact(zone, "open", debugContext)
@@ -646,12 +662,14 @@ def closedEngagedHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed, Engaged Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     if (!zoneIsOpen(zone)) {
@@ -672,12 +690,14 @@ def closedDisengagedHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed, Disengaged Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     if (!zoneIsOpen(zone)) {
@@ -708,12 +728,14 @@ def closedMomentaryHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed, Momentary Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     if (!zoneIsOpen(zone)) {
@@ -746,12 +768,14 @@ def childZoneActivityHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Child Zone Activity Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     state.devices["${evt.deviceId}"].activity = evt.value
@@ -767,12 +791,14 @@ def childZoneEventHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Child Zone Event Handler
 ${evt.device} is ${evt.value}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     if (evt.value == "engaged"
@@ -792,12 +818,14 @@ def checkingTimer(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Checking Timer
 ${state.devices[evt.deviceId].name}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
@@ -820,12 +848,14 @@ def questionableTimer(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Questionable Timer
 ${state.devices[evt.deviceId].name}
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
@@ -848,11 +878,13 @@ def closedTimer() {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed Timer
 contact: $contact
-activity: $activity"""
+activity: $activity
+occupancy: $occupancy"""
     )
     
     def anyDeviceActive = false
