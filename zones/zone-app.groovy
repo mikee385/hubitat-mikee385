@@ -367,6 +367,7 @@ def setContact(zone, value, debugContext) {
     
     debugContext.append("""
 contact => $value"""
+    )
 }
 
 def setActivity(zone, value, debugContext) {
@@ -374,6 +375,7 @@ def setActivity(zone, value, debugContext) {
     
     debugContext.append("""
 activity => $value"""
+    )
 }
 
 def setOccupancy(zone, value, debugContext) {
@@ -381,6 +383,7 @@ def setOccupancy(zone, value, debugContext) {
     
     debugContext.append("""
 occupancy => $value"""
+    )
 }
 
 def setEvent(zone, value, debugContext) {
@@ -388,6 +391,7 @@ def setEvent(zone, value, debugContext) {
     
     debugContext.append("""
 event => $value"""
+    )
 }
 
 //-----------------------------------------
