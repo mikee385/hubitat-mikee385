@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.12" }
+String getVersionNum() { return "10.0.0-beta.13" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -153,17 +153,17 @@ Initial"""
                 subscribe(entryDoor, "contact.open", openEngagedHandler)
                 subscribe(entryDoor, "contact.closed", closedEngagedHandler)
             } else if (allEngagedDoors_Open.containsKey(entryDoor.id)) {
-                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "open" ? "active" : "not active")
+                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "open" ? "active" : "inactive")
             
                 subscribe(entryDoor, "contact.open", openEngagedHandler)
                 subscribe(entryDoor, "contact.closed", closedDisengagedHandler)
             } else if (allEngagedDoors_Closed.containsKey(entryDoor.id)) {
-                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "closed" ? "active" : "not active")
+                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "closed" ? "active" : "inactive")
             
                 subscribe(entryDoor, "contact.open", openDisengagedHandler)
                 subscribe(entryDoor, "contact.closed", closedEngagedHandler)
             } else {
-                addDevice(entryDoor, "momentary", "not active")
+                addDevice(entryDoor, "momentary", "inactive")
                 
                 subscribe(entryDoor, "contact.open", openMomentaryHandler)
                 subscribe(entryDoor, "contact.closed", closedMomentaryHandler)
@@ -171,21 +171,21 @@ Initial"""
         }
         
         for (presenceSensor in allPresenceSensors.values()) {
-            addDevice(presenceSensor, "active", presenceSensor.currentValue("presence") == "present" ? "active" : "not active")
+            addDevice(presenceSensor, "active", presenceSensor.currentValue("presence") == "present" ? "active" : "inactive")
             
             subscribe(presenceSensor, "presence.present", activeDeviceHandler)
             subscribe(presenceSensor, "presence.not present", inactiveDeviceHandler)
         }
         
         for (motionSensor in allMotionSensors.values()) {
-            addDevice(motionSensor, "active", motionSensor.currentValue("motion") == "active" ? "active" : "not active")
+            addDevice(motionSensor, "active", motionSensor.currentValue("motion") == "active" ? "active" : "inactive")
             
             subscribe(motionSensor, "motion.active", activeDeviceHandler)
             subscribe(motionSensor, "motion.inactive", inactiveDeviceHandler)
         }
         
         for (accelerationSensor in allAccelerationSensors.values()) {
-            addDevice(accelerationSensor, "active", accelerationSensor.currentValue("acceleration") == "active" ? "active" : "not active")
+            addDevice(accelerationSensor, "active", accelerationSensor.currentValue("acceleration") == "active" ? "active" : "inactive")
             
             subscribe(accelerationSensor, "acceleration.active", activeDeviceHandler)
             subscribe(accelerationSensor, "acceleration.inactive", inactiveDeviceHandler)
@@ -193,7 +193,7 @@ Initial"""
         
         for (engagedDoor in allEngagedDoors_Open.values()) {
             if (!allEntryDoors.containsKey(engagedDoor.id)) {
-                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "open" ? "active" : "not active")
+                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "open" ? "active" : "inactive")
                 
                 subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
             
@@ -207,7 +207,7 @@ Initial"""
         
         for (engagedDoor in allEngagedDoors_Closed.values()) {
             if (!allEntryDoors.containsKey(engagedDoor.id) && !allEngagedDoors_Open.containsKey(engagedDoor.id)) { 
-                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "closed" ? "active" : "not active")
+                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "closed" ? "active" : "inactive")
                 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
                 subscribe(engagedDoor, "contact.open", disengagedDeviceHandler)
@@ -215,7 +215,7 @@ Initial"""
         }
         
         for (engagedSwitch in allEngagedSwitches_On.values()) {
-            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "on" ? "active" : "not active")
+            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "on" ? "active" : "inactive")
             
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
             
@@ -227,7 +227,7 @@ Initial"""
         }
         
         for (engagedSwitch in allEngagedSwitches_Off.values()) {
-            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "off" ? "active" : "not active")
+            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "off" ? "active" : "inactive")
             
             if (!allEngagedSwitches_On.containsKey(engagedSwitch.id)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
@@ -236,7 +236,7 @@ Initial"""
         }
         
         for (engagedLock in allEngagedLocks_Unlocked.values()) {
-            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "unlocked" ? "active" : "not active")
+            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "unlocked" ? "active" : "inactive")
             
             subscribe(engagedLock, "lock.unlocked", engagedDeviceHandler)
             
@@ -248,7 +248,7 @@ Initial"""
         }
         
         for (engagedLock in allEngagedLocks_Locked.values()) {
-            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "locked" ? "active" : "not active")
+            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "locked" ? "active" : "inactive")
             
             if (!allEngagedLocks_Unlocked.containsKey(engagedLock.id)) {
                 subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
@@ -258,14 +258,14 @@ Initial"""
         
         for (momentaryDoor in allMomentaryDoors.values()) {
             if (!allEntryDoors.containsKey(momentaryDoor.id) && !allEngagedDoors_Open.containsKey(momentaryDoor.id) && !allEngagedDoors_Closed.containsKey(momentaryDoor.id)) {
-                addDevice(momentaryDoor, "momentary", "not active")
+                addDevice(momentaryDoor, "momentary", "inactive")
                 
                 subscribe(momentaryDoor, "contact", momentaryDeviceHandler)
             }
         }
         
         for (momentaryButton in allMomentaryButtons.values()) {
-            addDevice(momentaryButton, "momentary", "not active")
+            addDevice(momentaryButton, "momentary", "inactive")
             
             subscribe(momentaryButton, "pushed", momentaryDeviceHandler)
             subscribe(momentaryButton, "doubleTapped", momentaryDeviceHandler)
@@ -275,7 +275,7 @@ Initial"""
         
         for (momentarySwitch in allMomentarySwitches.values()) {
             if (!allEngagedSwitches_On.containsKey(momentarySwitch.id) && !allEngagedSwitches_Off.containsKey(momentarySwitch.id)) {
-                addDevice(momentarySwitch, "momentary", "not active")
+                addDevice(momentarySwitch, "momentary", "inactive")
                 
                 subscribe(momentarySwitch, "switch", momentaryDeviceHandler)
             }
@@ -283,7 +283,7 @@ Initial"""
         
         for (momentaryLock in allMomentaryLocks.values()) {
             if (!allEngagedLocks_Unlocked.containsKey(momentaryLock.id) && !allEngagedLocks_Locked.containsKey(momentaryLock.id)) {
-                addDevice(momentaryLock, "momentary", "not active")
+                addDevice(momentaryLock, "momentary", "inactive")
                 
                 subscribe(momentaryLock, "lock", momentaryDeviceHandler)
             }
@@ -356,7 +356,7 @@ def setDeviceToQuestionable(evt) {
 }
 
 def setDeviceToIdle(evt) {
-    state.devices["${evt.deviceId}"].activity = "not active"
+    state.devices["${evt.deviceId}"].activity = "inactive"
     state.devices["${evt.deviceId}"].timerId = null
 }
 
@@ -413,7 +413,7 @@ def getActivityFromDevices() {
     } else if (unknown) {
         return "unknown"
     } else {
-        return "not active"
+        return "inactive"
     }
 }
     
@@ -424,7 +424,7 @@ def setOccupancyFromActivity(zone, contact, activity, debugContext) {
         } else if (activity == "unknown") {
             setOccupancy(zone, "unknown", debugContext)
         } else {
-            setOccupancy(zone, "not occupied", debugContext)
+            setOccupancy(zone, "unoccupied", debugContext)
         }
     } else if (zone.currentValue("occupancy") != "occupied") {
         if (activity == "active") {
@@ -432,7 +432,7 @@ def setOccupancyFromActivity(zone, contact, activity, debugContext) {
         } else if (activity == "unknown") {
             setOccupancy(zone, "unknown", debugContext)
         } else {
-            setOccupancy(zone, "not occupied", debugContext)
+            setOccupancy(zone, "unoccupied", debugContext)
         }
     } else {
         debugContext.append("""
@@ -507,7 +507,7 @@ occupancy: $occupancy"""
 
     cancelClosedTimer()
     
-    if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "not occupied") {
+    if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "unoccupied") {
         setDeviceToQuestionable(evt)
         
         activity = getActivityFromDevices()
@@ -563,7 +563,7 @@ occupancy: $occupancy"""
 
     cancelClosedTimer()
     
-    if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "not occupied") {
+    if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "unoccupied") {
         setDeviceToQuestionable(evt)
         
         activity = getActivityFromDevices()
@@ -937,8 +937,8 @@ occupancy: $occupancy"""
         setEvent(zone, "engaged", debugContext)
     
     } else {
-        setActivity(zone, "not active", debugContext)
-        setOccupancy(zone, "not occupied", debugContext)
+        setActivity(zone, "inactive", debugContext)
+        setOccupancy(zone, "unoccupied", debugContext)
         setEvent(zone, "idle", debugContext)
     }
     
