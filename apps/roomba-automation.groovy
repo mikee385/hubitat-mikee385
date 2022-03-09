@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.4.1" }
+String getVersionNum() { return "7.4.2" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -135,17 +135,23 @@ def initialize() {
 }
 
 def getBatteryThresholds() {
-    return [
-        [device: roomba, lowBattery: 10],
-        [device: pauseButton, lowBattery: 10]
+    def thresholds = [
+        [device: roomba, lowBattery: 10]
     ]
+    if (pauseButton) {
+        thresholds.add([device: pauseButton, lowBattery: 10])
+    }
+    return thresholds
 }
 
 def getInactiveThresholds() {
-    return [
-        [device: roomba, inactiveHours: 1],
-        [device: pauseButton, inactiveHours: 24]
+    def thresholds = [
+        [device: roomba, inactiveHours: 1]
     ]
+    if (pauseButton) {
+        thresholds.add([device: pauseButton, inactiveHours: 24])
+    }
+    return thresholds
 }
 
 def getUnchangedThresholds() {
