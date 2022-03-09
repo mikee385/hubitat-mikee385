@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.10" }
+String getVersionNum() { return "10.0.0-beta.11" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -426,14 +426,18 @@ def setOccupancyFromActivity(zone, contact, activity, debugContext) {
         } else {
             setOccupancy(zone, "not occupied", debugContext)
         }
-    } else {
+    } else if (zone.currentValue("occupancy") != "occupied") {
         if (activity == "active") {
             setOccupancy(zone, "occupied", debugContext)
         } else if (activity == "unknown") {
-            if (occupancy == "not occupied") {
-                setOccupancy(zone, "unknown", debugContext)
-            }
+            setOccupancy(zone, "unknown", debugContext)
+        } else {
+            setOccupancy(zone, "not occupied", debugContext)
         }
+    } else {
+        debugContext.append("""
+occupancy => ignored (closed, occupied)"""
+        )
     }
 }
 
@@ -863,7 +867,7 @@ occupancy: $occupancy"""
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
         setDeviceToIdle(evt)
         
-        if (activity == "unknown        ") {
+        if (activity == "unknown") {
             activity = getActivityFromDevices()
             setActivity(zone, activity, debugContext)
             setOccupancyFromActivity(zone, contact, activity, debugContext)
