@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.11" }
+String getVersionNum() { return "10.0.0-beta.12" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -703,29 +703,43 @@ contact: $contact
 activity: $activity
 occupancy: $occupancy"""
     )
-
+    
+    cancelClosedTimer()
+    setDeviceToChecking(evt)
+        
     if (!zoneIsOpen(zone)) {
-        setContact(zone, "closed", debugContext)
-        
-        cancelClosedTimer()
-        setDeviceToChecking(evt)
-        
-        setActivity(zone, "unknown", debugContext)
-        setOccupancy(zone, "unknown", debugContext)
-        setEvent(zone, "disengaged", debugContext)
-        
-        startClosedTimer()
+        runIn(1, setToClosedDisengaged)
     
     } else {
-        cancelClosedTimer()
-        setDeviceToChecking(evt)
-        
         setActivity(zone, "active", debugContext)
         setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "disengaged", debugContext)
+        
+        logDebug(debugContext)
     }
+}
+
+def setToClosedDisengaged() {
+    def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
+    def debugContext = new StringBuilder(
+"""Zone ${app.label}
+Closed, Disengaged Handler
+${evt.device} is ${evt.value}
+contact: $contact
+activity: $activity
+occupancy: $occupancy"""
+    )
     
-    logDebug(debugContext)
+    setContact(zone, "closed", debugContext)
+
+    setActivity(zone, "unknown", debugContext)
+    setOccupancy(zone, "unknown", debugContext)
+    setEvent(zone, "momentary", debugContext)
+        
+    startClosedTimer()
 }
 
 def closedMomentaryHandler(evt) {
@@ -742,28 +756,42 @@ activity: $activity
 occupancy: $occupancy"""
     )
 
+    cancelClosedTimer()
+    setDeviceToChecking(evt)
+
     if (!zoneIsOpen(zone)) {
-        setContact(zone, "closed", debugContext)
-        
-        cancelClosedTimer()
-        setDeviceToChecking(evt)
-        
-        setActivity(zone, "unknown", debugContext)
-        setOccupancy(zone, "unknown", debugContext)
-        setEvent(zone, "momentary", debugContext)
-        
-        startClosedTimer()
+        runIn(1, setToClosedMomentary)
         
     } else {
-        cancelClosedTimer()
-        setDeviceToChecking(evt)
-        
         setActivity(zone, "active", debugContext)
         setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "momentary", debugContext)
+        
+        logDebug(debugContext)
     }
+}
+
+def setToClosedMomentary() {
+    def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
+    def debugContext = new StringBuilder(
+"""Zone ${app.label}
+Closed, Momentary Handler
+${evt.device} is ${evt.value}
+contact: $contact
+activity: $activity
+occupancy: $occupancy"""
+    )
     
-    logDebug(debugContext)
+    setContact(zone, "closed", debugContext)
+
+    setActivity(zone, "unknown", debugContext)
+    setOccupancy(zone, "unknown", debugContext)
+    setEvent(zone, "momentary", debugContext)
+        
+    startClosedTimer()
 }
 
 //-----------------------------------------
