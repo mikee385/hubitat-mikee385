@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.14" }
+String getVersionNum() { return "10.0.0-beta.15" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -736,6 +736,8 @@ Closed, Disengaged Handler (Resumed)"""
     setEvent(zone, "momentary", debugContext)
         
     startClosedTimer()
+    
+    logDebug(debugContext)
 }
 
 def closedMomentaryHandler(evt) {
@@ -784,6 +786,8 @@ Closed, Momentary Handler (Resumed)"""
     setEvent(zone, "momentary", debugContext)
         
     startClosedTimer()
+    
+    logDebug(debugContext)
 }
 
 //-----------------------------------------
