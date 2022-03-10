@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.13" }
+String getVersionNum() { return "10.0.0-beta.14" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -709,28 +709,24 @@ occupancy: $occupancy"""
         
     if (!zoneIsOpen(zone)) {
         runIn(1, setToClosedDisengaged)
+        debugContext.append("""
+Paused"""
+        )
     
     } else {
         setActivity(zone, "active", debugContext)
         setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "disengaged", debugContext)
-        
-        logDebug(debugContext)
     }
+    
+    logDebug(debugContext)
 }
 
 def setToClosedDisengaged() {
     def zone = getZoneDevice()
-    def contact = zone.currentValue("contact")
-    def activity = zone.currentValue("activity")
-    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
-Closed, Disengaged Handler
-${evt.device} is ${evt.value}
-contact: $contact
-activity: $activity
-occupancy: $occupancy"""
+Closed, Disengaged Handler (Resumed)"""
     )
     
     setContact(zone, "closed", debugContext)
@@ -761,28 +757,24 @@ occupancy: $occupancy"""
 
     if (!zoneIsOpen(zone)) {
         runIn(1, setToClosedMomentary)
+        debugContext.append("""
+Paused"""
+        )
         
     } else {
         setActivity(zone, "active", debugContext)
         setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "momentary", debugContext)
-        
-        logDebug(debugContext)
     }
+    
+    logDebug(debugContext)
 }
 
 def setToClosedMomentary() {
     def zone = getZoneDevice()
-    def contact = zone.currentValue("contact")
-    def activity = zone.currentValue("activity")
-    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
-Closed, Momentary Handler
-${evt.device} is ${evt.value}
-contact: $contact
-activity: $activity
-occupancy: $occupancy"""
+Closed, Momentary Handler (Resumed)"""
     )
     
     setContact(zone, "closed", debugContext)
