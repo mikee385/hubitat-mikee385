@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.19" }
+String getVersionNum() { return "10.0.0-beta.20" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -711,7 +711,7 @@ occupancy: $occupancy"""
     setDeviceToActive(evt)
     startCheckingTimer(evt)
         
-    if (!zoneIsOpen(zone) && !zoneIsEngaged(zone)) {
+    if (!zoneIsOpen(zone)) {
         setEvent(zone, "disengaged", debugContext)
         runIn(1, setToClosed)
         
