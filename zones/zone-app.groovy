@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.16" }
+String getVersionNum() { return "10.0.0-beta.17" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -489,7 +489,7 @@ occupancy: $occupancy"""
 
     cancelClosedTimer()
     setDeviceToActive(evt)
-    startCheckingTimer()
+    startCheckingTimer(evt)
     
     setActivity(zone, "active", debugContext)
     setOccupancy(zone, "occupied", debugContext)
@@ -516,7 +516,7 @@ occupancy: $occupancy"""
     
     if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "unoccupied") {
         setDeviceToUnknown(evt)
-        startQuestionableTimer()
+        startQuestionableTimer(evt)
         
         activity = getActivityFromDevices()
         setActivity(zone, activity, debugContext)
@@ -541,7 +541,7 @@ Inactive Handler
 ${evt.device} is ${evt.value}"""
     )
 
-    startCheckingTimer()
+    startCheckingTimer(evt)
     
     logDebug(debugContext)
 }
@@ -564,7 +564,7 @@ occupancy: $occupancy"""
     
     if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "unoccupied") {
         setDeviceToUnknown(evt)
-        startQuestionableTimer()
+        startQuestionableTimer(evt)
         
         activity = getActivityFromDevices()
         setActivity(zone, activity, debugContext)
@@ -573,7 +573,7 @@ occupancy: $occupancy"""
 
     } else {
         setDeviceToActive(evt)
-        startCheckingTimer()
+        startCheckingTimer(evt)
         
         setActivity(zone, "active", debugContext)
         setOccupancy(zone, "occupied", debugContext)
@@ -629,7 +629,7 @@ occupancy: $occupancy"""
 
     cancelClosedTimer()
     setDeviceToActive(evt)
-    startCheckingTimer()
+    startCheckingTimer(evt)
     
     setActivity(zone, "active", debugContext)
     setOccupancy(zone, "occupied", debugContext)
@@ -656,7 +656,7 @@ occupancy: $occupancy"""
 
     cancelClosedTimer()
     setDeviceToActive(evt)
-    startCheckingTimer()
+    startCheckingTimer(evt)
     
     setActivity(zone, "active", debugContext)
     setOccupancy(zone, "occupied", debugContext)
@@ -709,7 +709,7 @@ occupancy: $occupancy"""
     
     cancelClosedTimer()
     setDeviceToActive(evt)
-    startCheckingTimer()
+    startCheckingTimer(evt)
         
     if (!zoneIsOpen(zone)) {
         setEvent(zone, "disengaged", debugContext)
@@ -760,7 +760,7 @@ occupancy: $occupancy"""
 
     cancelClosedTimer()
     setDeviceToActive(evt)
-    startCheckingTimer()
+    startCheckingTimer(evt)
 
     if (!zoneIsOpen(zone)) {
         setEvent(zone, "momentary", debugContext)
@@ -921,12 +921,12 @@ Expired""")
     logDebug(debugContext)
 }
 
-def startClosedTimer(zone, debugContext) {
+def startClosedTimer() {
     state.closing = true
     runIn(closedSeconds, closedTimer)
 }
 
-def cancelClosedTimer(zone, debugContext) {
+def cancelClosedTimer() {
     state.closing = false
     unschedule("closedTimer")
 }
