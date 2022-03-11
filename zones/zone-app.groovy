@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.18" }
+String getVersionNum() { return "10.0.0-beta.19" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -745,7 +745,7 @@ occupancy: $occupancy"""
     setDeviceToActive(evt)
     startCheckingTimer(evt)
 
-    if (!zoneIsOpen(zone) && !zoneIsEngaged(zone)) {
+    if (!zoneIsOpen(zone)) {
         setEvent(zone, "momentary", debugContext)
         runIn(1, setToClosed)
         
@@ -770,10 +770,16 @@ Closed Handler (Resumed)"""
     
     setContact(zone, "closed", debugContext)
 
-    setActivity(zone, "unknown", debugContext)
-    setOccupancy(zone, "unknown", debugContext)
-        
-    startClosedTimer()
+    if (!zoneIsEngaged(zone)) {
+        setActivity(zone, "unknown", debugContext)
+        setOccupancy(zone, "unknown", debugContext)
+            
+        startClosedTimer()
+    } else {
+        debugContext.append("""
+Ignored (engaged)"""
+        )
+    }
     
     logDebug(debugContext)
 }
@@ -929,15 +935,7 @@ occupancy: $occupancy"""
     
     state.closing = false
     
-    def anyDeviceActive = false
-    for (device in state.devices.values()) {
-        if (device.activity == "active") {
-            anyDeviceActive = true
-            break 
-        }
-    }
-    
-    if (anyDeviceActive) {
+    if (zoneIsActive(zone)) {
         setActivity(zone, "active", debugContext)
         setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "engaged", debugContext)
@@ -972,9 +970,19 @@ def zoneIsOpen(zone) {
 }
 
 def zoneIsEngaged(zone) {
-    for (device in state.devices) {
+    for (device in state.devices.values()) {
         if (device.type == "engaged" && device.activity == "active") {
             return "${device.name} is engaged"
+        } 
+    }
+    
+    return false
+}
+
+def zoneIsActive(zone) {
+    for (device in state.devices.values()) {
+        if (device.activity == "active") {
+            return "${device.name} is active"
         } 
     }
     
