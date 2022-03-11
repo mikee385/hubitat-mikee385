@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.17" }
+String getVersionNum() { return "10.0.0-beta.18" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -711,9 +711,9 @@ occupancy: $occupancy"""
     setDeviceToActive(evt)
     startCheckingTimer(evt)
         
-    if (!zoneIsOpen(zone)) {
+    if (!zoneIsOpen(zone) && !zoneIsEngaged(zone)) {
         setEvent(zone, "disengaged", debugContext)
-        runIn(1, setToClosedDisengaged)
+        runIn(1, setToClosed)
         
         debugContext.append("""
 Paused""")
@@ -723,23 +723,6 @@ Paused""")
         setOccupancy(zone, "occupied", debugContext)
         setEvent(zone, "disengaged", debugContext)
     }
-    
-    logDebug(debugContext)
-}
-
-def setToClosedDisengaged() {
-    def zone = getZoneDevice()
-    def debugContext = new StringBuilder(
-"""Zone ${app.label}
-Closed, Disengaged Handler (Resumed)"""
-    )
-    
-    setContact(zone, "closed", debugContext)
-
-    setActivity(zone, "unknown", debugContext)
-    setOccupancy(zone, "unknown", debugContext)
-        
-    startClosedTimer()
     
     logDebug(debugContext)
 }
@@ -762,9 +745,9 @@ occupancy: $occupancy"""
     setDeviceToActive(evt)
     startCheckingTimer(evt)
 
-    if (!zoneIsOpen(zone)) {
+    if (!zoneIsOpen(zone) && !zoneIsEngaged(zone)) {
         setEvent(zone, "momentary", debugContext)
-        runIn(1, setToClosedMomentary)
+        runIn(1, setToClosed)
         
         debugContext.append("""
 Paused""")
@@ -778,11 +761,11 @@ Paused""")
     logDebug(debugContext)
 }
 
-def setToClosedMomentary() {
+def setToClosed() {
     def zone = getZoneDevice()
     def debugContext = new StringBuilder(
 """Zone ${app.label}
-Closed, Momentary Handler (Resumed)"""
+Closed Handler (Resumed)"""
     )
     
     setContact(zone, "closed", debugContext)
@@ -986,4 +969,14 @@ def zoneIsOpen(zone) {
     }
     
     return "No entry doors"
+}
+
+def zoneIsEngaged(zone) {
+    for (device in state.devices) {
+        if (device.type == "engaged" && device.activity == "active") {
+            return "${device.name} is engaged"
+        } 
+    }
+    
+    return false
 }
