@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.20" }
+String getVersionNum() { return "10.0.0-beta.21" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -770,16 +770,10 @@ Closed Handler (Resumed)"""
     
     setContact(zone, "closed", debugContext)
 
-    if (!zoneIsEngaged(zone)) {
-        setActivity(zone, "unknown", debugContext)
-        setOccupancy(zone, "unknown", debugContext)
+    setActivity(zone, "unknown", debugContext)
+    setOccupancy(zone, "unknown", debugContext)
             
-        startClosedTimer()
-    } else {
-        debugContext.append("""
-Ignored (engaged)"""
-        )
-    }
+    startClosedTimer()
     
     logDebug(debugContext)
 }
