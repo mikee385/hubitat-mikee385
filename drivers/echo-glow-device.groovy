@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.1.1" }
 String getVersionLabel() { return "Echo Glow Device, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -67,7 +67,7 @@ def childDevice(color) {
         } else if (childName == "Glow Upstairs") {
             childName = "GU"
         }
-        child = addChildDevice("mikee385", "Alexa Trigger", childID, [label: "$childName $color", isComponent: true])
+        child = addChildDevice("mikee385", "Echo Glow Scene", childID, [label: "$childName $color", isComponent: true])
     }
     return child
 }
