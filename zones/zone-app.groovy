@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.23" }
+String getVersionNum() { return "10.0.0-beta.24" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -350,7 +350,7 @@ def addMomentaryDevice(device) {
 }
 
 def addChildZone(zone) {
-    addDevice(childZone, "zone", childZone.currentValue("activity"))
+    addDevice(zone, "zone", zone.currentValue("activity"))
 }
 
 //-----------------------------------------
