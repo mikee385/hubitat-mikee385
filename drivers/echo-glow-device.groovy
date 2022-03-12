@@ -1,7 +1,7 @@
 /**
  *  Echo Glow Device Driver
  *
- *  Copyright 2021 Michael Pierce
+ *  Copyright 2022 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Echo Glow Device, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -29,6 +29,7 @@ String getVersionLabel() { return "Echo Glow Device, version ${getVersionNum()} 
         command "green"
         command "orange"
         command "purple"
+        command "blue"
         command "off"
     }
 }
@@ -52,6 +53,7 @@ def initialize() {
     def green = childDevice("Green")
     def orange = childDevice("Orange")
     def purple = childDevice("Purple")
+    def blue = childDevice("Blue")
     def off = childDevice("Off")
 }
 
@@ -80,6 +82,10 @@ def orange() {
 
 def purple() {
     childDevice("Purple").trigger()
+}
+
+def blue() {
+    childDevice("Blue").trigger()
 }
 
 def off() {

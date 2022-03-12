@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.5.0" }
+String getVersionNum() { return "4.6.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -43,6 +43,7 @@ preferences {
             input "bedtimeTimerRoutine", "device.VirtualAlexaButton", title: "Bedtime Timer", multiple: false, required: true
             input "bedtimeSoonRoutine", "device.VirtualAlexaButton", title: "Bedtime Soon", multiple: false, required: true
             input "bedtimeNowRoutine", "device.VirtualAlexaButton", title: "Bedtime Now", multiple: false, required: true
+            input "naptimeNowRoutine", "device.VirtualAlexaButton", title: "Naptime Now", multiple: false, required: true
             input "wakeUpRoutine", "device.VirtualAlexaButton", title: "Wake Up", multiple: false, required: true
             input "glowsOffRoutine", "device.VirtualAlexaButton", title: "Glows Off", multiple: false, required: true
         }
@@ -56,10 +57,12 @@ preferences {
         section("Media Devices") {
             input "rokuRemotes", "device.RokuTV", title: "Roku", multiple: true, required: false
             input "bedtimeNowPause", "bool", title: "Pause when Bedtime Now?", required: true, defaultValue: false
+            input "naptimeNowPause", "bool", title: "Pause when Naptime Now?", required: true, defaultValue: false
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
             input "bedtimeNowAlert", "bool", title: "Alert when Bedtime Now?", required: true, defaultValue: false
+            input "naptimeNowAlert", "bool", title: "Alert when Naptime Now?", required: true, defaultValue: false
             input "wakeUpAlert", "bool", title: "Alert when Wake Up?", required: true, defaultValue: false
             input "glowsOffAlert", "bool", title: "Alert when Glows Off?", required: true, defaultValue: false
         }
@@ -85,6 +88,11 @@ mappings {
     path("/bedtimeNow") {
         action: [
             GET: "urlHandler_bedtimeNow"
+        ]
+    }
+    path("/naptimeNow") {
+        action: [
+            GET: "urlHandler_naptimeNow"
         ]
     }
     path("/wakeUp") {
@@ -122,6 +130,7 @@ def initialize() {
     subscribe(bedtimeTimerRoutine, "pushed", routineHandler_BedtimeTimer)
     subscribe(bedtimeSoonRoutine, "pushed", routineHandler_BedtimeSoon)
     subscribe(bedtimeNowRoutine, "pushed", routineHandler_BedtimeNow)
+    subscribe(naptimeNowRoutine, "pushed", routineHandler_NaptimeNow)
     subscribe(wakeUpRoutine, "pushed", routineHandler_WakeUp)
     subscribe(glowsOffRoutine, "pushed", routineHandler_GlowsOff)
 
@@ -137,6 +146,7 @@ def initialize() {
     // Away Alerts
     subscribe(bedtimeSoonRoutine, "pushed", handler_AwayAlert)
     subscribe(bedtimeNowRoutine, "pushed", handler_AwayAlert)
+    subscribe(naptimeNowRoutine, "pushed", handler_AwayAlert)
     subscribe(wakeUpRoutine, "pushed", handler_AwayAlert)
     
     // Battery Alert
@@ -152,6 +162,7 @@ def initialize() {
     state.bedtimeTimerUrl = "${getFullLocalApiServerUrl()}/bedtimeTimer?access_token=$state.accessToken"
     state.bedtimeSoonUrl = "${getFullLocalApiServerUrl()}/bedtimeSoon?access_token=$state.accessToken"
     state.bedtimeNowUrl = "${getFullLocalApiServerUrl()}/bedtimeNow?access_token=$state.accessToken"
+    state.naptimeNowUrl = "${getFullLocalApiServerUrl()}/naptimeNow?access_token=$state.accessToken"
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
 }
@@ -266,6 +277,38 @@ def pauseRoku() {
     }
 }
 
+def routineHandler_NaptimeNow(evt) {
+    logDebug("routineHandler_NaptimeNow: ${evt.device} changed to ${evt.value}")
+    
+    if (state.timerActive == true) {
+        state.timerActive = false
+        unschedule("bedtimeNow")
+    }
+    
+    unschedule("downstairsGlowOff")
+    unschedule("glowsOff")
+
+    downstairsGlow.blue()
+    upstairsGlow.blue()
+    
+    runIn(10*60, downstairsGlowOff)
+    
+    if (state.lastRoutine != "NaptimeNow") {
+        if (naptimeNowAlert) {
+            personToNotify.deviceNotification("Naptime Now!")
+        }
+        
+        if (naptimeNowPause && rokuRemotes) {
+            for (rokuRemote in rokuRemotes) {
+                rokuRemote.queryMediaPlayer()
+            }
+            runIn(2, pauseRoku)
+        }
+        
+        state.lastRoutine = "NaptimeNow"
+    }
+}
+
 def routineHandler_WakeUp(evt) {
     logDebug("routineHandler_WakeUp: ${evt.device} changed to ${evt.value}")
     
@@ -322,8 +365,10 @@ def hueRemoteHandler_Routine(evt) {
     logDebug("hueRemoteHandler_Routine: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "1") {
-        if (timeOfDayIsBetween(timeToday("00:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+        if (timeOfDayIsBetween(timeToday("00:00"), timeToday("09:00"), new Date(), location.timeZone)) {
             wakeUpRoutine.push()
+        } else if (timeOfDayIsBetween(timeToday("09:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+            naptimeNowRoutine.push()
         } else {
             bedtimeTimerRoutine.push()
         }
@@ -372,6 +417,12 @@ def urlHandler_bedtimeNow(evt) {
     logDebug("urlHandler_bedtimeNow")
     
     bedtimeNowRoutine.push()
+}
+
+def urlHandler_naptimeNow(evt) {
+    logDebug("urlHandler_naptimeNow")
+    
+    naptimeNowRoutine.push()
 }
 
 def urlHandler_wakeUp(evt) {
