@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "10.0.0-beta.3" }
+String getVersionNum() { return "10.0.0-beta.4" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
@@ -29,7 +29,7 @@ metadata {
         capability "Sensor"
 
         attribute "occupancy", "enum", ["occupied", "unknown", "unoccupied"]
-        attribute "activity", "enum", ["active", "unknown", "inactive"]
+        attribute "activity", "enum", ["engaged", "active", "checking", "closing", "unknown", "inactive"]
         attribute "event", "enum", ["engaged", "disengaged", "active", "inactive", "momentary", "questionable", "idle"]
     }
 }
