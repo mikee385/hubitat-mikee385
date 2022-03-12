@@ -4,7 +4,7 @@
     "version": "4.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix handling of the first alert for each sensor",
+    "releaseNotes": "Add preferences for temperature thresholds",
     "dateReleased": "2022-03-11",
     "apps": [
         {
