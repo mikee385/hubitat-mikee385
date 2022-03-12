@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial release",
-    "dateReleased": "2021-06-26",
+    "releaseNotes": "Add support for a naptime routine",
+    "dateReleased": "2022-03-11",
     "drivers": [
         {
             "id": "e7b898cb-e8bd-45c9-ace8-f86e2b93204a",
             "name": "Echo Glow Device",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-device.groovy",
             "required": true
