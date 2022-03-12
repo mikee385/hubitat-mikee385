@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.1" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,14 +36,12 @@ preferences {
     page(name: "settings", title: "Thermostat Automation", install: true, uninstall: true) {
         section("Downstairs") {
             input "downstairsThermostat", "device.EcobeeThermostat", title: "Thermostat", multiple: false, required: false
-            input "downstairsBaseline", "device.EcobeeSensor", title: "Baseline Sensor", multiple: false, required: false
-            input "downstairsSensors", "device.EcobeeSensor", title: "Additional Sensors", multiple: true, required: false
+            input "downstairsSensors", "device.EcobeeSensor", title: "Sensors", multiple: true, required: false
             input "downstairsThreshold", "decimal", title: "Temperature Difference for Alert (°)", required: true, defaultValue: 3
         }
         section("Upstairs") {
             input "upstairsThermostat", "device.EcobeeThermostat", title: "Thermostat", multiple: false, required: false
-            input "upstairsBaseline", "device.EcobeeSensor", title: "Baseline Sensor", multiple: false, required: false
-            input "upstairsSensors", "device.EcobeeSensor", title: "Additional Sensors", multiple: true, required: false
+            input "upstairsSensors", "device.EcobeeSensor", title: "Sensors", multiple: true, required: false
             input "upstairsThreshold", "decimal", title: "Temperature Difference for Alert (°)", required: true, defaultValue: 3
         }
         section {
@@ -90,27 +88,18 @@ def initialize() {
     }
     
     // Temperature Alert
-    if (downstairsBaseline && downstairsSensors) {
-        subscribe(downstairsBaseline, "temperature", temperatureHandler_DownstairsTemperatureAlert)
-        for (sensor in downstairsSensors) {
-            subscribe(sensor, "temperature", temperatureHandler_DownstairsTemperatureAlert)
-        }
+    for (sensor in downstairsSensors) {
+        subscribe(sensor, "temperature", temperatureHandler_DownstairsTemperatureAlert)
     }
     
-    if (upstairsBaseline && upstairsSensors) {
-        subscribe(upstairsBaseline, "temperature", temperatureHandler_UpstairsTemperatureAlert)
-        for (sensor in upstairsSensors) {
-            subscribe(sensor, "temperature", temperatureHandler_UpstairsTemperatureAlert)
-        }
+    for (sensor in upstairsSensors) {
+        subscribe(sensor, "temperature", temperatureHandler_UpstairsTemperatureAlert)
     }
     
     // Away Alert
     if (downstairsThermostat) {
         subscribe(downstairsThermostat, "motion.active", handler_AwayAlert)
     }
-    if (downstairsBaseline) {
-        subscribe(downstairsBaseline, "motion.active", handler_AwayAlert)
-    } 
     for (sensor in downstairsSensors) {
         subscribe(sensor, "motion.active", handler_AwayAlert)
     }
@@ -118,9 +107,6 @@ def initialize() {
     if (upstairsThermostat) {
         subscribe(upstairsThermostat, "motion.active", handler_AwayAlert)
     }
-    if (upstairsBaseline) {
-        subscribe(upstairsBaseline, "motion.active", handler_AwayAlert)
-    } 
     for (sensor in upstairsSensors) {
         subscribe(sensor, "motion.active", handler_AwayAlert)
     }
@@ -135,18 +121,12 @@ def getInactiveThresholds() {
     if (downstairsThermostat) {
         thresholds.add([device: downstairsThermostat, inactiveHours: 1])
     }
-    if (downstairsBaseline) {
-        thresholds.add([device: downstairsBaseline, inactiveHours: 1])
-    }
     for (sensor in downstairsSensors) {
         thresholds.add([device: sensor, inactiveHours: 1])
     }
     
     if (upstairsThermostat) {
         thresholds.add([device: upstairsThermostat, inactiveHours: 1])
-    }
-    if (upstairsBaseline) {
-        thresholds.add([device: upstairsBaseline, inactiveHours: 1])
     }
     for (sensor in upstairsSensors) {
         thresholds.add([device: sensor, inactiveHours: 1])
@@ -161,18 +141,12 @@ def getUnchangedThresholds() {
     if (downstairsThermostat) {
         thresholds.add([device: downstairsThermostat, attribute: "temperature", inactiveHours: 6])
     }
-    if (downstairsBaseline) {
-        thresholds.add([device: downstairsBaseline, attribute: "temperature", inactiveHours: 6])
-    }
     for (sensor in downstairsSensors) {
         thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 6])
     }
     
     if (upstairsThermostat) {
         thresholds.add([device: upstairsThermostat, attribute: "temperature", inactiveHours: 6])
-    }
-    if (upstairsBaseline) {
-        thresholds.add([device: upstairsBaseline, attribute: "temperature", inactiveHours: 6])
     }
     for (sensor in upstairsSensors) {
         thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 6])
@@ -239,9 +213,7 @@ def temperatureHandler_DownstairsTemperatureAlert(evt) {
 }
 
 def checkDownstairsTemperatures() {
-    for (sensor in downstairsSensors) {
-        checkTemperature(downstairsBaseline, sensor, downstairsThreshold)
-    }
+    checkTemperatures(downstairsSensors, downstairsThreshold)
 }
 
 def temperatureHandler_UpstairsTemperatureAlert(evt) {
@@ -251,19 +223,27 @@ def temperatureHandler_UpstairsTemperatureAlert(evt) {
 }
 
 def checkUpstairsTemperatures() {
-    for (sensor in upstairsSensors) {
-        checkTemperature(upstairsBaseline, sensor, upstairsThreshold)
-    }
+    checkTemperatures(upstairsSensors, upstairsThreshold)
 }
 
-def checkTemperature(baseline, sensor, threshold) {
-    def temperatureDifference = sensor.currentValue("temperature") - baseline.currentValue("temperature")
-    //log.info "$sensor: ${sensor.currentValue('temperature')} - ${baseline.currentValue('temperature')} = $temperatureDifference"
-    if (temperatureDifference >= threshold) {
-        temperatureAlert(sensor, "${sensor} is too hot! (${temperatureDifference}°)")
-    } else if (temperatureDifference <= -threshold) {
-        temperatureAlert(sensor, "${sensor} is too cold! (${temperatureDifference}°)")
-    } 
+def checkTemperatures(sensors, threshold) {
+    def temperatureSum = 0.0
+    def temperatureCount = 0
+    for (sensor in sensors) {
+        temperatureSum += sensor.currentValue("temperature")
+        temperatureCount += 1
+    }
+    def averageTemperature = temperatureSum / temperatureCount
+    
+    for (sensor in sensors) {
+        def temperatureDifference = sensor.currentValue("temperature") - averageTemperature
+        //log.info "$sensor: ${sensor.currentValue('temperature')} - ${averageTemperature} = $temperatureDifference"
+        if (temperatureDifference >= threshold) {
+            temperatureAlert(sensor, "${sensor} is too hot! (${temperatureDifference}°)")
+        } else if (temperatureDifference <= -threshold) {
+            temperatureAlert(sensor, "${sensor} is too cold! (${temperatureDifference}°)")
+        }
+    }
 }
 
 def temperatureAlert(sensor, message) {
