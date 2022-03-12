@@ -1,11 +1,11 @@
 {
     "packageName": "Thermostat Automation",
     "author": "Michael Pierce",
-    "version": "4.1.0",
+    "version": "4.1.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add preferences for temperature thresholds",
-    "dateReleased": "2022-03-11",
+    "releaseNotes": "Disable debug logging",
+    "dateReleased": "2022-03-12",
     "apps": [
         {
             "id": "a53151e5-9ddf-43c4-af86-440edf88ba24",
