@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.1" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -38,11 +38,13 @@ preferences {
             input "downstairsThermostat", "device.EcobeeThermostat", title: "Thermostat", multiple: false, required: false
             input "downstairsBaseline", "device.EcobeeSensor", title: "Baseline Sensor", multiple: false, required: false
             input "downstairsSensors", "device.EcobeeSensor", title: "Additional Sensors", multiple: true, required: false
+            input "downstairsThreshold", "decimal", title: "Temperature Difference for Alert (°)", required: true, defaultValue: 3
         }
         section("Upstairs") {
             input "upstairsThermostat", "device.EcobeeThermostat", title: "Thermostat", multiple: false, required: false
             input "upstairsBaseline", "device.EcobeeSensor", title: "Baseline Sensor", multiple: false, required: false
             input "upstairsSensors", "device.EcobeeSensor", title: "Additional Sensors", multiple: true, required: false
+            input "upstairsThreshold", "decimal", title: "Temperature Difference for Alert (°)", required: true, defaultValue: 3
         }
         section {
             input "workdayTime", "time", title: "Workday Resume Time", required: false
@@ -238,7 +240,7 @@ def temperatureHandler_DownstairsTemperatureAlert(evt) {
 
 def checkDownstairsTemperatures() {
     for (sensor in downstairsSensors) {
-        checkTemperature(downstairsBaseline, sensor)
+        checkTemperature(downstairsBaseline, sensor, downstairsThreshold)
     }
 }
 
@@ -250,16 +252,16 @@ def temperatureHandler_UpstairsTemperatureAlert(evt) {
 
 def checkUpstairsTemperatures() {
     for (sensor in upstairsSensors) {
-        checkTemperature(upstairsBaseline, sensor)
+        checkTemperature(upstairsBaseline, sensor, upstairsThreshold)
     }
 }
 
-def checkTemperature(baseline, sensor) {
+def checkTemperature(baseline, sensor, threshold) {
     def temperatureDifference = sensor.currentValue("temperature") - baseline.currentValue("temperature")
     log.info "$sensor: ${sensor.currentValue('temperature')} - ${baseline.currentValue('temperature')} = $temperatureDifference"
-    if (temperatureDifference >= 2) {
+    if (temperatureDifference >= threshold) {
         temperatureAlert(sensor, "${sensor} is too hot! (${temperatureDifference}°)")
-    } else if (temperatureDifference <= -2) {
+    } else if (temperatureDifference <= -threshold) {
         temperatureAlert(sensor, "${sensor} is too cold! (${temperatureDifference}°)")
     } 
 }
