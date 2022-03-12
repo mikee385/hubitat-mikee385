@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.21" }
+String getVersionNum() { return "10.0.0-beta.22" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -149,22 +149,22 @@ Initial"""
         
         for (entryDoor in allEntryDoors.values()) {
             if (allEngagedDoors_Open.containsKey(entryDoor.id) && allEngagedDoors_Closed.containsKey(entryDoor.id)) {
-                addDevice(entryDoor, "engaged", "active")
+                addEngagedDevice(entryDoor, true)
             
                 subscribe(entryDoor, "contact.open", openEngagedHandler)
                 subscribe(entryDoor, "contact.closed", closedEngagedHandler)
             } else if (allEngagedDoors_Open.containsKey(entryDoor.id)) {
-                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "open" ? "active" : "inactive")
+                addEngagedDevice(entryDoor, entryDoor.currentValue("contact") == "open")
             
                 subscribe(entryDoor, "contact.open", openEngagedHandler)
                 subscribe(entryDoor, "contact.closed", closedDisengagedHandler)
             } else if (allEngagedDoors_Closed.containsKey(entryDoor.id)) {
-                addDevice(entryDoor, "engaged", entryDoor.currentValue("contact") == "closed" ? "active" : "inactive")
+                addEngagedDevice(entryDoor, entryDoor.currentValue("contact") == "closed")
             
                 subscribe(entryDoor, "contact.open", openDisengagedHandler)
                 subscribe(entryDoor, "contact.closed", closedEngagedHandler)
             } else {
-                addDevice(entryDoor, "momentary", "inactive")
+                addMomentaryDevice(entryDoor)
                 
                 subscribe(entryDoor, "contact.open", openMomentaryHandler)
                 subscribe(entryDoor, "contact.closed", closedMomentaryHandler)
@@ -172,21 +172,21 @@ Initial"""
         }
         
         for (presenceSensor in allPresenceSensors.values()) {
-            addDevice(presenceSensor, "active", presenceSensor.currentValue("presence") == "present" ? "active" : "inactive")
+            addActiveDevice(presenceSensor, presenceSensor.currentValue("presence") == "present")
             
             subscribe(presenceSensor, "presence.present", activeDeviceHandler)
             subscribe(presenceSensor, "presence.not present", inactiveDeviceHandler)
         }
         
         for (motionSensor in allMotionSensors.values()) {
-            addDevice(motionSensor, "active", motionSensor.currentValue("motion") == "active" ? "active" : "inactive")
+            addActiveDevice(motionSensor, motionSensor.currentValue("motion") == "active")
             
             subscribe(motionSensor, "motion.active", activeDeviceHandler)
             subscribe(motionSensor, "motion.inactive", inactiveDeviceHandler)
         }
         
         for (accelerationSensor in allAccelerationSensors.values()) {
-            addDevice(accelerationSensor, "active", accelerationSensor.currentValue("acceleration") == "active" ? "active" : "inactive")
+            addActiveDevice(accelerationSensor, accelerationSensor.currentValue("acceleration") == "active")
             
             subscribe(accelerationSensor, "acceleration.active", activeDeviceHandler)
             subscribe(accelerationSensor, "acceleration.inactive", inactiveDeviceHandler)
@@ -194,7 +194,7 @@ Initial"""
         
         for (engagedDoor in allEngagedDoors_Open.values()) {
             if (!allEntryDoors.containsKey(engagedDoor.id)) {
-                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "open" ? "active" : "inactive")
+                addEngagedDevice(engagedDoor, engagedDoor.currentValue("contact") == "open")
                 
                 subscribe(engagedDoor, "contact.open", engagedDeviceHandler)
             
@@ -208,7 +208,7 @@ Initial"""
         
         for (engagedDoor in allEngagedDoors_Closed.values()) {
             if (!allEntryDoors.containsKey(engagedDoor.id) && !allEngagedDoors_Open.containsKey(engagedDoor.id)) { 
-                addDevice(engagedDoor, "engaged", engagedDoor.currentValue("contact") == "closed" ? "active" : "inactive")
+                addEngagedDevice(engagedDoor, engagedDoor.currentValue("contact") == "closed")
                 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
                 subscribe(engagedDoor, "contact.open", disengagedDeviceHandler)
@@ -216,7 +216,7 @@ Initial"""
         }
         
         for (engagedSwitch in allEngagedSwitches_On.values()) {
-            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "on" ? "active" : "inactive")
+            addEngagedDevice(engagedSwitch, engagedSwitch.currentValue("switch") == "on")
             
             subscribe(engagedSwitch, "switch.on", engagedDeviceHandler)
             
@@ -228,7 +228,7 @@ Initial"""
         }
         
         for (engagedSwitch in allEngagedSwitches_Off.values()) {
-            addDevice(engagedSwitch, "engaged", engagedSwitch.currentValue("switch") == "off" ? "active" : "inactive")
+            addEngagedDevice(engagedSwitch, engagedSwitch.currentValue("switch") == "off")
             
             if (!allEngagedSwitches_On.containsKey(engagedSwitch.id)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
@@ -237,7 +237,7 @@ Initial"""
         }
         
         for (engagedLock in allEngagedLocks_Unlocked.values()) {
-            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "unlocked" ? "active" : "inactive")
+            addEngagedDevice(engagedLock, engagedLock.currentValue("lock") == "unlocked")
             
             subscribe(engagedLock, "lock.unlocked", engagedDeviceHandler)
             
@@ -249,7 +249,7 @@ Initial"""
         }
         
         for (engagedLock in allEngagedLocks_Locked.values()) {
-            addDevice(engagedLock, "engaged", engagedLock.currentValue("lock") == "locked" ? "active" : "inactive")
+            addEngagedDevice(engagedLock, engagedLock.currentValue("lock") == "locked")
             
             if (!allEngagedLocks_Unlocked.containsKey(engagedLock.id)) {
                 subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
@@ -259,14 +259,14 @@ Initial"""
         
         for (momentaryDoor in allMomentaryDoors.values()) {
             if (!allEntryDoors.containsKey(momentaryDoor.id) && !allEngagedDoors_Open.containsKey(momentaryDoor.id) && !allEngagedDoors_Closed.containsKey(momentaryDoor.id)) {
-                addDevice(momentaryDoor, "momentary", "inactive")
+                addMomentaryDevice(momentaryDoor)
                 
                 subscribe(momentaryDoor, "contact", momentaryDeviceHandler)
             }
         }
         
         for (momentaryButton in allMomentaryButtons.values()) {
-            addDevice(momentaryButton, "momentary", "inactive")
+            addMomentaryDevice(momentaryButton)
             
             subscribe(momentaryButton, "pushed", momentaryDeviceHandler)
             subscribe(momentaryButton, "doubleTapped", momentaryDeviceHandler)
@@ -276,7 +276,7 @@ Initial"""
         
         for (momentarySwitch in allMomentarySwitches.values()) {
             if (!allEngagedSwitches_On.containsKey(momentarySwitch.id) && !allEngagedSwitches_Off.containsKey(momentarySwitch.id)) {
-                addDevice(momentarySwitch, "momentary", "inactive")
+                addMomentaryDevice(momentarySwitch)
                 
                 subscribe(momentarySwitch, "switch", momentaryDeviceHandler)
             }
@@ -284,7 +284,7 @@ Initial"""
         
         for (momentaryLock in allMomentaryLocks.values()) {
             if (!allEngagedLocks_Unlocked.containsKey(momentaryLock.id) && !allEngagedLocks_Locked.containsKey(momentaryLock.id)) {
-                addDevice(momentaryLock, "momentary", "inactive")
+                addMomentaryDevice(momentaryLock)
                 
                 subscribe(momentaryLock, "lock", momentaryDeviceHandler)
             }
@@ -292,7 +292,7 @@ Initial"""
         
         for (childZone in allChildZones.values()) {
             if (childZone.id != zone.id) {
-                addDevice(childZone, "zone", childZone.currentValue("activity"))  
+                addChildZone(childZone)
                 
                 subscribe(childZone, "activity", childZoneActivityHandler)
                 subscribe(childZone, "event", childZoneEventHandler)
@@ -335,6 +335,22 @@ def addDevice(device, type, activity) {
         activity: activity,
         timerId: null
     ]
+}
+
+def addEngagedDevice(device, active) {
+    addDevice(device, "engaged", active ? "active" : "inactive")
+}
+
+def addActiveDevice(device, active) {
+    addDevice(device, "active", active ? "active" : "inactive")
+}
+
+def addMomentaryDevice(device) {
+    addDevice(device, "momentary", "inactive")
+}
+
+def addChildZone(zone) {
+    addDevice(childZone, "zone", childZone.currentValue("activity"))
 }
 
 //-----------------------------------------
