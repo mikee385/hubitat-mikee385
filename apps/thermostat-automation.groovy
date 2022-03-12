@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.1.1" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -258,7 +258,7 @@ def checkUpstairsTemperatures() {
 
 def checkTemperature(baseline, sensor, threshold) {
     def temperatureDifference = sensor.currentValue("temperature") - baseline.currentValue("temperature")
-    log.info "$sensor: ${sensor.currentValue('temperature')} - ${baseline.currentValue('temperature')} = $temperatureDifference"
+    //log.info "$sensor: ${sensor.currentValue('temperature')} - ${baseline.currentValue('temperature')} = $temperatureDifference"
     if (temperatureDifference >= threshold) {
         temperatureAlert(sensor, "${sensor} is too hot! (${temperatureDifference}°)")
     } else if (temperatureDifference <= -threshold) {
@@ -272,9 +272,9 @@ def temperatureAlert(sensor, message) {
         def previousAlertTime = state.lastAlertTime.get(sensor.id)
         if (previousAlertTime != null) {
             minutesSincePreviousAlert = (now() - previousAlertTime)/1000.0/60.0
-            log.info "$sensor: Previous alert was $minutesSincePreviousAlert minutes ago"
+            //log.info "$sensor: Previous alert was $minutesSincePreviousAlert minutes ago"
         } else {
-             log.info "$sensor: No previous alert"
+            //log.info "$sensor: No previous alert"
         }
             
         if (minutesSincePreviousAlert >= 60) {
