@@ -30,7 +30,7 @@ metadata {
 
         attribute "occupancy", "enum", ["occupied", "unknown", "unoccupied"]
         attribute "activity", "enum", ["engaged", "active", "checking", "unknown", "inactive"]
-        attribute "event", "enum", ["engaged", "disengaged", "active", "momentary", "questionable", "closing", "inactive"]
+        attribute "event", "enum", ["engaged", "active", "momentary", "questionable", "closing", "inactive"]
     }
 }
 

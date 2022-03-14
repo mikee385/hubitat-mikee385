@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.28         " }
+String getVersionNum() { return "10.0.0-beta.29" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -157,11 +157,11 @@ Initial"""
                 addEngagedDevice(entryDoor, entryDoor.currentValue("contact") == "open")
             
                 subscribe(entryDoor, "contact.open", openEngagedHandler)
-                subscribe(entryDoor, "contact.closed", closedDisengagedHandler)
+                subscribe(entryDoor, "contact.closed", closedMomentaryHandler)
             } else if (allEngagedDoors_Closed.containsKey(entryDoor.id)) {
                 addEngagedDevice(entryDoor, entryDoor.currentValue("contact") == "closed")
             
-                subscribe(entryDoor, "contact.open", openDisengagedHandler)
+                subscribe(entryDoor, "contact.open", openMomentaryHandler)
                 subscribe(entryDoor, "contact.closed", closedEngagedHandler)
             } else {
                 addMomentaryDevice(entryDoor)
@@ -201,7 +201,7 @@ Initial"""
                 if (allEngagedDoors_Closed.containsKey(engagedDoor.id)) {
                     subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
                 } else {
-                    subscribe(engagedDoor, "contact.closed", disengagedDeviceHandler)
+                    subscribe(engagedDoor, "contact.closed", momentaryDeviceHandler)
                 }
             }
         }
@@ -211,7 +211,7 @@ Initial"""
                 addEngagedDevice(engagedDoor, engagedDoor.currentValue("contact") == "closed")
                 
                 subscribe(engagedDoor, "contact.closed", engagedDeviceHandler)
-                subscribe(engagedDoor, "contact.open", disengagedDeviceHandler)
+                subscribe(engagedDoor, "contact.open", momentaryDeviceHandler)
             }
         }
         
@@ -223,7 +223,7 @@ Initial"""
             if (allEngagedSwitches_Off.containsKey(engagedSwitch.id)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
             } else {
-                subscribe(engagedSwitch, "switch.off", disengagedDeviceHandler)
+                subscribe(engagedSwitch, "switch.off", momentaryDeviceHandler)
             }
         }
         
@@ -232,7 +232,7 @@ Initial"""
             
             if (!allEngagedSwitches_On.containsKey(engagedSwitch.id)) {
                 subscribe(engagedSwitch, "switch.off", engagedDeviceHandler)
-                subscribe(engagedSwitch, "switch.on", disengagedDeviceHandler)
+                subscribe(engagedSwitch, "switch.on", momentaryDeviceHandler)
             }
         }
         
@@ -244,7 +244,7 @@ Initial"""
             if (allEngagedLocks_Locked.containsKey(engagedLock.id)) {
                 subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
             } else {
-                subscribe(engagedLock, "lock.locked", disengagedDeviceHandler)
+                subscribe(engagedLock, "lock.locked", momentaryDeviceHandler)
             }
         }
         
@@ -253,7 +253,7 @@ Initial"""
             
             if (!allEngagedLocks_Unlocked.containsKey(engagedLock.id)) {
                 subscribe(engagedLock, "lock.locked", engagedDeviceHandler)
-                subscribe(engagedLock, "lock.unlocked", disengagedDeviceHandler)
+                subscribe(engagedLock, "lock.unlocked", momentaryDeviceHandler)
             }
         }
         
@@ -493,35 +493,6 @@ occupancy: $occupancy"""
     logDebug(debugContext)
 }
 
-def disengagedDeviceHandler(evt) {
-    def zone = getZoneDevice()
-    def contact = zone.currentValue("contact")
-    def activity = zone.currentValue("activity")
-    def occupancy = zone.currentValue("occupancy")
-    def debugContext = new StringBuilder(
-"""Zone ${app.label}
-Disengaged Handler
-${evt.device} is ${evt.value}
-contact: $contact
-activity: $activity
-occupancy: $occupancy"""
-    )
-
-    def message = "${evt.device} is ${evt.value}"
-
-    cancelClosedTimer()
-    updateDevice(evt, "checking")
-    startCheckingTimer(evt)
-    
-    activity = getActivityFromDevices()
-    occupancy = "occupied"
-    def event = "disengaged"
-    
-    setStatus(zone, event, activity, occupancy, message, debugContext)
-    
-    logDebug(debugContext)
-}
-
 def activeDeviceHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
@@ -651,39 +622,6 @@ occupancy: $occupancy"""
     logDebug(debugContext)
 }
 
-def openDisengagedHandler(evt) {
-    def zone = getZoneDevice()
-    def contact = zone.currentValue("contact")
-    def activity = zone.currentValue("activity")
-    def occupancy = zone.currentValue("occupancy")
-    def debugContext = new StringBuilder(
-"""Zone ${app.label}
-Open, Disengaged Handler
-${evt.device} is ${evt.value}
-contact: $contact
-activity: $activity
-occupancy: $occupancy"""
-    )
-
-    def message = "${evt.device} is ${evt.value}"
-    
-    unschedule("setToClosed")
-
-    cancelClosedTimer()
-    updateDevice(evt, "checking")
-    startCheckingTimer(evt)
-    
-    activity = getActivityFromDevices()
-    occupancy = "occupied"
-    def event = "disengaged"
-    
-    setStatus(zone, event, activity, occupancy, message, debugContext)
-    
-    setContact(zone, "open", message, debugContext)
-
-    logDebug(debugContext)
-}
-
 def openMomentaryHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
@@ -746,45 +684,6 @@ occupancy: $occupancy"""
     
     if (!zoneIsOpen(zone)) {
         setContact(zone, "closed", message, debugContext)
-    }
-    
-    logDebug(debugContext)
-}
-
-def closedDisengagedHandler(evt) {
-    def zone = getZoneDevice()
-    def contact = zone.currentValue("contact")
-    def activity = zone.currentValue("activity")
-    def occupancy = zone.currentValue("occupancy")
-    def debugContext = new StringBuilder(
-"""Zone ${app.label}
-Closed, Disengaged Handler
-${evt.device} is ${evt.value}
-contact: $contact
-activity: $activity
-occupancy: $occupancy"""
-    )
-    
-    def message = "${evt.device} is ${evt.value}"
-
-    unschedule("setToClosed")
-    
-    cancelClosedTimer()
-    updateDevice(evt, "checking")
-    startCheckingTimer(evt)
-    
-    activity = getActivityFromDevices()
-    occupancy = "occupied"
-    def event = "disengaged"
-        
-    setStatus(zone, event, activity, occupancy, message, debugContext)
-    
-    if (!zoneIsOpen(zone)) {
-        if (activity == "engaged") {
-            setContact(zone, "closed", message, debugContext)
-        } else {
-            runIn(1, setToClosed, [data: [descriptionText: message]])
-        }
     }
     
     logDebug(debugContext)
@@ -870,7 +769,6 @@ occupancy: $occupancy"""
     def message = "${evt.descriptionText}, via ${evt.device}"
 
     if (evt.value == "engaged"
-     || evt.value == "disengaged"
      || evt.value == "active"
      || evt.value == "momentary") {
         cancelClosedTimer()
