@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.25" }
+String getVersionNum() { return "10.0.0-beta.26" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -294,14 +294,15 @@ Initial"""
             if (childZone.id != zone.id) {
                 addChildZone(childZone)
                 
-                subscribe(childZone, "activity", childZoneActivityHandler)
-                subscribe(childZone, "event", childZoneEventHandler)
+                subscribe(childZone, "event", childZoneHandler)
             }
         }
         
         def activity = getActivityFromDevices()
-        setActivity(zone, activity, "initialize", debugContext)
-        setOccupancyFromActivity(zone, contact, activity, "initialize", debugContext)
+        def occupancy = getOccupancyFromActivity(zone, contact, activity)
+        def event = "inactive"
+        
+        setStatus(zone, event, activity, occupancy, "initialize", debugContext)
     
     } else if (zoneType != "Manual") {
         log.error "Unknown zone type: $zoneType"
@@ -350,15 +351,30 @@ def addMomentaryDevice(device) {
 }
 
 def addChildZone(zone) {
-    addDevice(zone, "zone", zone.currentValue("activity"))
+    state.devices[zone.id] = [
+        id: zone.id,
+        name: zone.displayName,
+        type: "zone",
+        activity: zone.currentValue("activity"),
+        occupancy: zone.currentValue("occupancy"),
+        timerId: null
+    ]
 }
 
 //-----------------------------------------
 
-def setDevice(evt, activity) {
+def updateDevice(evt, activity) {
     state.devices["${evt.deviceId}"].activity = activity
     state.devices["${evt.deviceId}"].timerId = null
 }
+
+def updateChildZone(evt, activity, occupancy) {
+    state.devices["${evt.deviceId}"].activity = activity
+    state.devices["${evt.deviceId}"].occupancy = occupancy
+    state.devices["${evt.deviceId}"].timerId = null
+}
+
+//-----------------------------------------
 
 def setContact(zone, value, message, debugContext) {
     zone.sendEvent(name: "contact", value: value, descriptionText: message)
@@ -368,27 +384,15 @@ contact => $value"""
     )
 }
 
-def setActivity(zone, value, message, debugContext) {
-    zone.sendEvent(name: "activity", value: value, descriptionText: message)
-    
-    debugContext.append("""
-activity => $value"""
-    )
-}
+def sendStatus(zone, event, activity, occupancy, message, debugContext) {
+    zone.sendEvent(name: "activity", value: activity, descriptionText: message)
+    zone.sendEvent(name: "occupancy", value: occupancy, descriptionText: message)
+    zone.sendEvent(name: "event", value: event, descriptionText: message, isStateChange: true)
 
-def setOccupancy(zone, value, message, debugContext) {
-    zone.sendEvent(name: "occupancy", value: value, descriptionText: message)
-    
     debugContext.append("""
-occupancy => $value"""
-    )
-}
-
-def setEvent(zone, value, message, debugContext) {
-    zone.sendEvent(name: "event", value: value, descriptionText: message, isStateChange: true)
-    
-    debugContext.append("""
-event => $value"""
+activity => $activity
+occupancy => $occupancy
+event => $event"""
     )
 }
 
@@ -431,35 +435,32 @@ def getActivityFromDevices() {
     }
 }
     
-def setOccupancyFromActivity(zone, contact, activity, message, debugContext) {
+def getOccupancyFromActivity(zone, contact, activity) {
     if (state.closing) {
-        setOccupancy(zone, "unknown", message, debugContext) 
+        return "unknown"
     
     } else if (contact == "open" || zone.currentValue("occupancy") != "occupied") {
         def childOccupied = false
         def childUnknown = false
         
         for (childZone in childZones) {
-            def childOccupancy = childZone.currentValue("occupancy")
-            if (childOccupancy == "occupied") {
+            if (childZone.occupancy == "occupied") {
                 childOccupied = true
-            } else if (childOccupancy == "unknown") {
+            } else if (childZone.occupancy == "unknown") {
                 childUnknown = true
             }
         }
     
         if (activity == "engaged" || activity == "active" || activity == "checking" || childOccupied) {
-            setOccupancy(zone, "occupied", message, debugContext)
+            return "occupied"
         } else if (activity == "closing" || activity == "unknown" || childUnknown) {
-            setOccupancy(zone, "unknown", message, debugContext)
+            return "unknown"
         } else {
-            setOccupancy(zone, "unoccupied", message, debugContext)
+            return "unoccupied"
         }
     
     } else {
-        debugContext.append("""
-occupancy => ignored (closed, occupied)"""
-        )
+        return "occupied" 
     }
 }
 
@@ -482,12 +483,13 @@ occupancy: $occupancy"""
     def message = "${evt.device} is ${evt.value}"
 
     cancelClosedTimer()
-    setDevice(evt, "engaged")
+    updateDevice(evt, "engaged")
     
-    setActivity(zone, "engaged", message, debugContext)
-    setOccupancy(zone, "occupied", message, debugContext)
+    activity = "engaged"
+    occupancy = "occupied"
+    def event = "engaged"
     
-    setEvent(zone, "engaged", message, debugContext)
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
@@ -509,14 +511,14 @@ occupancy: $occupancy"""
     def message = "${evt.device} is ${evt.value}"
 
     cancelClosedTimer()
-    setDevice(evt, "checking")
+    updateDevice(evt, "checking")
     startCheckingTimer(evt)
     
     activity = getActivityFromDevices()
-    setActivity(zone, activity, message, debugContext)
-    setOccupancy(zone, "occupied", message, debugContext)
+    occupancy = "occupied"
+    def event = "disengaged"
     
-    setEvent(zone, "disengaged", message, debugContext)
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
@@ -540,23 +542,23 @@ occupancy: $occupancy"""
     cancelClosedTimer()
     
     if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "unoccupied") {
-        setDevice(evt, "unknown")
+        updateDevice(evt, "unknown")
         startQuestionableTimer(evt)
         
         activity = getActivityFromDevices()
-        setActivity(zone, activity, message, debugContext)
-        setOccupancyFromActivity(zone, contact, activity, message, debugContext)
+        occupancy = getOccupancyFromActivity(zone, contact, activity)
+        def event = "questionable"
         
-        setEvent(zone, "questionable", message, debugContext)
+        setStatus(zone, event, activity, occupancy, message, debugContext)
     
     } else {
-        setDevice(evt, "active")
+        updateDevice(evt, "active")
         
         activity = getActivityFromDevices()
-        setActivity(zone, activity, message, debugContext)
-        setOccupancy(zone, "occupied", message, debugContext)
+        occupancy = "occupied"
+        def event = "active"
         
-        setEvent(zone, "active", message, debugContext)
+        setStatus(zone, event, activity, occupancy, message, debugContext)
     }
     
     logDebug(debugContext)
@@ -593,24 +595,24 @@ occupancy: $occupancy"""
     cancelClosedTimer()
     
     if (zone.currentValue("contact") == "closed" && zone.currentValue("occupancy") == "unoccupied") {
-        setDevice(evt, "unknown")
+        updateDevice(evt, "unknown")
         startQuestionableTimer(evt)
         
         activity = getActivityFromDevices()
-        setActivity(zone, activity, message, debugContext)
-        setOccupancyFromActivity(zone, contact, activity, message, debugContext)
+        occupancy = getOccupancyFromActivity(zone, contact, activity)
+        def event = "questionable"
         
-        setEvent(zone, "questionable", message, debugContext)
-
+        setStatus(zone, event, activity, occupancy, message, debugContext)
+    
     } else {
-        setDevice(evt, "checking")
+        updateDevice(evt, "checking")
         startCheckingTimer(evt)
         
         activity = getActivityFromDevices()
-        setActivity(zone, activity, message, debugContext)
-        setOccupancy(zone, "occupied", message, debugContext)
+        occupancy = "occupied"
+        def event = "momentary"
         
-        setEvent(zone, "momentary", message, debugContext)
+        setStatus(zone, event, activity, occupancy, message, debugContext)
     }
     
     logDebug(debugContext)
@@ -637,12 +639,13 @@ occupancy: $occupancy"""
     setContact(zone, "open", message, debugContext)
 
     cancelClosedTimer()
-    setDevice(evt, "engaged")
+    updateDevice(evt, "engaged")
     
-    setActivity(zone, "engaged", message, debugContext)
-    setOccupancy(zone, "occupied", message, debugContext)
+    activity = "engaged"
+    occupancy = "occupied"
+    def event = "engaged"
     
-    setEvent(zone, "engaged", message, debugContext)
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
@@ -666,14 +669,14 @@ occupancy: $occupancy"""
     setContact(zone, "open", message, debugContext)
 
     cancelClosedTimer()
-    setDevice(evt, "checking")
+    updateDevice(evt, "checking")
     startCheckingTimer(evt)
     
     activity = getActivityFromDevices()
-    setActivity(zone, activity, message, debugContext)
-    setOccupancy(zone, "occupied", message, debugContext)
+    occupancy = "occupied"
+    def event = "disengaged"
     
-    setEvent(zone, "disengaged", message, debugContext)
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
@@ -697,14 +700,14 @@ occupancy: $occupancy"""
     setContact(zone, "open", message, debugContext)
 
     cancelClosedTimer()
-    setDevice(evt, "checking")
+    updateDevice(evt, "checking")
     startCheckingTimer(evt)
     
     activity = getActivityFromDevices()
-    setActivity(zone, activity, message, debugContext)
-    setOccupancy(zone, "occupied", message, debugContext)
-    
-    setEvent(zone, "momentary", message, debugContext)
+    occupancy = "occupied"
+    def event = "momentary"
+        
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
@@ -730,12 +733,13 @@ occupancy: $occupancy"""
     }
 
     cancelClosedTimer()
-    setDevice(evt, "engaged")
+    updateDevice(evt, "engaged")
     
-    setActivity(zone, "engaged", message, debugContext)
-    setOccupancy(zone, "occupied", message, debugContext)
+    activity = "engaged"
+    occupancy = "occupied"
+    def event = "engaged"
     
-    setEvent(zone, "engaged", message, debugContext)
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
@@ -757,22 +761,20 @@ occupancy: $occupancy"""
     def message = "${evt.device} is ${evt.value}"
 
     cancelClosedTimer()
-    setDevice(evt, "checking")
+    updateDevice(evt, "checking")
     startCheckingTimer(evt)
         
     if (!zoneIsOpen(zone)) {
-        setEvent(zone, "disengaged", message, debugContext)
-        runIn(1, setToClosed, [overwrite: false, data: [descriptionText: message]])
-        
+        runIn(1, setToClosed, [overwrite: false, data: [event: "disengaged", descriptionText: message]])
         debugContext.append("""
 Paused""")
     
     } else {
         activity = getActivityFromDevices()
-        setActivity(zone, activity, message, debugContext)
-        setOccupancy(zone, "occupied", message, debugContext)
+        occupancy = "occupied"
+        def event = "disengaged"
         
-        setEvent(zone, "disengaged", message, debugContext)
+        setStatus(zone, event, activity, occupancy, message, debugContext)
     }
     
     logDebug(debugContext)
@@ -795,22 +797,20 @@ occupancy: $occupancy"""
     def message = "${evt.device} is ${evt.value}"
 
     cancelClosedTimer()
-    setDevice(evt, "checking")
+    updateDevice(evt, "checking")
     startCheckingTimer(evt)
 
     if (!zoneIsOpen(zone)) {
-        setEvent(zone, "momentary", message, debugContext)
-        runIn(1, setToClosed, [overwrite: false, data: [descriptionText: message]])
-        
+        runIn(1, setToClosed, [overwrite: false, data: [event: "momentary", descriptionText: message]])
         debugContext.append("""
 Paused""")
         
     } else {
         activity = getActivityFromDevices()
-        setActivity(zone, activity, message, debugContext)
-        setOccupancy(zone, "occupied", message, debugContext)
-        
-        setEvent(zone, "momentary", message, debugContext)
+        occupancy = "occupied"
+        def event = "momentary"
+            
+        setStatus(zone, event, activity, occupancy, message, debugContext)
     }
     
     logDebug(debugContext)
@@ -823,11 +823,16 @@ def setToClosed(evt) {
 Closed Handler (Resumed)"""
     )
     
-    setContact(zone, "closed", evt.descriptionText, debugContext)
-
-    setActivity(zone, "closing", evt.descriptionText, debugContext)
-    setOccupancy(zone, "unknown", evt.descriptionText, debugContext)
+    def message = evt.descriptionText
+    
+    setContact(zone, "closed", message, debugContext)
+    
+    activity = "closing"
+    occupancy = "unknown"
+    def event = evt.event
             
+    setStatus(zone, event, activity, occupancy, message, debugContext)
+    
     startClosedTimer()
     
     logDebug(debugContext)
@@ -835,60 +840,14 @@ Closed Handler (Resumed)"""
 
 //-----------------------------------------
 
-def childZoneOccupancyHandler(evt) {
+def childZoneHandler(evt) {
     def zone = getZoneDevice()
     def contact = zone.currentValue("contact")
     def activity = zone.currentValue("activity")
     def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
-Child Zone Occupancy Handler
-${evt.device} is ${evt.value}
-contact: $contact
-activity: $activity
-occupancy: $occupancy"""
-    )
-
-    def message = "${evt.descriptionText}, via ${evt.device}"
-
-    setOccupancyFromActivity(zone, contact, activity, message, debugContext)
-    
-    logDebug(debugContext)
-}
-
-def childZoneActivityHandler(evt) {
-    def zone = getZoneDevice()
-    def contact = zone.currentValue("contact")
-    def activity = zone.currentValue("activity")
-    def occupancy = zone.currentValue("occupancy")
-    def debugContext = new StringBuilder(
-"""Zone ${app.label}
-Child Zone Activity Handler
-${evt.device} is ${evt.value}
-contact: $contact
-activity: $activity
-occupancy: $occupancy"""
-    )
-    
-    def message = "${evt.descriptionText}, via ${evt.device}"
-
-    setDevice(evt, evt.value)
-
-    activity = getActivityFromDevices()
-    setActivity(zone, activity, message, debugContext)
-    setOccupancyFromActivity(zone, contact, activity, message, debugContext)
-    
-    logDebug(debugContext)
-}
-
-def childZoneEventHandler(evt) {
-    def zone = getZoneDevice()
-    def contact = zone.currentValue("contact")
-    def activity = zone.currentValue("activity")
-    def occupancy = zone.currentValue("occupancy")
-    def debugContext = new StringBuilder(
-"""Zone ${app.label}
-Child Zone Event Handler
+Child Zone Handler
 ${evt.device} is ${evt.value}
 contact: $contact
 activity: $activity
@@ -903,7 +862,20 @@ occupancy: $occupancy"""
      || evt.value == "momentary") {
         cancelClosedTimer()
     }
-    setEvent(zone, evt.value, message, debugContext)
+    
+    def data = new LinkedHashMap(parseJson(evt.data))
+    if (data.occupancy != null && data.activity != null) {
+        updateChildZone(evt, data.activity, data.occupancy)
+
+        activity = getActivityFromDevices()
+        occupancy = getOccupancyFromActivity(zone, contact, activity)
+        def event = evt.value
+        
+        setStatus(zone, event, activity, occupancy, message, debugContext)
+    
+    } else {
+        log.error "Missing occupancy and activity data from child zone: ${evt.data}"
+    }
     
     logDebug(debugContext)
 }
@@ -937,13 +909,13 @@ occupancy: $occupancy"""
     def message = "${state.devices[evt.deviceId].name} has finished checking"
 
     if (state.devices["${evt.deviceId}"].timerId == "${evt.id}") {
-        setDevice(evt, "inactive")
+        updateDevice(evt, "inactive")
         
         activity = getActivityFromDevices()
-        setActivity(zone, activity, message, debugContext)
-        setOccupancyFromActivity(zone, contact, activity, message, debugContext)
+        occupancy = getOccupancyFromActivity(zone, contact, activity)
+        def event = "inactive"
         
-        setEvent(zone, "inactive", message, debugContext)
+        setStatus(zone, event, activity, occupancy, message, debugContext)
     
     } else {
         debugContext.append("""
@@ -981,10 +953,10 @@ occupancy: $occupancy"""
     state.closing = false
     
     activity = getActivityFromDevices()
-    setActivity(zone, activity, message, debugContext)
-    setOccupancyFromActivity(zone, contact, activity, message, debugContext)
-    
-    setEvent(zone, "inactive", message, debugContext)
+    occupancy = getOccupancyFromActivity(zone, contact, activity)
+    def event = "inactive"
+        
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
