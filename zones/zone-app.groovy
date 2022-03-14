@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.30" }
+String getVersionNum() { return "10.0.0-beta.31" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -442,11 +442,13 @@ def getOccupancyFromActivity(zone, contact, activity) {
         def childOccupied = false
         def childUnknown = false
         
-        for (childZone in childZones) {
-            if (childZone.occupancy == "occupied") {
-                childOccupied = true
-            } else if (childZone.occupancy == "unknown") {
-                childUnknown = true
+        for (device in state.devices.values()) {
+            if (device.type == "zone") {
+                if (device.occupancy == "occupied") {
+                    childOccupied = true
+                } else if (device.occupancy == "unknown") {
+                    childUnknown = true
+                }
             }
         }
     
