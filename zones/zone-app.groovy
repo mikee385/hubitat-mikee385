@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.26" }
+String getVersionNum() { return "10.0.0-beta.27" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -384,10 +384,10 @@ contact => $value"""
     )
 }
 
-def sendStatus(zone, event, activity, occupancy, message, debugContext) {
+def setStatus(zone, event, activity, occupancy, message, debugContext) {
     zone.sendEvent(name: "activity", value: activity, descriptionText: message)
     zone.sendEvent(name: "occupancy", value: occupancy, descriptionText: message)
-    zone.sendEvent(name: "event", value: event, descriptionText: message, isStateChange: true)
+    zone.sendEvent(name: "event", value: event, data: [activity: activity, occupancy: occupancy], descriptionText: message, isStateChange: true)
 
     debugContext.append("""
 activity => $activity
