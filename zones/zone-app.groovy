@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.29" }
+String getVersionNum() { return "10.0.0-beta.30" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -535,13 +535,29 @@ occupancy: $occupancy"""
 }
 
 def inactiveDeviceHandler(evt) {
+    def zone = getZoneDevice()
+    def contact = zone.currentValue("contact")
+    def activity = zone.currentValue("activity")
+    def occupancy = zone.currentValue("occupancy")
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Inactive Handler
-${evt.device} is ${evt.value}"""
+${evt.device} is ${evt.value}
+contact: $contact
+activity: $activity
+occupancy: $occupancy"""
     )
+    
+    def message = "${evt.device} is ${evt.value}"
 
+    updateDevice(evt, "checking")
     startCheckingTimer(evt)
+        
+    activity = getActivityFromDevices()
+    occupancy = getOccupancyFromActivity(zone, contact, activity)
+    def event = "inactive"
+        
+    setStatus(zone, event, activity, occupancy, message, debugContext)
     
     logDebug(debugContext)
 }
