@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone App" }
-String getVersionNum() { return "10.0.0-beta.31" }
+String getVersionNum() { return "10.0.0-beta.32" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 #include mikee385.debug-library
@@ -739,25 +739,25 @@ occupancy: $occupancy"""
         if (activity == "engaged") {
             setContact(zone, "closed", message, debugContext)
         } else {
-            runIn(1, setToClosed, [data: [descriptionText: message]])
+            runIn(1, setToClosed)
         }
     }
     
     logDebug(debugContext)
 }
 
-def setToClosed(evt) {
+def setToClosed() {
     def zone = getZoneDevice()
     def debugContext = new StringBuilder(
 """Zone ${app.label}
 Closed Handler"""
     )
     
-    def message = evt.descriptionText
+    def message = def message = "${app.label} is closing"
     
     def activity = "unknown"
     def occupancy = "unknown"
-    def event = "closing"
+    def event = "inactive"
             
     setStatus(zone, event, activity, occupancy, message, debugContext)
     
