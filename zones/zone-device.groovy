@@ -15,7 +15,7 @@
  */
  
 String getName() { return "Zone Device" }
-String getVersionNum() { return "10.0.0-beta.5" }
+String getVersionNum() { return "10.0.0-beta.6" }
 String getVersionLabel() { return "${getName()}, version ${getVersionNum()}" }
 
 metadata {
