@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.2.0" }
+String getVersionNum() { return "7.3.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -68,6 +68,7 @@ def updated() {
 }
 
 def initialize() {
+    state.occupancy = door.currentValue("contact") == "open" ? "occupied" : "vacant"
     state.sprinklersPaused = false
     
     // Occupancy
@@ -127,6 +128,8 @@ def getInactiveThresholds() {
 }
 
 def occupied() {
+    state.occupancy = "occupied"
+    
     // Light Switch
     if (sunlight.currentValue("switch") == "off") {
         for (light in lights) {
@@ -150,7 +153,7 @@ def occupied() {
 
 def vacant() {
     unsubscribe("lockHandler_Occupancy")
-    unschedule("lockAlert")
+    state.occupancy = "vacant"
     
     // Light Switch
     for (light in lights) {
@@ -285,6 +288,8 @@ def personHandler_LockAlert(evt) {
 }
 
 def lockAlert() {
-    personToNotify.deviceNotification("Should the $lock still be unlocked?")
-    runIn(60*30, lockAlert)
+    if (state.occupancy == "occupied") {
+        personToNotify.deviceNotification("Should the $lock still be unlocked?")
+        runIn(60*30, lockAlert)
+    } 
 }

@@ -1,10 +1,10 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "7.2.0",
+    "version": "7.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Attempt to improve reliability of lock alert",
+    "releaseNotes": "Another attempt to improve reliability of lock alert",
     "dateReleased": "2022-03-15",
     "apps": [
         {
