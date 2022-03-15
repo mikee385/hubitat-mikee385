@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.1.0" }
+String getVersionNum() { return "7.2.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -150,6 +150,7 @@ def occupied() {
 
 def vacant() {
     unsubscribe("lockHandler_Occupancy")
+    unschedule("lockAlert")
     
     // Light Switch
     for (light in lights) {
