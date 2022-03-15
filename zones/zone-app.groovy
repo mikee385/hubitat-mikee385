@@ -753,7 +753,7 @@ def setToClosed() {
 Closed Handler"""
     )
     
-    def message = def message = "${app.label} is closing"
+    def message = "${app.label} is closing"
     
     def activity = "unknown"
     def occupancy = "unknown"
