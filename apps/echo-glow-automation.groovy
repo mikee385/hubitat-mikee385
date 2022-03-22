@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.6.0" }
+String getVersionNum() { return "4.7.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -49,6 +49,9 @@ preferences {
         }
         section("Announcements") {
             input "bedtimeAnnouncement", "device.VirtualAlexaButton", title: "Bedtime Announcement", multiple: false, required: true
+        }
+        section("Doors") {
+            input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: false    
         }
         section("Remotes") {
             input "hueRemote", "capability.pushableButton", title: "Hue Remote", required: false
@@ -217,6 +220,9 @@ def routineHandler_BedtimeSoon(evt) {
     
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
+    
+    unsubscribe("doorHandler_DownstairsGlowOff")
+    unsubscribe("doorHandler_GlowsOff")
 
     downstairsGlow.orange()
     upstairsGlow.orange()
@@ -240,11 +246,18 @@ def routineHandler_BedtimeNow(evt) {
     
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
+    
+    unsubscribe("doorHandler_DownstairsGlowOff")
+    unsubscribe("doorHandler_GlowsOff")
 
     downstairsGlow.purple()
     upstairsGlow.purple()
     
-    runIn(10*60, downstairsGlowOff)
+    if (bedroomDoor) {
+        subscribe(bedroomDoor, "contact.closed", doorHandler_DownstairsGlowOff)
+    } else {
+        runIn(10*60, downstairsGlowOff)
+    }
     
     if (state.lastRoutine != "BedtimeNow") {
         if (bedtimeNowAlert) {
@@ -287,11 +300,18 @@ def routineHandler_NaptimeNow(evt) {
     
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
+    
+    unsubscribe("doorHandler_DownstairsGlowOff")
+    unsubscribe("doorHandler_GlowsOff")
 
     downstairsGlow.blue()
     upstairsGlow.blue()
     
-    runIn(10*60, downstairsGlowOff)
+    if (bedroomDoor) {
+        subscribe(bedroomDoor, "contact.closed", doorHandler_DownstairsGlowOff)
+    } else {
+        runIn(10*60, downstairsGlowOff)
+    }
     
     if (state.lastRoutine != "NaptimeNow") {
         if (naptimeNowAlert) {
@@ -319,11 +339,18 @@ def routineHandler_WakeUp(evt) {
     
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
+    
+    unsubscribe("doorHandler_DownstairsGlowOff")
+    unsubscribe("doorHandler_GlowsOff")
 
     downstairsGlow.green()
     upstairsGlow.green()
     
-    runIn(10*60, glowsOff)
+    if (bedroomDoor) {
+        subscribe(bedroomDoor, "contact.open", doorHandler_GlowsOff)
+    } else {
+        runIn(10*60, glowsOff)
+    }
     
     if (state.lastRoutine != "WakeUp") {
         if (wakeUpAlert) {
@@ -348,6 +375,9 @@ def routineHandler_GlowsOff(evt) {
     
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
+    
+    unsubscribe("doorHandler_DownstairsGlowOff")
+    unsubscribe("doorHandler_GlowsOff")
 
     downstairsGlow.off()
     upstairsGlow.off()
@@ -359,6 +389,18 @@ def routineHandler_GlowsOff(evt) {
     
         state.lastRoutine = "GlowsOff"
     }
+}
+
+def doorHandler_DownstairsGlowOff(evt) {
+    logDebug("doorHandler_DownstairsGlowOff: ${evt.device} changed to ${evt.value}")
+    
+    runIn(10*60, downstairsGlowOff)
+}
+
+def doorHandler_GlowsOff(evt) {
+    logDebug("doorHandler_GlowsOff: ${evt.device} changed to ${evt.value}")
+    
+    runIn(10*60, glowsOff)
 }
 
 def hueRemoteHandler_Routine(evt) {

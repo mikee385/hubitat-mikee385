@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "4.6.0",
+    "version": "4.7.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add support for a naptime routine",
-    "dateReleased": "2022-03-12",
+    "releaseNotes": "Wait until door is active to start off timers",
+    "dateReleased": "2022-03-22",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
