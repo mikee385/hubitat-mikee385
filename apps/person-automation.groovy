@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.2.0" }
+String getVersionNum() { return "5.3.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,6 +36,10 @@ preferences {
     page(name: "settings", title: "Person Automation", install: true, uninstall: true) {
         section {
             input "person", "device.PersonStatus", title: "Person Status", multiple: false, required: true
+        }
+        section("Life360") {
+            input "life360Sensor", "capability.presenceSensor", title: "Life 360 Presence", multiple: false, required: false
+            input "life360Refresh", "capability.pushableButton", title: "Life 360 Refresh", multiple: false, required: false
         }
         section {
             input "primarySensors", "capability.presenceSensor", title: "Primary Presence (Arrival & Departure)", multiple: true, required: false
@@ -92,6 +96,10 @@ def updated() {
 
 def initialize() {
     // Person Status
+    if (life360Sensor) {
+        subscribe(life360Sensor, "presence.present", arrivalHandler_PersonStatus)
+        subscribe(life360Sensor, "presence.not present", departureHandler_PersonStatus)
+    }
     for (primarySensor in primarySensors) {
         subscribe(primarySensor, "presence.present", arrivalHandler_PersonStatus)
         subscribe(primarySensor, "presence.not present", departureHandler_PersonStatus)
@@ -156,6 +164,9 @@ def getInactiveThresholds() {
 def getUnchangedThresholds() {
     def thresholds = []
     
+    if (life360Sensor) {
+        thresholds.add([device: life360Sensor, attribute: "presence", inactiveHours: 24*3])
+    }
     for (primarySensor in primarySensors) {
         thresholds.add([device: primarySensor, attribute: "presence", inactiveHours: 24*3])
     }
@@ -198,6 +209,16 @@ def personHandler_InconsistencyCheck(evt) {
 
 def inconsistencyCheck() {
     def presenceValue = person.currentValue("presence")
+    
+    if (life360Sensor) {
+        if (life360Sensor.currentValue("presence") != presenceValue) {
+            personToNotify.deviceNotification("WARNING: $life360Sensor failed to change to $presenceValue!")
+            if (life360Refresh) {
+                life360Refresh.push(1)
+            }
+        }
+    }
+    
     for (primarySensor in primarySensors) {
         if (primarySensor.currentValue("presence") != presenceValue) {
             personToNotify.deviceNotification("WARNING: $primarySensor failed to change to $presenceValue!")
