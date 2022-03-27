@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.7.0" }
+String getVersionNum() { return "4.8.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -409,8 +409,10 @@ def hueRemoteHandler_Routine(evt) {
     if (evt.value == "1") {
         if (timeOfDayIsBetween(timeToday("00:00"), timeToday("09:00"), new Date(), location.timeZone)) {
             wakeUpRoutine.push()
-        } else if (timeOfDayIsBetween(timeToday("09:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+        } else if (timeOfDayIsBetween(timeToday("09:00"), timeToday("14:00"), new Date(), location.timeZone)) {
             naptimeNowRoutine.push()
+        } else if (timeOfDayIsBetween(timeToday("14:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+            wakeUpRoutine.push()
         } else {
             bedtimeTimerRoutine.push()
         }

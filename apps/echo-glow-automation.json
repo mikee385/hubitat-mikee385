@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "4.7.0",
+    "version": "4.8.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Wait until door is active to start off timers",
-    "dateReleased": "2022-03-22",
+    "releaseNotes": "Add a wakeup routine after naptime for the Hue remote",
+    "dateReleased": "2022-03-27",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
