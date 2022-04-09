@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.8.0" }
+String getVersionNum() { return "4.9.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -108,6 +108,11 @@ mappings {
             GET: "urlHandler_glowsOff"
         ]
     }
+    path("/next") {
+        action: [
+            GET: "urlHandler_next"
+        ]
+    }
 }
 
 def installed() {
@@ -168,6 +173,7 @@ def initialize() {
     state.naptimeNowUrl = "${getFullLocalApiServerUrl()}/naptimeNow?access_token=$state.accessToken"
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
+    state.nextUrl = "${getFullLocalApiServerUrl()}/next?access_token=$state.accessToken"
 }
 
 def getBatteryThresholds() {
@@ -407,15 +413,7 @@ def hueRemoteHandler_Routine(evt) {
     logDebug("hueRemoteHandler_Routine: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "1") {
-        if (timeOfDayIsBetween(timeToday("00:00"), timeToday("09:00"), new Date(), location.timeZone)) {
-            wakeUpRoutine.push()
-        } else if (timeOfDayIsBetween(timeToday("09:00"), timeToday("14:00"), new Date(), location.timeZone)) {
-            naptimeNowRoutine.push()
-        } else if (timeOfDayIsBetween(timeToday("14:00"), timeToday("17:00"), new Date(), location.timeZone)) {
-            wakeUpRoutine.push()
-        } else {
-            bedtimeTimerRoutine.push()
-        }
+        nextRoutine()
     } else if (evt.value == "2") {
         bedtimeNowRoutine.push()
     } else if (evt.value == "4") {
@@ -442,6 +440,18 @@ def modeHandler_Routine(evt) {
     
     if (evt.value == "Away") {
         glowsOffRoutine.push()
+    }
+}
+
+def nextRoutine() {
+    if (timeOfDayIsBetween(timeToday("00:00"), timeToday("09:00"), new Date(), location.timeZone)) {
+        wakeUpRoutine.push()
+    } else if (timeOfDayIsBetween(timeToday("09:00"), timeToday("14:00"), new Date(), location.timeZone)) {
+        naptimeNowRoutine.push()
+    } else if (timeOfDayIsBetween(timeToday("14:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+        wakeUpRoutine.push()
+    } else {
+        bedtimeTimerRoutine.push()
     }
 }
 
@@ -479,4 +489,10 @@ def urlHandler_glowsOff(evt) {
     logDebug("urlHandler_glowsOff")
     
     glowsOffRoutine.push()
+}
+
+def urlHandler_next(evt) {
+    logDebug("urlHandler_next")
+    
+    nextRoutine()
 }
