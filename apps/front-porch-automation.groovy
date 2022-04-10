@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.4.0" }
+String getVersionNum() { return "3.5.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -44,10 +44,7 @@ preferences {
         section("Outdoor Sensors") {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: false
-        }
-        section("Doorbell") {
             input "doorbell", "capability.pushableButton", title: "Doorbell", multiple: false, required: false
-            input "alertDoorbellRang", "bool", title: "Alert when rang?", required: true, defaultValue: true
         }
         section("Sprinklers") {
             input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
@@ -56,6 +53,10 @@ preferences {
         section("Light Button") {
             input "buttonDevice", "capability.pushableButton", title: "Button Device", required: false
             input "buttonNumber", "number", title: "Button Number", required: false
+        }
+        section("Alerts") {
+            input "alertMotionActive", "bool", title: "Alert when motion active?", required: true, defaultValue: true
+            input "alertDoorbellRang", "bool", title: "Alert when doorbell rang?", required: true, defaultValue: true
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -204,8 +205,8 @@ def buttonHandler_LightSwitch(evt) {
 def motionHandler_MotionAlert(evt) {
     logDebug("motionHandler_MotionAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "active") {
-        if (door.currentValue("contact") == "closed") {
+    if (evt.value == "active" && door.currentValue("contact") == "closed") {
+        if (alertMotionActive) {
             personToNotify.deviceNotification("Motion on the Front Porch!")
         }
     }
