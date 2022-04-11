@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "System Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -35,6 +35,7 @@ preferences {
         section("Alerts") {
             input "alertReboot", "bool", title: "Alert when Rebooted?", required: true, defaultValue: true
             input "alertSevereLoad", "bool", title: "Alert when Severe Load?", required: true, defaultValue: true
+            input "alertLowMemory", "bool", title: "Alert when Low Memory?", required: true, defaultValue: true
             input "alertZigbeeOff", "bool", title: "Alert when Zigbee Off?", required: true, defaultValue: true
             input "alertZigbeeOn", "bool", title: "Alert when Zigbee On?", required: true, defaultValue: true
             input "alertZwaveCrashed", "bool", title: "Alert when Z-Wave Crashed?", required: true, defaultValue: true
@@ -66,6 +67,10 @@ def initialize() {
         subscribe(location, "severeLoad", severeLoadHandler)
     }
     
+    if (alertLowMemory) {
+        subscribe(location, "lowMemory", lowMemoryHandler)
+    }
+    
     if (alertZigbeeOff) {
         subscribe(location, "zigbeeOff", zigbeeOffHandler)
     }
@@ -89,6 +94,12 @@ def severeLoadHandler(evt) {
     logDebug("severeLoadHandler: ${evt.device} changed to ${evt.value}")
     
     personToNotify.deviceNotification("Hub has severe load!")
+}
+
+def lowMemoryHandler(evt) {
+    logDebug("lowMemoryHandler: ${evt.device} changed to ${evt.value}")
+    
+    personToNotify.deviceNotification("Hub has low memory!")
 }
 
 def zigbeeOffHandler(evt) {
