@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.3.0" }
+String getVersionNum() { return "5.4.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -204,7 +204,7 @@ def departureHandler_PersonStatus(evt) {
 def personHandler_InconsistencyCheck(evt) {
     logDebug("personHandler_InconsistencyCheck: ${evt.device} changed to ${evt.value}")
     
-    runIn(60, inconsistencyCheck)
+    runIn(5*60, inconsistencyCheck)
 }
 
 def inconsistencyCheck() {
