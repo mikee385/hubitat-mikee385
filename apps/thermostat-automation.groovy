@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "4.3.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -139,17 +139,17 @@ def getUnchangedThresholds() {
     def thresholds = []
     
     if (downstairsThermostat) {
-        thresholds.add([device: downstairsThermostat, attribute: "temperature", inactiveHours: 6])
+        thresholds.add([device: downstairsThermostat, attribute: "temperature", inactiveHours: 12])
     }
     for (sensor in downstairsSensors) {
-        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 6])
+        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 12])
     }
     
     if (upstairsThermostat) {
-        thresholds.add([device: upstairsThermostat, attribute: "temperature", inactiveHours: 6])
+        thresholds.add([device: upstairsThermostat, attribute: "temperature", inactiveHours: 12])
     }
     for (sensor in upstairsSensors) {
-        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 6])
+        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 12])
     }
     
     return thresholds

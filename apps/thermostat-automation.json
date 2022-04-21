@@ -1,11 +1,11 @@
 {
     "packageName": "Thermostat Automation",
     "author": "Michael Pierce",
-    "version": "4.2.0",
+    "version": "4.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use average temperature instead of baseline for alerts",
-    "dateReleased": "2022-03-12",
+    "releaseNotes": "Increase unchanged thresholds to 12 hours",
+    "dateReleased": "2022-04-20",
     "apps": [
         {
             "id": "a53151e5-9ddf-43c4-af86-440edf88ba24",
