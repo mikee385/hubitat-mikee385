@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.6.0" }
+String getVersionNum() { return "6.7.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -44,9 +44,9 @@ preferences {
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
-        section("Overhead Door") {
-            input "overheadDoor", "capability.contactSensor", title: "Primary Door", multiple: false, required: true
-            input "overheadSensors", "capability.contactSensor", title: "Secondary Sensors", multiple: true, required: false
+        section {
+            input "overheadDoor", "capability.garageDoorControl", title: "Overhead Door", multiple: false, required: true
+            input "overheadSensors", "capability.contactSensor", title: "Overhead Sensors", multiple: true, required: false
             input "alertInconsistent", "bool", title: "Alert when Sensors are Inconsistent?", required: true, defaultValue: true
         }
         section {
@@ -75,7 +75,7 @@ def initialize() {
     subscribe(garageLight, "switch.off", lightHandler_State)
 
     // Occupancy
-    subscribe(overheadDoor, "contact", overheadDoorHandler_Occupancy)
+    subscribe(overheadDoor, "door", overheadDoorHandler_Occupancy)
     subscribe(entryDoor, "contact", entryDoorHandler_Occupancy)
     subscribe(sideDoor, "contact", sideDoorHandler_Occupancy)
     subscribe(motionSensor, "motion.active", motionHandler_Occupancy)
@@ -83,11 +83,11 @@ def initialize() {
 
     // Light Switch
     subscribe(zone, "occupancy", zoneHandler_LightSwitch)
-    subscribe(overheadDoor, "contact", overheadDoorHandler_LightSwitch)
+    subscribe(overheadDoor, "door", overheadDoorHandler_LightSwitch)
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     
     // Light Alert
-    subscribe(overheadDoor, "contact", deviceHandler_LightAlert)
+    subscribe(overheadDoor, "door", deviceHandler_LightAlert)
     subscribe(entryDoor, "contact", deviceHandler_LightAlert)
     subscribe(sideDoor, "contact", deviceHandler_LightAlert)
     subscribe(motionSensor, "motion.active", deviceHandler_LightAlert)
@@ -95,7 +95,7 @@ def initialize() {
     subscribe(personToNotify, "sleeping", personHandler_LightAlert)
     
     // Door Alert
-    subscribe(overheadDoor, "contact", overheadDoorHandler_DoorAlert)
+    subscribe(overheadDoor, "door", overheadDoorHandler_DoorAlert)
     subscribe(entryDoor, "contact", entryDoorHandler_DoorAlert)
     subscribe(sideDoor, "contact", sideDoorHandler_DoorAlert)
     subscribe(personToNotify, "presence", personHandler_DoorAlert)
@@ -103,14 +103,14 @@ def initialize() {
     
     // Inconsistent Alert
     if (alertInconsistent && overheadSensors) {
-        subscribe(overheadDoor, "contact", handler_InconsistencyCheck)
+        subscribe(overheadDoor, "door", handler_InconsistencyCheck)
         for (overheadSensor in overheadSensors) {
             subscribe(overheadSensor, "contact", handler_InconsistencyCheck)
         }
     }
     
     // Away Alert
-    subscribe(overheadDoor, "contact", handler_AwayAlert)
+    subscribe(overheadDoor, "door", handler_AwayAlert)
     subscribe(entryDoor, "contact", handler_AwayAlert)
     subscribe(sideDoor, "contact", handler_AwayAlert)
     subscribe(motionSensor, "motion.active", handler_AwayAlert)
@@ -182,7 +182,7 @@ def sideDoorHandler_Occupancy(evt) {
 }
 
 def checkForVacant() {
-    if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
+    if (overheadDoor.currentValue("door") == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
         if (state.lightSwitch == "on") {
             zone.checking()
         } else {
@@ -216,7 +216,7 @@ def zoneHandler_LightSwitch(evt) {
         state.lightSwitch = "off"
         garageLight.off()
     } else if (state.previousOccupancy == "vacant") {
-        if (overheadDoor.currentValue("contact") == "closed") {
+        if (overheadDoor.currentValue("door") == "closed") {
             state.lightSwitch = "on"
             garageLight.on()
         }
@@ -245,7 +245,7 @@ def overheadDoorHandler_LightSwitch(evt) {
 def sunlightHandler_LightSwitch(evt) {
     logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (overheadDoor.currentValue("contact") == "open") {
+    if (overheadDoor.currentValue("door") == "open") {
         if (evt.value == "on") {
             state.lightSwitch = "off"
             garageLight.off()
@@ -297,7 +297,7 @@ def overheadDoorHandler_DoorAlert(evt) {
 }
 
 def overheadDoorAlert() {
-    if (overheadDoor.currentValue("contact") == "open") {
+    if (overheadDoor.currentValue("door") == "open") {
         personToNotify.deviceNotification("Should the $overheadDoor still be open?")
         runIn(60*30, overheadDoorAlert)
     } 
@@ -349,7 +349,7 @@ def personHandler_DoorAlert(evt) {
         unschedule("entryDoorAlert")
         unschedule("sideDoorAlert")
         
-        if (overheadDoor.currentValue("contact") == "open") {
+        if (overheadDoor.currentValue("door") == "open") {
             personToNotify.deviceNotification("$overheadDoor is still open!")
         }
         if (entryDoor.currentValue("contact") == "open") {
@@ -368,7 +368,7 @@ def handler_InconsistencyCheck(evt) {
 }
 
 def inconsistencyCheck() {
-    def doorValue = overheadDoor.currentValue("contact")
+    def doorValue = overheadDoor.currentValue("door")
     
     for (overheadSensor in overheadSensors) {
         def sensorValue = overheadSensor.currentValue("contact")
