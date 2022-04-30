@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.5.0" }
+String getVersionNum() { return "6.6.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -38,12 +38,16 @@ preferences {
     page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
         section {
             input "zone", "device.OccupancyStatus", title: "Zone", multiple: false, required: true
-            input "overheadDoor", "capability.contactSensor", title: "Overhead Door", multiple: false, required: true
             input "entryDoor", "capability.contactSensor", title: "Entry Door", multiple: false, required: true
             input "sideDoor", "capability.contactSensor", title: "Side Door", multiple: false, required: true
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
+        }
+        section("Overhead Door") {
+            input "overheadDoor", "capability.contactSensor", title: "Primary Door", multiple: false, required: true
+            input "overheadSensors", "capability.contactSensor", title: "Secondary Sensors", multiple: true, required: false
+            input "alertInconsistent", "bool", title: "Alert when Sensors are Inconsistent?", required: true, defaultValue: true
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -96,6 +100,14 @@ def initialize() {
     subscribe(sideDoor, "contact", sideDoorHandler_DoorAlert)
     subscribe(personToNotify, "presence", personHandler_DoorAlert)
     subscribe(personToNotify, "sleeping", personHandler_DoorAlert)
+    
+    // Inconsistent Alert
+    if (alertInconsistent && overheadSensors) {
+        subscribe(overheadDoor, "contact", handler_InconsistencyCheck)
+        for (overheadSensor in overheadSensors) {
+            subscribe(overheadSensor, "contact", handler_InconsistencyCheck)
+        }
+    }
     
     // Away Alert
     subscribe(overheadDoor, "contact", handler_AwayAlert)
@@ -345,6 +357,25 @@ def personHandler_DoorAlert(evt) {
         }
         if (sideDoor.currentValue("contact") == "open") {
             personToNotify.deviceNotification("$sideDoor is still open!")
+        }
+    }
+}
+
+def handler_InconsistencyCheck(evt) {
+    logDebug("handler_InconsistencyCheck: ${evt.device} changed to ${evt.value}")
+    
+    runIn(5*60, inconsistencyCheck)
+}
+
+def inconsistencyCheck() {
+    def doorValue = overheadDoor.currentValue("contact")
+    
+    for (overheadSensor in overheadSensors) {
+        def sensorValue = overheadSensor.currentValue("contact")
+        if (sensorValue != doorValue) {
+            def message = "WARNING: $overheadSensor ($sensorValue) does not match $overheadDoor ($doorValue)!"
+            log.warn(message)
+            personToNotify.deviceNotification(message)
         }
     }
 }

@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "6.5.0",
+    "version": "6.6.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add checks to prevent duplicate door alerts",
-    "dateReleased": "2022-03-02",
+    "releaseNotes": "Add inconsistency alert for the overhead door",
+    "dateReleased": "2022-04-30",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
