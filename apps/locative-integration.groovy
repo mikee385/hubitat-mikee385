@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Locative Integration, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,6 +36,7 @@ preferences {
             input name: "presenceId", type: "string", title: "ID to use for presence", required: true
         }
         section {
+            input name: "enableMessageLog", type: "bool", title: "Enable logging of Locative message?", defaultValue: false
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -92,6 +93,10 @@ def childDevice() {
 
 def urlHandler_update() {
     logDebug("urlHandler_update")
+    
+    if (enableMessageLog) {
+        logInfo(request.body)
+    }
     
     def queryParams = request.body.split("&")
     def mapParams = queryParams.collectEntries { param -> param.split('=').collect { URLDecoder.decode(it) }}
