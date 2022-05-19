@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.1.1" }
 String getVersionLabel() { return "Locative Integration, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -95,7 +95,7 @@ def urlHandler_update() {
     logDebug("urlHandler_update")
     
     if (enableMessageLog) {
-        logInfo(request.body)
+        log.info request.body
     }
     
     def queryParams = request.body.split("&")
