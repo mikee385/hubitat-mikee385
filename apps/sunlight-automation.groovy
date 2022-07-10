@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,6 +36,7 @@ preferences {
             input "sunlightSwitch", "capability.switch", title: "Sunlight Switch", multiple: false, required: true
         }
         section {
+            input "enableLightSensor", "bool", title: "Use Light Sensor?", defaultValue: true
             input "lightSensor", "capability.illuminanceMeasurement", title: "Light Sensor", multiple: false, required: false
             input "lightLevelForOn", "decimal", title: "Light Level for On", required: true, defaultValue: 8
             input "lightLevelForOff", "decimal", title: "Light Level for Off", required: true, defaultValue: 7
@@ -68,7 +69,7 @@ def initialize() {
     subscribe(location, "sunrise", sunriseHandler)
     subscribe(location, "sunset", sunsetHandler)
     
-    if (lightSensor) {
+    if (enableLightSensor && lightSensor) {
         subscribe(lightSensor, "illuminance", lightHandler)
     }
 }
@@ -76,7 +77,7 @@ def initialize() {
 def sunriseHandler(evt) {
     logDebug("Received sunrise event")
     
-    if (lightSensor) {
+    if (enableLightSensor && lightSensor) {
         if (alertSunrise) {
             def lightValue = lightSensor.currentValue("illuminance")
             personToNotify.deviceNotification("Sunrise! ($lightValue)")
@@ -95,7 +96,7 @@ def sunsetHandler(evt) {
     
     sunlightSwitch.off()
     
-    if (lightSensor) {
+    if (enableLightSensor && lightSensor) {
         if (alertSunset) {
             def lightValue = lightSensor.currentValue("illuminance")
             personToNotify.deviceNotification("Sunset! ($lightValue)")
