@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.5.0" }
+String getVersionNum() { return "7.0.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -31,15 +31,12 @@ metadata {
         capability "Sensor"
         capability "Sleep Sensor"
 
-        attribute "location", "string"
         attribute "message", "string"
         
         command "awake"
         command "asleep"
         command "arrived"
         command "departed"
-        
-        command "setLocation", ["string"]
         
         command "batteryNotification", ["string"]
         command "inactiveNotification", ["string"]
@@ -77,9 +74,6 @@ def initialize() {
     }
     if (!device.currentValue("sleeping")) {
         awake()
-    }
-    if (!device.currentValue("location")) {
-        setLocation("")
     }
     
     if (!atomicState.batteryMessage) {
@@ -141,14 +135,6 @@ def runCommand(name) {
         departed()
     } else {
         log.error "Unknown command name: $name"
-    }
-}
-
-def setLocation(locationName) {
-    if (locationName) {
-        sendEvent(name: "location", value: "${locationName}")
-    } else {
-        sendEvent(name: "location", value: "none")
     }
 }
 

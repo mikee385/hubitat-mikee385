@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "5.5.0",
+    "version": "6.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Log warnings in addition to sending an alert",
-    "dateReleased": "2022-04-30",
+    "releaseNotes": "Remove location device (Locative)",
+    "dateReleased": "2022-07-10",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

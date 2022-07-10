@@ -1,11 +1,11 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "6.5.0",
+    "version": "7.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Turn off alert preferences by default",
-    "dateReleased": "2022-02-26",
+    "releaseNotes": "Remove location device (Locative)",
+    "dateReleased": "2022-07-10",
     "drivers": [
         {
             "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",
