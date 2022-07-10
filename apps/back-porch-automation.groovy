@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.3.0" }
+String getVersionNum() { return "7.4.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -73,6 +73,7 @@ def initialize() {
     
     // Occupancy
     subscribe(door, "contact", doorHandler_Occupancy)
+    subscribe(lock, "contact", lockHandler_Occupancy)
     subscribe(location, "mode", modeHandler_Occupancy)
     
     // Light Alert
@@ -138,6 +139,7 @@ def occupied() {
     }
     
     // Camera Notification
+    unschedule("turnOn_CameraNotification")
     cameraNotification.off()
     
     // Sprinkler Zones
@@ -152,7 +154,6 @@ def occupied() {
 }
 
 def vacant() {
-    unsubscribe("lockHandler_Occupancy")
     state.occupancy = "vacant"
     
     // Light Switch
@@ -180,8 +181,6 @@ def doorHandler_Occupancy(evt) {
     
     if (evt.value == "open") {
         occupied()
-    } else {
-        subscribe(lock, "contact", lockHandler_Occupancy)
     }
 }
 
