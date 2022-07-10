@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.6.0" }
+String getVersionNum() { return "2.7.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -37,6 +37,9 @@ definition(
 
 preferences {
     page(name: "settings", title: "Security Automation", install: true, uninstall: true) {
+        section {
+            input "enableAutomation", "bool", title: "Enabled?", defaultValue: true
+        }
         section {
             input "alarmPanel", "device.VivintPanel", title: "Alarm Panel", multiple: false, required: false
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: false
@@ -62,66 +65,68 @@ def updated() {
 }
 
 def initialize() {
-    // Camera Switch
-    if (cameras) {
-        subscribe(location, "mode", modeHandler_CameraSwitch)
+    if (enableAutomation) {
+        // Camera Switch
+        if (cameras) {
+            subscribe(location, "mode", modeHandler_CameraSwitch)
+            if (alarmPanel) {
+                subscribe(alarmPanel, "alarm", alarmPanelHandler_CameraSwitch)
+            }
+        }
+        
+        // Alarm Alert
         if (alarmPanel) {
-            subscribe(alarmPanel, "alarm", alarmPanelHandler_CameraSwitch)
+            subscribe(location, "mode", modeHandler_AlarmAlert)
         }
-    }
-    
-    // Alarm Alert
-    if (alarmPanel) {
-        subscribe(location, "mode", modeHandler_AlarmAlert)
-    }
-    
-    // Camera Alert
-    if (cameras) {
-        subscribe(location, "mode", modeHandler_CameraAlert)
+        
+        // Camera Alert
+        if (cameras) {
+            subscribe(location, "mode", modeHandler_CameraAlert)
+            for (camera in cameras) {
+                subscribe(camera, "switch.on", cameraHandler_CameraAlert)
+            }
+        }
+        
+        // Smoke Alert
+        for (smokeDetector in smokeDetectors) {
+            subscribe(smokeDetector, "smoke.detected", smokeDetectorHandler_SmokeAlert)
+        }
+        
+        // Glass Break Alert
+        for (glassBreak in glassBreaks) {
+            subscribe(glassBreak, "shock.detected", glassBreakHandler_GlassBreakAlert)
+        }
+        
+        // Away Alert
         for (camera in cameras) {
-            subscribe(camera, "switch.on", cameraHandler_CameraAlert)
+            subscribe(camera, "switch.off", handler_AwayAlert)
         }
+        if (alarmPanel) {
+            subscribe(alarmPanel, "alarm.disarmed", handler_AwayAlert)
+        }
+        
+        // Sleep Alert
+        for (camera in cameras) {
+            subscribe(camera, "switch.off", handler_SleepAlert)
+        }
+        if (alarmPanel) {
+            subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
+        }
+        
+        // Tamper Alert
+        for (smokeDetector in smokeDetectors) {
+            subscribe(smokeDetector, "tamper.detected", handler_TamperAlert)
+        }
+        for (glassBreak in glassBreaks) {
+            subscribe(glassBreak, "tamper.detected", handler_TamperAlert)
+        }
+        
+        // Battery Alert
+        scheduleBatteryCheck()
+        
+        // Inactive Alert
+        scheduleInactiveCheck()
     }
-    
-    // Smoke Alert
-    for (smokeDetector in smokeDetectors) {
-        subscribe(smokeDetector, "smoke.detected", smokeDetectorHandler_SmokeAlert)
-    }
-    
-    // Glass Break Alert
-    for (glassBreak in glassBreaks) {
-        subscribe(glassBreak, "shock.detected", glassBreakHandler_GlassBreakAlert)
-    }
-    
-    // Away Alert
-    for (camera in cameras) {
-        subscribe(camera, "switch.off", handler_AwayAlert)
-    }
-    if (alarmPanel) {
-        subscribe(alarmPanel, "alarm.disarmed", handler_AwayAlert)
-    }
-    
-    // Sleep Alert
-    for (camera in cameras) {
-        subscribe(camera, "switch.off", handler_SleepAlert)
-    }
-    if (alarmPanel) {
-        subscribe(alarmPanel, "alarm.disarmed", handler_SleepAlert)
-    }
-    
-    // Tamper Alert
-    for (smokeDetector in smokeDetectors) {
-        subscribe(smokeDetector, "tamper.detected", handler_TamperAlert)
-    }
-    for (glassBreak in glassBreaks) {
-        subscribe(glassBreak, "tamper.detected", handler_TamperAlert)
-    }
-    
-    // Battery Alert
-    scheduleBatteryCheck()
-    
-    // Inactive Alert
-    scheduleInactiveCheck()
 }
 
 def getBatteryThresholds() {
