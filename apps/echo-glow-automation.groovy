@@ -14,13 +14,12 @@
  *
  */
  
-String getVersionNum() { return "4.9.0" }
+String getVersionNum() { return "4.10.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
 #include mikee385.battery-alert-library
-#include mikee385.inactive-alert-library
 
 definition(
     name: "Echo Glow Automation",
@@ -160,9 +159,6 @@ def initialize() {
     // Battery Alert
     scheduleBatteryCheck()
     
-    // Inactive Alert
-    scheduleInactiveCheck()
-    
     // URLs
     if(!state.accessToken) {
         createAccessToken()
@@ -183,26 +179,6 @@ def getBatteryThresholds() {
         thresholds.add([device: hueRemote, lowBattery: 10])
     }
     
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    
-    for (rokuRemote in rokuRemotes) {
-        thresholds.add([device: rokuRemote, inactiveHours: 24])
-    }
-    
-    return thresholds
-}
-
-def getUnchangedThresholds() {
-    def thresholds = []
-    
-    for (rokuRemote in rokuRemotes) {
-        thresholds.add([device: rokuRemote, attribute: "application", inactiveHours: 24])
-    }
-
     return thresholds
 }
 
