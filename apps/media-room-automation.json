@@ -1,0 +1,20 @@
+{
+    "packageName": "Media Room Automation",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "2.2.8",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial release",
+    "dateReleased": "2022-05-24",
+    "apps": [
+        {
+            "id": "1e30f415-120f-4a30-91b0-2480cd899f71",
+            "name": "Media Room Automation",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/media-room-automation.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ]
+}

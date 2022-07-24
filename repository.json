@@ -94,6 +94,13 @@
             "tags": [ "Presence & Location" ]
         },
         {
+            "name": "Media Room Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/media-room-automation.json",
+            "description": "Automation and alerts for the devices associated with the media room.",
+            "tags": [ "Automations & Groups", "Doors & Windows", "Lights & Switches" ]
+        },
+        {
             "name": "Mode Automation",
             "category": "Convenience",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/mode-automation.json",
