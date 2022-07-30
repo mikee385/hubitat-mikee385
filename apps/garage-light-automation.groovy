@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.9.0" }
+String getVersionNum() { return "6.9.1" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -44,7 +44,7 @@ preferences {
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
         }
-        section {
+        section("Overhead Door") {
             input "overheadControllers", "capability.garageDoorControl", title: "Overhead Controllers", multiple: true, required: false
             input "overheadSensors", "capability.contactSensor", title: "Overhead Sensors", multiple: true, required: false
             input "alertInconsistent", "bool", title: "Alert when Sensors are Inconsistent?", required: true, defaultValue: true
@@ -79,7 +79,7 @@ def initialize() {
             }
         }
         for (overheadSensor in overheadSensors) {
-            if (overheadController.currentValue("contact") == "open") {
+            if (overheadSensor.currentValue("contact") == "open") {
                 state.overheadDoorContact = "open"
             }
         }
@@ -134,20 +134,33 @@ def initialize() {
 }
 
 def getBatteryThresholds() {
-    return [
-        [device: overheadDoor, lowBattery: 10],
+    var thresholds = [
         [device: entryDoor, lowBattery: 10],
         [device: motionSensor, lowBattery: 10]
     ]
+    
+    for (overheadSensor in overheadSensors) {
+        thresholds.add([device: overheadSensor, lowBattery: 10])
+    }
+    
+    return thresholds
 }
 
 def getInactiveThresholds() {
-    return [
-        [device: overheadDoor, inactiveHours: 24],
+    var thresholds = [
         [device: entryDoor, inactiveHours: 2],
         [device: motionSensor, inactiveHours: 24],
         [device: garageLight, inactiveHours: 24]
     ]
+    
+    for (overheadController in overheadControllers) {
+        thresholds.add([device: overheadController, inactiveHours: 24])
+    }
+    for (overheadSensor in overheadSensors) {
+        thresholds.add([device: overheadSensor, inactiveHours: 24])
+    }
+    
+    return thresholds
 }
 
 def overheadDoorHandler_State(evt) {
@@ -396,7 +409,7 @@ def inconsistencyCheck() {
     for (overheadController in overheadControllers) {
         def sensorValue = overheadController.currentValue("door")
         if (sensorValue != state.overheadDoorContact) {
-            def message = "WARNING: $overheadController ($sensorValue) does not match ${state.overheadDoorContact}!"
+            def message = "WARNING: $overheadController failed to change to ${state.overheadDoorContact}!"
             log.warn(message)
             personToNotify.deviceNotification(message)
         }
@@ -404,7 +417,7 @@ def inconsistencyCheck() {
     for (overheadSensor in overheadSensors) {
         def sensorValue = overheadSensor.currentValue("contact")
         if (sensorValue != state.overheadDoorContact) {
-            def message = "WARNING: $overheadSensor ($sensorValue) does not match ${state.overheadDoorContact}!"
+            def message = "WARNING: $overheadSensor failed to change to ${state.overheadDoorContact}!"
             log.warn(message)
             personToNotify.deviceNotification(message)
         }
