@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "6.8.0",
+    "version": "6.9.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change overhead door back to ContactSensor capability",
-    "dateReleased": "2022-05-07",
+    "releaseNotes": "Improve handling of multiple overhead door devices",
+    "dateReleased": "2022-07-30",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",
