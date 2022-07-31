@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "6.9.1",
+    "version": "6.9.2",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix several bugs for overhead door devices",
-    "dateReleased": "2022-07-30",
+    "releaseNotes": "Fix bug where controller was specified instead of sensor.",
+    "dateReleased": "2022-07-31",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.9.1" }
+String getVersionNum() { return "6.9.2" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -88,7 +88,7 @@ def initialize() {
         subscribe(overheadController, "door", overheadDoorHandler_State)
     }
     for (overheadSensor in overheadSensors) {
-        subscribe(overheadController, "contact", overheadDoorHandler_State)
+        subscribe(overheadSensor, "contact", overheadDoorHandler_State)
     }
     
     state.lightSwitch = garageLight.currentValue("switch")
