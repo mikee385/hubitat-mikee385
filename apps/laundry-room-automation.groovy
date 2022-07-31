@@ -16,7 +16,7 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "7.4.0" }
+String getVersionNum() { return "7.5.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -328,7 +328,7 @@ def deviceHandler_LightAlert(evt) {
     unschedule("lightAlert")
     if (light.currentValue("switch") == "on" && light.currentValue("motion") == "inactive") {
         if (personToNotify.currentValue("sleeping") == "not sleeping") {
-            runIn(60*5, lightAlert)
+            runIn(60*6, lightAlert)
         }
     }
 }

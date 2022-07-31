@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "7.4.0",
+    "version": "7.5.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Improve timeout handling when door is opened muliple times",
-    "dateReleased": "2022-03-06",
+    "releaseNotes": "Change initial light alert to 6 minutes after activity",
+    "dateReleased": "2022-07-31",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",
