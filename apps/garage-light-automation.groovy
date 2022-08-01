@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.10.0" }
+String getVersionNum() { return "6.10.1" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -180,7 +180,7 @@ def sideDoorHandler_Occupancy(evt) {
 }
 
 def checkForVacant() {
-    if (state.overheadDoorContact == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
+    if (overheadDoor.currentValue("contact") == "closed" && entryDoor.currentValue("contact") == "closed" && sideDoor.currentValue("contact") == "closed") {
         if (state.lightSwitch == "on") {
             zone.checking()
         } else {
@@ -214,7 +214,7 @@ def zoneHandler_LightSwitch(evt) {
         state.lightSwitch = "off"
         garageLight.off()
     } else if (state.previousOccupancy == "vacant") {
-        if (state.overheadDoorContact == "closed") {
+        if (overheadDoor.currentValue("contact") == "closed") {
             state.lightSwitch = "on"
             garageLight.on()
         }
@@ -243,7 +243,7 @@ def overheadDoorHandler_LightSwitch(evt) {
 def sunlightHandler_LightSwitch(evt) {
     logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (state.overheadDoorContact == "open") {
+    if (overheadDoor.currentValue("contact") == "open") {
         if (evt.value == "on") {
             state.lightSwitch = "off"
             garageLight.off()
@@ -295,7 +295,7 @@ def overheadDoorHandler_DoorAlert(evt) {
 }
 
 def overheadDoorAlert() {
-    if (state.overheadDoorContact == "open") {
+    if (overheadDoor.currentValue("contact") == "open") {
         personToNotify.deviceNotification("Should the $overheadDoor still be open?")
         runIn(60*30, overheadDoorAlert)
     } 
@@ -347,7 +347,7 @@ def personHandler_DoorAlert(evt) {
         unschedule("entryDoorAlert")
         unschedule("sideDoorAlert")
         
-        if (state.overheadDoorContact == "open") {
+        if (overheadDoor.currentValue("contact") == "open") {
             personToNotify.deviceNotification("$overheadDoor is still open!")
         }
         if (entryDoor.currentValue("contact") == "open") {
