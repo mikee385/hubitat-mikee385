@@ -59,6 +59,13 @@
             "tags": [ "Automations & Groups", "Doors & Windows", "Lights & Switches", "Motion Control" ]
         },
         {
+            "name": "Garage Door Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-door-automation.json",
+            "description": "Combines several sensors and controllers into a single garage door device.",
+            "tags": [ "Automations & Groups", "Doors & Windows", "Garage Doors" ]
+        },
+        {
             "name": "Garage Light Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/garage-light-automation.json",
