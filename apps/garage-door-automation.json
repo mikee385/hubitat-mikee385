@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Door Automation",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial release",
-    "dateReleased": "2022-07-31",
+    "releaseNotes": "Fix 'var' with 'def'",
+    "dateReleased": "2022-08-01",
     "apps": [
         {
             "id": "1603f8da-7bc3-42bc-bd8c-66465295d33a",

@@ -1,10 +1,10 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "6.10.1",
+    "version": "6.10.2",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove old references to overheadDoorContact",
+    "releaseNotes": "Fix 'var' with 'def'",
     "dateReleased": "2022-08-01",
     "apps": [
         {

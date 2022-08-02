@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.10.1" }
+String getVersionNum() { return "6.10.2" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -115,7 +115,7 @@ def initialize() {
 }
 
 def getBatteryThresholds() {
-    var thresholds = [
+    def thresholds = [
         [device: entryDoor, lowBattery: 10],
         [device: motionSensor, lowBattery: 10]
     ]
@@ -128,7 +128,7 @@ def getBatteryThresholds() {
 }
 
 def getInactiveThresholds() {
-    var thresholds = [
+    def thresholds = [
         [device: entryDoor, inactiveHours: 2],
         [device: motionSensor, inactiveHours: 24],
         [device: garageLight, inactiveHours: 24]
