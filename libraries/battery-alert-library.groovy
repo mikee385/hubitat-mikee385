@@ -1,10 +1,10 @@
 /**
  *  name: Battery Alert Library
  *  author: Michael Pierce
- *  version: 1.3.0
+ *  version: 2.0.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Minor formatting changes to prepare for future work
+ *  releaseNotes: Get all devices automatically from settings
  *  dateReleased: 2022-08-02
  *
  *  Copyright 2022 Michael Pierce
@@ -39,6 +39,28 @@ def batteryCheck() {
     logDebug("batteryCheck")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+        def devices = []
+        for (setting in settings) {
+            if (setting.value instanceof List) {
+                for (item in setting.value) {
+                    if (item.metaClass.respondsTo(item, 'getDeviceNetworkId')) {
+                        devices.add(item)
+                    }
+                }
+            } else {
+                if (setting.value.metaClass.respondsTo(setting.value, 'getDeviceNetworkId')) {
+                    devices.add(setting.value)
+                }
+            }
+        }
+        
+        def newBatteryThresholds = []
+        for (device in devices) {
+            if (device.hasCapability("Battery")) {
+                newBatteryThresholds.add([device: device, lowBattery: 10])
+            }
+        }
+    
         def deviceIDs = []
         
         def oldBatteryThresholds = []
@@ -46,11 +68,36 @@ def batteryCheck() {
             oldBatteryThresholds = getBatteryThresholds()
         }
         
+        def oldBatteryIDs = []
+        for (item in oldBatteryThresholds) {
+            oldBatteryIDs.add(item.device.id)
+        }
+        def newBatteryIDs = []
+        for (item in newBatteryThresholds) {
+            newBatteryIDs.add(item.device.id)
+            
+            if (!oldBatteryIDs.contains(item.device.id)) {
+                def message = "Not Montiored in Old: ${item.device}"
+                log.warn(message)
+                personToNotify.deviceNotification(message)
+            }
+        }
+        for (item in oldBatteryThresholds) {
+            if (!newBatteryIDs.contains(item.device.id)) {
+                def message = "Not Montiored in New: ${item.device}"
+                log.warn(message)
+                personToNotify.deviceNotification(message)
+            }
+        }
+        
         for (item in oldBatteryThresholds) {
             if (!deviceIDs.contains(item.device.id)) {
                 if (item.device.currentValue("battery") <= item.lowBattery) {
                     deviceIDs.add(item.device.id)
-                    personToNotify.batteryNotification("${item.device} - ${item.device.currentValue('battery')}%")
+                    
+                    def message = "${item.device} - ${item.device.currentValue('battery')}%"
+                    log.warn(message)
+                    personToNotify.batteryNotification(message)
                 }
             }
         }

@@ -1,10 +1,10 @@
 /**
  *  name: Inactive Alert Library
  *  author: Michael Pierce
- *  version: 1.5.0
+ *  version: 2.0.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Minor formatting changes to prepare for future work
+ *  releaseNotes: Get all devices automatically from settings
  *  dateReleased: 2022-08-02
  *
  *  Copyright 2022 Michael Pierce
@@ -39,11 +39,78 @@ def inactiveCheck() {
     logDebug("inactiveCheck")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+        def devices = []
+        for (setting in settings) {
+            if (setting.value instanceof List) {
+                for (item in setting.value) {
+                    if (item.metaClass.respondsTo(item, 'getDeviceNetworkId')) {
+                        devices.add(item)
+                    }
+                }
+            } else {
+                if (setting.value.metaClass.respondsTo(setting.value, 'getDeviceNetworkId')) {
+                    devices.add(setting.value)
+                }
+            }
+        }
+        
+        def excludedDeviceTypes = [
+            "Appliance Status",
+            "Occupancy Status",
+            "Person Status"
+        ]
+        
+        def newInactiveThresholds = []
+        def newUnchangedThresholds = []
+        for (device in devices) {
+            if (!excludedDeviceTypes.contains(device.getTypeName())) {
+                if (device.hasCapability("TemperatureMeasurement")) {
+                    newInactiveThresholds.add([device: device, inactiveHours: 1])
+                    newUnchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 1])
+                
+                } else if (device.hasCapability("RelativeHumidityMeasurement")) {
+                    newInactiveThresholds.add([device: device, inactiveHours: 1])
+                    newUnchangedThresholds.add([device: device, attribute: "humidity", inactiveHours: 1])
+                
+                } else if (device.hasCapability("Battery")) {
+                    newInactiveThresholds.add([device: device, inactiveHours: 24])
+                
+                } else if (device.hasCapability("PresenceSensor")) {
+                    newUnchangedThresholds.add([device: device, attribute: "presence", inactiveHours: 72])
+                
+                } else if (!device.getTypeName().contains("Virtual")) {
+                    newInactiveThresholds.add([device: device, inactiveHours: 24])
+                }
+            } 
+        }
+        
         def deviceIDs = []
         
         def oldInactiveThresholds = []
         if (getInactiveThresholds) {
             oldInactiveThresholds = getInactiveThresholds()
+        }
+        
+        def oldInactiveIDs = []
+        for (item in oldInactiveThresholds) {
+            oldInactiveIDs.add(item.device.id)
+        }
+        def newInactiveIDs = []
+        for (item in newInactiveThresholds) {
+            newInactiveIDs.add(item.device.id)
+            
+            if (!oldInactiveIDs.contains(item.device.id)) {
+                def message = "Not Inactive Montiored in Old: ${item.device}"
+                log.warn(message)
+                personToNotify.deviceNotification(message)
+            }
+        }
+        for (item in oldInactiveThresholds) {
+            if (!newInactiveIDs.contains(item.device.id)) {
+                def message = "Not Inactive Montiored in New: ${item.device}"
+                log.warn(message)
+                personToNotify.deviceNotification(message)
+            }
         }
         
         for (item in oldInactiveThresholds) {
@@ -52,11 +119,17 @@ def inactiveCheck() {
                     def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                     if (item.device.getLastActivity().getTime() <= cutoffTime) {
                         deviceIDs.add(item.device.id)
-                        personToNotify.inactiveNotification("${item.device} - ${timeSince(item.device.getLastActivity().getTime())}")
+                        
+                        def message = "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}"
+                        log.warn(message)
+                        personToNotify.inactiveNotification(message)
                     }
                 } else {
                     deviceIDs.add(item.device.id)
-                    personToNotify.inactiveNotification("${item.device} - No Activity")
+                    
+                    def message = "${item.device} - No Activity"
+                    log.warn(message)
+                    personToNotify.inactiveNotification(message)
                 }
             }
         }
@@ -66,6 +139,28 @@ def inactiveCheck() {
             oldUnchangedThresholds = getUnchangedThresholds()
         }
         
+        def oldUnchangedIDs = []
+        for (item in oldUnchangedThresholds) {
+            oldUnchangedIDs.add(item.device.id)
+        }
+        def newUnchangedIDs = []
+        for (item in newUnchangedThresholds) {
+            newUnchangedIDs.add(item.device.id)
+            
+            if (!oldUnchangedIDs.contains(item.device.id)) {
+                def message = "Not Unchanged Montiored in Old: ${item.device}"
+                log.warn(message)
+                personToNotify.deviceNotification(message)
+            }
+        }
+        for (item in oldUnchangedThresholds) {
+            if (!newUnchangedIDs.contains(item.device.id)) {
+                def message = "Not Unchanged Montiored in New: ${item.device}"
+                log.warn(message)
+                personToNotify.deviceNotification(message)
+            }
+        }
+        
         for (item in oldUnchangedThresholds) {
             if (!deviceIDs.contains(item.device.id)) {
                 def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
@@ -73,11 +168,17 @@ def inactiveCheck() {
                     def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                     if (lastEvent.getDate().getTime() <= cutoffTime) {
                         deviceIDs.add(item.device.id)
-                        personToNotify.inactiveNotification("${item.device}* - ${timeSince(lastEvent.getDate().getTime())}")
+                        
+                        def message = "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}"
+                        log.warn(message)
+                        personToNotify.inactiveNotification(message)
                     }
                 } else {
                     deviceIDs.add(item.device.id)
-                    personToNotify.inactiveNotification("${item.device}* - No Activity")
+                    
+                    def message = "${item.device}* - No Activity"
+                    log.warn(message)
+                    personToNotify.inactiveNotification(message)
                 }
             }
         }
