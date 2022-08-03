@@ -41,13 +41,16 @@ def batteryCheck() {
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
         def deviceIDs = []
         
+        def oldBatteryThresholds = []
         if (getBatteryThresholds) {
-            for (item in getBatteryThresholds()) {
-                if (!deviceIDs.contains(item.device.id)) {
-                    if (item.device.currentValue("battery") <= item.lowBattery) {
-                        deviceIDs.add(item.device.id)
-                        personToNotify.batteryNotification("${item.device} - ${item.device.currentValue('battery')}%")
-                    }
+            oldBatteryThresholds = getBatteryThresholds()
+        }
+        
+        for (item in oldBatteryThresholds) {
+            if (!deviceIDs.contains(item.device.id)) {
+                if (item.device.currentValue("battery") <= item.lowBattery) {
+                    deviceIDs.add(item.device.id)
+                    personToNotify.batteryNotification("${item.device} - ${item.device.currentValue('battery')}%")
                 }
             }
         }
