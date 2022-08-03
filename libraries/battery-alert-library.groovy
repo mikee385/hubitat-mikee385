@@ -1,11 +1,11 @@
 /**
  *  name: Battery Alert Library
  *  author: Michael Pierce
- *  version: 1.2.0
+ *  version: 1.3.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Rename methods for clarity
- *  dateReleased: 2022-02-11
+ *  releaseNotes: Minor formatting changes to prepare for future work
+ *  dateReleased: 2022-08-02
  *
  *  Copyright 2022 Michael Pierce
  *
