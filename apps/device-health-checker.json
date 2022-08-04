@@ -1,0 +1,30 @@
+{
+    "packageName": "Device Health Checker",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "2.2.8",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial release",
+    "dateReleased": "2022-08-04",
+    "apps": [
+        {
+            "id": "152e08a6-8bf3-4c2d-beb3-1c2cb4ba54bc",
+            "name": "Device Health Checker",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-health-checker.groovy",
+            "required": true,
+            "oauth": true,
+            "primary": true
+        }
+    ],
+    "drivers": [
+        {
+            "id": "45abafb0-1501-49d0-9aab-e15dde22192c",
+            "name": "Device Health Checker",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/device-health-checker.groovy",
+            "required": true
+        }
+    ]
+}
