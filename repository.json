@@ -31,6 +31,13 @@
             "tags": [ "Automations & Groups", "Lights & Switches" ]
         },
         {
+            "name": "Device Health Checker",
+            "category": "Notifications",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-health-checker.json",
+            "description": "Runs device health checks and sends alerts for low battery and inactive devices.",
+            "tags": [ "Notifications", "Tools & Utilities" ]
+        },
+        {
             "name": "Dishwasher Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/dishwasher-automation.json",
