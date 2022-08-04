@@ -1,11 +1,11 @@
 /**
  *  name: Device Health Library
  *  author: Michael Pierce
- *  version: 1.0.0
+ *  version: 1.0.1
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Initial release
- *  dateReleased: 2022-08-03
+ *  releaseNotes: Fix incorrect variable name
+ *  dateReleased: 2022-08-04
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -64,7 +64,7 @@ def deviceHealthCheck(evt) {
     for (device in devices) {
         if (!excludedDeviceTypes.contains(device.getTypeName())) {
             if (device.hasCapability("Battery")) {
-                newBatteryThresholds.add([device: device, lowBattery: 10])
+                batteryThresholds.add([device: device, lowBattery: 10])
             } 
         }
     }
