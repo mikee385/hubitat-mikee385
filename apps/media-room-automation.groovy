@@ -14,11 +14,10 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Media Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -69,17 +68,6 @@ def initialize() {
     // Comfort Profile
     if (tv) {
         subscribe(tv, "switch", tvHandler_ComfortProfile)
-    }
-    
-    // Away Alert
-    if (door) {
-        subscribe(door, "contact", handler_AwayAlert)
-    }
-    if (tv) {
-        subscribe(tv, "switch.on", handler_AwayAlert)
-    }
-    if (comfortProfileButton) {
-        subscribe(comfortProfileButton, "pushed", handler_AwayAlert)
     }
     
     // Device Checks

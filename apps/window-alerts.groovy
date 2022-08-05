@@ -14,12 +14,10 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.tamper-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -64,16 +62,6 @@ def initialize() {
     }
     subscribe(personToNotify, "presence", personHandler_WindowAlert)
     subscribe(personToNotify, "sleeping", personHandler_WindowAlert)
-    
-    // Away Alert
-    for (window in windows) {
-        subscribe(window, "contact", handler_AwayAlert)
-    }
-    
-    // Tamper Alert
-    for (window in windows) {
-        subscribe(window, "tamper.detected", handler_TamperAlert)
-    }
     
     // Device Checks
     initializeDeviceChecks()

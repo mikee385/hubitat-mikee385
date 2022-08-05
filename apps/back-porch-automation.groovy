@@ -14,12 +14,10 @@
  *
  */
  
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "9.1.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.tamper-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -92,16 +90,6 @@ def initialize() {
     subscribe(lock, "contact", lockHandler_LockAlert)
     subscribe(personToNotify, "presence", personHandler_LockAlert)
     subscribe(personToNotify, "sleeping", personHandler_LockAlert)
-    
-    // Tamper Alert
-    subscribe(door, "tamper.detected", handler_TamperAlert)
-    
-    // Away Alert
-    subscribe(door, "contact", handler_AwayAlert)
-    subscribe(lock, "contact", handler_AwayAlert)
-    for (light in lights) {
-        subscribe(light, "switch.on", handler_AwayAlert)
-    }
     
     // Device Checks
     initializeDeviceChecks()

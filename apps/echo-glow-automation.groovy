@@ -14,11 +14,10 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -150,12 +149,6 @@ def initialize() {
         subscribe(harmonyRemote, "pushed", harmonyRemoteHandler_Routine)
     }
     subscribe(location, "mode", modeHandler_Routine)
-    
-    // Away Alerts
-    subscribe(bedtimeSoonRoutine, "pushed", handler_AwayAlert)
-    subscribe(bedtimeNowRoutine, "pushed", handler_AwayAlert)
-    subscribe(naptimeNowRoutine, "pushed", handler_AwayAlert)
-    subscribe(wakeUpRoutine, "pushed", handler_AwayAlert)
     
     // Device Checks
     initializeDeviceChecks()

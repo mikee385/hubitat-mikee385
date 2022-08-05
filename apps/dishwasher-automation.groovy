@@ -16,11 +16,10 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -115,9 +114,6 @@ def initialize() {
         // Reminder Alert
         subscribe(reminderSwitch, "switch", reminderHandler_ReminderAlert)
     }
-    
-    // Away Alert
-    subscribe(contactSensor, "contact", handler_AwayAlert)
     
     // Device Checks
     initializeDeviceChecks()

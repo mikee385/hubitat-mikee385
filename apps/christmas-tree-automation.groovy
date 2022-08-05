@@ -14,11 +14,10 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Christmas Tree Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -85,11 +84,6 @@ def initialize() {
         subscribe(routine, "switch.on", offRoutineHandler_LightSwitch)
     }
     subscribe(location, "mode", modeHandler_LightSwitch)
-    
-    // Away Alert
-    for (light in lights) {
-        subscribe(light, "switch.on", handler_AwayAlert)
-    }
     
     // Device Checks
     initializeDeviceChecks()

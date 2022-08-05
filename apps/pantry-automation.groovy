@@ -14,11 +14,10 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -60,12 +59,6 @@ def updated() {
 def initialize() {
     // Light Switch
     subscribe(location, "mode", modeHandler_LightSwitch)
-    
-    // Away Alert
-    subscribe(motionSensor, "motion.active", handler_AwayAlert)
-    for (light in lights) {
-        subscribe(light, "switch.on", handler_AwayAlert)
-    }
     
     // Device Checks
     initializeDeviceChecks()

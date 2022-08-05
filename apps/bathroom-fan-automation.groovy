@@ -16,11 +16,10 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -119,10 +118,6 @@ def initialize() {
     // Fan Alert
     subscribe(fan, "switch", fanHandler_FanAlert)
     
-    // Away Alert
-    subscribe(fan, "switch.on", handler_AwayAlert)
-    
-    // Device Checks
     initializeDeviceChecks()
     
     // Initialize state

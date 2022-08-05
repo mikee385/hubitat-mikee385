@@ -14,12 +14,10 @@
  *
  */
  
-String getVersionNum() { return "8.0.0" }
+String getVersionNum() { return "8.1.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.tamper-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -96,16 +94,6 @@ def initialize() {
     subscribe(sideDoor, "contact", sideDoorHandler_DoorAlert)
     subscribe(personToNotify, "presence", personHandler_DoorAlert)
     subscribe(personToNotify, "sleeping", personHandler_DoorAlert)
-    
-    // Away Alert
-    subscribe(overheadDoor, "contact", handler_AwayAlert)
-    subscribe(entryDoor, "contact", handler_AwayAlert)
-    subscribe(sideDoor, "contact", handler_AwayAlert)
-    subscribe(motionSensor, "motion.active", handler_AwayAlert)
-    subscribe(garageLight, "switch.on", handler_AwayAlert)
-    
-    // Tamper Alert
-    subscribe(entryDoor, "tamper.detected", handler_TamperAlert)
     
     // Device Checks
     initializeDeviceChecks()

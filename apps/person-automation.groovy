@@ -14,11 +14,10 @@
  *
  */
  
-String getVersionNum() { return "8.0.0" }
+String getVersionNum() { return "8.1.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -123,9 +122,6 @@ def initialize() {
     
         // Switch
         subscribe(location, "mode", modeHandler_Switch)
-    
-        // Away Alert
-        subscribe(sleepSwitch, "switch.on", handler_AwayAlert)
     }
     
     if (notificationDevices) {

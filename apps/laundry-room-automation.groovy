@@ -16,11 +16,10 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "9.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -131,13 +130,6 @@ def initialize() {
     subscribe(dryer, "error", dryerHandler_DryerErrorAlert)
     subscribe(personToNotify, "presence", personHandler_DryerErrorAlert)
     subscribe(personToNotify, "sleeping", personHandler_DryerErrorAlert)
-    
-    // Away Alert
-    subscribe(light, "switch.on", handler_AwayAlert)
-    subscribe(door, "contact", handler_AwayAlert)
-    if (gate) {
-        subscribe(gate, "contact", handler_AwayAlert)
-    }
     
     // Device Checks
     initializeDeviceChecks()

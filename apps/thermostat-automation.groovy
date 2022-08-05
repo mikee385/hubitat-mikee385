@@ -14,11 +14,10 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -95,21 +94,6 @@ def initialize() {
     
     for (sensor in upstairsSensors) {
         subscribe(sensor, "temperature", temperatureHandler_UpstairsTemperatureAlert)
-    }
-    
-    // Away Alert
-    if (downstairsThermostat) {
-        subscribe(downstairsThermostat, "motion.active", handler_AwayAlert)
-    }
-    for (sensor in downstairsSensors) {
-        subscribe(sensor, "motion.active", handler_AwayAlert)
-    }
-    
-    if (upstairsThermostat) {
-        subscribe(upstairsThermostat, "motion.active", handler_AwayAlert)
-    }
-    for (sensor in upstairsSensors) {
-        subscribe(sensor, "motion.active", handler_AwayAlert)
     }
     
     // Device Checks

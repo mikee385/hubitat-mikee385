@@ -14,12 +14,10 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Garage Door Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.away-alert-library
-#include mikee385.tamper-alert-library
 #include mikee385.device-check-library
 
 definition(
@@ -87,14 +85,6 @@ def initialize() {
         }
     }
         
-    // Away Alert
-    for (controller in controllers) {
-        subscribe(controller, "door", handler_AwayAlert)
-    }
-    for (sensor in sensors) {
-        subscribe(sensor, "contact", handler_AwayAlert)
-    }
-    
     // Device Checks
     initializeDeviceChecks()
 }

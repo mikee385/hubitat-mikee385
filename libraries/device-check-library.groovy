@@ -1,10 +1,10 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 2.1.0
+ *  version: 3.0.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Exclude Hue Remote and change inactive time from 1 hour to 6 hours
+ *  releaseNotes: Add alerts for tamper, away, and sleep
  *  dateReleased: 2022-08-05
  *
  *  Copyright 2022 Michael Pierce
@@ -30,14 +30,59 @@ library (
 )
 
 def initializeDeviceChecks() {
+    // Low Battery and Inactivity Alerts
     subscribe(deviceChecker, "deviceCheck.active", deviceCheck)
+    
+    for (device in getDevicesFromSettings()) {
+        if (!device.getTypeName().contains("Virtual")) {
+            // Tamper Alerts
+            if (device.hasCapability("TamperAlert")) {
+                subscribe(device, "tamper.detected", tamperAlert)
+            }
+            
+            // Away Alerts
+            if (device.hasCapability("ContactSensor")) {
+                subscribe(device, "contact", awayAlert)
+            }
+            if (device.hasCapability("GarageDoorControl")) {
+                subscribe(device, "door", awayAlert)
+            }
+            if (device.hasCapability("Lock")) {
+                subscribe(device, "lock", awayAlert)
+            }
+            if (device.hasCapability("MotionSensor")) {
+                subscribe(device, "motion.active", awayAlert)
+            }
+            if (device.hasCapability("PushableButton")) {
+                subscribe(device, "pushed", awayAlert)
+            }
+            if (device.hasCapability("Switch")) {
+                if (device.getDisplayName().contains("Camera") || device.getDisplayName().contains("Blink")) {
+                    subscribe(device, "switch.off", awayAlert)
+                } else {
+                    subscribe(device, "switch.on", awayAlert)
+                }
+            }
+            if (device.getTypeName() == "Vivint Panel") {
+                subscribe(device, "alarm.disarmed", awayAlert)
+            }
+            
+            // Sleep Alerts
+            if (device.hasCapability("Switch")) {
+                if (device.getDisplayName().contains("Camera") || device.getDisplayName().contains("Blink")) {
+                    subscribe(device, "switch.off", sleepAlert)
+                }
+            } 
+            if (device.getTypeName() == "Vivint Panel") {
+                subscribe(device, "alarm.disarmed", sleepAlert)
+            }
+        }
+    }
 }
 
-def deviceCheck(evt) {
-    logDebug("deviceCheck")
-    
-    //Get devices from settings
+def getDevicesFromSettings() {
     def devices = []
+    
     for (setting in settings) {
         if (setting.value instanceof List) {
             for (item in setting.value) {
@@ -50,20 +95,28 @@ def deviceCheck(evt) {
                 devices.add(setting.value)
             }
         }
-    } 
-        
+    }
+    
+    return devices
+}
+
+def deviceCheck(evt) {
+    logDebug("deviceCheck")
+    
+    //Get devices from settings
+    def devices = getDevicesFromSettings()
+    
+    //Get Battery Thresholds
     def excludedBatteryDeviceTypes = [
         "Aladdin Connect Garage Door",
         "Konke ZigBee Temperature Humidity Sensor"
     ]
-    
-    //Get Battery Thresholds
     def batteryThresholds = []
     for (device in devices) {
         if (!excludedBatteryDeviceTypes.contains(device.getTypeName())) {
             if (device.hasCapability("Battery")) {
                 batteryThresholds.add([device: device, lowBattery: 10])
-            } 
+            }
         }
     }
     
@@ -98,6 +151,7 @@ def deviceCheck(evt) {
         }
     }
     
+    //Get Inactive and Unchanged Thresholds
     def excludedInactiveDeviceTypes = [
         "Appliance Status",
         "Application Refresh Button",
@@ -107,8 +161,6 @@ def deviceCheck(evt) {
         "Person Status",
         "Philips Dimmer Button Controller"
     ]
-    
-    //Get Inactive and Unchanged Thresholds
     def inactiveThresholds = []
     def unchangedThresholds = []
     for (device in devices) {
@@ -252,4 +304,26 @@ def timeSince(date) {
     
     def years = days / 365.25
     return (int)Math.round(years) + " years"
+}
+
+def tamperAlert(evt) {
+    logDebug("tamperAlert: ${evt.device} changed to ${evt.value}")
+    
+    personToNotify.deviceNotification("Tamper alert for ${evt.device}!")
+}
+
+def awayAlert(evt) {
+    logDebug("awayAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Away") {
+        personToNotify.deviceNotification("${evt.device} is ${evt.value} while Away!")
+    }
+}
+
+def sleepAlert(evt) {
+    logDebug("sleepAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (location.mode == "Sleep") {
+        personToNotify.deviceNotification("${evt.device} is ${evt.value} during Sleep!")
+    }
 }
