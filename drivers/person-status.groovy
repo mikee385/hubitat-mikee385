@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "8.0.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -37,14 +37,6 @@ metadata {
         command "asleep"
         command "arrived"
         command "departed"
-        
-        command "batteryNotification", ["string"]
-        command "inactiveNotification", ["string"]
-    }
-    
-    preferences {
-        input "alertLowBattery", "bool", title: "Alert for Low Battery Report (8PM)?", required: true, defaultValue: false
-        input "alertInactive", "bool", title: "Alert for Inactive Device Report (8PM)?", required: true, defaultValue: false
     }
 }
 
@@ -75,26 +67,6 @@ def initialize() {
     if (!device.currentValue("sleeping")) {
         awake()
     }
-    
-    if (!atomicState.batteryMessage) {
-        batteryReset()
-    }
-    if (!atomicState.inactiveMessage) {
-        inactiveReset()
-    }
-    
-    schedule("0 0 0 * * ? *", batteryReset)
-    schedule("0 0 0 * * ? *", inactiveReset)
-    
-    def currentTime = new Date()
-    def alertTime = timeToday("20:00")
-    
-    if (alertLowBattery) {
-      schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", batteryAlert)
-    }
-    if (alertInactive) {
-      schedule("$currentTime.seconds $alertTime.minutes $alertTime.hours * * ? *", inactiveAlert)
-    } 
 }
 
 def childDevice(name) {
@@ -140,32 +112,4 @@ def runCommand(name) {
 
 def deviceNotification(message) {
   	sendEvent(name: "message", value: "${message}", isStateChange: true)
-}
-
-def batteryNotification(message) {
-    atomicState.batteryMessage += "\n" + message
-}
-
-def batteryReset() {
-    atomicState.batteryMessage = ""
-}
-
-def batteryAlert() {
-    if (atomicState.batteryMessage) {
-        deviceNotification("Low Battery:${atomicState.batteryMessage.split('\n').sort().join('\n')}")
-    }
-}
-
-def inactiveNotification(message) {
-  	atomicState.inactiveMessage += "\n" + message
-}
-
-def inactiveReset() {
-    atomicState.inactiveMessage = ""
-}
-
-def inactiveAlert() {
-    if (atomicState.inactiveMessage) {
-        deviceNotification("Inactive Devices:${atomicState.inactiveMessage.split('\n').sort().join('\n')}")
-    }
 }
