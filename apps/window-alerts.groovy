@@ -14,13 +14,13 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
 #include mikee385.tamper-alert-library
-#include mikee385.device-health-library
+#include mikee385.device-check-library
 
 definition(
     name: "Window Alerts",
@@ -40,7 +40,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceHealthChecker", "device.DeviceHealthChecker", title: "Device Health Checker", multiple: false, required: true
+            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -75,8 +75,8 @@ def initialize() {
         subscribe(window, "tamper.detected", handler_TamperAlert)
     }
     
-    // Device Health Checker
-    initializeDeviceHealthCheck()
+    // Device Checks
+    initializeDeviceChecks()
 }
 
 def getBatteryThresholds() {

@@ -14,11 +14,11 @@
  *
  */
  
-String getVersionNum() { return "8.0.0" }
+String getVersionNum() { return "9.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.device-health-library
+#include mikee385.device-check-library
 
 definition(
     name: "Roomba Automation",
@@ -55,7 +55,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceHealthChecker", "device.DeviceHealthChecker", title: "Device Health Checker", multiple: false, required: true
+            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -116,8 +116,8 @@ def initialize() {
     def resetToday = timeToday(roombaResetTime)
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
     
-    // Device Health Checker
-    initializeDeviceHealthCheck()
+    // Device Checks
+    initializeDeviceChecks()
     
     // Initialize state
     def deviceRunning = roomba.currentValue("phase") == "run"

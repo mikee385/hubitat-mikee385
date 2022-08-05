@@ -14,12 +14,12 @@
  *
  */
  
-String getVersionNum() { return "7.0.1" }
+String getVersionNum() { return "8.0.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
-#include mikee385.device-health-library
+#include mikee385.device-check-library
 
 definition(
     name: "Person Automation",
@@ -53,7 +53,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceHealthChecker", "device.DeviceHealthChecker", title: "Device Health Checker", multiple: false, required: true
+            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enablePresenceLog", type: "bool", title: "Enable presence logging?", defaultValue: false
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
@@ -133,8 +133,8 @@ def initialize() {
         subscribe(person, "message", handler_Notification)
     }
     
-    // Device Health Checker
-    initializeDeviceHealthCheck()
+    // Device Checks
+    initializeDeviceChecks()
     
     // URLs
     if(!state.accessToken) {

@@ -1,10 +1,10 @@
 /**
- *  name: Device Health Library
+ *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 1.1.0
+ *  version: 2.0.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Add additional excluded device types
+ *  releaseNotes: Renamed from Device Health Checker to Device Checker
  *  dateReleased: 2022-08-05
  *
  *  Copyright 2022 Michael Pierce
@@ -21,20 +21,20 @@
  */
 
 library (
-    name: "device-health-library",
+    name: "device-check-library",
     namespace: "mikee385",
     author: "Michael Pierce",
     description: "Common methods for checking for low battery and inactivity in all used devices.",
     category: "My Apps",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/device-health-library.groovy"
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/device-check-library.groovy"
 )
 
-def initializeDeviceHealthCheck() {
-    subscribe(deviceHealthChecker, "deviceCheck.active", deviceHealthCheck)
+def initializeDeviceChecks() {
+    subscribe(deviceChecker, "deviceCheck.active", deviceCheck)
 }
 
-def deviceHealthCheck(evt) {
-    logDebug("deviceHealthCheck")
+def deviceCheck(evt) {
+    logDebug("deviceCheck")
     
     //Get devices from settings
     def devices = []
@@ -76,7 +76,7 @@ def deviceHealthCheck(evt) {
                     
                 def message = "${item.device} - ${item.device.currentValue('battery')}%"
                 log.warn(message)
-                deviceHealthChecker.addBatteryMessage(message)
+                deviceChecker.addBatteryMessage(message)
             }
         }
     }
@@ -143,14 +143,14 @@ def deviceHealthCheck(evt) {
                         
                     def message = "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}"
                     log.warn(message)
-                    deviceHealthChecker.addInactiveMessage(message)
+                    deviceChecker.addInactiveMessage(message)
                 }
             } else {
                 inactiveDeviceIDs.add(item.device.id)
                     
                 def message = "${item.device} - No Activity"
                 log.warn(message)
-                deviceHealthChecker.addInactiveMessage(message)
+                deviceChecker.addInactiveMessage(message)
             }
         }
     }
@@ -183,14 +183,14 @@ def deviceHealthCheck(evt) {
                         
                     def message = "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}"
                     log.warn(message)
-                    deviceHealthChecker.addInactiveMessage(message)
+                    deviceChecker.addInactiveMessage(message)
                 }
             } else {
                 inactiveDeviceIDs.add(item.device.id)
                     
                 def message = "${item.device}* - No Activity"
                 log.warn(message)
-                deviceHealthChecker.addInactiveMessage(message)
+                deviceChecker.addInactiveMessage(message)
             }
         }
     }

@@ -1,5 +1,5 @@
 /**
- *  Device Health Checker App
+ *  Device Checker App
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -14,26 +14,26 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
-String getVersionLabel() { return "Device Health Checker, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "2.0.0" }
+String getVersionLabel() { return "Device Checker, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 
 definition(
-    name: "Device Health Checker",
+    name: "Device Checker",
     namespace: "mikee385",
     author: "Michael Pierce",
-    description: "Runs device health checks and sends alerts for low battery and inactive devices.",
+    description: "Runs device checks and sends alerts for low battery and inactive devices.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-health-checker.groovy"
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-checker.groovy"
 )
 
 preferences {
-    page(name: "settings", title: "Device Health Checker", install: true, uninstall: true) {
+    page(name: "settings", title: "Device Checker", install: true, uninstall: true) {
         section {
-            input "runDaily", "bool", title: "Run device health checks every day at 8PM?", required: true, defaultValue: true
+            input "runDaily", "bool", title: "Run every day at 8PM?", required: true, defaultValue: true
         }
         section {
             input "alertLowBattery", "bool", title: "Alert for Low Battery?", required: true, defaultValue: true
@@ -77,10 +77,10 @@ def initialize() {
 }
 
 def childDevice() {
-    def childID = "deviceHealthChecker:" + app.getId()
+    def childID = "deviceChecker:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        child = addChildDevice("mikee385", "Device Health Checker", childID, 1234, [label: "Device Health Checker", isComponent: false])
+        child = addChildDevice("mikee385", "Device Checker", childID, 1234, [label: "Device Checker", isComponent: false])
     }
     return child
 }
