@@ -1,10 +1,10 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 2.0.0
+ *  version: 2.1.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Renamed from Device Health Checker to Device Checker
+ *  releaseNotes: Exclude Hue Remote and change inactive time from 1 hour to 6 hours
  *  dateReleased: 2022-08-05
  *
  *  Copyright 2022 Michael Pierce
@@ -104,7 +104,8 @@ def deviceCheck(evt) {
         "Echo Glow Device",
         "Echo Glow Scene",
         "Occupancy Status",
-        "Person Status"
+        "Person Status",
+        "Philips Dimmer Button Controller"
     ]
     
     //Get Inactive and Unchanged Thresholds
@@ -113,12 +114,12 @@ def deviceCheck(evt) {
     for (device in devices) {
         if (!excludedInactiveDeviceTypes.contains(device.getTypeName())) {
             if (device.hasCapability("TemperatureMeasurement")) {
-                inactiveThresholds.add([device: device, inactiveHours: 1])
-                unchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 1])
+                inactiveThresholds.add([device: device, inactiveHours: 6])
+                unchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 6])
                 
             } else if (device.hasCapability("RelativeHumidityMeasurement")) {
-                inactiveThresholds.add([device: device, inactiveHours: 1])
-                unchangedThresholds.add([device: device, attribute: "humidity", inactiveHours: 1])
+                inactiveThresholds.add([device: device, inactiveHours: 6])
+                unchangedThresholds.add([device: device, attribute: "humidity", inactiveHours: 6])
                 
             } else if (device.hasCapability("Battery")) {
                 inactiveThresholds.add([device: device, inactiveHours: 24])
