@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.0.1" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -134,7 +134,7 @@ def initialize() {
     }
     
     // Device Health Checker
-    initializeDeviceHealthCheck
+    initializeDeviceHealthCheck()
     
     // URLs
     if(!state.accessToken) {
