@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "4.0.0" }
 String getVersionLabel() { return "Unused Device Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -34,8 +34,7 @@ definition(
 preferences {
     page(name: "settings", title: "Unused Device Alerts", install: true, uninstall: true) {
         section {
-            input "devices_2hr", "capability.sensor", title: "Inactivity threshold: 2 hours", multiple: true, required: false
-            input "devices_1day", "capability.sensor", title: "Inactivity threshold: 1 day", multiple: true, required: false
+            input "devices", "capability.sensor", title: "Devices", multiple: true, required: false
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -64,12 +63,7 @@ def initialize() {
 def getBatteryThresholds() {
     def thresholds = []
     
-    for (item in devices_2hr) {
-        if (item.hasCapability("Battery")) {
-            thresholds.add([device: item, lowBattery: 10])
-        }
-    }
-    for (item in devices_1day) {
+    for (item in devices) {
         if (item.hasCapability("Battery")) {
             thresholds.add([device: item, lowBattery: 10])
         }
@@ -81,10 +75,7 @@ def getBatteryThresholds() {
 def getInactiveThresholds() {
     def thresholds = []
     
-    for (item in devices_2hr) {
-        thresholds.add([device: item, inactiveHours: 2])
-    }
-    for (item in devices_1day) {
+    for (item in devices) {
         thresholds.add([device: item, inactiveHours: 24])
     }
     
