@@ -1,11 +1,11 @@
 /**
  *  name: Device Health Library
  *  author: Michael Pierce
- *  version: 1.0.1
+ *  version: 1.1.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Fix incorrect variable name
- *  dateReleased: 2022-08-04
+ *  releaseNotes: Add additional excluded device types
+ *  dateReleased: 2022-08-05
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -52,17 +52,15 @@ def deviceHealthCheck(evt) {
         }
     } 
         
-    def excludedDeviceTypes = [
-        "Appliance Status",
-        "Application Refresh Button",
-        "Occupancy Status",
-        "Person Status"
+    def excludedBatteryDeviceTypes = [
+        "Aladdin Connect Garage Door",
+        "Konke ZigBee Temperature Humidity Sensor"
     ]
     
     //Get Battery Thresholds
     def batteryThresholds = []
     for (device in devices) {
-        if (!excludedDeviceTypes.contains(device.getTypeName())) {
+        if (!excludedBatteryDeviceTypes.contains(device.getTypeName())) {
             if (device.hasCapability("Battery")) {
                 batteryThresholds.add([device: device, lowBattery: 10])
             } 
@@ -100,11 +98,20 @@ def deviceHealthCheck(evt) {
         }
     }
     
+    def excludedInactiveDeviceTypes = [
+        "Appliance Status",
+        "Application Refresh Button",
+        "Echo Glow Device",
+        "Echo Glow Scene",
+        "Occupancy Status",
+        "Person Status"
+    ]
+    
     //Get Inactive and Unchanged Thresholds
     def inactiveThresholds = []
     def unchangedThresholds = []
     for (device in devices) {
-        if (!excludedDeviceTypes.contains(device.getTypeName())) {
+        if (!excludedInactiveDeviceTypes.contains(device.getTypeName())) {
             if (device.hasCapability("TemperatureMeasurement")) {
                 inactiveThresholds.add([device: device, inactiveHours: 1])
                 unchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 1])
@@ -116,7 +123,7 @@ def deviceHealthCheck(evt) {
             } else if (device.hasCapability("Battery")) {
                 inactiveThresholds.add([device: device, inactiveHours: 24])
                 
-            } else if (device.hasCapability("PresenceSensor")) {
+            } else if (device.hasCapability("PresenceSensor") && device.getDisplayName() != "Guest") {
                 unchangedThresholds.add([device: device, attribute: "presence", inactiveHours: 72])
                 
             } else if (!device.getTypeName().contains("Virtual")) {
