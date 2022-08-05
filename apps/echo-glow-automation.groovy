@@ -14,12 +14,12 @@
  *
  */
  
-String getVersionNum() { return "4.10.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
-#include mikee385.battery-alert-library
+#include mikee385.device-health-library
 
 definition(
     name: "Echo Glow Automation",
@@ -70,6 +70,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input "deviceHealthChecker", "device.DeviceHealthChecker", title: "Device Health Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -156,8 +157,8 @@ def initialize() {
     subscribe(naptimeNowRoutine, "pushed", handler_AwayAlert)
     subscribe(wakeUpRoutine, "pushed", handler_AwayAlert)
     
-    // Battery Alert
-    scheduleBatteryCheck()
+    // Device Health Checker
+    initializeDeviceHealthCheck()
     
     // URLs
     if(!state.accessToken) {

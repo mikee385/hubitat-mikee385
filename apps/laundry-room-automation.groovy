@@ -16,13 +16,12 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "7.5.0" }
+String getVersionNum() { return "8.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
-#include mikee385.battery-alert-library
-#include mikee385.inactive-alert-library
+#include mikee385.device-health-library
 
 definition(
     name: "Laundry Room Automation",
@@ -60,6 +59,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input "deviceHealthChecker", "device.DeviceHealthChecker", title: "Device Health Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -139,11 +139,8 @@ def initialize() {
         subscribe(gate, "contact", handler_AwayAlert)
     }
     
-    // Battery Alert
-    scheduleBatteryCheck()
-    
-    // Inactive Alert
-    scheduleInactiveCheck()
+    // Device Health Checker
+    initializeDeviceHealthCheck()
 }
 
 def getBatteryThresholds() {

@@ -1,11 +1,11 @@
 {
     "packageName": "Window Alerts",
     "author": "Michael Pierce",
-    "version": "2.3.0",
+    "version": "3.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add tamper alerts",
-    "dateReleased": "2022-02-13",
+    "releaseNotes": "Use automated device health checks",
+    "dateReleased": "2022-08-05",
     "apps": [
         {
             "id": "5513b8d1-02cd-4af9-b20c-7fab56c2742d",

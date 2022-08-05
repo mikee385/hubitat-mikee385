@@ -1,11 +1,11 @@
 {
     "packageName": "Front Porch Automation",
     "author": "Michael Pierce",
-    "version": "3.6.0",
+    "version": "4.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add checks to prevent duplicate door alerts",
-    "dateReleased": "2022-04-19",
+    "releaseNotes": "Use automated device health checks",
+    "dateReleased": "2022-08-05",
     "apps": [
         {
             "id": "2b643332-38a5-413c-b76e-647edd831fa9",

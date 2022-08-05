@@ -14,14 +14,13 @@
  *
  */
  
-String getVersionNum() { return "7.4.0" }
+String getVersionNum() { return "8.0.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.away-alert-library
 #include mikee385.tamper-alert-library
-#include mikee385.battery-alert-library
-#include mikee385.inactive-alert-library
+#include mikee385.device-health-library
 
 definition(
     name: "Back Porch Automation",
@@ -51,6 +50,7 @@ preferences {
         }
         section {
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input "deviceHealthChecker", "device.DeviceHealthChecker", title: "Device Health Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -103,11 +103,8 @@ def initialize() {
         subscribe(light, "switch.on", handler_AwayAlert)
     }
     
-    // Battery Alert
-    scheduleBatteryCheck()
-    
-    // Inactive Alert
-    scheduleInactiveCheck()
+    // Device Health Checker
+    initializeDeviceHealthCheck()
 }
 
 def getBatteryThresholds() {
