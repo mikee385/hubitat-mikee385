@@ -1,10 +1,10 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.3.0
+ *  version: 3.4.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Use map to eliminate duplicate messages
+ *  releaseNotes: Remove redundant log messages
  *  dateReleased: 2022-08-06
  *
  *  Copyright 2022 Michael Pierce
@@ -126,10 +126,7 @@ def deviceCheck(evt) {
         if (!batteryDeviceIDs.contains(item.device.id)) {
             if (item.device.currentValue("battery") <= item.lowBattery) {
                 batteryDeviceIDs.add(item.device.id)
-                    
-                def message = "${item.device} - ${item.device.currentValue('battery')}%"
-                log.warn(message)
-                deviceChecker.addBatteryMessage(item.device.id, message)
+                deviceChecker.addBatteryMessage(item.device.id, "${item.device} - ${item.device.currentValue('battery')}%")
             }
         }
     }
@@ -176,17 +173,11 @@ def deviceCheck(evt) {
                 def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                 if (item.device.getLastActivity().getTime() <= cutoffTime) {
                     inactiveDeviceIDs.add(item.device.id)
-                        
-                    def message = "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}"
-                    log.warn(message)
-                    deviceChecker.addInactiveMessage(item.device.id, message)
+                    deviceChecker.addInactiveMessage(item.device.id, "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}")
                 }
             } else {
                 inactiveDeviceIDs.add(item.device.id)
-                    
-                def message = "${item.device} - No Activity"
-                log.warn(message)
-                deviceChecker.addInactiveMessage(item.device.id, message)
+                deviceChecker.addInactiveMessage(item.device.id, "${item.device} - No Activity")
             }
         }
     }
@@ -199,17 +190,11 @@ def deviceCheck(evt) {
                 def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                 if (lastEvent.getDate().getTime() <= cutoffTime) {
                     inactiveDeviceIDs.add(item.device.id)
-                        
-                    def message = "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}"
-                    log.warn(message)
-                    deviceChecker.addInactiveMessage(item.device.id, message)
+                    deviceChecker.addInactiveMessage(item.device.id, "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}")
                 }
             } else {
                 inactiveDeviceIDs.add(item.device.id)
-                    
-                def message = "${item.device}* - No Activity"
-                log.warn(message)
-                deviceChecker.addInactiveMessage(item.device.id, message)
+                deviceChecker.addInactiveMessage(item.device.id, "${item.device}* - No Activity")
             }
         }
     }
