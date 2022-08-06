@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "5.1.0" }
+String getVersionNum() { return "5.2.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -122,24 +122,6 @@ def initialize() {
     
     // Initialize state
     handleHumidity(humidity)
-}
-
-def getBatteryThresholds() {
-    return [
-        //[device: sensor, lowBattery: 10] // Disabled since Konke sensors are very unreliable for battery reporting
-    ]
-}
-
-def getInactiveThresholds() {
-    return [
-        [device: sensor, inactiveHours: 1]
-    ]
-}
-
-def getUnchangedThresholds() {
-    return [
-        [device: sensor, attribute: "humidity", inactiveHours: 1]
-    ]
 }
 
 def logInfo(msg) {

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -98,46 +98,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    
-    if (downstairsThermostat) {
-        thresholds.add([device: downstairsThermostat, inactiveHours: 1])
-    }
-    for (sensor in downstairsSensors) {
-        thresholds.add([device: sensor, inactiveHours: 1])
-    }
-    
-    if (upstairsThermostat) {
-        thresholds.add([device: upstairsThermostat, inactiveHours: 1])
-    }
-    for (sensor in upstairsSensors) {
-        thresholds.add([device: sensor, inactiveHours: 1])
-    }
-    
-    return thresholds
-}
-
-def getUnchangedThresholds() {
-    def thresholds = []
-    
-    if (downstairsThermostat) {
-        thresholds.add([device: downstairsThermostat, attribute: "temperature", inactiveHours: 12])
-    }
-    for (sensor in downstairsSensors) {
-        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 12])
-    }
-    
-    if (upstairsThermostat) {
-        thresholds.add([device: upstairsThermostat, attribute: "temperature", inactiveHours: 12])
-    }
-    for (sensor in upstairsSensors) {
-        thresholds.add([device: sensor, attribute: "temperature", inactiveHours: 12])
-    }
-    
-    return thresholds
 }
 
 def modeHandler_Thermostat(evt) {

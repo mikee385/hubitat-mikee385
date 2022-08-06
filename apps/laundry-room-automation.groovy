@@ -16,7 +16,7 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "9.1.0" }
+String getVersionNum() { return "9.2.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -133,36 +133,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getBatteryThresholds() {
-    def thresholds = [
-        [device: door, lowBattery: 10]
-    ]
-    if (gate) {
-        thresholds.add([device: gate, lowBattery: 10])
-    }
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = [
-        [device: light, inactiveHours: 24],
-        [device: door, inactiveHours: 24],
-        [device: washer, inactiveHours: 24*8],
-        [device: dryer, inactiveHours: 24*8]
-    ]
-    if (gate) {
-        thresholds.add([device: gate, inactiveHours: 24])
-    }
-    return thresholds
-}
-
-def getUnchangedThresholds() {
-    return [
-        [device: washer, attribute: "currentState", inactiveHours: 24*8],
-        [device: dryer, attribute: "currentState", inactiveHours: 24*8]
-    ]
 }
 
 def doorHandler_LightSwitch(evt) {

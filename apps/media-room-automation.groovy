@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Media Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -72,26 +72,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getBatteryThresholds() {
-    def thresholds = []
-    
-    if (door) {
-        thresholds.add([device: door, lowBattery: 10])
-    }
-    
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    
-    if (door) {
-        thresholds.add([device: door, inactiveHours: 24])
-    }
-    
-    return thresholds
 }
 
 def tvHandler_ComfortProfile(evt) {

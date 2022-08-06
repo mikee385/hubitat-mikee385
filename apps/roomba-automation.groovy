@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "9.1.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -129,32 +129,6 @@ def initialize() {
         state.endTime = now()
         state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     }
-}
-
-def getBatteryThresholds() {
-    def thresholds = [
-        [device: roomba, lowBattery: 10]
-    ]
-    if (pauseButton) {
-        thresholds.add([device: pauseButton, lowBattery: 10])
-    }
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = [
-        [device: roomba, inactiveHours: 1]
-    ]
-    if (pauseButton) {
-        thresholds.add([device: pauseButton, inactiveHours: 24])
-    }
-    return thresholds
-}
-
-def getUnchangedThresholds() {
-    return [
-        [device: roomba, attribute: "phase", inactiveHours: 24*7]
-    ]
 }
 
 def workFromHomePersonHandler(evt) {

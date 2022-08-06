@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -97,14 +97,6 @@ def initialize() {
     state.onUrl = "${getFullLocalApiServerUrl()}/on?access_token=$state.accessToken"
     state.offUrl = "${getFullLocalApiServerUrl()}/off?access_token=$state.accessToken"
     state.toggleUrl = "${getFullLocalApiServerUrl()}/toggle?access_token=$state.accessToken"
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    for (light in lights) {
-        thresholds.add([device: light, inactiveHours: 24])
-    }
-    return thresholds
 }
 
 def onRoutineHandler_LightSwitch(evt) {

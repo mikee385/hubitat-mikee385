@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.1.0" }
+String getVersionNum() { return "5.2.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -106,32 +106,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getBatteryThresholds() {
-    def thresholds = [
-        [device: door, lowBattery: 10]
-    ]
-    if (lock) {
-        thresholds.add([device: lock, lowBattery: 10])
-    }
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = [
-        [device: door, inactiveHours: 2]
-    ]
-    if (lock) {
-        thresholds.add([device: lock, inactiveHours: 2])
-    }
-    for (light in lights) {
-        thresholds.add([device: light, inactiveHours: 24])
-    }
-    if (doorbell) {
-        thresholds.add([device: doorbell, inactiveHours: 2])
-    }
-    return thresholds
 }
 
 def on() {

@@ -16,7 +16,7 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "7.1.0" }
+String getVersionNum() { return "7.2.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -127,18 +127,6 @@ def initialize() {
     } else if (!deviceRunning && stateRunning) {
         finished()
     }
-}
-
-def getBatteryThresholds() {
-    return [
-        [device: contactSensor, lowBattery: 10]
-    ]
-}
-
-def getInactiveThresholds() {
-    return [
-        [device: contactSensor, inactiveHours: 1]
-    ]
 }
 
 def started() {

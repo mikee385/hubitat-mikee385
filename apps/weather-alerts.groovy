@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "Weather Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -82,18 +82,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getInactiveThresholds() {
-    return [
-        [device: weatherStation, inactiveHours: 1]
-    ]
-}
-
-def getUnchangedThresholds() {
-    return [
-        [device: weatherStation, attribute: "temperature", inactiveHours: 1]
-    ]
 }
 
 def rainRateHandler_RainAlert(evt) {

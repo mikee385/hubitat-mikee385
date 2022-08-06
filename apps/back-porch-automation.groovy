@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.1.0" }
+String getVersionNum() { return "9.2.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -93,24 +93,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getBatteryThresholds() {
-    return [
-        [device: door, lowBattery: 10],
-        [device: lock, lowBattery: 10]
-    ]
-}
-
-def getInactiveThresholds() {
-    def thresholds = [
-        [device: door, inactiveHours: 2],
-        [device: lock, inactiveHours: 24]
-    ]
-    for (light in lights) {
-        thresholds.add([device: light, inactiveHours: 24])
-    }
-    return thresholds
 }
 
 def occupied() {

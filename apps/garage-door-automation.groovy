@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Garage Door Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -96,29 +96,6 @@ def childDevice() {
         child = addChildDevice("hubitat", "Virtual Contact Sensor", childID, 1234, [label: "Garage Virtual Door", isComponent: false])
     }
     return child
-}
-
-def getBatteryThresholds() {
-    def thresholds = []
-    
-    for (sensor in sensors) {
-        thresholds.add([device: sensor, lowBattery: 10])
-    }
-    
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    
-    for (controller in controllers) {
-        thresholds.add([device: controller, inactiveHours: 24])
-    }
-    for (sensor in sensors) {
-        thresholds.add([device: sensor, inactiveHours: 24])
-    }
-    
-    return thresholds
 }
 
 def handler_DoorContact(evt) {

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Window Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -65,22 +65,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getBatteryThresholds() {
-    def thresholds = []
-    for (window in windows) {
-        thresholds.add([device: window, lowBattery: 10])
-    }
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    for (window in windows) {
-        thresholds.add([device: window, inactiveHours: 2])
-    }
-    return thresholds
 }
 
 def windowHandler_WindowAlert(evt) {

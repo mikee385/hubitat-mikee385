@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "8.1.0" }
+String getVersionNum() { return "8.2.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -140,32 +140,6 @@ def initialize() {
     state.departedUrl = "${getFullLocalApiServerUrl()}/departed?access_token=$state.accessToken"
     state.awakeUrl = "${getFullLocalApiServerUrl()}/awake?access_token=$state.accessToken"
     state.asleepUrl = "${getFullLocalApiServerUrl()}/asleep?access_token=$state.accessToken"
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    
-    if (sleepSwitch) {
-        thresholds.add([device: sleepSwitch, inactiveHours: 24])
-    }
-    
-    return thresholds
-}
-
-def getUnchangedThresholds() {
-    def thresholds = []
-    
-    if (life360Sensor) {
-        thresholds.add([device: life360Sensor, attribute: "presence", inactiveHours: 24*3])
-    }
-    for (primarySensor in primarySensors) {
-        thresholds.add([device: primarySensor, attribute: "presence", inactiveHours: 24*3])
-    }
-    for (secondarySensor in secondarySensors) {
-        thresholds.add([device: secondarySensor, attribute: "presence", inactiveHours: 24*3])
-    }
-    
-    return thresholds
 }
 
 def arrivalHandler_PersonStatus(evt) {

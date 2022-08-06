@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Security Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -97,35 +97,6 @@ def initialize() {
         // Device Checks
         initializeDeviceChecks()
     }
-}
-
-def getBatteryThresholds() {
-    def thresholds = []
-    
-    for (smokeDetector in smokeDetectors) {
-        thresholds.add([device: smokeDetector, lowBattery: 10])
-    }
-    for (glassBreak in glassBreaks) {
-        thresholds.add([device: glassBreak, lowBattery: 10])
-    }
-    
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = [
-        [device: alarmPanel, inactiveHours: 2]
-    ]
-    for (camera in cameras) {
-        thresholds.add([device: camera, inactiveHours: 24])
-    }
-    for (smokeDetector in smokeDetectors) {
-        thresholds.add([device: smokeDetector, inactiveHours: 2])
-    }
-    for (glassBreak in glassBreaks) {
-        thresholds.add([device: glassBreak, inactiveHours: 2])
-    }
-    return thresholds
 }
 
 def modeHandler_CameraSwitch(evt) {

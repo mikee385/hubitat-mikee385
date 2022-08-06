@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "Pantry Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -62,16 +62,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getInactiveThresholds() {
-    def thresholds = [
-        [device: motionSensor, inactiveHours: 24]
-    ]
-    for (light in lights) {
-        thresholds.add([device: light, inactiveHours: 24])
-    }
-    return thresholds
 }
 
 def modeHandler_LightSwitch(evt) {

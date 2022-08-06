@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -164,16 +164,6 @@ def initialize() {
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
     state.nextUrl = "${getFullLocalApiServerUrl()}/next?access_token=$state.accessToken"
-}
-
-def getBatteryThresholds() {
-    def thresholds = []
-
-    if (hueRemote) {
-        thresholds.add([device: hueRemote, lowBattery: 10])
-    }
-    
-    return thresholds
 }
 
 def routineHandler_BedtimeTimer(evt) {

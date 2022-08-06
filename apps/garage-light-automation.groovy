@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "8.1.0" }
+String getVersionNum() { return "8.2.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -97,33 +97,6 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getBatteryThresholds() {
-    def thresholds = [
-        [device: entryDoor, lowBattery: 10],
-        [device: motionSensor, lowBattery: 10]
-    ]
-    
-    if (overheadDoor.hasCapability("Battery")) {
-        thresholds.add([device: overheadDoor, lowBattery: 10])
-    }
-    
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = [
-        [device: entryDoor, inactiveHours: 2],
-        [device: motionSensor, inactiveHours: 24],
-        [device: garageLight, inactiveHours: 24]
-    ]
-    
-    if (overheadDoor.hasCapability("Battery")) {
-        thresholds.add([device: overheadDoor, inactiveHours: 24])
-    }
-    
-    return thresholds
 }
 
 def lightHandler_State(evt) {

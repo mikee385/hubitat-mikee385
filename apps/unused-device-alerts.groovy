@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Unused Device Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -58,26 +58,4 @@ def updated() {
 def initialize() {
     // Device Checks
     initializeDeviceChecks()
-}
-
-def getBatteryThresholds() {
-    def thresholds = []
-    
-    for (item in devices) {
-        if (item.hasCapability("Battery")) {
-            thresholds.add([device: item, lowBattery: 10])
-        }
-    }
-    
-    return thresholds
-}
-
-def getInactiveThresholds() {
-    def thresholds = []
-    
-    for (item in devices) {
-        thresholds.add([device: item, inactiveHours: 24])
-    }
-    
-    return thresholds
 }
