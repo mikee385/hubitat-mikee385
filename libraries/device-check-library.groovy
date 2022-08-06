@@ -1,10 +1,10 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.1.0
+ *  version: 3.2.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Remove debugging checks
+ *  releaseNotes: Change inactive time from 6 hours to 24 hours
  *  dateReleased: 2022-08-05
  *
  *  Copyright 2022 Michael Pierce
@@ -149,12 +149,12 @@ def deviceCheck(evt) {
     for (device in devices) {
         if (!excludedInactiveDeviceTypes.contains(device.getTypeName())) {
             if (device.hasCapability("TemperatureMeasurement")) {
-                inactiveThresholds.add([device: device, inactiveHours: 6])
-                unchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 6])
+                inactiveThresholds.add([device: device, inactiveHours: 24])
+                unchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 24])
                 
             } else if (device.hasCapability("RelativeHumidityMeasurement")) {
-                inactiveThresholds.add([device: device, inactiveHours: 6])
-                unchangedThresholds.add([device: device, attribute: "humidity", inactiveHours: 6])
+                inactiveThresholds.add([device: device, inactiveHours: 24])
+                unchangedThresholds.add([device: device, attribute: "humidity", inactiveHours: 24])
                 
             } else if (device.hasCapability("Battery")) {
                 inactiveThresholds.add([device: device, inactiveHours: 24])
