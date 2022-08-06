@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "Device Checker, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -96,7 +96,7 @@ def handler_DeviceCheck(evt) {
 
     def batteryMessages = childDevice().getBatteryMessages() 
     if (batteryMessages) {
-        def message = "Low Battery:${batteryMessages.split('\n').sort().join('\n')}"
+        def message = "Low Battery:\n${batteryMessages.sort().join('\n')}"
         log.warn(message)
         if (alertLowBattery) {
             personToNotify.deviceNotification(message)
@@ -105,7 +105,7 @@ def handler_DeviceCheck(evt) {
     
     def inactiveMessages = childDevice().getInactiveMessages()
     if (inactiveMessages) {
-        def message = "Inactive Devices:${inactiveMessages.split('\n').sort().join('\n')}"
+        def message = "Inactive Devices:\n${inactiveMessages.sort().join('\n')}"
         log.warn(message)
         if (alertInactive) {
             personToNotify.deviceNotification(message)

@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use map to eliminate duplicate messages",
+    "releaseNotes": "Fix issue with empty message maps",
     "dateReleased": "2022-08-06",
     "apps": [
         {
             "id": "152e08a6-8bf3-4c2d-beb3-1c2cb4ba54bc",
             "name": "Device Checker",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-checker.groovy",
             "required": true,
