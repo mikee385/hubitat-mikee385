@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Device Checker, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -31,26 +31,26 @@ metadata {
         
         command "runDeviceCheck"
         
-        command "addBatteryMessage", ["string"]
-        command "addInactiveMessage", ["string"]
+        command "addBatteryMessage", ["number", "string"]
+        command "addInactiveMessage", ["number", "string"]
     }
 }
 
 def runDeviceCheck() {
-    atomicState.batteryMessageText = ""
-    atomicState.inactiveMessageText = ""
+    atomicState.batteryMessageText = [:]
+    atomicState.inactiveMessageText = [:]
     
     sendEvent(name: "deviceCheck", value: "active")
     runIn(10, resetDeviceCheck)
 }
 
-def addBatteryMessage(message) {
-    atomicState.batteryMessageText += "\n" + message
+def addBatteryMessage(deviceId, message) {
+    atomicState.batteryMessageText[deviceId] = message
     runIn(10, resetDeviceCheck)
 }
 
-def addInactiveMessage(message) {
-  	atomicState.inactiveMessageText += "\n" + message
+def addInactiveMessage(deviceId, message) {
+  	atomicState.inactiveMessageText[deviceId] = message
   	runIn(10, resetDeviceCheck)
 }
 
@@ -59,9 +59,9 @@ def resetDeviceCheck() {
 }
 
 def getBatteryMessages() {
-    return atomicState.batteryMessageText
+    return atomicState.batteryMessageText.values()
 }
 
 def getInactiveMessages() {
-    return atomicState.inactiveMessageText
+    return atomicState.inactiveMessageText.values()
 }

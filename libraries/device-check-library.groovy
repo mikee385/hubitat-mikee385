@@ -1,11 +1,11 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.2.0
+ *  version: 3.3.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Change inactive time from 6 hours to 24 hours
- *  dateReleased: 2022-08-05
+ *  releaseNotes: Use map to eliminate duplicate messages
+ *  dateReleased: 2022-08-06
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -129,7 +129,7 @@ def deviceCheck(evt) {
                     
                 def message = "${item.device} - ${item.device.currentValue('battery')}%"
                 log.warn(message)
-                deviceChecker.addBatteryMessage(message)
+                deviceChecker.addBatteryMessage(item.device.id, message)
             }
         }
     }
@@ -179,14 +179,14 @@ def deviceCheck(evt) {
                         
                     def message = "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}"
                     log.warn(message)
-                    deviceChecker.addInactiveMessage(message)
+                    deviceChecker.addInactiveMessage(item.device.id, message)
                 }
             } else {
                 inactiveDeviceIDs.add(item.device.id)
                     
                 def message = "${item.device} - No Activity"
                 log.warn(message)
-                deviceChecker.addInactiveMessage(message)
+                deviceChecker.addInactiveMessage(item.device.id, message)
             }
         }
     }
@@ -202,14 +202,14 @@ def deviceCheck(evt) {
                         
                     def message = "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}"
                     log.warn(message)
-                    deviceChecker.addInactiveMessage(message)
+                    deviceChecker.addInactiveMessage(item.device.id, message)
                 }
             } else {
                 inactiveDeviceIDs.add(item.device.id)
                     
                 def message = "${item.device}* - No Activity"
                 log.warn(message)
-                deviceChecker.addInactiveMessage(message)
+                deviceChecker.addInactiveMessage(item.device.id, message)
             }
         }
     }
