@@ -1,10 +1,10 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.0.0
+ *  version: 3.1.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Add alerts for tamper, away, and sleep
+ *  releaseNotes: Remove debugging checks
  *  dateReleased: 2022-08-05
  *
  *  Copyright 2022 Michael Pierce
@@ -134,23 +134,6 @@ def deviceCheck(evt) {
         }
     }
     
-    //***DEBUG ONLY***
-    def oldBatteryThresholds = []
-    if (getBatteryThresholds) {
-        oldBatteryThresholds = getBatteryThresholds()
-    }
-    def newBatteryIDs = []
-    for (item in batteryThresholds) {
-        newBatteryIDs.add(item.device.id)
-    }
-    for (item in oldBatteryThresholds) {
-        if (!newBatteryIDs.contains(item.device.id)) {
-            def message = "Not Montiored in New: ${item.device}"
-            log.warn(message)
-            personToNotify.deviceNotification(message)
-        }
-    }
-    
     //Get Inactive and Unchanged Thresholds
     def excludedInactiveDeviceTypes = [
         "Appliance Status",
@@ -208,23 +191,6 @@ def deviceCheck(evt) {
         }
     }
     
-    //***DEBUG ONLY***
-    def oldInactiveThresholds = []
-    if (getInactiveThresholds) {
-        oldInactiveThresholds = getInactiveThresholds()
-    }
-    def newInactiveIDs = []
-    for (item in inactiveThresholds) {
-        newInactiveIDs.add(item.device.id)
-    }
-    for (item in oldInactiveThresholds) {
-        if (!newInactiveIDs.contains(item.device.id)) {
-            def message = "Not Inactive Montiored in New: ${item.device}"
-            log.warn(message)
-            personToNotify.deviceNotification(message)
-        }
-    }
-    
     //Check Unchanged Devices
     for (item in unchangedThresholds) {
         if (!inactiveDeviceIDs.contains(item.device.id)) {
@@ -245,23 +211,6 @@ def deviceCheck(evt) {
                 log.warn(message)
                 deviceChecker.addInactiveMessage(message)
             }
-        }
-    }
-    
-    //***DEBUG ONLY***
-    def oldUnchangedThresholds = []
-    if (getUnchangedThresholds) {
-        oldUnchangedThresholds = getUnchangedThresholds()
-    }
-    def newUnchangedIDs = []
-    for (item in unchangedThresholds) {
-        newUnchangedIDs.add(item.device.id)
-    }
-    for (item in oldUnchangedThresholds) {
-        if (!newUnchangedIDs.contains(item.device.id)) {
-            def message = "Not Unchanged Montiored in New: ${item.device}"
-            log.warn(message)
-            personToNotify.deviceNotification(message)
         }
     }
 }
