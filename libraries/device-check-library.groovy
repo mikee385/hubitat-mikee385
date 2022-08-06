@@ -1,10 +1,10 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.4.0
+ *  version: 3.5.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Remove redundant log messages
+ *  releaseNotes: Improve filtering of virtual devices
  *  dateReleased: 2022-08-06
  *
  *  Copyright 2022 Michael Pierce
@@ -29,54 +29,84 @@ library (
     importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/device-check-library.groovy"
 )
 
+import groovy.transform.Field
+
+@Field static final List virtualDeviceTypes = [
+    "Appliance Status",
+    "Application Refresh Button",
+    "Echo Glow Device",
+    "Echo Glow Scene",
+    "Occupancy Status",
+    "Person Status"
+]
+
+@Field static final List excludedBatteryDeviceTypes = [
+    "Aladdin Connect Garage Door",
+    "Konke ZigBee Temperature Humidity Sensor"
+]
+    
+ @Field static final List excludedInactiveDeviceTypes = [
+    "Philips Dimmer Button Controller"
+]
+
 def initializeDeviceChecks() {
     // Low Battery and Inactivity Alerts
     subscribe(deviceChecker, "deviceCheck.active", deviceCheck)
     
     for (device in getDevicesFromSettings()) {
-        if (!device.getTypeName().contains("Virtual")) {
-            // Tamper Alerts
-            if (device.hasCapability("TamperAlert")) {
-                subscribe(device, "tamper.detected", tamperAlert)
-            }
+        // Tamper Alerts
+        if (device.hasCapability("TamperAlert")) {
+            subscribe(device, "tamper.detected", tamperAlert)
+        }
             
-            // Away Alerts
-            if (device.hasCapability("ContactSensor")) {
-                subscribe(device, "contact", awayAlert)
-            }
-            if (device.hasCapability("GarageDoorControl")) {
-                subscribe(device, "door", awayAlert)
-            }
-            if (device.hasCapability("Lock")) {
-                subscribe(device, "lock", awayAlert)
-            }
-            if (device.hasCapability("MotionSensor")) {
-                subscribe(device, "motion.active", awayAlert)
-            }
-            if (device.hasCapability("PushableButton")) {
-                subscribe(device, "pushed", awayAlert)
-            }
-            if (device.hasCapability("Switch")) {
-                if (device.getDisplayName().contains("Camera") || device.getDisplayName().contains("Blink")) {
-                    subscribe(device, "switch.off", awayAlert)
-                } else {
-                    subscribe(device, "switch.on", awayAlert)
-                }
-            }
-            if (device.getTypeName() == "Vivint Panel") {
-                subscribe(device, "alarm.disarmed", awayAlert)
-            }
-            
-            // Sleep Alerts
-            if (device.hasCapability("Switch")) {
-                if (device.getDisplayName().contains("Camera") || device.getDisplayName().contains("Blink")) {
-                    subscribe(device, "switch.off", sleepAlert)
-                }
-            } 
-            if (device.getTypeName() == "Vivint Panel") {
-                subscribe(device, "alarm.disarmed", sleepAlert)
+        // Away Alerts
+        if (device.hasCapability("ContactSensor")) {
+            subscribe(device, "contact", awayAlert)
+        }
+        if (device.hasCapability("GarageDoorControl")) {
+            subscribe(device, "door", awayAlert)
+        }
+        if (device.hasCapability("Lock")) {
+            subscribe(device, "lock", awayAlert)
+        }
+        if (device.hasCapability("MotionSensor")) {
+            subscribe(device, "motion.active", awayAlert)
+        }
+        if (device.hasCapability("PushableButton")) {
+            subscribe(device, "pushed", awayAlert)
+        }
+        if (device.hasCapability("Switch")) {
+            if (device.getDisplayName().contains("Camera") || device.getDisplayName().contains("Blink")) {
+                subscribe(device, "switch.off", awayAlert)
+            } else {
+                subscribe(device, "switch.on", awayAlert)
             }
         }
+        if (device.getTypeName() == "Vivint Panel") {
+            subscribe(device, "alarm.disarmed", awayAlert)
+        }
+            
+        // Sleep Alerts
+        if (device.hasCapability("Switch")) {
+            if (device.getDisplayName().contains("Camera") || device.getDisplayName().contains("Blink")) {
+                subscribe(device, "switch.off", sleepAlert)
+            }
+        } 
+        if (device.getTypeName() == "Vivint Panel") {
+            subscribe(device, "alarm.disarmed", sleepAlert)
+        }
+    }
+}
+
+def isVirtualDevice(device) {
+    if (device.getTypeName().contains("Virtual Presence")) {
+        return false
+    } else if (device.getTypeName().contains("Virtual")) {
+        return true
+    } else if (virtualDeviceTypes.contains(device.getTypeName())) {
+        return true
+    } else {
+        return false
     }
 }
 
@@ -87,12 +117,16 @@ def getDevicesFromSettings() {
         if (setting.value instanceof List) {
             for (item in setting.value) {
                 if (item.metaClass.respondsTo(item, 'getDeviceNetworkId')) {
-                    devices.add(item)
+                    if (!isVirtualDevice(item)) {
+                        devices.add(item)
+                    } 
                 }
             }
         } else {
             if (setting.value.metaClass.respondsTo(setting.value, 'getDeviceNetworkId')) {
-                devices.add(setting.value)
+                if (!isVirtualDevice(setting.value)) {
+                    devices.add(setting.value)
+                } 
             }
         }
     }
@@ -107,10 +141,6 @@ def deviceCheck(evt) {
     def devices = getDevicesFromSettings()
     
     //Get Battery Thresholds
-    def excludedBatteryDeviceTypes = [
-        "Aladdin Connect Garage Door",
-        "Konke ZigBee Temperature Humidity Sensor"
-    ]
     def batteryThresholds = []
     for (device in devices) {
         if (!excludedBatteryDeviceTypes.contains(device.getTypeName())) {
@@ -132,15 +162,6 @@ def deviceCheck(evt) {
     }
     
     //Get Inactive and Unchanged Thresholds
-    def excludedInactiveDeviceTypes = [
-        "Appliance Status",
-        "Application Refresh Button",
-        "Echo Glow Device",
-        "Echo Glow Scene",
-        "Occupancy Status",
-        "Person Status",
-        "Philips Dimmer Button Controller"
-    ]
     def inactiveThresholds = []
     def unchangedThresholds = []
     for (device in devices) {
@@ -159,7 +180,7 @@ def deviceCheck(evt) {
             } else if (device.hasCapability("PresenceSensor") && device.getDisplayName() != "Guest") {
                 unchangedThresholds.add([device: device, attribute: "presence", inactiveHours: 72])
                 
-            } else if (!device.getTypeName().contains("Virtual")) {
+            } else {
                 inactiveThresholds.add([device: device, inactiveHours: 24])
             }
         } 
