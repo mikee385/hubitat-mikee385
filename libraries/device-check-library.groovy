@@ -1,10 +1,10 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.7.0
+ *  version: 3.8.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Consolidate checks for duplicate devices
+ *  releaseNotes: Add more virtual device types
  *  dateReleased: 2022-08-07
  *
  *  Copyright 2022 Michael Pierce
@@ -34,10 +34,15 @@ import groovy.transform.Field
 @Field static final List virtualDeviceTypes = [
     "Appliance Status",
     "Application Refresh Button",
+    "Child Button",
+    "Child Switch",
+    "Device Checker",
     "Echo Glow Device",
     "Echo Glow Scene",
     "Occupancy Status",
-    "Person Status"
+    "Person Status",
+    "Zone Device",
+    "Zone Parent"
 ]
 
 @Field static final List excludedBatteryDeviceTypes = [
