@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "9.2.0",
+    "version": "10.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unused battery and inactivity thresholds",
-    "dateReleased": "2022-08-05",
+    "releaseNotes": "Rename Device Checker to Device Monitor",
+    "dateReleased": "2022-08-07",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

@@ -1,5 +1,5 @@
 /**
- *  Device Checker Device Handler
+ *  Device Monitor Device Handler
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -14,15 +14,15 @@
  *
  */
  
-String getVersionNum() { return "2.2.0" }
-String getVersionLabel() { return "Device Checker, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "3.0.0" }
+String getVersionLabel() { return "Device Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
     definition (
-		name: "Device Checker", 
+		name: "Device Monitor", 
 		namespace: "mikee385", 
 		author: "Michael Pierce", 
-		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/device-checker.groovy"
+		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/device-monitor.groovy"
 	) {
         capability "Actuator"
         capability "Sensor"

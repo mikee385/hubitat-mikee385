@@ -14,11 +14,11 @@
  *
  */
  
-String getVersionNum() { return "9.1.0" }
+String getVersionNum() { return "10.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.device-check-library
+#include mikee385.device-monitor-library
 
 definition(
     name: "Roomba Automation",
@@ -54,8 +54,8 @@ preferences {
             input "additionalPeople", "capability.presenceSensor", title: "Additional People", multiple: true, required: false
         }
         section {
+            input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }

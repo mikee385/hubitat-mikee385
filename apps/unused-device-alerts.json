@@ -1,11 +1,11 @@
 {
     "packageName": "Unused Device Alerts",
     "author": "Michael Pierce",
-    "version": "4.1.0",
+    "version": "5.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unused battery and inactivity thresholds",
-    "dateReleased": "2022-08-05",
+    "releaseNotes": "Rename Device Checker to Device Monitor",
+    "dateReleased": "2022-08-07",
     "apps": [
         {
             "id": "be2b90f4-5ea9-4a29-97e1-74378cd3e378",

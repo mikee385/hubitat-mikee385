@@ -1,10 +1,10 @@
 /**
- *  name: Device Check Library
+ *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 3.8.0
+ *  version: 4.0.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Add more virtual device types
+ *  releaseNotes: Rename Device Checker to Device Monitor
  *  dateReleased: 2022-08-07
  *
  *  Copyright 2022 Michael Pierce
@@ -21,12 +21,12 @@
  */
 
 library (
-    name: "device-check-library",
+    name: "device-monitor-library",
     namespace: "mikee385",
     author: "Michael Pierce",
     description: "Common methods for checking for low battery and inactivity in all used devices.",
     category: "My Apps",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/device-check-library.groovy"
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/libraries/device-monitor-library.groovy"
 )
 
 import groovy.transform.Field
@@ -36,7 +36,7 @@ import groovy.transform.Field
     "Application Refresh Button",
     "Child Button",
     "Child Switch",
-    "Device Checker",
+    "Device Monitor",
     "Echo Glow Device",
     "Echo Glow Scene",
     "Occupancy Status",
@@ -56,7 +56,7 @@ import groovy.transform.Field
 
 def initializeDeviceChecks() {
     // Low Battery and Inactivity Alerts
-    subscribe(deviceChecker, "deviceCheck.active", deviceCheck)
+    subscribe(deviceMonitor, "deviceCheck.active", deviceCheck)
     
     for (device in getDevicesFromSettings()) {
         // Tamper Alerts
@@ -158,7 +158,7 @@ def deviceCheck(evt) {
     //Check Battery Levels
     for (item in batteryThresholds) {
         if (item.device.currentValue("battery") <= item.lowBattery) {
-            deviceChecker.addBatteryMessage(item.device.id, "${item.device} - ${item.device.currentValue('battery')}%")
+            deviceMonitor.addBatteryMessage(item.device.id, "${item.device} - ${item.device.currentValue('battery')}%")
         }
     }
     
@@ -194,11 +194,11 @@ def deviceCheck(evt) {
             def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
             if (item.device.getLastActivity().getTime() <= cutoffTime) {
                 inactiveDeviceIDs.add(item.device.id)
-                deviceChecker.addInactiveMessage(item.device.id, "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}")
+                deviceMonitor.addInactiveMessage(item.device.id, "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}")
             }
         } else {
             inactiveDeviceIDs.add(item.device.id)
-            deviceChecker.addInactiveMessage(item.device.id, "${item.device} - No Activity")
+            deviceMonitor.addInactiveMessage(item.device.id, "${item.device} - No Activity")
         }
     }
     
@@ -209,10 +209,10 @@ def deviceCheck(evt) {
             if (lastEvent) {
                 def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                 if (lastEvent.getDate().getTime() <= cutoffTime) {
-                    deviceChecker.addInactiveMessage(item.device.id, "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}")
+                    deviceMonitor.addInactiveMessage(item.device.id, "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}")
                 }
             } else {
-                deviceChecker.addInactiveMessage(item.device.id, "${item.device}* - No Activity")
+                deviceMonitor.addInactiveMessage(item.device.id, "${item.device}* - No Activity")
             }
         }
     }

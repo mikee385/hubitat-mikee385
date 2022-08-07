@@ -14,11 +14,11 @@
  *
  */
  
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.device-check-library
+#include mikee385.device-monitor-library
 
 definition(
     name: "Holiday Lights Automation",
@@ -39,8 +39,8 @@ preferences {
             input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
         }
         section {
+            input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }

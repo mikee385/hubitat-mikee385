@@ -1,11 +1,11 @@
 {
     "packageName": "Holiday Lights Automation",
     "author": "Michael Pierce",
-    "version": "4.2.0",
+    "version": "5.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unused battery and inactivity thresholds",
-    "dateReleased": "2022-08-05",
+    "releaseNotes": "Rename Device Checker to Device Monitor",
+    "dateReleased": "2022-08-07",
     "apps": [
         {
             "id": "2c6a175b-4cf6-4336-ba71-eddbedc538a4",

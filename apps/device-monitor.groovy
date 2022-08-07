@@ -1,5 +1,5 @@
 /**
- *  Device Checker App
+ *  Device Monitor App
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -14,24 +14,24 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
-String getVersionLabel() { return "Device Checker, version ${getVersionNum()} on ${getPlatform()}" }
+String getVersionNum() { return "3.0.0" }
+String getVersionLabel() { return "Device Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 
 definition(
-    name: "Device Checker",
+    name: "Device Monitor",
     namespace: "mikee385",
     author: "Michael Pierce",
     description: "Runs device checks and sends alerts for low battery and inactive devices.",
     category: "My Apps",
     iconUrl: "",
     iconX2Url: "",
-    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-checker.groovy"
+    importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-monitor.groovy"
 )
 
 preferences {
-    page(name: "settings", title: "Device Checker", install: true, uninstall: true) {
+    page(name: "settings", title: "Device Monitor", install: true, uninstall: true) {
         section {
             input "runDaily", "bool", title: "Run every day at 8PM?", required: true, defaultValue: true
         }
@@ -77,10 +77,10 @@ def initialize() {
 }
 
 def childDevice() {
-    def childID = "deviceChecker:" + app.getId()
+    def childID = "deviceMonitor:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        child = addChildDevice("mikee385", "Device Checker", childID, 1234, [label: "Device Checker", isComponent: false])
+        child = addChildDevice("mikee385", "Device Monitor", childID, 1234, [label: "Device Monitor", isComponent: false])
     }
     return child
 }

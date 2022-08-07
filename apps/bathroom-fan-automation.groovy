@@ -16,11 +16,11 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "5.2.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.device-check-library
+#include mikee385.device-monitor-library
 
 definition(
     name: "Bathroom Fan Automation",
@@ -56,8 +56,8 @@ preferences {
             input "maximumRuntime", "number", title: "Maximum runtime (minutes)", required: true, defaultValue: 120
         }
         section {
+            input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enableInfoLog", type: "bool", title: "Enable info logging?", defaultValue: false
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true

@@ -14,11 +14,11 @@
  *
  */
  
-String getVersionNum() { return "8.2.0" }
+String getVersionNum() { return "9.0.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.device-check-library
+#include mikee385.device-monitor-library
 
 definition(
     name: "Person Automation",
@@ -51,8 +51,8 @@ preferences {
             input "alertAsleepWhenAway", "bool", title: "Alert when Asleep while Away?", required: true, defaultValue: false
         }
         section {
+            input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enablePresenceLog", type: "bool", title: "Enable presence logging?", defaultValue: false
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true

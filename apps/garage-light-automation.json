@@ -1,11 +1,11 @@
 {
     "packageName": "Garage Light Automation",
     "author": "Michael Pierce",
-    "version": "8.2.0",
+    "version": "9.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unused battery and inactivity thresholds",
-    "dateReleased": "2022-08-05",
+    "releaseNotes": "Rename Device Checker to Device Monitor",
+    "dateReleased": "2022-08-07",
     "apps": [
         {
             "id": "3645a5b6-76dd-46b8-9110-bfd84731d650",

@@ -16,11 +16,11 @@
  
 import groovy.time.TimeCategory
  
-String getVersionNum() { return "9.2.0" }
+String getVersionNum() { return "10.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
-#include mikee385.device-check-library
+#include mikee385.device-monitor-library
 
 definition(
     name: "Laundry Room Automation",
@@ -57,8 +57,8 @@ preferences {
             input "alertReset", "bool", title: "Alert when Laundry Reset?", required: true, defaultValue: false
         }
         section {
+            input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input "deviceChecker", "device.DeviceChecker", title: "Device Checker", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }

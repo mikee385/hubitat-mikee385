@@ -1,17 +1,17 @@
 {
-    "packageName": "Device Checker",
+    "packageName": "Device Monitor",
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename internal message maps for consistency",
+    "releaseNotes": "Rename Device Checker to Device Monitor",
     "dateReleased": "2022-08-07",
     "apps": [
         {
             "id": "152e08a6-8bf3-4c2d-beb3-1c2cb4ba54bc",
-            "name": "Device Checker",
-            "version": "2.0.1",
+            "name": "Device Monitor",
+            "version": "3.0.0",
             "namespace": "mikee385",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-checker.groovy",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/device-monitor.groovy",
             "required": true,
             "oauth": true,
             "primary": true
@@ -20,10 +20,10 @@
     "drivers": [
         {
             "id": "45abafb0-1501-49d0-9aab-e15dde22192c",
-            "name": "Device Checker",
-            "version": "2.2.0",
+            "name": "Device Monitor",
+            "version": "3.0.0",
             "namespace": "mikee385",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/device-checker.groovy",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/device-monitor.groovy",
             "required": true
         }
     ]

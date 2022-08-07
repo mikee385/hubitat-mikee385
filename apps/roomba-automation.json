@@ -1,11 +1,11 @@
 {
     "packageName": "Roomba Automation",
     "author": "Michael Pierce",
-    "version": "9.1.0",
+    "version": "10.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove unused battery and inactivity thresholds",
-    "dateReleased": "2022-08-05",
+    "releaseNotes": "Rename Device Checker to Device Monitor",
+    "dateReleased": "2022-08-07",
     "apps": [
         {
             "id": "8f28ae8c-f76b-44de-99bb-42d5b77cbaef",
