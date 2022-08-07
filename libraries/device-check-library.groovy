@@ -1,11 +1,11 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.6.0
+ *  version: 3.7.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Improve filtering of virtual devices
- *  dateReleased: 2022-08-06
+ *  releaseNotes: Consolidate checks for duplicate devices
+ *  dateReleased: 2022-08-07
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -111,27 +111,27 @@ def isVirtualDevice(device) {
 }
 
 def getDevicesFromSettings() {
-    def devices = []
+    def devices = [:]
     
     for (setting in settings) {
         if (setting.value instanceof List) {
             for (item in setting.value) {
                 if (item.metaClass.respondsTo(item, 'getDeviceNetworkId')) {
                     if (!isVirtualDevice(item)) {
-                        devices.add(item)
+                        devices[item.id] = item
                     } 
                 }
             }
         } else {
             if (setting.value.metaClass.respondsTo(setting.value, 'getDeviceNetworkId')) {
                 if (!isVirtualDevice(setting.value)) {
-                    devices.add(setting.value)
+                    devices[setting.value.id] = setting.value
                 } 
             }
         }
     }
     
-    return devices
+    return devices.values()
 }
 
 def deviceCheck(evt) {
@@ -151,13 +151,9 @@ def deviceCheck(evt) {
     }
     
     //Check Battery Levels
-    def batteryDeviceIDs = []
     for (item in batteryThresholds) {
-        if (!batteryDeviceIDs.contains(item.device.id)) {
-            if (item.device.currentValue("battery") <= item.lowBattery) {
-                batteryDeviceIDs.add(item.device.id)
-                deviceChecker.addBatteryMessage(item.device.id, "${item.device} - ${item.device.currentValue('battery')}%")
-            }
+        if (item.device.currentValue("battery") <= item.lowBattery) {
+            deviceChecker.addBatteryMessage(item.device.id, "${item.device} - ${item.device.currentValue('battery')}%")
         }
     }
     
@@ -189,17 +185,15 @@ def deviceCheck(evt) {
     //Check Inactive Devices
     def inactiveDeviceIDs = []
     for (item in inactiveThresholds) {
-        if (!inactiveDeviceIDs.contains(item.device.id)) {
-            if (item.device.getLastActivity()) {
-                def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
-                if (item.device.getLastActivity().getTime() <= cutoffTime) {
-                    inactiveDeviceIDs.add(item.device.id)
-                    deviceChecker.addInactiveMessage(item.device.id, "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}")
-                }
-            } else {
+        if (item.device.getLastActivity()) {
+            def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
+            if (item.device.getLastActivity().getTime() <= cutoffTime) {
                 inactiveDeviceIDs.add(item.device.id)
-                deviceChecker.addInactiveMessage(item.device.id, "${item.device} - No Activity")
+                deviceChecker.addInactiveMessage(item.device.id, "${item.device} - ${timeSince(item.device.getLastActivity().getTime())}")
             }
+        } else {
+            inactiveDeviceIDs.add(item.device.id)
+            deviceChecker.addInactiveMessage(item.device.id, "${item.device} - No Activity")
         }
     }
     
@@ -210,11 +204,9 @@ def deviceCheck(evt) {
             if (lastEvent) {
                 def cutoffTime = now() - (item.inactiveHours * 60*60*1000)
                 if (lastEvent.getDate().getTime() <= cutoffTime) {
-                    inactiveDeviceIDs.add(item.device.id)
                     deviceChecker.addInactiveMessage(item.device.id, "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}")
                 }
             } else {
-                inactiveDeviceIDs.add(item.device.id)
                 deviceChecker.addInactiveMessage(item.device.id, "${item.device}* - No Activity")
             }
         }
