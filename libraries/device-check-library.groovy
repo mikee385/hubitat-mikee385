@@ -1,7 +1,7 @@
 /**
  *  name: Device Check Library
  *  author: Michael Pierce
- *  version: 3.5.0
+ *  version: 3.6.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
  *  releaseNotes: Improve filtering of virtual devices
@@ -99,7 +99,7 @@ def initializeDeviceChecks() {
 }
 
 def isVirtualDevice(device) {
-    if (device.getTypeName().contains("Virtual Presence")) {
+    if (device.getTypeName().contains("Virtual Presence") && device.getDisplayName() != "Guest") {
         return false
     } else if (device.getTypeName().contains("Virtual")) {
         return true
