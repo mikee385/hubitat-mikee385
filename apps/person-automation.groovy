@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.1.1" }
+String getVersionNum() { return "9.2.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -40,10 +40,13 @@ preferences {
             input "life360Sensor", "capability.presenceSensor", title: "Life 360 Presence", multiple: false, required: false
             input "life360Refresh", "capability.pushableButton", title: "Life 360 Refresh", multiple: false, required: false
         }
-        section {
+        section("Presence") {
             input "primarySensors", "capability.presenceSensor", title: "Primary Presence (Arrival & Departure)", multiple: true, required: false
             input "secondarySensors", "capability.presenceSensor", title: "Secondary Presence (Arrival Only)", multiple: true, required: false
+        }
+        section("Sleep") {
             input "sleepSwitch", "capability.switch", title: "Sleep Switch", multiple: false, required: false
+            input "sleepDoor", "capability.contactSensor", title: "Sleep Door", multiple: false, required: false
         }
         section("Alerts") {
             input "notificationDevices", "capability.notification", title: "Notification Devices", multiple: true, required: false
@@ -116,12 +119,17 @@ def initialize() {
         subscribe(person, "sleeping", personHandler_AsleepWhenAwayCheck)
     }
     
+    // Sleep
     if (sleepSwitch) {
         // Person Status
         subscribe(sleepSwitch, "switch", switchHandler_PersonStatus)
     
         // Switch
         subscribe(location, "mode", modeHandler_Switch)
+    }
+    if (sleepDoor) {
+        // Person Status
+        subscribe(sleepDoor, "contact", doorHandler_PersonStatus)
     }
     
     if (notificationDevices) {
@@ -206,11 +214,13 @@ def personHandler_AsleepWhenAwayCheck(evt) {
 def switchHandler_PersonStatus(evt) {
     logDebug("switchHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "on") {
-        person.asleep()
-    } else {
-        person.awake()
-    }
+    if (person.currentValue("presence") == "present") {
+        if (evt.value == "on") {
+            person.asleep()
+        } else {
+            person.awake()
+        }
+    } 
 }
 
 def modeHandler_Switch(evt) {
@@ -219,6 +229,26 @@ def modeHandler_Switch(evt) {
     if (evt.value == "Away") {
         sleepSwitch.off()
     }
+}
+
+def doorHandler_PersonStatus(evt) {
+    logDebug("doorHandler_PersonStatus: ${evt.device} changed to ${evt.value}")
+    
+    if (person.currentValue("presence") == "present") {
+        if (evt.value == "closed") {
+            def startToday = timeToday("20:30") // 8:30 PM
+            def endToday = timeToday("23:59") // 11:59 PM
+            if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
+                person.asleep()
+            }
+        } else {
+            def startToday = timeToday("04:00") // 4:00 AM
+            def endToday = timeToday("10:00") // 10:00 AM
+            if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
+                person.awake()
+            }
+        }
+    } 
 }
 
 def handler_Notification(evt) {

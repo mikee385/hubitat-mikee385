@@ -1,10 +1,10 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "9.1.1",
+    "version": "9.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix incorrect device variable",
+    "releaseNotes": "Add door to use as a trigger for asleep and awake",
     "dateReleased": "2022-08-09",
     "apps": [
         {
