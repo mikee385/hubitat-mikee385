@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.1.0" }
+String getVersionNum() { return "9.1.1" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -232,7 +232,7 @@ def handler_Notification(evt) {
 def presenceCheck(evt) {
     logDebug("presenceCheck")
     
-    def parentEvent = person.device.events(max: 200).find{it.name == "presence"}
+    def parentEvent = person.events(max: 200).find{it.name == "presence"}
     if (parentEvent) {
         //Get Unchanged Thresholds
         def unchangedThresholds = []
