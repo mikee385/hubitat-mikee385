@@ -1,11 +1,11 @@
 /**
  *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 4.0.0
+ *  version: 4.1.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Rename Device Checker to Device Monitor
- *  dateReleased: 2022-08-07
+ *  releaseNotes: Remove inactive checks for presence sensors
+ *  dateReleased: 2022-08-09
  *
  *  Copyright 2022 Michael Pierce
  *
