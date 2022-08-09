@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "9.1.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -131,6 +131,7 @@ def initialize() {
     
     // Device Checks
     initializeDeviceChecks()
+    subscribe(deviceMonitor, "deviceCheck.active", presenceCheck)
     
     // URLs
     if(!state.accessToken) {
@@ -225,6 +226,40 @@ def handler_Notification(evt) {
     
     for (notifier in notificationDevices) {
         notifier.deviceNotification("${evt.value}")
+    }
+}
+
+def presenceCheck(evt) {
+    logDebug("presenceCheck")
+    
+    def parentEvent = person.device.events(max: 200).find{it.name == "presence"}
+    if (parentEvent) {
+        //Get Unchanged Thresholds
+        def unchangedThresholds = []
+        if (life360Sensor) {
+            unchangedThresholds.add([device: life360Sensor, attribute: "presence", inactiveHours: 24])
+        }
+        for (primarySensor in primarySensors) {
+            unchangedThresholds.add([device: primarySensor, attribute: "presence", inactiveHours: 24])
+        }
+        for (secondarySensor in secondarySensors) {
+            unchangedThresholds.add([device: secondarySensor, attribute: "presence", inactiveHours: 24])
+        }
+        
+        //Check Unchanged Devices
+        for (item in unchangedThresholds) {
+            def lastEvent = item.device.events(max: 200).find{it.name == item.attribute}
+            if (lastEvent) {
+                def cutoffTime = parentEvent.getDate().getTime() - (item.inactiveHours * 60*60*1000)
+                if (lastEvent.getDate().getTime() <= cutoffTime) {
+                    deviceMonitor.addInactiveMessage(item.device.id, "${item.device}* - ${timeSince(lastEvent.getDate().getTime())}")
+                }
+            } else {
+                deviceMonitor.addInactiveMessage(item.device.id, "${item.device}* - No Activity")
+            }
+        }
+    } else {
+        deviceMonitor.addInactiveMessage(person.id, "${person}* - No Activity")
     }
 }
 

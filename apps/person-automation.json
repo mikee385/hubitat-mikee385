@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "9.0.0",
+    "version": "9.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename Device Checker to Device Monitor",
-    "dateReleased": "2022-08-07",
+    "releaseNotes": "Add custom inactivity check for presence devices",
+    "dateReleased": "2022-08-09",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

@@ -104,9 +104,7 @@ def initializeDeviceChecks() {
 }
 
 def isVirtualDevice(device) {
-    if (device.getTypeName().contains("Virtual Presence") && device.getDisplayName() != "Guest") {
-        return false
-    } else if (device.getTypeName().contains("Virtual")) {
+    if (device.getTypeName().contains("Virtual")) {
         return true
     } else if (virtualDeviceTypes.contains(device.getTypeName())) {
         return true
@@ -167,22 +165,16 @@ def deviceCheck(evt) {
     def unchangedThresholds = []
     for (device in devices) {
         if (!excludedInactiveDeviceTypes.contains(device.getTypeName())) {
-            if (device.hasCapability("TemperatureMeasurement")) {
+            if (!device.hasCapability("PresenceSensor")) {
                 inactiveThresholds.add([device: device, inactiveHours: 24])
+            }
+        
+            if (device.hasCapability("TemperatureMeasurement")) {
                 unchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 24])
                 
             } else if (device.hasCapability("RelativeHumidityMeasurement")) {
-                inactiveThresholds.add([device: device, inactiveHours: 24])
                 unchangedThresholds.add([device: device, attribute: "humidity", inactiveHours: 24])
                 
-            } else if (device.hasCapability("Battery")) {
-                inactiveThresholds.add([device: device, inactiveHours: 24])
-                
-            } else if (device.hasCapability("PresenceSensor") && device.getDisplayName() != "Guest") {
-                unchangedThresholds.add([device: device, attribute: "presence", inactiveHours: 72])
-                
-            } else {
-                inactiveThresholds.add([device: device, inactiveHours: 24])
             }
         } 
     }
