@@ -1,11 +1,11 @@
 /**
  *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 4.1.0
+ *  version: 4.2.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Remove inactive checks for presence sensors
- *  dateReleased: 2022-08-09
+ *  releaseNotes: Exclude Roku TV from inactive device check
+ *  dateReleased: 2022-08-11
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -51,7 +51,8 @@ import groovy.transform.Field
 ]
     
  @Field static final List excludedInactiveDeviceTypes = [
-    "Philips Dimmer Button Controller"
+    "Philips Dimmer Button Controller", 
+    "Roku TV"
 ]
 
 def initializeDeviceChecks() {
