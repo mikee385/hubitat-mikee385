@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.0" }
+String getVersionNum() { return "11.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -43,15 +43,8 @@ preferences {
             input "pauseButton", "capability.pushableButton", title: "Pause/Resume Button", multiple: false, required: false
             input "pauseDoors", "capability.contactSensor", title: "Pause when Opened", multiple: true, required: false
         }
-        section("Work from Home") {
-            input "workFromHomePerson", "capability.presenceSensor", title: "Person", multiple: false, required: true
-            input "workStartTime", "time", title: "Start Time", multiple: false, required: true
-            input "workEndTime", "time", title: "End Time", multiple: false, required: true
-            input "workAwaySwitch", "capability.switch", title: "Away Switch", multiple: false, required: true
-            input "workBusySwitch", "capability.switch", title: "Busy Switch", multiple: false, required: true
-        }
         section {
-            input "additionalPeople", "capability.presenceSensor", title: "Additional People", multiple: true, required: false
+            input "people", "capability.presenceSensor", title: "People", multiple: true, required: false
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -85,13 +78,8 @@ def initialize() {
     }
     
     // Clean Status
-    subscribe(workFromHomePerson, "presence", workFromHomePersonHandler)
-    subscribe(workAwaySwitch, "switch", calendarSwitchHandler)
-    subscribe(workBusySwitch, "switch", calendarSwitchHandler)
-    if (additionalPeople) {
-        for (additionalPerson in additionalPeople) {
-            subscribe(additionalPerson, "presence", additionalPersonHandler)
-        }
+    for (person in people) {
+        subscribe(person, "presence", personHandler)
     }
     subscribe(roomba, "rechrgTm", rechrgTmHandler)
     if (pauseButton) {
@@ -131,36 +119,8 @@ def initialize() {
     }
 }
 
-def workFromHomePersonHandler(evt) {
-    logDebug("workFromHomePersonHandler: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "present") {
-        if (duringWorkHours()) {
-            if (busyWithWork()) {
-                pauseCycle()
-            }
-        } else {
-            cancelCycle()
-        }
-    } else {
-        startCycle()
-    }
-}
-
-def calendarSwitchHandler(evt) {
-    logDebug("calendarSwitchHandler: ${evt.device} changed to ${evt.value}")
-    
-    if (workFromHomePerson.currentValue("presence") == "present" && duringWorkHours()) {
-        if (busyWithWork()) {
-            pauseCycle()
-        } else {
-            startCycle()
-        }
-    }
-}
-
-def additionalPersonHandler(evt) {
-    logDebug("additionalPersonHandler: ${evt.device} changed to ${evt.value}")
+def personHandler(evt) {
+    logDebug("personHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "present") {
         cancelCycle()
@@ -177,14 +137,14 @@ def rechrgTmHandler(evt) {
         if (rechrgTm > 0) {
             initialTm = rechrgTm - 15*1000
             if (initialTm > now()) {
-                runOnce(new Date(initialTm), initialCheck)
+                runOnce(new Date(initialTm), checkCycle)
             }
             
             finalTm = rechrgTm + 5*1000
             if (finalTm > now()) {
-                runOnce(new Date(finalTm), finalCheck)
+                runOnce(new Date(finalTm), checkCycle)
             } else {
-                finalCheck()
+                checkCycle()
             }
         }
     }
@@ -214,29 +174,16 @@ def doorOpenedHandler(evt) {
     roomba.pause()
 }
 
-def duringWorkHours() {
-    def date = new Date()
-    def day = date[Calendar.DAY_OF_WEEK]
-    
-    return day >= 2 && day <= 6 && timeOfDayIsBetween(timeToday(workStartTime), timeToday(workEndTime), date, location.timeZone) && workAwaySwitch.currentValue("switch") == "off"
-}
-
-def busyWithWork() {
-    return workAwaySwitch.currentValue("switch") == "off" && workBusySwitch.currentValue("switch") == "on"
-}
-
 def startCycle() {
     def everyoneAway = true
-    if (additionalPeople) {
-        for (additionalPerson in additionalPeople) {
-            if (additionalPerson.currentValue("presence") == "present") {
-                everyoneAway = false
-                break
-            }
+    for (person in people) {
+        if (person.currentValue("presence") == "present") {
+            everyoneAway = false
+            break
         }
     }
 
-     if (timeOfDayIsBetween(timeToday(roombaStartTime), location.sunset, new Date(), location.timeZone) && everyoneAway && (workFromHomePerson.currentValue("presence") == "not present" || (duringWorkHours() && !busyWithWork()))) {
+     if (timeOfDayIsBetween(timeToday(roombaStartTime), location.sunset, new Date(), location.timeZone) && everyoneAway) {
         if (roomba.currentValue("consumableStatus") == "maintenance_required") {
             personToNotify.deviceNotification("$roomba could not start because the bin is full!")
         } else if (roomba.currentValue("consumableStatus") == "missing") {
@@ -261,48 +208,22 @@ def pauseCycle() {
 
 def cancelCycle() {
     if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "run") {
-        unschedule("initialCheck")
-        unschedule("finalCheck")
+        unschedule("checkCycle")
         roomba.dock()
     }
 }
 
-def initialCheck() {
-    checkCycle(false)
-}
-
-def finalCheck() {
-    checkCycle(true)
-}
-
-def checkCycle(lastCheck) {
-    def everyoneAway = true
-    if (additionalPeople) {
-        for (additionalPerson in additionalPeople) {
-            if (additionalPerson.currentValue("presence") == "present") {
-                everyoneAway = false
-                break
-            }
+def checkCycle() {
+    def anyoneHome = false
+    for (person in people) {
+        if (person.currentValue("presence") == "present") {
+            anyoneHome = true
+            break
         }
     }
     
-    if (everyoneAway) {
-        if (workFromHomePerson.currentValue("presence") == "present") {
-            if (duringWorkHours()) {
-                if (lastCheck) {
-                    if (busyWithWork()) {
-                        roomba.pause()
-                    }
-                }
-            } else {
-                unschedule("initialCheck")
-                unschedule("finalCheck")
-                roomba.stop()
-            }
-        }
-    } else {
-        unschedule("initialCheck")
-        unschedule("finalCheck")
+    if (anyoneHome) {
+        unschedule("checkCycle")
         roomba.stop()
     }
 }
@@ -321,8 +242,7 @@ def phaseHandler(evt) {
 def cycleHandler(evt) {
     logDebug("cycleHandler: ${evt.device} changed to ${evt.value}")
     
-    unschedule("initialCheck")
-    unschedule("finalCheck")
+    unschedule("checkCycle")
     
     if (evt.value == "none") {
         if (state.durationMinutes >= 0.5) {
