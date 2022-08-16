@@ -1,11 +1,11 @@
 /**
  *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 4.2.0
+ *  version: 4.3.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Exclude Roku TV from inactive device check
- *  dateReleased: 2022-08-11
+ *  releaseNotes: Exclude LG ThinQ Washer and Dryer from inactive device check
+ *  dateReleased: 2022-08-15
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -51,6 +51,8 @@ import groovy.transform.Field
 ]
     
  @Field static final List excludedInactiveDeviceTypes = [
+    "LG ThinQ Dryer",
+    "LG ThinQ Washer",
     "Philips Dimmer Button Controller", 
     "Roku TV"
 ]
