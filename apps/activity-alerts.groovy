@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "1.0.1" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -33,11 +33,11 @@ definition(
 preferences {
     page(name: "settings", title: "Activity Alerts", install: true, uninstall: true) {
         section {
-            input "person", "capability.PresenceSensor", title: "Person", multiple: false, required: false
+            input "person", "capability.presenceSensor", title: "Person", multiple: false, required: false
         }
         section("Doors") {
-            input "bedroomDoor", "capability.ContactSensor", title: "Bedroom Door", multiple: false, required: false
-            input "otherDoors", "capability.ContactSensor", title: "Other Doors", multiple: true, required: false
+            input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: false
+            input "otherDoors", "capability.contactSensor", title: "Other Doors", multiple: true, required: false
         }
         section("Bedtime") {
             input "bedtimeStart", "time", title: "Start Time", required: false
