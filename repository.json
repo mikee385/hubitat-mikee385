@@ -3,6 +3,13 @@
     "gitHubUrl": "https://github.com/mikee385/hubitat-mikee385",
     "packages": [
         {
+            "name": "Activity Alerts",
+            "category": "Notifications",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/activity-alerts.json",
+            "description": "Sends alerts when certain doors and switches are active after bedtime",
+            "tags": [ "Notifications" ]
+        },
+        {
             "name": "Back Porch Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/back-porch-automation.json",
