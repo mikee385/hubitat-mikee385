@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -140,6 +140,11 @@ def initialize() {
     subscribe(naptimeNowRoutine, "pushed", routineHandler_NaptimeNow)
     subscribe(wakeUpRoutine, "pushed", routineHandler_WakeUp)
     subscribe(glowsOffRoutine, "pushed", routineHandler_GlowsOff)
+    
+    // Doors
+    if (bedroomDoor) {
+        subscribe(bedroomDoor, "contact", doorHandler_GlowsOff)
+    }
 
     // Buttons and Modes
     if (hueRemote) {
@@ -187,9 +192,6 @@ def routineHandler_BedtimeSoon(evt) {
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
-    unsubscribe("doorHandler_DownstairsGlowOff")
-    unsubscribe("doorHandler_GlowsOff")
-
     downstairsGlow.orange()
     upstairsGlow.orange()
     
@@ -213,15 +215,10 @@ def routineHandler_BedtimeNow(evt) {
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
-    unsubscribe("doorHandler_DownstairsGlowOff")
-    unsubscribe("doorHandler_GlowsOff")
-
     downstairsGlow.purple()
     upstairsGlow.purple()
     
-    if (bedroomDoor) {
-        subscribe(bedroomDoor, "contact.closed", doorHandler_DownstairsGlowOff)
-    } else {
+    if (!bedroomDoor) {
         runIn(10*60, downstairsGlowOff)
     }
     
@@ -267,15 +264,10 @@ def routineHandler_NaptimeNow(evt) {
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
-    unsubscribe("doorHandler_DownstairsGlowOff")
-    unsubscribe("doorHandler_GlowsOff")
-
     downstairsGlow.blue()
     upstairsGlow.blue()
     
-    if (bedroomDoor) {
-        subscribe(bedroomDoor, "contact.closed", doorHandler_DownstairsGlowOff)
-    } else {
+    if (!bedroomDoor) {
         runIn(10*60, downstairsGlowOff)
     }
     
@@ -306,15 +298,10 @@ def routineHandler_WakeUp(evt) {
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
-    unsubscribe("doorHandler_DownstairsGlowOff")
-    unsubscribe("doorHandler_GlowsOff")
-
     downstairsGlow.green()
     upstairsGlow.green()
     
-    if (bedroomDoor) {
-        subscribe(bedroomDoor, "contact.open", doorHandler_GlowsOff)
-    } else {
+    if (!bedroomDoor) {
         runIn(10*60, glowsOff)
     }
     
@@ -342,9 +329,6 @@ def routineHandler_GlowsOff(evt) {
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
-    unsubscribe("doorHandler_DownstairsGlowOff")
-    unsubscribe("doorHandler_GlowsOff")
-
     downstairsGlow.off()
     upstairsGlow.off()
     
@@ -357,16 +341,17 @@ def routineHandler_GlowsOff(evt) {
     }
 }
 
-def doorHandler_DownstairsGlowOff(evt) {
-    logDebug("doorHandler_DownstairsGlowOff: ${evt.device} changed to ${evt.value}")
-    
-    runIn(10*60, downstairsGlowOff)
-}
-
 def doorHandler_GlowsOff(evt) {
     logDebug("doorHandler_GlowsOff: ${evt.device} changed to ${evt.value}")
     
-    runIn(10*60, glowsOff)
+    unschedule("downstairsGlowOff")
+    unschedule("glowsOff")
+    
+    if (evt.value == "closed") {
+        runIn(10*60, downstairsGlowOff)
+    } else if (timeOfDayIsBetween(timeToday("05:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+        runIn(10*60, glowsOff)
+    } 
 }
 
 def hueRemoteHandler_Routine(evt) {
