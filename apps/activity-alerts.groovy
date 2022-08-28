@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.3.0" }
+String getVersionNum() { return "1.3.1" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -69,14 +69,15 @@ def initialize() {
     // Create state
     if (person) {
         state.personName = person.displayName
-    }
-    if (bedroomDoor) {
+    } else if (bedroomDoor) {
         state.personName = bedroomDoor.displayName.split(" ")[0]
-    }
-    for (door in otherDoors) {
-        state.personName = door.displayName.split(" ")[0]
-        break
-    }
+    } else {
+        state.personName = app.label
+        for (door in otherDoors) {
+            state.personName = door.displayName.split(" ")[0]
+            break
+        }
+    } 
 
     // Arm & Disarm
     if (person) {
