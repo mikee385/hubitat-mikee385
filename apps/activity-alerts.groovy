@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.2.0" }
+String getVersionNum() { return "1.3.0" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -89,10 +89,10 @@ def initialize() {
     
     // Activity
     if (bedroomDoor) {
-        subscribe(bedroomDoor, "contact", doorHandler_Activity)
+        subscribe(bedroomDoor, "contact.open", doorHandler_Activity)
     }
     for (door in otherDoors) {
-        subscribe(door, "contact", doorHandler_Activity)
+        subscribe(door, "contact.open", doorHandler_Activity)
     }
 }
 
