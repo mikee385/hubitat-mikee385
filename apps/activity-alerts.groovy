@@ -14,10 +14,11 @@
  *
  */
  
-String getVersionNum() { return "1.3.1" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
+#include mikee385.device-monitor-library
 
 definition(
     name: "Activity Alerts",
@@ -48,6 +49,7 @@ preferences {
             input "alertDisrmed", "bool", title: "Alert when disarmed?", required: true, defaultValue: false
         }
         section {
+            input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
@@ -95,6 +97,9 @@ def initialize() {
     for (door in otherDoors) {
         subscribe(door, "contact.open", doorHandler_Activity)
     }
+     
+    // Device Checks
+    initializeDeviceChecks()
 }
 
 def personHandler_Arm(evt) {
