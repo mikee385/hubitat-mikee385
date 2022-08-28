@@ -1,17 +1,17 @@
 {
-    "packageName": "Laundry Room Automation",
+    "packageName": "Bedtime Automation",
     "author": "Michael Pierce",
-    "version": "11.0.0",
+    "version": "1.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove Bedtime routine",
+    "releaseNotes": "Initial release",
     "dateReleased": "2022-08-28",
     "apps": [
         {
-            "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",
-            "name": "Laundry Room Automation",
+            "id": "2a2230aa-92e5-4c6c-a11f-fd3ac20e8e78",
+            "name": "Bedtime Automation",
             "namespace": "mikee385",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/laundry-room-automation.groovy",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-automation.groovy",
             "required": true,
             "oauth": false,
             "primary": true

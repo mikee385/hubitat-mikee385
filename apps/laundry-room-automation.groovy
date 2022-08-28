@@ -14,9 +14,7 @@
  *
  */
  
-import groovy.time.TimeCategory
- 
-String getVersionNum() { return "10.0.0" }
+String getVersionNum() { return "11.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -44,11 +42,6 @@ preferences {
             input "laundry", "device.ApplianceStatus", title: "Laundry", multiple: false, required: true
             input "washer", "device.LGThinQWasher", title: "Washer", required: true
             input "dryer", "device.LGThinQDryer", title: "Dryer", required: true
-        }
-        section("Bedtime") {
-            input "routine", "capability.switch", title: "Routine", multiple: false, required: true
-            input "startTime", "time", title: "Start Time", required: true
-            input "endTime", "time", title: "End Time", required: true
         }
         section("Alerts") {
             input "alertReminder", "bool", title: "Reminder when Laundry Not Moved?", required: true, defaultValue: false
@@ -83,7 +76,6 @@ def initialize() {
     }
     subscribe(light, "switch", switchHandler_LightSwitch)
     subscribe(light, "motion", motionHandler_LightSwitch)
-    subscribe(routine, "switch.on", routineHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
 
     // Light Timeout
@@ -94,9 +86,6 @@ def initialize() {
     subscribe(dryer, "currentState", dryerHandler_LaundryStatus)
     subscribe(light, "motion.active", switchHandler_LaundryStatus)
 
-    // Bedtime Routine
-    subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
-    
     // Light Alert
     subscribe(door, "contact", deviceHandler_LightAlert)
     if (gate) {
@@ -159,12 +148,6 @@ def motionHandler_LightSwitch(evt) {
     if (evt.value == "active") {
         unschedule("lightOff")
     }
-}
-
-def routineHandler_LightSwitch(evt) {
-    logDebug("routineHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-
-    light.off()
 }
 
 def modeHandler_LightSwitch(evt) {
@@ -262,22 +245,6 @@ def switchHandler_LaundryStatus(evt) {
     
     if (laundry.currentValue("status") == "finished") {
         laundry.reset()
-    }
-}
-
-def doorHandler_BedtimeRoutine(evt) {
-    logDebug("doorHandler_BedtimeRoutine: ${evt.device} changed to ${evt.value}")
-    
-    def startToday = timeToday(startTime)
-    def endToday = timeToday(endTime)
-    if (endToday <= startToday) {
-        use (TimeCategory) {
-            endToday = endToday + 1.day
-        }
-    }
-    
-    if (location.mode != "Away" && timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
-        routine.on()
     }
 }
 

@@ -31,6 +31,13 @@
             "tags": [ "Automations & Groups", "Bathroom", "Shower", "Temperature & Humidity" ]
         },
         {
+            "name": "Bedtime Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/bedtime-automation.json",
+            "description": "Automation and alerts for the bedtime routine.",
+            "tags": [ "Automations & Groups" ]
+        },
+        {
             "name": "Christmas Tree Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/christmas-tree-automation.json",
@@ -157,6 +164,13 @@
             "tags": [ "Automations & Groups", "Presence & Location" ]
         },
         {
+            "name": "Roomba Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roomba-automation.json",
+            "description": "Starts and stops the Roomba based on a schedule and presence.",
+            "tags": [ "Automations & Groups", "Cleaning Devices" ]
+        },
+        {
             "name": "Security Automation",
             "category": "Security",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/security-automation.json",
@@ -169,13 +183,6 @@
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/system-alerts.json",
             "description": "Sends alerts when the system events occur.",
             "tags": [ "Notifications", "Tools & Utilities" ]
-        },
-        {
-            "name": "Roomba Automation",
-            "category": "Control",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roomba-automation.json",
-            "description": "Starts and stops the Roomba based on a schedule and presence.",
-            "tags": [ "Automations & Groups", "Cleaning Devices" ]
         },
         {
             "name": "Sunlight Automation",
