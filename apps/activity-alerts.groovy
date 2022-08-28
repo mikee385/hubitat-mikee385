@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -103,9 +103,13 @@ def personHandler_Arm(evt) {
     unschedule("disarm")
     
     if (evt.value == "sleeping") {
-        arm()
-    } else if (evt.value == "not sleeping") {
-        disarm()
+        if (!(state.armed == true)) {
+            arm()
+        } 
+    } else if (!(state.armed == false) && evt.value == "not sleeping") {
+        if (!(state.armed == false)) {
+            disarm()
+        } 
     }
 }
 
@@ -116,34 +120,30 @@ def doorHandler_Arm(evt) {
     unschedule("disarm")
     
     if (evt.value == "closed") {
-        if (timeOfDayIsBetween(timeToday(bedTimeStart), timeToday(bedTimeEnd), new Date(), location.timeZone)) {
+        if (!(state.armed == true) && timeOfDayIsBetween(timeToday(bedTimeStart), timeToday(bedTimeEnd), new Date(), location.timeZone)) {
             runIn(10*60, arm)
         } 
     } else if (evt.value == "open") {
-        if (timeOfDayIsBetween(timeToday(bedTimeEnd), timeToday(bedTimeStart), new Date(), location.timeZone)) {
+        if (!(state.armed == false) && timeOfDayIsBetween(timeToday(bedTimeEnd), timeToday(bedTimeStart), new Date(), location.timeZone)) {
             runIn(10*60, disarm)
         } 
     }
 }
 
 def arm() {
-    if (state.armed != true) {
-        state.armed = true
+    state.armed = true
         
-        if (alertArmed) {
-            personToNotify.deviceNotification("${state.personName} is armed!")
-        }
-    } 
+    if (alertArmed) {
+        personToNotify.deviceNotification("${state.personName} is armed!")
+    }
 }
 
 def disarm() {
-    if (state.armed != false) {
-        state.armed = false
+    state.armed = false
         
-        if (alertDisrmed) {
-            personToNotify.deviceNotification("${state.personName} is disarmed!")
-        }
-    } 
+    if (alertDisrmed) {
+        personToNotify.deviceNotification("${state.personName} is disarmed!")
+    }
 }
 
 def doorHandler_Activity(evt) {
