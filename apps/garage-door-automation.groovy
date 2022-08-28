@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "Garage Door Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -77,12 +77,7 @@ def initialize() {
     
     // Inconsistency Check
     if (alertInconsistent) {
-        for (controller in controllers) {
-            subscribe(controller, "door", handler_InconsistencyCheck)
-        }
-        for (sensor in sensors) {
-            subscribe(sensor, "contact", handler_InconsistencyCheck)
-        }
+        subscribe(childDevice(), "contact", handler_InconsistencyCheck)
     }
         
     // Device Checks
@@ -111,14 +106,16 @@ def handler_DoorContact(evt) {
 def handler_InconsistencyCheck(evt) {
     logDebug("handler_InconsistencyCheck: ${evt.device} changed to ${evt.value}")
     
-    runIn(5*60, inconsistencyCheck)
+    runIn(1*60, inconsistencyCheck)
 }
 
 def inconsistencyCheck() {
     def virtualValue = childDevice().currentValue("contact")
+    logDebug("${childDevice()} is $virtualValue")
     
     for (controller in controllers) {
         def doorValue = controller.currentValue("door")
+        logDebug("$controller is $doorValue")
         if (doorValue != virtualValue) {
             def message = "WARNING: $controller failed to change to $virtualValue!"
             log.warn(message)
@@ -128,6 +125,7 @@ def inconsistencyCheck() {
     
     for (sensor in sensors) {
         def doorValue = sensor.currentValue("contact")
+        logDebug("$sensor is $doorValue")
         if (doorValue != virtualValue) {
             def message = "WARNING: $sensor failed to change to $virtualValue!"
             log.warn(message)
