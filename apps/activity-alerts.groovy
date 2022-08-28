@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.2" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -115,13 +115,12 @@ def doorHandler_Arm(evt) {
     unschedule("arm")
     unschedule("disarm")
     
-    def currentTime = new Date()
     if (evt.value == "closed") {
-        if (currentTime >= timeToday(bedTimeStart) || currentTime <= timeToday(bedTimeEnd)) {
+        if (timeOfDayIsBetween(timeToday(bedTimeStart), timeToday(bedTimeEnd), new Date(), location.timeZone)) {
             runIn(10*60, arm)
         } 
     } else if (evt.value == "open") {
-        if (currentTime > timeToday(bedTimeEnd) && currentTime < timeToday(bedTimeStart)) {
+        if (timeOfDayIsBetween(timeToday(bedTimeEnd), timeToday(bedTimeStart), new Date(), location.timeZone)) {
             runIn(10*60, disarm)
         } 
     }
