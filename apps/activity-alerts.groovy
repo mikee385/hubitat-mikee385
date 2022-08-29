@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.1.1" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -127,11 +127,11 @@ def doorHandler_Arm(evt) {
     unschedule("disarm")
     
     if (evt.value == "closed") {
-        if (!(state.armed == true) && currentTimeIsBetween(bedTimeStart, bedTimeEnd)) {
+        if (!(state.armed == true) && currentTimeIsBetween(bedtimeStart, bedtimeEnd)) {
             runIn(10*60, arm)
         } 
     } else if (evt.value == "open") {
-        if (!(state.armed == false) && currentTimeIsBetween(bedTimeEnd, bedTimeStart)) {
+        if (!(state.armed == false) && currentTimeIsBetween(bedtimeEnd, bedtimeStart)) {
             runIn(10*60, disarm)
         } 
     }

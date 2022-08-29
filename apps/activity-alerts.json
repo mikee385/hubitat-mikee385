@@ -1,11 +1,11 @@
 {
     "packageName": "Activity Alerts",
     "author": "Michael Pierce",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Improve time range handling",
-    "dateReleased": "2022-08-28",
+    "releaseNotes": "Fix capitalization error",
+    "dateReleased": "2022-08-29",
     "apps": [
         {
             "id": "f0095b67-83f4-4be9-9433-9a843795e512",
