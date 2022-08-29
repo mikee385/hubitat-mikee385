@@ -14,11 +14,12 @@
  *
  */
 
-String getVersionNum() { return "1.0.1" }
+String getVersionNum() { return "1.1.0" }
 String getVersionLabel() { return "Bedtime Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
+#include mikee385.time-library
 
 definition(
     name: "Bedtime Automation",
@@ -71,7 +72,7 @@ def initialize() {
 def doorHandler_BedtimeRoutine(evt) {
     logDebug("doorHandler_BedtimeRoutine: ${evt.device} changed to ${evt.value}")
     
-    if (location.mode != "Away" && timeOfDayIsBetween(timeToday(startTime), timeToday(endTime), new Date(), location.timeZone)) {
+    if (location.mode != "Away" && currentTimeIsBetween(startTime, endTime)) {
         routine.on()
     }
 }

@@ -1,10 +1,10 @@
 {
     "packageName": "Bedtime Automation",
     "author": "Michael Pierce",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix capability names",
+    "releaseNotes": "Improve time range handling",
     "dateReleased": "2022-08-28",
     "apps": [
         {

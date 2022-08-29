@@ -14,13 +14,12 @@
  *
  */
  
-import groovy.time.TimeCategory
- 
-String getVersionNum() { return "8.0.0" }
+String getVersionNum() { return "8.1.0" }
 String getVersionLabel() { return "Dishwasher Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
+#include mikee385.time-library
 
 definition(
     name: "Dishwasher Automation",
@@ -168,15 +167,7 @@ def applianceHandler_ApplianceStatus(evt) {
 def contactSensorHandler_ApplianceStatus(evt) {
     logDebug("contactSensorHandler_ApplianceStatus: ${evt.device} changed to ${evt.value}")
     
-    def startToday = timeToday(bedtimeStart)
-    def endToday = timeToday(bedtimeEnd)
-    if (endToday <= startToday) {
-        use (TimeCategory) {
-            endToday = endToday + 1.day
-        }
-    }
-    
-    if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone) || (reminderSwitch && reminderSwitch.currentValue("switch") == "on")) {
+    if (currentTimeIsBetween(bedtimeStart, bedtimeEnd) || (reminderSwitch && reminderSwitch.currentValue("switch") == "on")) {
         appliance.start()
     }
 }

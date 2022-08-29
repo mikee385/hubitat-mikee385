@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "9.2.0" }
+String getVersionNum() { return "9.3.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
+#include mikee385.time-library
 
 definition(
     name: "Person Automation",
@@ -236,15 +237,11 @@ def doorHandler_PersonStatus(evt) {
     
     if (person.currentValue("presence") == "present") {
         if (evt.value == "closed") {
-            def startToday = timeToday("20:30") // 8:30 PM
-            def endToday = timeToday("23:59") // 11:59 PM
-            if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
+            if (currentTimeIsBetween("20:30", "23:59")) {
                 person.asleep()
             }
         } else {
-            def startToday = timeToday("04:00") // 4:00 AM
-            def endToday = timeToday("10:00") // 10:00 AM
-            if (timeOfDayIsBetween(startToday, endToday, new Date(), location.timeZone)) {
+            if (currentTimeIsBetween("04:00", "10:00")) {
                 person.awake()
             }
         }

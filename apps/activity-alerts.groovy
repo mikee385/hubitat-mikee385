@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Activity Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
+#include mikee385.time-library
 
 definition(
     name: "Activity Alerts",
@@ -126,11 +127,11 @@ def doorHandler_Arm(evt) {
     unschedule("disarm")
     
     if (evt.value == "closed") {
-        if (!(state.armed == true) && timeOfDayIsBetween(timeToday(bedTimeStart), timeToday(bedTimeEnd), new Date(), location.timeZone)) {
+        if (!(state.armed == true) && currentTimeIsBetween(bedTimeStart, bedTimeEnd)) {
             runIn(10*60, arm)
         } 
     } else if (evt.value == "open") {
-        if (!(state.armed == false) && timeOfDayIsBetween(timeToday(bedTimeEnd), timeToday(bedTimeStart), new Date(), location.timeZone)) {
+        if (!(state.armed == false) && currentTimeIsBetween(bedTimeEnd, bedTimeStart)) {
             runIn(10*60, disarm)
         } 
     }

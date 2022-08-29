@@ -14,10 +14,11 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Sunlight Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
+#include mikee385.time-library
 
 definition(
     name: "Sunlight Automation",
@@ -112,7 +113,7 @@ def sunsetHandler(evt) {
 def lightHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
     
-    if (timeOfDayIsBetween(location.sunrise, location.sunset, new Date(), location.timeZone)) {
+    if (currentTimeIsBetween(location.sunrise, location.sunset)) {
         if (lightSensor.currentValue("illuminance") <= lightLevelForOff) {
             if (sunlightSwitch.currentValue("switch") == "on") {
                 sunlightSwitch.off()

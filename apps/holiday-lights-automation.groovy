@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "5.1.0" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
+#include mikee385.time-library
 
 definition(
     name: "Holiday Lights Automation",
@@ -137,7 +138,7 @@ def modeHandler_LightSwitch(evt) {
     logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Home") {
-        if (timeOfDayIsBetween(location.sunset, timeToday("23:59"), new Date(), location.timeZone)) {
+        if (currentTimeIsBetween(location.sunset, "23:59")) {
             for (light in lights) {
                 light.on()
             }

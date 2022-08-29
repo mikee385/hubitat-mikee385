@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "7.1.0" }
+String getVersionNum() { return "7.2.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
+#include mikee385.time-library
 
 definition(
     name: "Echo Glow Automation",
@@ -349,7 +350,7 @@ def doorHandler_GlowsOff(evt) {
     
     if (evt.value == "closed") {
         runIn(10*60, downstairsGlowOff)
-    } else if (timeOfDayIsBetween(timeToday("05:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+    } else if (currentTimeIsBetween("05:00", "17:00")) {
         runIn(10*60, glowsOff)
     } 
 }
@@ -389,11 +390,11 @@ def modeHandler_Routine(evt) {
 }
 
 def nextRoutine() {
-    if (timeOfDayIsBetween(timeToday("00:00"), timeToday("09:00"), new Date(), location.timeZone)) {
+    if (currentTimeIsBetween("00:00", "09:00")) {
         wakeUpRoutine.push()
-    } else if (timeOfDayIsBetween(timeToday("09:00"), timeToday("14:00"), new Date(), location.timeZone)) {
+    } else if (currentTimeIsBetween("09:00", "14:00")) {
         naptimeNowRoutine.push()
-    } else if (timeOfDayIsBetween(timeToday("14:00"), timeToday("17:00"), new Date(), location.timeZone)) {
+    } else if (currentTimeIsBetween("14:00", "17:00")) {
         wakeUpRoutine.push()
     } else {
         bedtimeTimerRoutine.push()

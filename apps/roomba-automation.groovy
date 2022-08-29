@@ -14,11 +14,12 @@
  *
  */
  
-String getVersionNum() { return "11.0.0" }
+String getVersionNum() { return "11.1.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
+#include mikee385.time-library
 
 definition(
     name: "Roomba Automation",
@@ -183,7 +184,7 @@ def startCycle() {
         }
     }
 
-     if (timeOfDayIsBetween(timeToday(roombaStartTime), location.sunset, new Date(), location.timeZone) && everyoneAway) {
+     if (currentTimeIsBetween(roombaStartTime, location.sunset) && everyoneAway) {
         if (roomba.currentValue("consumableStatus") == "maintenance_required") {
             personToNotify.deviceNotification("$roomba could not start because the bin is full!")
         } else if (roomba.currentValue("consumableStatus") == "missing") {

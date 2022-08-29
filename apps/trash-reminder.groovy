@@ -14,10 +14,11 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
+#include mikee385.time-library
 
 definition(
     name: "Trash Reminder",
@@ -67,7 +68,7 @@ def personHandler_TrashReminder(evt) {
     logDebug("personHandler_TrashReminder: ${evt.device} changed to ${evt.value}")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
-        if (timeOfDayIsBetween(timeToday("00:00"), timeToday("12:00"), new Date(), location.timeZone)) {
+        if (currentTimeIsBetween("00:00", "12:00")) {
             def df = new java.text.SimpleDateFormat("EEEE")
             df.setTimeZone(location.timeZone)
             def day = df.format(new Date())
