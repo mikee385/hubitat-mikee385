@@ -1,11 +1,11 @@
 /**
  *  name: Time Library
  *  author: Michael Pierce
- *  version: 1.0.0
+ *  version: 1.0.1
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Initial commit
- *  dateReleased: 2022-08-28
+ *  releaseNotes: Fix capitalization error
+ *  dateReleased: 2022-08-29
  *
  *  Copyright 2022 Michael Pierce
  *
@@ -30,7 +30,7 @@ library (
 )
 
 Boolean currentTimeIsBetween(firstTime, secondTime) {
-   long currtime = now()
+   long currTime = now()
    long start = timeToday(firstTime, location.timeZone).time
    long stop = timeToday(secondTime, location.timeZone).time
    return (start == stop && currTime >= start && currTime - start < 60000) || (start <= stop ? currTime >= start && currTime < stop : currTime < stop || currTime >= start)
