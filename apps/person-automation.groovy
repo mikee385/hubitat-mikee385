@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.0" }
+String getVersionNum() { return "10.0.1" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -235,7 +235,7 @@ def personAsleep() {
     person.asleep()
 }
 
-def personHandler_PresenceAlert() {
+def personHandler_PresenceAlert(evt) {
     logDebug("personHandler_PresenceAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("personAwake")
@@ -252,7 +252,7 @@ def personHandler_PresenceAlert() {
     }
 }
 
-def personHandler_SleepAlert() {
+def personHandler_SleepAlert(evt) {
     logDebug("personHandler_SleepAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("personAwake")
