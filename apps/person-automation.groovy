@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.2" }
+String getVersionNum() { return "10.0.3" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -140,9 +140,6 @@ def initialize() {
         subscribe(person, "sleeping", personHandler_AsleepWhenAway)
     }
     if (alertActiveWhenAsleep) {
-        if (bedroomDoor) {
-            subscribe(bedroomDoor, "contact.open", doorHandler_ActiveWhenAsleep)
-        }
         for (door in otherDoors) {
             subscribe(door, "contact.open", doorHandler_ActiveWhenAsleep)
         }
@@ -214,15 +211,21 @@ def doorHandler_SleepStatus(evt) {
     
     if (person.currentValue("presence") == "present") {
         if (evt.value == "closed") {
-            if (currentTimeIsBetween(bedtimeStart, bedtimeEnd)) {
-                person.asleep()
-            } else if (asleepWhenClosed) {
-                runIn(10*60, personAsleep)
-            }
-        } else {
-            if (currentTimeIsBetween(bedtimeEnd, bedtimeStart)) {
-                person.awake()
-            }
+            if (person.currentValue("sleeping") == "not sleeping") {
+                if (currentTimeIsBetween(bedtimeStart, bedtimeEnd)) {
+                    person.asleep()
+                } else if (asleepWhenClosed) {
+                    runIn(10*60, personAsleep)
+                }
+            } 
+        } else if (evt.value == "open") {
+            if (person.currentValue("sleeping") == "sleeping") {
+                if (currentTimeIsBetween(bedtimeEnd, bedtimeStart)) {
+                    person.awake()
+                } else if (alertActiveWhenAsleep) {
+                    personToNotify.deviceNotification("$person is active!")
+                }
+            } 
         }
     }
 }

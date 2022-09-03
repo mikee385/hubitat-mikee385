@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "10.0.2",
+    "version": "10.0.3",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Prevent awake during bedtime",
-    "dateReleased": "2022-09-02",
+    "releaseNotes": "Prevent redundant active and awake messages",
+    "dateReleased": "2022-09-03",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",
