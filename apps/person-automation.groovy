@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.1" }
+String getVersionNum() { return "10.0.2" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -210,6 +210,8 @@ def modeHandler_SleepSwitch(evt) {
 def doorHandler_SleepStatus(evt) {
     logDebug("doorHandler_SleepStatus: ${evt.device} changed to ${evt.value}")
     
+    unschedule("personAsleep")
+    
     if (person.currentValue("presence") == "present") {
         if (evt.value == "closed") {
             if (currentTimeIsBetween(bedtimeStart, bedtimeEnd)) {
@@ -220,15 +222,9 @@ def doorHandler_SleepStatus(evt) {
         } else {
             if (currentTimeIsBetween(bedtimeEnd, bedtimeStart)) {
                 person.awake()
-            } else if (asleepWhenClosed) {
-                runIn(10*60, personAwake)
             }
         }
     }
-}
-
-def personAwake() {
-    person.awake()
 }
 
 def personAsleep() {
@@ -238,7 +234,6 @@ def personAsleep() {
 def personHandler_PresenceAlert(evt) {
     logDebug("personHandler_PresenceAlert: ${evt.device} changed to ${evt.value}")
     
-    unschedule("personAwake")
     unschedule("personAsleep")
     
     if (evt.value == "present") {
@@ -255,7 +250,6 @@ def personHandler_PresenceAlert(evt) {
 def personHandler_SleepAlert(evt) {
     logDebug("personHandler_SleepAlert: ${evt.device} changed to ${evt.value}")
     
-    unschedule("personAwake")
     unschedule("personAsleep")
     
     if (evt.value == "sleeping") {
