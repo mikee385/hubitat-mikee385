@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "People Alerts, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,15 +36,11 @@ preferences {
             input "primaryPerson", "device.PersonStatus", title: "Person", multiple: false, required: true
             input "alertPrimaryArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
             input "alertPrimaryDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
-            input "alertPrimaryAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
-            input "alertPrimaryAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
         }
         section("Secondary Person") {
             input "secondaryPerson", "device.PersonStatus", title: "Person", multiple: false, required: true
             input "alertSecondaryArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
             input "alertSecondaryDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
-            input "alertSecondaryAwake", "bool", title: "Alert when Awake?", required: true, defaultValue: false
-            input "alertSecondaryAsleep", "bool", title: "Alert when Asleep?", required: true, defaultValue: false
         }
         section("Combined") {
             input "combinedArrivedSeconds", "number", title: "Arrival Time Window (seconds)", required: true, defaultValue: 15
@@ -54,8 +50,6 @@ preferences {
         }
         section("Guest") {
             input "guest", "capability.presenceSensor", title: "Guest", multiple: false, required: true
-            input "alertGuestArrived", "bool", title: "Alert when Arrived?", required: true, defaultValue: false
-            input "alertGuestDeparted", "bool", title: "Alert when Departed?", required: true, defaultValue: false
             input "alertReminder", "bool", title: "Reminder Alert?", required: true, defaultValue: false
         }
         section {
@@ -93,10 +87,7 @@ def initialize() {
 
     // Person Alerts
     subscribe(primaryPerson, "presence", personHandler_PrimaryPresenceAlert)
-    subscribe(primaryPerson, "sleeping", personHandler_PrimarySleepingAlert)
     subscribe(secondaryPerson, "presence", personHandler_SecondaryPresenceAlert)
-    subscribe(secondaryPerson, "sleeping", personHandler_SecondarySleepingAlert)
-    subscribe(guest, "presence", personHandler_GuestPresenceAlert)
 
     // Guest Reminder
     subscribe(primaryPerson, "presence.not present", personHandler_GuestReminder)
@@ -137,20 +128,6 @@ def personHandler_PrimaryPresenceAlert(evt) {
     }
 }
 
-def personHandler_PrimarySleepingAlert(evt) {
-    logDebug("personHandler_PrimarySleepingAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "not sleeping") {
-        if (alertPrimaryAwake) {
-            personToNotify.deviceNotification("${primaryPerson} is awake!")
-        }
-    } else if (evt.value == "sleeping") {
-        if (alertPrimaryAsleep) {
-            personToNotify.deviceNotification("${primaryPerson} is asleep!")
-        }
-    }
-}
-
 def personHandler_SecondaryPresenceAlert(evt) {
     logDebug("personHandler_SecondaryPresenceAlert: ${evt.device} changed to ${evt.value}")
     
@@ -179,20 +156,6 @@ def personHandler_SecondaryPresenceAlert(evt) {
             }
         } else {
             runIn(combinedDepartedSeconds, secondaryDepartedAlert)
-        }
-    }
-}
-
-def personHandler_SecondarySleepingAlert(evt) {
-    logDebug("personHandler_SecondarySleepingAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "not sleeping") {
-        if (alertSecondaryAwake) {
-            personToNotify.deviceNotification("${secondaryPerson} is awake!")
-        }
-    } else if (evt.value == "sleeping") {
-        if (alertSecondaryAsleep) {
-            personToNotify.deviceNotification("${secondaryPerson} is asleep!")
         }
     }
 }
@@ -236,20 +199,6 @@ def combinedDepartedAlert() {
 
     if (alertCombinedDeparted) {
         personToNotify.deviceNotification("${primaryPerson} and ${secondaryPerson} have left!")
-    }
-}
-
-def personHandler_GuestPresenceAlert(evt) {
-    logDebug("personHandler_GuestPresenceAlert: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "present") {
-        if (alertGuestArrived) {
-            personToNotify.deviceNotification("Guests have arrived!")
-        }
-    } else if (evt.value == "not present") {
-        if (alertGuestDeparted) {
-            personToNotify.deviceNotification("Guests have left!")
-        }
     }
 }
 
