@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.1.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -42,7 +42,8 @@ preferences {
         }
         section("Sensor") {
             input "sensor", "capability.relativeHumidityMeasurement", title: "Bathroom Sensor", multiple: false, required: true
-            input "reportTimeInterval", "number", title: "Reporting Interval (minutes)", required: true, defaultValue: 30
+            input "reportMinimumInterval", "number", title: "Minimum Reporting Interval (minutes)", required: false, defaultValue: 5
+            input "reportMaximumInterval", "number", title: "Maximum Reporting Interval (minutes)", required: false, defaultValue: 30
             input "reportHumidityChange", "decimal", title: "Humidity Change Reported (%)", required: true, defaultValue: 5
         }
         section("Turn Fan On") {
@@ -106,9 +107,19 @@ def initialize() {
         state.status = "normal"
     }
     
-    state.minimumRiseRate = reportHumidityChange / reportTimeInterval
+    if (reportMaximumInterval) {
+        state.minimumRiseRate = reportHumidityChange / reportMaximumInterval
+    } else {
+        state.minimumRiseRate = rapidRiseRate
+    } 
+    
     state.risingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidRiseRate))
     state.fallingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidFallRate))
+    
+    if (reportMinimumInterval) {
+        state.risingMinutesToWait = Math.max(state.risingMinutesToWait, reportMinimumInterval+1)
+        state.fallingMinutesToWait = Math.max(state.fallingMinutesToWait, reportMinimumInterval+1)
+    }
     
     // Fan Switch
     subscribe(sensor, "humidity", humidityHandler_FanSwitch)
