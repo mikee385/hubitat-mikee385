@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "11.1.0" }
+String getVersionNum() { return "12.0.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -44,8 +44,9 @@ preferences {
             input "pauseButton", "capability.pushableButton", title: "Pause/Resume Button", multiple: false, required: false
             input "pauseDoors", "capability.contactSensor", title: "Pause when Opened", multiple: true, required: false
         }
-        section {
-            input "people", "capability.presenceSensor", title: "People", multiple: true, required: false
+        section("People") {
+            input "everydayPeople", "capability.presenceSensor", title: "Every Day", multiple: true, required: false
+            input "weekendPeople", "capability.presenceSensor", title: "Weekend Only", multiple: true, required: false
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -79,8 +80,11 @@ def initialize() {
     }
     
     // Clean Status
-    for (person in people) {
-        subscribe(person, "presence", personHandler)
+    for (person in everydayPeople) {
+        subscribe(person, "presence", everydayPersonHandler)
+    }
+    for (person in weekendPeople) {
+        subscribe(person, "presence", weekendPersonHandler)
     }
     subscribe(roomba, "rechrgTm", rechrgTmHandler)
     if (pauseButton) {
@@ -118,6 +122,32 @@ def initialize() {
         state.endTime = now()
         state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     }
+}
+
+def isWeekend() {
+    def date = new Date()
+    def day = date[Calendar.DAY_OF_WEEK]
+    
+    return day == 1 || day == 7
+}
+
+def getPeople() {
+    def people = everydayPeople.collect()
+    if (isWeekend()) {
+        people.addAll(weekendPeople)
+    }
+    
+    return people
+}
+
+def everydayPersonHandler(evt) {
+    personHandler(evt)
+}
+
+def weekendPersonHandler(evt) {
+    if (isWeekend()) {
+        personHandler(evt)
+    } 
 }
 
 def personHandler(evt) {
@@ -177,7 +207,7 @@ def doorOpenedHandler(evt) {
 
 def startCycle() {
     def everyoneAway = true
-    for (person in people) {
+    for (person in getPeople()) {
         if (person.currentValue("presence") == "present") {
             everyoneAway = false
             break
@@ -216,7 +246,7 @@ def cancelCycle() {
 
 def checkCycle() {
     def anyoneHome = false
-    for (person in people) {
+    for (person in getPeople()) {
         if (person.currentValue("presence") == "present") {
             anyoneHome = true
             break
