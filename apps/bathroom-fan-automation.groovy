@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "6.1.0" }
+String getVersionNum() { return "6.2.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -234,6 +234,7 @@ Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.""
             smartFanOff()
             logInfo(
 """$fan turned off due to non-rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min. 
+Current: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}%, Target: ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%
 Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
             )
         }
@@ -284,6 +285,7 @@ def fallingRateTimeout() {
         smartFanOff()
         logInfo(
 """$fan turned off due to exceeding time for rapid falling rate: ${state.fallingMinutesToWait} min. 
+Current: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}%, Target: ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%
 Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
         )
     }
@@ -306,6 +308,7 @@ def totalRuntimeExceeded() {
     smartFanOff()
     logInfo(
 """$fan turned off due to exceeding total time: ${maximumRuntime} min. 
+Current: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}%, Target: ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%
 Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
     )
 }

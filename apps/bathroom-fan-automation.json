@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "6.1.0",
+    "version": "6.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add minimum and maximum reporting intervals",
-    "dateReleased": "2022-09-08",
+    "releaseNotes": "Add logging of current humidity and target humidity",
+    "dateReleased": "2022-09-11",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",
