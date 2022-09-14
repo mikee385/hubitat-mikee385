@@ -14,7 +14,7 @@
  *
  */
 
-String getVersionNum() { return "1.1.0" }
+String getVersionNum() { return "1.2.0" }
 String getVersionLabel() { return "Bedtime Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -38,7 +38,7 @@ preferences {
             input "routine", "capability.switch", title: "Routine", multiple: false, required: true  
         }
         section {
-            input "door", "capability.contactSensor", title: "Door", multiple: false, required: true  
+            input "doors", "capability.contactSensor", title: "Doors", multiple: true, required: true  
             input "startTime", "time", title: "Start Time", required: true
             input "endTime", "time", title: "End Time", required: true
         }
@@ -63,7 +63,9 @@ def updated() {
 
 def initialize() {
     // Bedtime Routine
-    subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
+    for (door in doors) {
+        subscribe(door, "contact.closed", doorHandler_BedtimeRoutine)
+    } 
     
     // Device Checks
     initializeDeviceChecks()

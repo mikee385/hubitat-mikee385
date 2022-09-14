@@ -1,11 +1,11 @@
 {
     "packageName": "Bedtime Automation",
     "author": "Michael Pierce",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Improve time range handling",
-    "dateReleased": "2022-08-28",
+    "releaseNotes": "Allow multiple doors as triggers",
+    "dateReleased": "2022-09-13",
     "apps": [
         {
             "id": "2a2230aa-92e5-4c6c-a11f-fd3ac20e8e78",
