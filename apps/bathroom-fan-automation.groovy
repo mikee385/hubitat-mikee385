@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "6.2.0" }
+String getVersionNum() { return "6.2.1" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -91,7 +91,7 @@ def initialize() {
         state.durationMinutes = 0
     }
     
-    humidity = sensor.currentValue("humidity")
+    humidity = BigDecimal.valueOf(sensor.currentValue("humidity"))
     if (state.currentHumidity == null) {
         state.currentHumidity = humidity
     }
@@ -145,7 +145,7 @@ def logInfo(msg) {
 def humidityHandler_FanSwitch(evt) {
     //logDebug("humidityHandler_FanSwitch: ${evt.device} changed to ${evt.value}")
     
-    humidity = sensor.currentValue("humidity")
+    humidity = BigDecimal.valueOf(sensor.currentValue("humidity"))
     handleHumidity(humidity)
 }
 
