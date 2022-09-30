@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.3" }
+String getVersionNum() { return "10.1.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -223,7 +223,7 @@ def doorHandler_SleepStatus(evt) {
                 if (currentTimeIsBetween(bedtimeEnd, bedtimeStart)) {
                     person.awake()
                 } else if (alertActiveWhenAsleep) {
-                    personToNotify.deviceNotification("$person is active!")
+                    personToNotify.deviceNotification("$person is out during bedtime!")
                 }
             } 
         }
@@ -310,7 +310,7 @@ def doorHandler_ActiveWhenAsleep(evt) {
     logDebug("doorHandler_ActiveWhenAsleep: ${evt.device} changed to ${evt.value}")
     
     if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "sleeping") {
-        personToNotify.deviceNotification("$person is active!")
+        personToNotify.deviceNotification("$person is active during bedtime!")
     }
 }
 
