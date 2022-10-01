@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "Thermostat Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -46,6 +46,10 @@ preferences {
         section {
             input "workdayTime", "time", title: "Workday Resume Time", required: false
             input "sleepTime", "time", title: "Sleep Resume Time", required: false
+        }
+        section {
+            input "alertTooHot", "bool", title: "Alert when Too Hot?", required: true, defaultValue: true
+            input "alertTooCold", "bool", title: "Alert when Too Cold?", required: true, defaultValue: true
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -183,9 +187,9 @@ def checkTemperatures(sensors, threshold) {
     for (sensor in sensors) {
         def temperatureDifference = sensor.currentValue("temperature") - averageTemperature
         //log.info "$sensor: ${sensor.currentValue('temperature')} - ${averageTemperature} = $temperatureDifference"
-        if (temperatureDifference >= threshold) {
+        if (alertTooHot && temperatureDifference >= threshold) {
             temperatureAlert(sensor, "${sensor} is too hot! (${temperatureDifference}°)")
-        } else if (temperatureDifference <= -threshold) {
+        } else if (alertTooCold && temperatureDifference <= -threshold) {
             temperatureAlert(sensor, "${sensor} is too cold! (${temperatureDifference}°)")
         }
     }
