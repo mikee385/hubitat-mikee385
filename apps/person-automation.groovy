@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.1.0" }
+String getVersionNum() { return "10.2.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -213,7 +213,7 @@ def doorHandler_SleepStatus(evt) {
         if (evt.value == "closed") {
             if (person.currentValue("sleeping") == "not sleeping") {
                 if (currentTimeIsBetween(bedtimeStart, bedtimeEnd)) {
-                    person.asleep()
+                    runIn(10*60, personAsleep)
                 } else if (asleepWhenClosed) {
                     runIn(10*60, personAsleep)
                 }
