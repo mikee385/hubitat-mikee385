@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.2.0" }
+String getVersionNum() { return "10.3.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -351,8 +351,6 @@ def presenceCheck(evt) {
                 deviceMonitor.addInactiveMessage(item.device.id, "${item.device}* - No Activity")
             }
         }
-    } else {
-        deviceMonitor.addInactiveMessage(person.id, "${person}* - No Activity")
     }
 }
 
