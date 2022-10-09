@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "10.3.0",
+    "version": "10.4.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove parent device from inactive messages",
-    "dateReleased": "2022-10-05",
+    "releaseNotes": "Set person awake if bedroom door open when bedtime ends",
+    "dateReleased": "2022-10-08",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

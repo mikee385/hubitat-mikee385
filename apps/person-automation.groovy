@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.3.0" }
+String getVersionNum() { return "10.4.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -125,6 +125,12 @@ def initialize() {
     }
     if (bedroomDoor) {
         subscribe(bedroomDoor, "contact", doorHandler_SleepStatus)
+        
+        if (bedtimeEnd) {
+            def currentTime = new Date()
+            def wakeTime = timeToday(bedtimeEnd)
+            schedule("$currentTime.seconds $wakeTime.minutes $wakeTime.hours * * ? *", wakeTimeHandler_SleepStatus)
+        }
     }
     
     // Alerts
@@ -208,6 +214,7 @@ def doorHandler_SleepStatus(evt) {
     logDebug("doorHandler_SleepStatus: ${evt.device} changed to ${evt.value}")
     
     unschedule("personAsleep")
+    unschedule("personAwake")
     
     if (person.currentValue("presence") == "present") {
         if (evt.value == "closed") {
@@ -234,10 +241,19 @@ def personAsleep() {
     person.asleep()
 }
 
+def wakeTimeHandler_SleepStatus(evt) {
+    logDebug("wakeTimeHandler_SleepStatus")
+    
+    if (person.currentValue("sleeping") == "sleeping" && bedroomDoor.currentValue("contact") == "open") {
+        person.awake()
+    } 
+}
+
 def personHandler_PresenceAlert(evt) {
     logDebug("personHandler_PresenceAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("personAsleep")
+    unschedule("personAwake")
     
     if (evt.value == "present") {
         if (alertArrived) {
@@ -254,6 +270,7 @@ def personHandler_SleepAlert(evt) {
     logDebug("personHandler_SleepAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("personAsleep")
+    unschedule("personAwake")
     
     if (evt.value == "sleeping") {
         if (alertAsleep) {
