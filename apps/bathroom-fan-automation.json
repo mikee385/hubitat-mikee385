@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "6.2.1",
+    "version": "6.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix issue where sensor values are integers instead of decimals",
-    "dateReleased": "2022-09-15",
+    "releaseNotes": "Use minimum rates to maintain rising and falling states longer",
+    "dateReleased": "2022-10-14",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",

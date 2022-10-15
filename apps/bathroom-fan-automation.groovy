@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "6.2.1" }
+String getVersionNum() { return "6.3.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -107,14 +107,11 @@ def initialize() {
         state.status = "normal"
     }
     
-    if (reportMaximumInterval) {
-        state.minimumRiseRate = reportHumidityChange / reportMaximumInterval
-    } else {
-        state.minimumRiseRate = rapidRiseRate
-    } 
+    state.minimumRiseRate = Math.min(rapidRiseRate, 0.2)
+    state.minimumFallRate = Math.max(rapidFallRate, -0.2)
     
-    state.risingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidRiseRate))
-    state.fallingMinutesToWait = Math.round(reportHumidityChange / Math.abs(rapidFallRate))
+    state.risingMinutesToWait = Math.round(reportHumidityChange / Math.abs(state.minimumRiseRate))
+    state.fallingMinutesToWait = Math.round(reportHumidityChange / Math.abs(state.minimumFallRate))
     
     if (reportMinimumInterval) {
         state.risingMinutesToWait = Math.max(state.risingMinutesToWait, reportMinimumInterval+1)
@@ -194,9 +191,9 @@ def handleHumidity(humidity) {
         if (state.rate <= rapidFallRate) {
             state.status = "falling"
             logInfo("$fan falling due to rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
-        } else if (state.rate < rapidRiseRate) {
+        } else if (state.rate < state.minimumRiseRate) {
             state.status = "peak"
-            logInfo("$fan peak due to non-rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
+            logInfo("$fan peak due to slow rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
         }
         
     } else if (state.status == "peak") {
@@ -219,9 +216,6 @@ Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.""
         if (state.rate >= rapidRiseRate) {
             state.status = "rising"
             logInfo("$fan rising due to rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
-        } else if (state.rate >= state.minimumRiseRate) {
-            state.status = "rising"
-            logInfo("$fan rising due to minimum rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min")
         } else if (state.currentHumidity <= state.targetHumidity && state.currentHumidity < maximumThreshold) {
             state.status = "normal"
             smartFanOff()
@@ -229,11 +223,11 @@ Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min.""
 """$fan turned off due to dropping below target: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}% < ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%.
 Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
             )
-        } else if (state.rate > rapidFallRate && state.currentHumidity < maximumThreshold) {
+        } else if (state.rate > state.minimumFallRate && state.currentHumidity < maximumThreshold) {
             state.status = "normal"
             smartFanOff()
             logInfo(
-"""$fan turned off due to non-rapid rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min. 
+"""$fan turned off due to slow rate: ${state.rate.setScale(2, RoundingMode.HALF_UP)}%/min. 
 Current: ${state.currentHumidity.setScale(1, RoundingMode.HALF_UP)}%, Target: ${state.targetHumidity.setScale(1, RoundingMode.HALF_UP)}%
 Total runtime: ${state.durationMinutes.setScale(0, RoundingMode.HALF_UP)} min."""
             )
