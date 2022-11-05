@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.0" }
+String getVersionNum() { return "11.0.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -40,7 +40,7 @@ preferences {
         }
         section("Outdoor Sensors") {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
-            input "cameraNotification", "capability.switch", title: "Camera Notifications", multiple: false, required: false
+            input "cameras", "capability.switch", title: "Cameras", multiple: true, required: false
         }
         section("Sprinklers") {
             input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
@@ -105,9 +105,11 @@ def occupied() {
         }
     }
     
-    // Camera Notification
-    unschedule("turnOn_CameraNotification")
-    cameraNotification.off()
+    // Cameras
+    unschedule("turnOn_Cameras")
+    for (camera in cameras) {
+        camera.off()
+    } 
     
     // Sprinkler Zones
     for (sprinklerZone in sprinklerZones) {
@@ -128,8 +130,8 @@ def vacant() {
         light.off()
     }
     
-    // Camera Notification
-    runIn(15, turnOn_CameraNotification)
+    // Cameras
+    runIn(15, turnOn_Cameras)
     
     // Sprinkler Zones
     if (state.sprinklersPaused) {
@@ -139,8 +141,10 @@ def vacant() {
     }
 }
 
-def turnOn_CameraNotification() {
-    cameraNotification.on()
+def turnOn_Cameras() {
+    for (camera in cameras) {
+        camera.on()
+    } 
 }
 
 def doorHandler_Occupancy(evt) {
