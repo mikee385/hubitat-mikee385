@@ -1,11 +1,11 @@
 {
     "packageName": "Laundry Room Automation",
     "author": "Michael Pierce",
-    "version": "11.0.0",
+    "version": "12.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove Bedtime routine",
-    "dateReleased": "2022-08-28",
+    "releaseNotes": "Remove light timeout and separate light and motion",
+    "dateReleased": "2022-11-04",
     "apps": [
         {
             "id": "ba623fa4-8932-4ec5-8820-36ed33d08308",

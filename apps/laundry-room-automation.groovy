@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "11.0.0" }
+String getVersionNum() { return "12.0.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -34,9 +34,9 @@ definition(
 preferences {
     page(name: "settings", title: "Laundry Room Automation", install: true, uninstall: true) {
         section {
-            input "light", "device.GEZ-WavePlusMotionSwitchComboDriver", title: "Light", multiple: false, required: true
+            input "light", "capability.switch", title: "Light", multiple: false, required: true
+            input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
-            input "gate", "capability.contactSensor", title: "Gate", multiple: false, required: false
         }
         section("Laundry") {
             input "laundry", "device.ApplianceStatus", title: "Laundry", multiple: false, required: true
@@ -71,27 +71,18 @@ def updated() {
 def initialize() {
     // Light Switch
     subscribe(door, "contact.open", doorHandler_LightSwitch)
-    if (gate) {
-        subscribe(gate, "contact.open", doorHandler_LightSwitch)
-    }
     subscribe(light, "switch", switchHandler_LightSwitch)
-    subscribe(light, "motion", motionHandler_LightSwitch)
+    subscribe(motionSensor, "motion", motionHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
 
-    // Light Timeout
-    subscribe(door, "contact", doorHandler_LightTimeout)
-    
     // Laundry Status
     subscribe(washer, "currentState", washerHandler_LaundryStatus)
     subscribe(dryer, "currentState", dryerHandler_LaundryStatus)
-    subscribe(light, "motion.active", switchHandler_LaundryStatus)
+    subscribe(motionSensor, "motion.active", switchHandler_LaundryStatus)
 
     // Light Alert
     subscribe(door, "contact", deviceHandler_LightAlert)
-    if (gate) {
-        subscribe(gate, "contact", deviceHandler_LightAlert)
-    }
-    subscribe(light, "motion", deviceHandler_LightAlert)
+    subscribe(motionSensor, "motion", deviceHandler_LightAlert)
     subscribe(light, "switch", deviceHandler_LightAlert)
     subscribe(personToNotify, "sleeping", personHandler_LightAlert)
     
@@ -134,7 +125,7 @@ def switchHandler_LightSwitch(evt) {
     logDebug("switchHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "on") {
-        if (light.currentValue("motion") != "active") {
+        if (motionSensor.currentValue("motion") != "active") {
             runIn(60, lightOff)
         }
     } else {
@@ -161,27 +152,9 @@ def modeHandler_LightSwitch(evt) {
 def lightOff() {
     logDebug("lightOff")
     
-    if (light.currentValue("motion") != "active") {
+    if (motionSensor.currentValue("motion") != "active") {
         light.off()
     } 
-}
-
-def doorHandler_LightTimeout(evt) {
-    logDebug("doorHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "closed") {
-        unsubscribe("switchHandler_LightTimeout")
-        light.setLightTimeout("5 minutes")
-    } else {
-        subscribe(light, "switch.off", switchHandler_LightTimeout)
-    }
-}
-
-def switchHandler_LightTimeout(evt) {
-    logDebug("switchHandler_LightTimeout: ${evt.device} changed to ${evt.value}")
-    
-    unsubscribe("switchHandler_LightTimeout")
-    light.setLightTimeout("1 minute")
 }
 
 def washerRunning(currentState) {
@@ -252,7 +225,7 @@ def deviceHandler_LightAlert(evt) {
     logDebug("deviceHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     unschedule("lightAlert")
-    if (light.currentValue("switch") == "on" && light.currentValue("motion") == "inactive") {
+    if (light.currentValue("switch") == "on" && motionSensor.currentValue("motion") == "inactive") {
         if (personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*6, lightAlert)
         }
