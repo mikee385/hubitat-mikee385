@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.0" }
+String getVersionNum() { return "12.1.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -68,6 +68,9 @@ def updated() {
 }
 
 def initialize() {
+    // Child Device
+    def child = childDevice()
+
     // Create state
     if (state.startTime == null) {
         state.startTime = now()
@@ -95,6 +98,7 @@ def initialize() {
     for (pauseDoor in pauseDoors) {
         subscribe(pauseDoor, "contact.open", doorOpenedHandler)
     }
+    subscribe(childDevice(), "switch.off", switchOffHandler)
 
     // Runtime Tracking
     subscribe(roomba, "phase", phaseHandler)
@@ -122,6 +126,15 @@ def initialize() {
         state.endTime = now()
         state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     }
+}
+
+def childDevice() {
+    def childID = "roomba:" + app.getId()
+    def child = getChildDevice(childID)
+    if (!child) {
+        child = addChildDevice("hubitat", "Virtual Switch", childID, 1234, [label: app.label, isComponent: false])
+    }
+    return child
 }
 
 def isWeekend() {
@@ -205,29 +218,41 @@ def doorOpenedHandler(evt) {
     roomba.pause()
 }
 
-def startCycle() {
-    def everyoneAway = true
-    for (person in getPeople()) {
-        if (person.currentValue("presence") == "present") {
-            everyoneAway = false
-            break
-        }
-    }
+def switchOffHandler(evt) {
+    logDebug("switchOffHandler: ${evt.device} changed to ${evt.value}")
 
-     if (currentTimeIsBetween(roombaStartTime, location.sunset) && everyoneAway) {
-        if (roomba.currentValue("consumableStatus") == "maintenance_required") {
-            personToNotify.deviceNotification("$roomba could not start because the bin is full!")
-        } else if (roomba.currentValue("consumableStatus") == "missing") {
-            personToNotify.deviceNotification("$roomba could not start because the bin is missing!")
-        } else if (roomba.currentValue("consumableStatus") != "good") {
-            personToNotify.deviceNotification("$roomba could not start because of an unknown error with the bin!")
-        } else if (roomba.currentValue("battery") <= 10) {
-            personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
-        } else if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
-            roomba.start()
-        } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
-            roomba.resume()
+    unschedule("checkCycle")
+    roomba.stop()
+}
+
+def startCycle() {
+    if (childDevice().currentValue("switch") == "on") {
+        def everyoneAway = true
+        for (person in getPeople()) {
+            if (person.currentValue("presence") == "present") {
+                everyoneAway = false
+                break
+            }
         }
+
+         if (currentTimeIsBetween(roombaStartTime, location.sunset) && everyoneAway) {
+            if (roomba.currentValue("consumableStatus") == "maintenance_required") {
+                personToNotify.deviceNotification("$roomba could not start because the bin is full!")
+            } else if (roomba.currentValue("consumableStatus") == "missing") {
+                personToNotify.deviceNotification("$roomba could not start because the bin is missing!")
+            } else if (roomba.currentValue("consumableStatus") != "good") {
+                personToNotify.deviceNotification("$roomba could not start because of an unknown error with the bin!")
+            } else if (roomba.currentValue("battery") <= 10) {
+                personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
+            } else if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
+                roomba.start()
+            } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
+                roomba.resume()
+            }
+        }
+    } else {
+        unschedule("checkCycle")
+        roomba.stop()
     }
 }
 
@@ -245,18 +270,23 @@ def cancelCycle() {
 }
 
 def checkCycle() {
-    def anyoneHome = false
-    for (person in getPeople()) {
-        if (person.currentValue("presence") == "present") {
-            anyoneHome = true
-            break
+    if (childDevice().currentValue("switch") == "on") {
+        def anyoneHome = false
+        for (person in getPeople()) {
+            if (person.currentValue("presence") == "present") {
+                anyoneHome = true
+                break
+            }
         }
-    }
-    
-    if (anyoneHome) {
+        
+        if (anyoneHome) {
+            unschedule("checkCycle")
+            roomba.stop()
+        }
+    } else {
         unschedule("checkCycle")
         roomba.stop()
-    }
+    } 
 }
 
 def phaseHandler(evt) {
