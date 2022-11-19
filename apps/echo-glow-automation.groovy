@@ -14,12 +14,14 @@
  *
  */
  
-String getVersionNum() { return "7.2.0" }
+String getVersionNum() { return "8.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
 #include mikee385.time-library
+
+def getDaysOfWeek() { ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] }
 
 definition(
     name: "Echo Glow Automation",
@@ -60,6 +62,10 @@ preferences {
             input "rokuRemotes", "device.RokuTV", title: "Roku", multiple: true, required: false
             input "bedtimeNowPause", "bool", title: "Pause when Bedtime Now?", required: true, defaultValue: false
             input "naptimeNowPause", "bool", title: "Pause when Naptime Now?", required: true, defaultValue: false
+        }
+        section("Daily Schedule") {
+            input "daysToNotify", "enum", title: "Days of the Week", multiple: true, required: false, options: daysOfWeek
+            input "timeToNotify", "time", title: "Time", required: true, defaultValue: "18:55"
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
@@ -156,6 +162,13 @@ def initialize() {
     }
     subscribe(location, "mode", modeHandler_Routine)
     
+    // Daily Schedule
+    scheduleBedtimeTimer()
+    
+    def resetToday = timeToday("23:59")
+    def currentTime = new Date()
+    schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtimeTimer)
+    
     // Device Checks
     initializeDeviceChecks()
     
@@ -170,6 +183,18 @@ def initialize() {
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
     state.nextUrl = "${getFullLocalApiServerUrl()}/next?access_token=$state.accessToken"
+}
+
+def scheduleBedtimeTimer() {
+    if (daysToNotify) {
+        def daysFilter = daysToNotify.collect { (daysOfWeek.indexOf(it)+1).toString() }.join(",")
+        def timeToNotifyToday = timeToday(timeToNotify)
+        schedule("0 $timeToNotifyToday.minutes $timeToNotifyToday.hours ? * $daysFilter *", bedtimeTimer)
+    }
+}
+
+def bedtimeTimer() {
+    bedtimeTimerRoutine.push()
 }
 
 def routineHandler_BedtimeTimer(evt) {
@@ -190,6 +215,7 @@ def bedtimeNow() {
 def routineHandler_BedtimeSoon(evt) {
     logDebug("routineHandler_BedtimeSoon: ${evt.device} changed to ${evt.value}")
     
+    unschedule("bedtimeTimer")
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
@@ -213,6 +239,7 @@ def routineHandler_BedtimeNow(evt) {
         unschedule("bedtimeNow")
     }
     
+    unschedule("bedtimeTimer")
     unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
@@ -340,6 +367,8 @@ def routineHandler_GlowsOff(evt) {
     
         state.lastRoutine = "GlowsOff"
     }
+    
+    scheduleBedtimeTimer()
 }
 
 def doorHandler_GlowsOff(evt) {
