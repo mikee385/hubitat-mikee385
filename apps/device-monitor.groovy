@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "Device Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -88,7 +88,9 @@ def childDevice() {
 def runDeviceCheck() {
     logDebug("runDeviceCheck")
 
-    childDevice().runDeviceCheck()
+    if (location.mode == "Home") {
+        childDevice().runDeviceCheck()
+    } 
 }
 
 def handler_DeviceCheck(evt) {
