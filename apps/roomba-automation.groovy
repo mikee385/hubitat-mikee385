@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.1.0" }
+String getVersionNum() { return "12.2.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -98,7 +98,7 @@ def initialize() {
     for (pauseDoor in pauseDoors) {
         subscribe(pauseDoor, "contact.open", doorOpenedHandler)
     }
-    subscribe(childDevice(), "switch.off", switchOffHandler)
+    subscribe(childDevice(), "switch", switchHandler)
 
     // Runtime Tracking
     subscribe(roomba, "phase", phaseHandler)
@@ -218,41 +218,42 @@ def doorOpenedHandler(evt) {
     roomba.pause()
 }
 
-def switchOffHandler(evt) {
-    logDebug("switchOffHandler: ${evt.device} changed to ${evt.value}")
+def switchHandler(evt) {
+    logDebug("switchHandler: ${evt.device} changed to ${evt.value}")
 
-    unschedule("checkCycle")
-    roomba.stop()
-}
-
-def startCycle() {
-    if (childDevice().currentValue("switch") == "on") {
-        def everyoneAway = true
-        for (person in getPeople()) {
-            if (person.currentValue("presence") == "present") {
-                everyoneAway = false
-                break
-            }
-        }
-
-         if (currentTimeIsBetween(roombaStartTime, location.sunset) && everyoneAway) {
-            if (roomba.currentValue("consumableStatus") == "maintenance_required") {
-                personToNotify.deviceNotification("$roomba could not start because the bin is full!")
-            } else if (roomba.currentValue("consumableStatus") == "missing") {
-                personToNotify.deviceNotification("$roomba could not start because the bin is missing!")
-            } else if (roomba.currentValue("consumableStatus") != "good") {
-                personToNotify.deviceNotification("$roomba could not start because of an unknown error with the bin!")
-            } else if (roomba.currentValue("battery") <= 10) {
-                personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
-            } else if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
-                roomba.start()
-            } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
-                roomba.resume()
-            }
-        }
+    if (evt.value == "on") {
+        startCycle()
     } else {
         unschedule("checkCycle")
         roomba.stop()
+    } 
+}
+
+def startCycle() {
+    def everyoneAway = true
+    for (person in getPeople()) {
+        if (person.currentValue("presence") == "present") {
+            everyoneAway = false
+            break
+        }
+    }
+
+    if (currentTimeIsBetween(roombaStartTime, location.sunset) && everyoneAway) {
+        if (childDevice().currentValue("switch") == "off") {
+            personToNotify.deviceNotification("Do you want to run $roomba?")
+        } else if (roomba.currentValue("consumableStatus") == "maintenance_required") {
+            personToNotify.deviceNotification("$roomba could not start because the bin is full!")
+        } else if (roomba.currentValue("consumableStatus") == "missing") {
+            personToNotify.deviceNotification("$roomba could not start because the bin is missing!")
+        } else if (roomba.currentValue("consumableStatus") != "good") {
+            personToNotify.deviceNotification("$roomba could not start because of an unknown error with the bin!")
+        } else if (roomba.currentValue("battery") <= 10) {
+            personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
+        } else if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
+            roomba.start()
+        } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
+            roomba.resume()
+        }
     }
 }
 
