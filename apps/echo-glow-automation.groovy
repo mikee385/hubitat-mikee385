@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "8.0.0" }
+String getVersionNum() { return "8.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -132,6 +132,9 @@ def updated() {
 }
 
 def initialize() {
+    // Child Device
+    def child = childDevice()
+    
     // Create state
     if (state.lastRoutine == null) {
         state.lastRoutine = ""
@@ -163,11 +166,14 @@ def initialize() {
     subscribe(location, "mode", modeHandler_Routine)
     
     // Daily Schedule
-    scheduleBedtimeTimer()
+    if (childDevice().currentValue("switch") == "on") {
+        scheduleBedtimeTimer()
     
-    def resetToday = timeToday("23:59")
-    def currentTime = new Date()
-    schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtimeTimer)
+        def resetToday = timeToday("23:59")
+        def currentTime = new Date()
+        schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtimeTimer)
+    }
+    subscribe(childDevice(), "switch", switchHandler_Schedule)
     
     // Device Checks
     initializeDeviceChecks()
@@ -183,6 +189,15 @@ def initialize() {
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
     state.nextUrl = "${getFullLocalApiServerUrl()}/next?access_token=$state.accessToken"
+}
+
+def childDevice() {
+    def childID = "echoGlow:" + app.getId()
+    def child = getChildDevice(childID)
+    if (!child) {
+        child = addChildDevice("hubitat", "Virtual Switch", childID, 1234, [label: app.label, isComponent: false])
+    }
+    return child
 }
 
 def scheduleBedtimeTimer() {
@@ -368,7 +383,9 @@ def routineHandler_GlowsOff(evt) {
         state.lastRoutine = "GlowsOff"
     }
     
-    scheduleBedtimeTimer()
+    if (childDevice().currentValue("switch") == "on") {
+        scheduleBedtimeTimer()
+    } 
 }
 
 def doorHandler_GlowsOff(evt) {
@@ -416,6 +433,17 @@ def modeHandler_Routine(evt) {
     if (evt.value == "Away") {
         glowsOffRoutine.push()
     }
+}
+
+def switchHandler_Schedule(evt) {
+    logDebug("switchHandler_Schedule: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value == "on") {
+        scheduleBedtimeTimer()
+    } else {
+        unschedule("bedtimeTimer")
+        unschedule("scheduleBedtimeTimer")
+    } 
 }
 
 def nextRoutine() {
