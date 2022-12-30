@@ -1,10 +1,10 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "8.1.0",
+    "version": "8.1.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add switch for enabling/disabling automation",
+    "releaseNotes": "Fix issue where bedtime schedule was not reset correctly",
     "dateReleased": "2022-12-30",
     "apps": [
         {

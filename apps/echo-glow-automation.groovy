@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "8.1.0" }
+String getVersionNum() { return "8.1.1" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -167,11 +167,7 @@ def initialize() {
     
     // Daily Schedule
     if (childDevice().currentValue("switch") == "on") {
-        scheduleBedtimeTimer()
-    
-        def resetToday = timeToday("23:59")
-        def currentTime = new Date()
-        schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtimeTimer)
+        initializeBedtimeSchedule()
     }
     subscribe(childDevice(), "switch", switchHandler_Schedule)
     
@@ -198,6 +194,14 @@ def childDevice() {
         child = addChildDevice("hubitat", "Virtual Switch", childID, 1234, [label: app.label, isComponent: false])
     }
     return child
+}
+
+def initializeBedtimeSchedule() {
+    scheduleBedtimeTimer()
+        
+    def resetToday = timeToday("23:59")
+    def currentTime = new Date()
+    schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtimeTimer)
 }
 
 def scheduleBedtimeTimer() {
@@ -439,7 +443,7 @@ def switchHandler_Schedule(evt) {
     logDebug("switchHandler_Schedule: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "on") {
-        scheduleBedtimeTimer()
+        initializeBedtimeSchedule()
     } else {
         unschedule("bedtimeTimer")
         unschedule("scheduleBedtimeTimer")
