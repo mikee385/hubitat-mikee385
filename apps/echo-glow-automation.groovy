@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "8.1.1" }
+String getVersionNum() { return "8.1.2" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -123,6 +123,12 @@ mappings {
 
 def installed() {
     initialize()
+}
+
+def uninstalled() {
+    for (device in getChildDevices()) {
+        deleteChildDevice(device.deviceNetworkId)
+    }
 }
 
 def updated() {
