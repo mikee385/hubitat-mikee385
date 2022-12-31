@@ -16,7 +16,7 @@
  
 import java.math.RoundingMode
  
-String getVersionNum() { return "6.3.0" }
+String getVersionNum() { return "6.4.0" }
 String getVersionLabel() { return "Bathroom Fan Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -107,8 +107,8 @@ def initialize() {
         state.status = "normal"
     }
     
-    state.minimumRiseRate = Math.min(rapidRiseRate, 0.2)
-    state.minimumFallRate = Math.max(rapidFallRate, -0.2)
+    state.minimumRiseRate = Math.min(rapidRiseRate, 1.0/6.0)
+    state.minimumFallRate = Math.max(rapidFallRate, -1.0/6.0)
     
     state.risingMinutesToWait = Math.round(reportHumidityChange / Math.abs(state.minimumRiseRate))
     state.fallingMinutesToWait = Math.round(reportHumidityChange / Math.abs(state.minimumFallRate))

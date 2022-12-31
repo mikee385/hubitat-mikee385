@@ -1,11 +1,11 @@
 {
     "packageName": "Bathroom Fan Automation",
     "author": "Michael Pierce",
-    "version": "6.3.0",
+    "version": "6.4.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use minimum rates to maintain rising and falling states longer",
-    "dateReleased": "2022-10-14",
+    "releaseNotes": "Minor change to minimum rising and falling rates",
+    "dateReleased": "2022-12-30",
     "apps": [
         {
             "id": "47b33df5-abb1-4296-903a-71bebc4c2565",
