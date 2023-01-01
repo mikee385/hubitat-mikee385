@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.0" }
+String getVersionNum() { return "12.1.0" }
 String getVersionLabel() { return "Laundry Room Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -44,10 +44,13 @@ preferences {
             input "dryer", "device.LGThinQDryer", title: "Dryer", required: true
         }
         section("Alerts") {
-            input "alertReminder", "bool", title: "Reminder when Laundry Not Moved?", required: true, defaultValue: false
             input "alertStarted", "bool", title: "Alert when Laundry Started?", required: true, defaultValue: false
             input "alertFinished", "bool", title: "Alert when Laundry Finished?", required: true, defaultValue: false
             input "alertReset", "bool", title: "Alert when Laundry Reset?", required: true, defaultValue: false
+        }
+        section("Reminder") {
+            input "reminderSwitch", "capability.switch", title: "Reminder Switch", multiple: false, required: false
+            input "alertReminder", "bool", title: "Alert when Laundry Not Moved?", required: true, defaultValue: false
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -88,8 +91,15 @@ def initialize() {
     
     // Laundry Alert
     subscribe(laundry, "status", laundryHandler_LaundryAlert)
-    subscribe(personToNotify, "presence", personHandler_LaundryAlert)
-    subscribe(personToNotify, "sleeping", personHandler_LaundryAlert)
+    
+    // Reminder Alert
+    if (reminderSwitch) {
+        subscribe(laundry, "status", laundryHandler_ReminderSwitch)
+        
+        subscribe(reminderSwitch, "switch", switchHandler_ReminderAlert)
+        subscribe(personToNotify, "presence", personHandler_ReminderAlert)
+        subscribe(personToNotify, "sleeping", personHandler_ReminderAlert)
+    }
     
     // Washer Pause Alert
     subscribe(washer, "currentState", washerHandler_WasherPauseAlert)
@@ -253,8 +263,6 @@ def laundryHandler_LaundryAlert(evt) {
     logDebug("laundryHandler_LaundryAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "running") {
-        unschedule("reminderAlert")
-        
         if (alertStarted) {
             personToNotify.deviceNotification("Laundry has started.")
         }
@@ -262,30 +270,46 @@ def laundryHandler_LaundryAlert(evt) {
         if (alertFinished) {
             personToNotify.deviceNotification("Laundry has finished.")
         }
-        
-        if (alertReminder && personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
-            runIn(60*5, reminderAlert)
-        }
     } else if (evt.value == "idle") {
-        unschedule("reminderAlert")
-        
         if (alertReset) {
             personToNotify.deviceNotification("Laundry has reset.")
         }
     }
 }
 
-def personHandler_LaundryAlert(evt) {
-    logDebug("personHandler_LaundryAlert: ${evt.device} changed to ${evt.value}")
+def laundryHandler_ReminderSwitch(evt) {
+    logDebug("laundryHandler_ReminderSwitch: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "finished") {
+        reminderSwitch.on()
+    } else {
+        reminderSwitch.off()
+    }
+}
+
+def switchHandler_ReminderAlert(evt) {
+    logDebug("switchHandler_ReminderAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        if (alertReminder && personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+            runIn(60*5, reminderAlert)
+        }
+    } else {
+        unschedule("reminderAlert")
+    }
+}
+
+def personHandler_ReminderAlert(evt) {
+    logDebug("personHandler_ReminderAlert: ${evt.device} changed to ${evt.value}")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
-        if (alertReminder && laundry.currentValue("status") == "finished") {
+        if (alertReminder && reminderSwitch.currentValue("switch") == "on") {
             reminderAlert()
         }
     } else {
         unschedule("reminderAlert")
         
-        if (alertReminder && laundry.currentValue("status") == "finished") {
+        if (alertReminder && reminderSwitch.currentValue("switch") == "on") {
             personToNotify.deviceNotification("Laundry has not been moved!")
         }
     }
