@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.0.1" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -76,10 +76,11 @@ def childDevice(name) {
     return child
 }
 
+def componentRefresh(cd) {}
+
 def componentOn(cd) {
     def child = getChildDevice(cd.deviceNetworkId)
     child.sendEvent(name: "switch", value: "on")
-    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
     
     def name = child.getDataValue("Name")
     if (name == "Occupied") {
@@ -91,6 +92,8 @@ def componentOn(cd) {
     } else {
         log.error "Unknown command name: $name"
     }
+    
+    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
 }
 
 def componentOff(cd) {
