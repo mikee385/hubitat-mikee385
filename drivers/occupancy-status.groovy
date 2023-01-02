@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.1.0" }
+String getVersionNum() { return "7.1.1" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -74,6 +74,7 @@ def childDevice(name) {
         child.updateSetting("logEnable", [value: "false", type: "bool"])
         child.updateSetting("txtEnable", [value: "false", type: "bool"])
         child.updateDataValue("Name", name)
+        child.sendEvent(name: "switch", value: "off")
     }
     return child
 }
