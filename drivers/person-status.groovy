@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "8.0.0" }
+String getVersionNum() { return "9.0.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -74,10 +74,40 @@ def childDevice(name) {
     def child = getChildDevice(childID)
     if (!child) {
         def childName = "${device.label ?: device.name}"
-        child = addChildDevice("mikee385", "Child Button", childID, [label: "$childName $name", isComponent: true])
-        child.setCommand(name)
+        child = addChildDevice("hubitat", "Generic Component Switch", childID, [label: "$childName $name", isComponent: true])
+        child.updateSetting("logEnable", [value: "false", type: "bool"])
+        child.updateSetting("txtEnable", [value: "false", type: "bool"])
+        child.updateDataValue("Name", name)
+        child.sendEvent(name: "switch", value: "off")
     }
     return child
+}
+
+def componentRefresh(cd) {}
+
+def componentOn(cd) {
+    def child = getChildDevice(cd.deviceNetworkId)
+    child.sendEvent(name: "switch", value: "on")
+    
+    def name = child.getDataValue("Name")
+    if (name == "Awake") {
+        awake()
+    } else if (name == "Asleep") {
+        asleep()
+    } else if (name == "Arrived") {
+        arrived()
+    } else if (name == "Departed") {
+        departed()
+    } else {
+        log.error "Unknown command name: $name"
+    }
+    
+    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
+}
+
+def componentOff(cd) {
+    def child = getChildDevice(cd.deviceNetworkId)
+    child.sendEvent(name: "switch", value: "off")
 }
 
 def awake() {
@@ -94,20 +124,6 @@ def arrived() {
 
 def departed() {
     sendEvent(name: "presence", value: "not present")
-}
-
-def runCommand(name) {
-    if (name == "Awake") {
-        awake()
-    } else if (name == "Asleep") {
-        asleep()
-    } else if (name == "Arrived") {
-        arrived()
-    } else if (name == "Departed") {
-        departed()
-    } else {
-        log.error "Unknown command name: $name"
-    }
 }
 
 def deviceNotification(message) {
