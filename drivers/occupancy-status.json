@@ -1,11 +1,11 @@
 {
     "packageName": "Occupancy Status",
     "author": "Michael Pierce",
-    "version": "6.0.0",
+    "version": "7.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add child buttons for each command",
-    "dateReleased": "2022-01-30",
+    "releaseNotes": "Change child buttons to Generic Component Switch",
+    "dateReleased": "2023-01-02",
     "drivers": [
         {
             "id": "9a0311c1-63d2-4d93-aee3-61aaf22dbe93",

@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "7.0.0" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -66,17 +66,22 @@ def initialize() {
 }
 
 def childDevice(name) {
-    def childID = "appliance:${device.getId()}:$name"
+    def childID = "occupancy:${device.getId()}:$name"
     def child = getChildDevice(childID)
     if (!child) {
         def childName = "${device.label ?: device.name}"
-        child = addChildDevice("mikee385", "Child Button", childID, [label: "$childName $name", isComponent: true])
-        child.setCommand(name)
+        child = addChildDevice("hubitat", "Generic Component Switch", childID, [label: "$childName $name", isComponent: true])
+        child.updateDataValue("Name", name)
     }
     return child
 }
 
-def runCommand(name) {
+def componentOn(cd) {
+    def child = getChildDevice(cd.deviceNetworkId)
+    child.sendEvent(name: "switch", value: "on")
+    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
+    
+    def name = child.getDataValue("Name")
     if (name == "Occupied") {
         occupied()
     } else if (name == "Checking") {
@@ -86,6 +91,11 @@ def runCommand(name) {
     } else {
         log.error "Unknown command name: $name"
     }
+}
+
+def componentOff(cd) {
+    def child = getChildDevice(cd.deviceNetworkId)
+    child.sendEvent(name: "switch", value: "off")
 }
 
 def occupied() {
