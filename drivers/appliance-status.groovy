@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "Appliance Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -70,10 +70,37 @@ def childDevice(name) {
     def child = getChildDevice(childID)
     if (!child) {
         def childName = "${device.label ?: device.name}"
-        child = addChildDevice("mikee385", "Child Button", childID, [label: "$childName $name", isComponent: true])
-        child.setCommand(name)
+        child = addChildDevice("hubitat", "Generic Component Switch", childID, [label: "$childName $name", isComponent: true])
+        child.updateSetting("logEnable", [value: "false", type: "bool"])
+        child.updateSetting("txtEnable", [value: "false", type: "bool"])
+        child.updateDataValue("Name", name)
     }
     return child
+}
+
+def componentRefresh(cd) {}
+
+def componentOn(cd) {
+    def child = getChildDevice(cd.deviceNetworkId)
+    child.sendEvent(name: "switch", value: "on")
+    
+    def name = child.getDataValue("Name")
+    if (name == "Start") {
+        start()
+    } else if (name == "Finish") {
+        finish()
+    } else if (name == "Reset") {
+        reset()
+    } else {
+        log.error "Unknown command name: $name"
+    }
+    
+    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
+}
+
+def componentOff(cd) {
+    def child = getChildDevice(cd.deviceNetworkId)
+    child.sendEvent(name: "switch", value: "off")
 }
 
 def on() {
@@ -100,16 +127,4 @@ def reset() {
     sendEvent(name: "status", value: "idle", descriptionText: "$device.displayName changed to idle")    
     sendEvent(name: "switch", value: "off")
     sendEvent(name: "resetTime", value: new Date())
-}
-
-def runCommand(name) {
-    if (name == "Start") {
-        start()
-    } else if (name == "Finish") {
-        finish()
-    } else if (name == "Reset") {
-        reset()
-    } else {
-        log.error "Unknown command name: $name"
-    }
 }
