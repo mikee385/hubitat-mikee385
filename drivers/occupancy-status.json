@@ -1,10 +1,10 @@
 {
     "packageName": "Occupancy Status",
     "author": "Michael Pierce",
-    "version": "7.0.1",
+    "version": "7.1.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix issue where child switch was not reset",
+    "releaseNotes": "Disable logging for child switches",
     "dateReleased": "2023-01-02",
     "drivers": [
         {

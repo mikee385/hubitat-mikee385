@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.1" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -71,6 +71,8 @@ def childDevice(name) {
     if (!child) {
         def childName = "${device.label ?: device.name}"
         child = addChildDevice("hubitat", "Generic Component Switch", childID, [label: "$childName $name", isComponent: true])
+        child.updateSetting("logEnable", [value: "false", type: "bool"])
+        child.updateSetting("txtEnable", [value: "false", type: "bool"])
         child.updateDataValue("Name", name)
     }
     return child
