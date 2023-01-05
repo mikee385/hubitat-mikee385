@@ -1,13 +1,13 @@
 /**
  *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 4.3.0
+ *  version: 4.4.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Exclude LG ThinQ Washer and Dryer from inactive device check
- *  dateReleased: 2022-08-15
+ *  releaseNotes: Exclude Generic Component virtual devices from device checks
+ *  dateReleased: 2023-01-05
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2023 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -108,6 +108,8 @@ def initializeDeviceChecks() {
 
 def isVirtualDevice(device) {
     if (device.getTypeName().contains("Virtual")) {
+        return true
+    } else if (device.getTypeName().contains("Generic Component")) {
         return true
     } else if (virtualDeviceTypes.contains(device.getTypeName())) {
         return true
