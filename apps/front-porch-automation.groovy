@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "7.0.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -47,10 +47,6 @@ preferences {
             input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
             input "sprinklerZones", "device.RachioZone", title: "Sprinkler Zones", multiple: true, required: false
         }
-        section("Light Button") {
-            input "buttonDevice", "capability.pushableButton", title: "Button Device", required: false
-            input "buttonNumber", "number", title: "Button Number", required: false
-        }
         section("Alerts") {
             input "alertMotionActive", "bool", title: "Alert when motion active?", required: true, defaultValue: true
             input "alertDoorbellRang", "bool", title: "Alert when doorbell rang?", required: true, defaultValue: true
@@ -78,9 +74,6 @@ def initialize() {
     // Light Switch
     subscribe(sunlight, "switch", sunlightHandler_LightSwitch)
     subscribe(location, "mode", modeHandler_LightSwitch)
-    if (buttonDevice) {
-        subscribe(buttonDevice, "pushed", buttonHandler_LightSwitch)
-    }
     
     // Motion Alert
     if (motionSensor) {
@@ -108,38 +101,13 @@ def initialize() {
     initializeDeviceChecks()
 }
 
-def on() {
-    for (light in lights) {
-        light.on()
-    }
-}
-
-def off() {
-    for (light in lights) {
-        light.off()
-    }
-}
-
-def toggle() {
-    def anyLightOn = false
-    for (light in lights) {
-        if (light.currentValue("switch") == "on") {
-            anyLightOn = true
-            break 
-        }
-    }
-    if (anyLightOn) {
-        off()
-    } else {
-        on()
-    }
-}
-
 def sunlightHandler_LightSwitch(evt) {
     logDebug("sunlightHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        off()
+        for (light in lights) {
+            light.off()
+        }
     }
 }
 
@@ -147,15 +115,9 @@ def modeHandler_LightSwitch(evt) {
     logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "Sleep") {
-        off()
-    }
-}
-
-def buttonHandler_LightSwitch(evt) {
-    logDebug("buttonHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
-    
-    if (buttonNumber == null || evt.value == buttonNumber.toString()) {
-        toggle()
+        for (light in lights) {
+            light.off()
+        }
     }
 }
 
