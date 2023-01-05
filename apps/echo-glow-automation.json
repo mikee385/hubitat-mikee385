@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "8.1.2",
+    "version": "9.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix issue where child devices were not deleted",
-    "dateReleased": "2022-12-30",
+    "releaseNotes": "Replace Echo Glow Devices with Routines",
+    "dateReleased": "2023-01-02",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",

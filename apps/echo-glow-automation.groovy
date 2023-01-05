@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "8.1.2" }
+String getVersionNum() { return "9.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,32 +36,18 @@ definition(
 
 preferences {
     page(name: "settings", title: "Echo Glow Automation", install: true, uninstall: true) {
-        section("Echo Glows") {
-            input "downstairsGlow", "device.EchoGlowDevice", title: "Downstairs Glow", multiple: false, required: true
-            input "upstairsGlow", "device.EchoGlowDevice", title: "Upstairs Glow", multiple: false, required: true
-        }
         section("Routines") {
-            input "bedtimeTimerRoutine", "device.VirtualAlexaButton", title: "Bedtime Timer", multiple: false, required: true
-            input "bedtimeSoonRoutine", "device.VirtualAlexaButton", title: "Bedtime Soon", multiple: false, required: true
-            input "bedtimeNowRoutine", "device.VirtualAlexaButton", title: "Bedtime Now", multiple: false, required: true
-            input "naptimeNowRoutine", "device.VirtualAlexaButton", title: "Naptime Now", multiple: false, required: true
-            input "wakeUpRoutine", "device.VirtualAlexaButton", title: "Wake Up", multiple: false, required: true
-            input "glowsOffRoutine", "device.VirtualAlexaButton", title: "Glows Off", multiple: false, required: true
-        }
-        section("Announcements") {
-            input "bedtimeAnnouncement", "device.VirtualAlexaButton", title: "Bedtime Announcement", multiple: false, required: true
+            input "bedtimeSoonRoutine", "capability.switch", title: "Bedtime Soon", multiple: false, required: true
+            input "bedtimeNowRoutine", "capability.switch", title: "Bedtime Now", multiple: false, required: true
+            input "wakeUpRoutine", "capability.switch", title: "Wake Up", multiple: false, required: true
+            input "glowsOffRoutine", "capability.switch", title: "Glows Off", multiple: false, required: true
         }
         section("Doors") {
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: false    
         }
-        section("Remotes") {
-            input "hueRemote", "capability.pushableButton", title: "Hue Remote", required: false
-            input "harmonyRemote", "capability.pushableButton", title: "Harmony Remote", required: false
-        }
         section("Media Devices") {
-            input "rokuRemotes", "device.RokuTV", title: "Roku", multiple: true, required: false
+            input "rokuDevices", "device.RokuTV", title: "Roku Devices", multiple: true, required: false
             input "bedtimeNowPause", "bool", title: "Pause when Bedtime Now?", required: true, defaultValue: false
-            input "naptimeNowPause", "bool", title: "Pause when Naptime Now?", required: true, defaultValue: false
         }
         section("Daily Schedule") {
             input "daysToNotify", "enum", title: "Days of the Week", multiple: true, required: false, options: daysOfWeek
@@ -70,7 +56,6 @@ preferences {
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
             input "bedtimeNowAlert", "bool", title: "Alert when Bedtime Now?", required: true, defaultValue: false
-            input "naptimeNowAlert", "bool", title: "Alert when Naptime Now?", required: true, defaultValue: false
             input "wakeUpAlert", "bool", title: "Alert when Wake Up?", required: true, defaultValue: false
             input "glowsOffAlert", "bool", title: "Alert when Glows Off?", required: true, defaultValue: false
         }
@@ -84,11 +69,6 @@ preferences {
 }
 
 mappings {
-    path("/bedtimeTimer") {
-        action: [
-            GET: "urlHandler_bedtimeTimer"
-        ]
-    }
     path("/bedtimeSoon") {
         action: [
             GET: "urlHandler_bedtimeSoon"
@@ -99,11 +79,6 @@ mappings {
             GET: "urlHandler_bedtimeNow"
         ]
     }
-    path("/naptimeNow") {
-        action: [
-            GET: "urlHandler_naptimeNow"
-        ]
-    }
     path("/wakeUp") {
         action: [
             GET: "urlHandler_wakeUp"
@@ -112,11 +87,6 @@ mappings {
     path("/glowsOff") {
         action: [
             GET: "urlHandler_glowsOff"
-        ]
-    }
-    path("/next") {
-        action: [
-            GET: "urlHandler_next"
         ]
     }
 }
@@ -150,25 +120,17 @@ def initialize() {
     }
     
     // Routines
-    subscribe(bedtimeTimerRoutine, "pushed", routineHandler_BedtimeTimer)
-    subscribe(bedtimeSoonRoutine, "pushed", routineHandler_BedtimeSoon)
-    subscribe(bedtimeNowRoutine, "pushed", routineHandler_BedtimeNow)
-    subscribe(naptimeNowRoutine, "pushed", routineHandler_NaptimeNow)
-    subscribe(wakeUpRoutine, "pushed", routineHandler_WakeUp)
-    subscribe(glowsOffRoutine, "pushed", routineHandler_GlowsOff)
+    subscribe(bedtimeSoonRoutine, "switch.on", routineHandler_BedtimeSoon)
+    subscribe(bedtimeNowRoutine, "switch.on", routineHandler_BedtimeNow)
+    subscribe(wakeUpRoutine, "switch.on", routineHandler_WakeUp)
+    subscribe(glowsOffRoutine, "switch.on", routineHandler_GlowsOff)
     
     // Doors
     if (bedroomDoor) {
         subscribe(bedroomDoor, "contact", doorHandler_GlowsOff)
     }
 
-    // Buttons and Modes
-    if (hueRemote) {
-        subscribe(hueRemote, "pushed", hueRemoteHandler_Routine)
-    }
-    if (harmonyRemote) {
-        subscribe(harmonyRemote, "pushed", harmonyRemoteHandler_Routine)
-    }
+    // Modes
     subscribe(location, "mode", modeHandler_Routine)
     
     // Daily Schedule
@@ -184,13 +146,10 @@ def initialize() {
     if(!state.accessToken) {
         createAccessToken()
     }
-    state.bedtimeTimerUrl = "${getFullLocalApiServerUrl()}/bedtimeTimer?access_token=$state.accessToken"
     state.bedtimeSoonUrl = "${getFullLocalApiServerUrl()}/bedtimeSoon?access_token=$state.accessToken"
     state.bedtimeNowUrl = "${getFullLocalApiServerUrl()}/bedtimeNow?access_token=$state.accessToken"
-    state.naptimeNowUrl = "${getFullLocalApiServerUrl()}/naptimeNow?access_token=$state.accessToken"
     state.wakeUpUrl = "${getFullLocalApiServerUrl()}/wakeUp?access_token=$state.accessToken"
     state.glowsOffUrl = "${getFullLocalApiServerUrl()}/glowsOff?access_token=$state.accessToken"
-    state.nextUrl = "${getFullLocalApiServerUrl()}/next?access_token=$state.accessToken"
 }
 
 def childDevice() {
@@ -203,49 +162,30 @@ def childDevice() {
 }
 
 def initializeBedtimeSchedule() {
-    scheduleBedtimeTimer()
+    scheduleBedtime()
         
     def resetToday = timeToday("23:59")
     def currentTime = new Date()
-    schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtimeTimer)
+    schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtime)
 }
 
-def scheduleBedtimeTimer() {
+def scheduleBedtime() {
     if (daysToNotify) {
         def daysFilter = daysToNotify.collect { (daysOfWeek.indexOf(it)+1).toString() }.join(",")
         def timeToNotifyToday = timeToday(timeToNotify)
-        schedule("0 $timeToNotifyToday.minutes $timeToNotifyToday.hours ? * $daysFilter *", bedtimeTimer)
+        schedule("0 $timeToNotifyToday.minutes $timeToNotifyToday.hours ? * $daysFilter *", bedtimeSoon)
     }
 }
 
-def bedtimeTimer() {
-    bedtimeTimerRoutine.push()
-}
-
-def routineHandler_BedtimeTimer(evt) {
-    logDebug("routineHandler_BedtimeTimer: ${evt.device} changed to ${evt.value}")
-
-    bedtimeSoonRoutine.push()
-    
-    if (state.timerActive == false) {
-        state.timerActive = true
-        runIn(5*60, bedtimeNow)
-    }
-}
-
-def bedtimeNow() {
-    bedtimeNowRoutine.push()
+def bedtimeSoon() {
+    bedtimeSoonRoutine.on()
 }
 
 def routineHandler_BedtimeSoon(evt) {
     logDebug("routineHandler_BedtimeSoon: ${evt.device} changed to ${evt.value}")
     
-    unschedule("bedtimeTimer")
-    unschedule("downstairsGlowOff")
+    unschedule("bedtimeSoon")
     unschedule("glowsOff")
-    
-    downstairsGlow.orange()
-    upstairsGlow.orange()
     
     if (state.lastRoutine != "BedtimeSoon") {
         if (bedtimeSoonAlert) {
@@ -254,6 +194,15 @@ def routineHandler_BedtimeSoon(evt) {
         
         state.lastRoutine = "BedtimeSoon"
     }
+    
+    if (state.timerActive == false) {
+        state.timerActive = true
+        runIn(5*60, bedtimeNow)
+    }
+}
+
+def bedtimeNow() {
+    bedtimeNowRoutine.on()
 }
 
 def routineHandler_BedtimeNow(evt) {
@@ -264,79 +213,31 @@ def routineHandler_BedtimeNow(evt) {
         unschedule("bedtimeNow")
     }
     
-    unschedule("bedtimeTimer")
-    unschedule("downstairsGlowOff")
+    unschedule("bedtimeSoon")
     unschedule("glowsOff")
-    
-    downstairsGlow.purple()
-    upstairsGlow.purple()
-    
-    if (!bedroomDoor) {
-        runIn(10*60, downstairsGlowOff)
-    }
     
     if (state.lastRoutine != "BedtimeNow") {
         if (bedtimeNowAlert) {
             personToNotify.deviceNotification("Bedtime Now!")
         }
         
-        if (bedtimeNowPause && rokuRemotes) {
-            for (rokuRemote in rokuRemotes) {
-                rokuRemote.queryMediaPlayer()
+        if (bedtimeNowPause && rokuDevices) {
+            for (rokuDevice in rokuDevices) {
+                rokuDevice.queryMediaPlayer()
             }
             runIn(2, pauseRoku)
         }
-        
-        bedtimeAnnouncement.push()
         
         state.lastRoutine = "BedtimeNow"
     }
 }
 
-def downstairsGlowOff() {
-    downstairsGlow.off()
-}
-
 def pauseRoku() {
-    for (rokuRemote in rokuRemotes) {
-        if (rokuRemote.currentValue("transportStatus") == "playing" && rokuRemote.currentValue("application") != "Live TV") {
-            rokuRemote.pause()
-            rokuRemote.queryMediaPlayer()
+    for (rokuDevice in rokuDevices) {
+        if (rokuDevice.currentValue("transportStatus") == "playing" && rokuDevice.currentValue("application") != "Live TV") {
+            rokuDevice.pause()
+            rokuDevice.queryMediaPlayer()
         }
-    }
-}
-
-def routineHandler_NaptimeNow(evt) {
-    logDebug("routineHandler_NaptimeNow: ${evt.device} changed to ${evt.value}")
-    
-    if (state.timerActive == true) {
-        state.timerActive = false
-        unschedule("bedtimeNow")
-    }
-    
-    unschedule("downstairsGlowOff")
-    unschedule("glowsOff")
-    
-    downstairsGlow.blue()
-    upstairsGlow.blue()
-    
-    if (!bedroomDoor) {
-        runIn(10*60, downstairsGlowOff)
-    }
-    
-    if (state.lastRoutine != "NaptimeNow") {
-        if (naptimeNowAlert) {
-            personToNotify.deviceNotification("Naptime Now!")
-        }
-        
-        if (naptimeNowPause && rokuRemotes) {
-            for (rokuRemote in rokuRemotes) {
-                rokuRemote.queryMediaPlayer()
-            }
-            runIn(2, pauseRoku)
-        }
-        
-        state.lastRoutine = "NaptimeNow"
     }
 }
 
@@ -348,11 +249,7 @@ def routineHandler_WakeUp(evt) {
         unschedule("bedtimeNow")
     }
     
-    unschedule("downstairsGlowOff")
     unschedule("glowsOff")
-    
-    downstairsGlow.green()
-    upstairsGlow.green()
     
     if (!bedroomDoor) {
         runIn(10*60, glowsOff)
@@ -368,7 +265,7 @@ def routineHandler_WakeUp(evt) {
 }
 
 def glowsOff() {
-    glowsOffRoutine.push()
+    glowsOffRoutine.on()
 }
 
 def routineHandler_GlowsOff(evt) {
@@ -379,11 +276,7 @@ def routineHandler_GlowsOff(evt) {
         unschedule("bedtimeNow")
     }
     
-    unschedule("downstairsGlowOff")
     unschedule("glowsOff")
-    
-    downstairsGlow.off()
-    upstairsGlow.off()
     
     if (state.lastRoutine != "GlowsOff") {
         if (glowsOffAlert) {
@@ -394,54 +287,25 @@ def routineHandler_GlowsOff(evt) {
     }
     
     if (childDevice().currentValue("switch") == "on") {
-        scheduleBedtimeTimer()
+        scheduleBedtime()
     } 
 }
 
 def doorHandler_GlowsOff(evt) {
     logDebug("doorHandler_GlowsOff: ${evt.device} changed to ${evt.value}")
     
-    unschedule("downstairsGlowOff")
     unschedule("glowsOff")
     
-    if (evt.value == "closed") {
-        runIn(10*60, downstairsGlowOff)
-    } else if (currentTimeIsBetween("05:00", "17:00")) {
+    if (evt.value == "open" && currentTimeIsBetween("05:00", "17:00")) {
         runIn(10*60, glowsOff)
     } 
-}
-
-def hueRemoteHandler_Routine(evt) {
-    logDebug("hueRemoteHandler_Routine: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "1") {
-        nextRoutine()
-    } else if (evt.value == "2") {
-        bedtimeNowRoutine.push()
-    } else if (evt.value == "4") {
-        glowsOffRoutine.push()
-    }
-}
-
-def harmonyRemoteHandler_Routine(evt) {
-    logDebug("harmonyRemoteHandler_Routine: ${evt.device} changed to ${evt.value}")
-    
-    if (evt.value == "1") {
-        bedtimeTimerRoutine.push()
-    } else if (evt.value == "2") {
-        bedtimeNowRoutine.push()
-    } else if (evt.value == "3") {
-        wakeUpRoutine.push()
-    } else if (evt.value == "4") {
-        glowsOffRoutine.push()
-    }
 }
 
 def modeHandler_Routine(evt) {
     logDebug("modeHandler_Routine: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
-        glowsOffRoutine.push()
+        glowsOffRoutine.on()
     }
 }
 
@@ -451,61 +315,31 @@ def switchHandler_Schedule(evt) {
     if (evt.value == "on") {
         initializeBedtimeSchedule()
     } else {
-        unschedule("bedtimeTimer")
-        unschedule("scheduleBedtimeTimer")
+        unschedule("bedtimeSoon")
+        unschedule("scheduleBedtime")
     } 
-}
-
-def nextRoutine() {
-    if (currentTimeIsBetween("00:00", "09:00")) {
-        wakeUpRoutine.push()
-    } else if (currentTimeIsBetween("09:00", "14:00")) {
-        naptimeNowRoutine.push()
-    } else if (currentTimeIsBetween("14:00", "17:00")) {
-        wakeUpRoutine.push()
-    } else {
-        bedtimeTimerRoutine.push()
-    }
-}
-
-def urlHandler_bedtimeTimer(evt) {
-    logDebug("urlHandler_bedtimeTimer")
-    
-    bedtimeTimerRoutine.push()
 }
 
 def urlHandler_bedtimeSoon(evt) {
     logDebug("urlHandler_bedtimeSoon")
     
-    bedtimeSoonRoutine.push()
+    bedtimeSoonRoutine.on()
 }
 
 def urlHandler_bedtimeNow(evt) {
     logDebug("urlHandler_bedtimeNow")
     
-    bedtimeNowRoutine.push()
-}
-
-def urlHandler_naptimeNow(evt) {
-    logDebug("urlHandler_naptimeNow")
-    
-    naptimeNowRoutine.push()
+    bedtimeNowRoutine.on()
 }
 
 def urlHandler_wakeUp(evt) {
     logDebug("urlHandler_wakeUp")
     
-    wakeUpRoutine.push()
+    wakeUpRoutine.on()
 }
 
 def urlHandler_glowsOff(evt) {
     logDebug("urlHandler_glowsOff")
     
-    glowsOffRoutine.push()
-}
-
-def urlHandler_next(evt) {
-    logDebug("urlHandler_next")
-    
-    nextRoutine()
+    glowsOffRoutine.on()
 }
