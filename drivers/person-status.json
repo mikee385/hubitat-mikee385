@@ -1,11 +1,11 @@
 {
     "packageName": "Person Status",
     "author": "Michael Pierce",
-    "version": "9.0.0",
+    "version": "10.0.0",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change child buttons to Generic Component Switch",
-    "dateReleased": "2023-01-02",
+    "releaseNotes": "Replace child buttons with switches",
+    "dateReleased": "2023-01-03",
     "drivers": [
         {
             "id": "b6964028-d31b-4ba3-8e89-1b2ea4e799ed",

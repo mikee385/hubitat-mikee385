@@ -1,7 +1,7 @@
 /**
  *  Person Status Device Handler
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2023 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "10.0.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -56,10 +56,8 @@ def updated() {
 }
 
 def initialize() {
-    def awakeButton = childDevice("Awake")
-    def asleepButton = childDevice("Asleep")
-    def arrivedButton = childDevice("Arrived")
-    def departedButton = childDevice("Departed")
+    def presenceSwitch = childDevice("Presence")
+    def sleepingSwitch = childDevice("Sleeping")
     
     if (!device.currentValue("presence")) {
         arrived()
@@ -87,43 +85,46 @@ def componentRefresh(cd) {}
 
 def componentOn(cd) {
     def child = getChildDevice(cd.deviceNetworkId)
-    child.sendEvent(name: "switch", value: "on")
-    
     def name = child.getDataValue("Name")
-    if (name == "Awake") {
-        awake()
-    } else if (name == "Asleep") {
-        asleep()
-    } else if (name == "Arrived") {
+    if (name == "Presence") {
         arrived()
-    } else if (name == "Departed") {
-        departed()
+    } else if (name == "Sleeping") {
+        asleep()
     } else {
-        log.error "Unknown command name: $name"
+        log.error "Unknown child switch: $name"
     }
-    
-    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
 }
 
 def componentOff(cd) {
     def child = getChildDevice(cd.deviceNetworkId)
-    child.sendEvent(name: "switch", value: "off")
+    def name = child.getDataValue("Name")
+    if (name == "Presence") {
+        departed()
+    } else if (name == "Sleeping") {
+        awake()
+    } else {
+        log.error "Unknown child switch: $name"
+    }
 }
 
 def awake() {
     sendEvent(name: "sleeping", value: "not sleeping")
+    childDevice("Sleeping").sendEvent(name: "switch", value: "off")
 }
 
 def asleep() {
     sendEvent(name: "sleeping", value: "sleeping")
+    childDevice("Sleeping").sendEvent(name: "switch", value: "on")
 }
 
 def arrived() {
     sendEvent(name: "presence", value: "present")
+    childDevice("Presence").sendEvent(name: "switch", value: "on")
 }
 
 def departed() {
     sendEvent(name: "presence", value: "not present")
+    childDevice("Presence").sendEvent(name: "switch", value: "off")
 }
 
 def deviceNotification(message) {
