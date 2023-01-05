@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.0" }
+String getVersionNum() { return "10.1.0" }
 String getVersionLabel() { return "Person Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -25,7 +25,6 @@ metadata {
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/person-status.groovy"
 	) {
         capability "Actuator"
-        capability "Initialize"
         capability "Notification"
         capability "Presence Sensor"
         capability "Sensor"
