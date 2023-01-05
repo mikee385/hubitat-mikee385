@@ -1,7 +1,7 @@
 /**
  *  Occupancy Status Device Handler
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2023 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.1.1" }
+String getVersionNum() { return "8.0.0" }
 String getVersionLabel() { return "Occupancy Status, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -56,25 +56,27 @@ def updated() {
 }
 
 def initialize() {
-    def occupiedButton = childDevice("Occupied")
-    def checkingButton = childDevice("Checking")
-    def vacantButton = childDevice("Vacant")
-
+    def occupancySwitch = childDevice()
+    
     if (!device.currentValue("occupancy")) {
         vacant()
     }
 }
 
-def childDevice(name) {
-    def childID = "occupancy:${device.getId()}:$name"
+def childDevice() {
+    def childID = "occupancy:${device.getId()}:OccupancySwitch"
     def child = getChildDevice(childID)
     if (!child) {
         def childName = "${device.label ?: device.name}"
-        child = addChildDevice("hubitat", "Generic Component Switch", childID, [label: "$childName $name", isComponent: true])
+        child = addChildDevice("hubitat", "Generic Component Switch", childID, [label: "$childName Occupancy", isComponent: true])
         child.updateSetting("logEnable", [value: "false", type: "bool"])
         child.updateSetting("txtEnable", [value: "false", type: "bool"])
-        child.updateDataValue("Name", name)
-        child.sendEvent(name: "switch", value: "off")
+        
+        if (device.currentValue("occupancy") == "occupied") {
+            child.sendEvent(name: "switch", value: "on")
+        } else {
+            child.sendEvent(name: "switch", value: "off")
+        } 
     }
     return child
 }
@@ -82,26 +84,11 @@ def childDevice(name) {
 def componentRefresh(cd) {}
 
 def componentOn(cd) {
-    def child = getChildDevice(cd.deviceNetworkId)
-    child.sendEvent(name: "switch", value: "on")
-    
-    def name = child.getDataValue("Name")
-    if (name == "Occupied") {
-        occupied()
-    } else if (name == "Checking") {
-        checking()
-    } else if (name == "Vacant") {
-        vacant()
-    } else {
-        log.error "Unknown command name: $name"
-    }
-    
-    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
+    occupied()
 }
 
 def componentOff(cd) {
-    def child = getChildDevice(cd.deviceNetworkId)
-    child.sendEvent(name: "switch", value: "off")
+    vacant()
 }
 
 def occupied() {
@@ -139,13 +126,19 @@ def resumeFromChecking() {
 }
 
 private def setStatusToOccupied() {
+    unschedule("resumeFromBlind")
+    unschedule("resumeFromChecking")
+    
     sendEvent(name: "occupancy", value: "occupied")
-    unschedule()
+    childDevice().sendEvent(name: "switch", value: "on")
 }
 
 private def setStatusToVacant() {
+    unschedule("resumeFromBlind")
+    unschedule("resumeFromChecking")
+    
     sendEvent(name: "occupancy", value: "vacant")
-    unschedule()
+    childDevice().sendEvent(name: "switch", value: "off")
 }
 
 private def setStatusToChecking() {
