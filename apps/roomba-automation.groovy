@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.2.0" }
+String getVersionNum() { return "12.2.1" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -59,6 +59,12 @@ preferences {
 
 def installed() {
     initialize()
+}
+
+def uninstalled() {
+    for (device in getChildDevices()) {
+        deleteChildDevice(device.deviceNetworkId)
+    }
 }
 
 def updated() {
