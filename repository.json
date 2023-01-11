@@ -220,6 +220,13 @@
             "tags": [ "Notifications", "Presence & Location" ]
         },
         {
+            "name": "Virtual Garage Door",
+            "category": "Convenience",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/virtual-garage-door.json",
+            "description": "Simulates a garage door by combining a contact sensor, acceleration sensor, and door control.",
+            "tags": [ "Automations & Groups", "Doors & Windows", "Garage Doors", "Misc. Devices"]
+        },
+        {
             "name": "Weather Alerts",
             "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/weather-alerts.json",

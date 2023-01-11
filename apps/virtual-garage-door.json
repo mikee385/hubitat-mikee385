@@ -1,0 +1,30 @@
+{
+    "packageName": "Virtual Garage Door",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "2.2.8",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2023-01-10",
+    "apps": [
+        {
+            "id": "9550be5d-366f-4224-a792-db973da2b5c5",
+            "name": "Virtual Garage Door",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/virtual-garage-door.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ],
+    "drivers": [
+        {
+            "id": "6ec973ad-2d3d-486a-925e-254a044aa284",
+            "name": "Virtual Garage Door",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/virtual-garage-door.groovy",
+            "required": true
+        }
+    ]
+}
