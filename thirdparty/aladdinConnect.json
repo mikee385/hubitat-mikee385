@@ -1,0 +1,27 @@
+{
+  "packageName": "hubitat_aladdinConnect",
+  "author": "tomw",
+  "version": "2.0.0",
+  "minimumHEVersion": "2.1.9",
+  "dateReleased": "2023-01-12",
+  "drivers": [
+    {
+      "id": "a44132e9-106e-4695-8428-6713d0dc17ed",
+      "name": "Aladdin Connect System",
+      "namespace": "tomw",
+      "location": "https://raw.githubusercontent.com/mikee385/hubitat_aladdinConnect/master/aladdinConnectSystem",
+      "required": true
+    },
+    {
+      "id": "6809e461-9953-4009-90c2-76f7d59be04f",
+      "name": "Aladdin Connect Garage Door",
+      "namespace": "tomw",
+      "location": "https://raw.githubusercontent.com/mikee385/hubitat_aladdinConnect/master/aladdinConnectGarageDoor",
+      "required": true
+    }
+  ],
+  "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat_aladdinConnect/master/LICENSE",
+  "releaseNotes": "2.0.1 - mikee385 - Fix for handling real-time events that do not include the device ID\n2.0.0 - tomw and mikes - Update to new API flow and real-time events without polling.  See readme first if you are updating from 1.x.\n1.1.2 - tomw - Support both seconds and minutes for refreshInterval.\n1.1.1 - tomw - Added Actuator for compatibility.\n1.1.0 - tomw - Added support for multiple openers.\n1.0.0 - tomw - Initial release.",
+  "documentationLink": "https://github.com/mikee385/hubitat_aladdinConnect/blob/master/README.md",
+  "communityLink": "https://community.hubitat.com/t/is-it-possible-to-use-rm4-to-control-report-on-my-genie-aladdin-garage-based-on-postman-success/45619/6"
+}

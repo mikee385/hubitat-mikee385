@@ -325,11 +325,17 @@
             "tags": [ "Energy Monitoring", "Misc. Devices", "Monitoring" ]
         },
         {
+            "name": "Aladdin Connect System",
+            "category": "Integrations",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/thirdparty/aladdinConnect.json",
+            "description": "This package provides driver capabilities for Hubitat with Genie Aladdin Connect systems",
+            "tags": [ "Cloud", "Doors & Windows", "Garage Doors" ]
+        },{
             "name": "Ambient Weather Integration",
             "category": "Integrations",
             "location": "https://raw.githubusercontent.com/mikee385/Hubitat-Ambient-Weather/master/packageManifest.json",
             "description": "A simple api for providing ambient weather access",
-            "tags": [ "Misc. Devices", "Weather"]
+            "tags": [ "Cloud", "Misc. Devices", "Weather" ]
         },
         {
             "name": "Rachio Community Package",
