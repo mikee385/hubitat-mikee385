@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "10.0.0",
+    "version": "10.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Replace Routine devices with Echo Glow Routines device",
-    "dateReleased": "2023-01-16",
+    "releaseNotes": "Schedule Glows Off if bedroom door is already open",
+    "dateReleased": "2023-01-19",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",

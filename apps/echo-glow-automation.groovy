@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.0.0" }
+String getVersionNum() { return "10.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -252,7 +252,7 @@ def routineHandler_WakeUp(evt) {
     
     unschedule("glowsOff")
     
-    if (!bedroomDoor) {
+    if (!bedroomDoor || bedroomDoor.currentValue("contact") == "open")) {
         runIn(10*60, glowsOff)
     }
     
