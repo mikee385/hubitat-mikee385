@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "10.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -37,10 +37,7 @@ definition(
 preferences {
     page(name: "settings", title: "Echo Glow Automation", install: true, uninstall: true) {
         section("Routines") {
-            input "bedtimeSoonRoutine", "capability.switch", title: "Bedtime Soon", multiple: false, required: true
-            input "bedtimeNowRoutine", "capability.switch", title: "Bedtime Now", multiple: false, required: true
-            input "wakeUpRoutine", "capability.switch", title: "Wake Up", multiple: false, required: true
-            input "glowsOffRoutine", "capability.switch", title: "Glows Off", multiple: false, required: true
+            input "echoGlowRoutines", "device.EchoGlowRoutines", title: "Echo Glow Routines", multiple: false, required: true
         }
         section("Doors") {
             input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: false    
@@ -120,10 +117,10 @@ def initialize() {
     }
     
     // Routines
-    subscribe(bedtimeSoonRoutine, "switch.on", routineHandler_BedtimeSoon)
-    subscribe(bedtimeNowRoutine, "switch.on", routineHandler_BedtimeNow)
-    subscribe(wakeUpRoutine, "switch.on", routineHandler_WakeUp)
-    subscribe(glowsOffRoutine, "switch.on", routineHandler_GlowsOff)
+    subscribe(echoGlowRoutines, "lastRoutine.bedtimeSoon", routineHandler_BedtimeSoon)
+    subscribe(echoGlowRoutines, "lastRoutine.bedtimeNow", routineHandler_BedtimeNow)
+    subscribe(echoGlowRoutines, "lastRoutine.wakeUp", routineHandler_WakeUp)
+    subscribe(echoGlowRoutines, "lastRoutine.glowsOff", routineHandler_GlowsOff)
     
     // Doors
     if (bedroomDoor) {
@@ -178,7 +175,7 @@ def scheduleBedtime() {
 }
 
 def bedtimeSoon() {
-    bedtimeSoonRoutine.on()
+    echoGlowRoutines.bedtimeSoon()
 }
 
 def routineHandler_BedtimeSoon(evt) {
@@ -202,7 +199,7 @@ def routineHandler_BedtimeSoon(evt) {
 }
 
 def bedtimeNow() {
-    bedtimeNowRoutine.on()
+    echoGlowRoutines.bedtimeNow()
 }
 
 def routineHandler_BedtimeNow(evt) {
@@ -241,6 +238,10 @@ def pauseRoku() {
     }
 }
 
+def wakeUp() {
+    echoGlowRoutines.wakeUp()
+}
+
 def routineHandler_WakeUp(evt) {
     logDebug("routineHandler_WakeUp: ${evt.device} changed to ${evt.value}")
     
@@ -265,7 +266,7 @@ def routineHandler_WakeUp(evt) {
 }
 
 def glowsOff() {
-    glowsOffRoutine.on()
+    echoGlowRoutines.glowsOff()
 }
 
 def routineHandler_GlowsOff(evt) {
@@ -305,7 +306,7 @@ def modeHandler_Routine(evt) {
     logDebug("modeHandler_Routine: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "Away") {
-        glowsOffRoutine.on()
+        glowsOff()
     }
 }
 
@@ -323,23 +324,23 @@ def switchHandler_Schedule(evt) {
 def urlHandler_bedtimeSoon(evt) {
     logDebug("urlHandler_bedtimeSoon")
     
-    bedtimeSoonRoutine.on()
+    bedtimeSoon()
 }
 
 def urlHandler_bedtimeNow(evt) {
     logDebug("urlHandler_bedtimeNow")
     
-    bedtimeNowRoutine.on()
+    bedtimeNow()
 }
 
 def urlHandler_wakeUp(evt) {
     logDebug("urlHandler_wakeUp")
     
-    wakeUpRoutine.on()
+    wakeUp()
 }
 
 def urlHandler_glowsOff(evt) {
     logDebug("urlHandler_glowsOff")
     
-    glowsOffRoutine.on()
+    glowsOff()
 }

@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial release",
-    "dateReleased": "2023-01-02",
+    "releaseNotes": "Add commands and integrate Glows Off",
+    "dateReleased": "2023-01-16",
     "drivers": [
         {
             "id": "0a3389a1-772e-4ea6-8400-29e550dc4c6d",
             "name": "Echo Glow Routines",
-            "version": "1.0.0",
+            "version": "2.0.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-routines.groovy",
             "required": true

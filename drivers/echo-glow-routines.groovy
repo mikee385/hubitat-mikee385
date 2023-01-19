@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "Echo Glow Routines, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -23,7 +23,18 @@ metadata {
 		namespace: "mikee385", 
 		author: "Michael Pierce", 
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-routines.groovy"
-	) {}
+	) {
+        capability "Actuator"
+        capability "ContactSensor"
+        capability "Sensor"
+        
+        attribute "lastRoutine", "enum", ["bedtimeSoon", "bedtimeNow", "wakeUp", "glowsOff"]
+        
+        command "bedtimeSoon"
+        command "bedtimeNow"
+        command "wakeUp"
+        command "glowsOff"
+    }
 }
 
 def installed() {
@@ -42,10 +53,21 @@ def updated() {
 }
 
 def initialize() {
-    def bedtimeSoon = childDevice("Alexa Bedtime Soon")
-    def bedtimeNow = childDevice("Alexa Bedtime Now")
-    def wakeUp = childDevice("Alexa Wake Up")
-    def glowsOff = childDevice("Alexa Glows Off")
+    def bedtimeSoon = bedtimeSoonDevice()
+    def bedtimeNow = bedtimeNowDevice()
+    def wakeUp = wakeUpDevice()
+}
+
+def bedtimeSoonDevice() {
+    return childDevice("Alexa Bedtime Soon")
+}
+
+def bedtimeNowDevice() {
+    return childDevice("Alexa Bedtime Now")
+}
+
+def wakeUpDevice() {
+    return childDevice("Alexa Wake Up")
 }
 
 def childDevice(name) {
@@ -56,24 +78,73 @@ def childDevice(name) {
         child.updateSetting("logEnable", [value: "false", type: "bool"])
         child.updateSetting("txtEnable", [value: "false", type: "bool"])
         child.updateDataValue("Name", name)
-        child.sendEvent(name: "switch", value: "off")
-        child.sendEvent(name: "contact", value: "closed")
+        childOff(child)
     }
     return child
+}
+
+def childOn(child) {
+    child.sendEvent(name: "switch", value: "on")
+    child.sendEvent(name: "contact", value: "open")
+}
+
+def childOff(child) {
+    child.sendEvent(name: "switch", value: "off")
+    child.sendEvent(name: "contact", value: "closed")
+}
+
+def bedtimeSoon() {
+    childOn(bedtimeSoonDevice())
+    childOff(bedtimeNowDevice())
+    childOff(wakeUpDevice())
+    
+    sendEvent(name: "lastRoutine", value: "bedtimeSoon", isStateChange: true)
+    sendEvent(name: "contact", value: "open")
+}
+
+def bedtimeNow() {
+    childOff(bedtimeSoonDevice())
+    childOn(bedtimeNowDevice())
+    childOff(wakeUpDevice())
+    
+    sendEvent(name: "lastRoutine", value: "bedtimeNow", isStateChange: true)
+    sendEvent(name: "contact", value: "open")
+}
+
+def wakeUp() {
+    childOff(bedtimeSoonDevice())
+    childOff(bedtimeNowDevice())
+    childOn(wakeUpDevice())
+    
+    sendEvent(name: "lastRoutine", value: "wakeUp", isStateChange: true)
+    sendEvent(name: "contact", value: "open")
+}
+
+def glowsOff() {
+    childOff(bedtimeSoonDevice())
+    childOff(bedtimeNowDevice())
+    childOff(wakeUpDevice())
+    
+    sendEvent(name: "lastRoutine", value: "glowsOff", isStateChange: true)
+    sendEvent(name: "contact", value: "closed")
 }
 
 def componentRefresh(cd) {}
 
 def componentOn(cd) {
     def child = getChildDevice(cd.deviceNetworkId)
-    child.sendEvent(name: "switch", value: "on")
-    child.sendEvent(name: "contact", value: "open")
-    
-    runIn(1, componentOff, [data: [deviceNetworkId: cd.deviceNetworkId]])
+    def name = child.getDataValue("Name")
+    if (name == "Alexa Bedtime Soon") {
+        bedtimeSoon()
+    } else if (name == "Alexa Bedtime Now") {
+        bedtimeNow()
+    } else if (name == "Alexa Wake Up") {
+        wakeUp()
+    } else {
+        log.error "Unknown child switch: $name"
+    }
 }
 
 def componentOff(cd) {
-    def child = getChildDevice(cd.deviceNetworkId)
-    child.sendEvent(name: "switch", value: "off")
-    child.sendEvent(name: "contact", value: "closed")
+    glowsOff()
 }
