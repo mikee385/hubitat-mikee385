@@ -1,11 +1,11 @@
 /**
  *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 4.4.0
+ *  version: 4.5.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Exclude Generic Component virtual devices from device checks
- *  dateReleased: 2023-01-05
+ *  releaseNotes: Exclude Echo Glow Routines from device checks
+ *  dateReleased: 2023-01-20
  *
  *  Copyright 2023 Michael Pierce
  *
@@ -38,6 +38,7 @@ import groovy.transform.Field
     "Child Switch",
     "Device Monitor",
     "Echo Glow Device",
+    "Echo Glow Routines",
     "Echo Glow Scene",
     "Occupancy Status",
     "Person Status",
