@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.1.1" }
+String getVersionNum() { return "10.2.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -39,8 +39,8 @@ preferences {
         section("Routines") {
             input "echoGlowRoutines", "device.EchoGlowRoutines", title: "Echo Glow Routines", multiple: false, required: true
         }
-        section("Doors") {
-            input "bedroomDoor", "capability.contactSensor", title: "Bedroom Door", multiple: false, required: false    
+        section("Kids") {
+            input "kidPerson", "device.PersonStatus", title: "Kid", multiple: false, required: false
         }
         section("Media Devices") {
             input "rokuDevices", "device.RokuTV", title: "Roku Devices", multiple: true, required: false
@@ -122,10 +122,10 @@ def initialize() {
     subscribe(echoGlowRoutines, "lastRoutine.wakeUp", routineHandler_WakeUp)
     subscribe(echoGlowRoutines, "lastRoutine.glowsOff", routineHandler_GlowsOff)
     
-    // Doors
-    if (bedroomDoor) {
-        subscribe(bedroomDoor, "contact", doorHandler_GlowsOff)
-    }
+    // People
+    if (kidPerson) {
+        subscribe(kidPerson, "sleeping", personHandler_GlowsOff)
+    } 
 
     // Modes
     subscribe(location, "mode", modeHandler_Routine)
@@ -252,7 +252,7 @@ def routineHandler_WakeUp(evt) {
     
     unschedule("glowsOff")
     
-    if (!bedroomDoor || bedroomDoor.currentValue("contact") == "open") {
+    if (!kidPerson || kidPerson.currentValue("sleeping") == "not sleeping") {
         runIn(10*60, glowsOff)
     }
     
@@ -292,14 +292,14 @@ def routineHandler_GlowsOff(evt) {
     } 
 }
 
-def doorHandler_GlowsOff(evt) {
-    logDebug("doorHandler_GlowsOff: ${evt.device} changed to ${evt.value}")
+def personHandler_GlowsOff(evt) {
+    logDebug("personHandler_GlowsOff: ${evt.device} changed to ${evt.value}")
     
-    unschedule("glowsOff")
-    
-    if (evt.value == "open" && currentTimeIsBetween("05:00", "17:00")) {
+    if (evt.value == "not sleeping") {
         runIn(10*60, glowsOff)
-    } 
+    } else {
+        unschedule("glowsOff")
+    }
 }
 
 def modeHandler_Routine(evt) {
