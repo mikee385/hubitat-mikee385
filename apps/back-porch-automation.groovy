@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.0" }
+String getVersionNum() { return "13.0.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -43,10 +43,6 @@ preferences {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
             input "cameras", "capability.switch", title: "Cameras", multiple: true, required: false
         }
-        section("Sprinklers") {
-            input "sprinklerController", "device.RachioController", title: "Sprinkler Controller", multiple: false, required: false
-            input "sprinklerZones", "device.RachioZone", title: "Sprinkler Zones", multiple: true, required: false
-        }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
@@ -67,8 +63,6 @@ def updated() {
 }
 
 def initialize() {
-    state.sprinklersPaused = false
-    
     // Zone
     subscribe(zone, "occupancy.occupied", zoneHandler_Occupied)
     subscribe(zone, "occupancy.vacant", zoneHandler_Vacant)
@@ -113,16 +107,6 @@ def zoneHandler_Occupied(evt) {
     unschedule("turnOn_Cameras")
     for (camera in cameras) {
         camera.off()
-    } 
-    
-    // Sprinkler Zones
-    for (sprinklerZone in sprinklerZones) {
-        if (sprinklerZone.currentValue("switch") == "on") {
-            state.sprinklersPaused = true
-            //sprinklerController.pauseZoneRun(1800)
-            personToNotify.deviceNotification("Pausing sprinklers!")
-            break
-        }
     }
 }
 
@@ -136,13 +120,6 @@ def zoneHandler_Vacant(evt) {
     
     // Cameras
     runIn(15, turnOn_Cameras)
-    
-    // Sprinkler Zones
-    if (state.sprinklersPaused) {
-        state.sprinklersPaused = false
-        //sprinklerController.resumeZoneRun()
-        personToNotify.deviceNotification("Resuming sprinklers!")
-    }
 }
 
 def turnOn_Cameras() {
