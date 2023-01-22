@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "11.0.0" }
+String getVersionNum() { return "12.0.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -34,6 +34,7 @@ definition(
 preferences {
     page(name: "settings", title: "Back Porch Automation", install: true, uninstall: true) {
         section {
+            input "zone", "device.OccupancyStatus", title: "Zone", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
             input "lights", "capability.switch", title: "Lights", multiple: true, required: true
@@ -66,8 +67,11 @@ def updated() {
 }
 
 def initialize() {
-    state.occupancy = door.currentValue("contact") == "open" ? "occupied" : "vacant"
     state.sprinklersPaused = false
+    
+    // Zone
+    subscribe(zone, "occupancy.occupied", zoneHandler_Occupied)
+    subscribe(zone, "occupancy.vacant", zoneHandler_Vacant)
     
     // Occupancy
     subscribe(door, "contact", doorHandler_Occupancy)
@@ -95,8 +99,8 @@ def initialize() {
     initializeDeviceChecks()
 }
 
-def occupied() {
-    state.occupancy = "occupied"
+def zoneHandler_Occupied(evt) {
+    logDebug("zoneHandler_Occupied: ${evt.device} changed to ${evt.value}")
     
     // Light Switch
     if (sunlight.currentValue("switch") == "off") {
@@ -122,8 +126,8 @@ def occupied() {
     }
 }
 
-def vacant() {
-    state.occupancy = "vacant"
+def zoneHandler_Vacant(evt) {
+    logDebug("zoneHandler_Vacant: ${evt.device} changed to ${evt.value}")
     
     // Light Switch
     for (light in lights) {
@@ -151,21 +155,21 @@ def doorHandler_Occupancy(evt) {
     logDebug("doorHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "open") {
-        occupied()
+        zone.occupied()
     }
 }
 
 def lockHandler_Occupancy(evt) {
     logDebug("lockHandler_Occupancy: ${evt.device} changed to ${evt.value}")
     
-    vacant()
+    zone.vacant()
 }
 
 def modeHandler_Occupancy(evt) {
     logDebug("modeHandler_Occupancy: ${evt.device} changed to ${evt.value}")
 
     if (evt.value != "Home") {
-        vacant()
+        zone.vacant()
     }
 }
 
@@ -258,7 +262,7 @@ def personHandler_LockAlert(evt) {
 }
 
 def lockAlert() {
-    if (state.occupancy == "occupied") {
+    if (zone.currentValue("occupancy") == "occupied") {
         personToNotify.deviceNotification("Should the $lock still be unlocked?")
         runIn(60*30, lockAlert)
     } 

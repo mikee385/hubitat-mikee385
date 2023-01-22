@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "11.0.0",
+    "version": "12.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Allow multiple cameras",
-    "dateReleased": "2022-11-04",
+    "releaseNotes": "Use Occupancy Status device to track occupancy (again)",
+    "dateReleased": "2023-01-21",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
