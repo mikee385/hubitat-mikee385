@@ -1,7 +1,7 @@
 /**
  *  Backup Battery Automation
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2023 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,10 +14,11 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "Backup Battery Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
+#include mikee385.device-monitor-library
 
 definition(
     name: "Backup Battery Automation",
@@ -34,7 +35,10 @@ preferences {
     page(name: "settings", title: "Backup Battery Automation", install: true, uninstall: true) {
         section {
             input "backupBattery", "capability.powerSource", title: "Backup Battery", multiple: false, required: true
-            input "shutdownMinutes", "number", title: "Shutdown hub when battery has time remaining (minutes)", required: true, defaultValue: 10
+        }
+        section("Shutdown hub when:") {
+            input "minBatteryLevel", "number", title: "Charge is below:", required: true, defaultValue: 10
+            input "minRuntimeLevel", "number", title: "Runtime is below:", required: true, defaultValue: 300
         }
         section("Alerts") {
             input "alertBattery", "bool", title: "Alert when on battery?", required: true, defaultValue: false
@@ -42,6 +46,7 @@ preferences {
             input "alertOffline", "bool", title: "Alert when offline?", required: true, defaultValue: false
         }
         section {
+            input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
@@ -60,29 +65,40 @@ def updated() {
 }
 
 def initialize() {
-    state.lowBattery = false
+    state.shuttingDown = false
 
     // Shutdown Hub
     subscribe(backupBattery, "powerSource", backupBatteryHandler_ShutdownHub)
-    subscribe(backupBattery, "batteryRuntime", backupBatteryHandler_ShutdownHub)
+    subscribe(backupBattery, "battery", backupBatteryHandler_ShutdownHub)
+    subscribe(backupBattery, "batteryRuntimeSecs", backupBatteryHandler_ShutdownHub)
     
     // Power Source Alert
-    subscribe(backupBattery, "powerSource", backupBatteryHandler_PowerSourceAlert)
+    subscribe(backupBattery, "powerSource", backupBatteryHandler_PowerSourceAlert)     
+    
+    // Device Checks
+    initializeDeviceChecks()
 }
 
 def backupBatteryHandler_ShutdownHub(evt) {
     logDebug("backupBatteryHandler_ShutdownHub: ${evt.device} changed to ${evt.value}")
 
     if (backupBattery.currentValue("powerSource") == "battery") {
-        if (backupBattery.currentValue("batteryRuntime") <= (shutdownMinutes*60) && !state.lowBattery) {
-            state.lowBattery = true
-            log.warn "Backup battery is low! Shutting down..."
-            personToNotify.deviceNotification("Backup battery is low! Shutting down... (mine)")
-            runIn(15, shutdownHub)
+        if (!state.shuttingDown) {
+            if (backupBattery.currentValue("battery") <= minBatteryLevel) {
+                state.shuttingDown = true
+                log.warn "Backup battery charge is low! Shutting down..."
+                personToNotify.deviceNotification("Backup battery charge is low! Shutting down...")
+                runIn(15, shutdownHub)
+            } else if (backupBattery.currentValue("batteryRuntimeSecs") <= minRuntimeLevel) {
+                state.shuttingDown = true
+                log.warn "Backup battery runtime is low! Shutting down..."
+                personToNotify.deviceNotification("Backup battery runtime is low! Shutting down...")
+                runIn(15, shutdownHub)
+            }
         }
     } else if (backupBattery.currentValue("powerSource") == "mains") {
         unschedule("shutdownHub")
-        state.lowBattery = false
+        state.shuttingDown = false
     }
 }
 
@@ -96,17 +112,17 @@ def backupBatteryHandler_PowerSourceAlert(evt) {
     if (evt.value == "battery") {
         log.info "Power is on battery!"
         if (alertBattery) {
-            personToNotify.deviceNotification("Power is on battery! (mine)")
+            personToNotify.deviceNotification("Power is on battery!")
         }
     } else if (evt.value == "mains") {
         log.info "Power has been restored!"
         if (alertMains) {
-            personToNotify.deviceNotification("Power has been restored! (mine)")
+            personToNotify.deviceNotification("Power has been restored!")
         }
     } else if (evt.value == "unknown") {
         log.warn "Backup battery is offline!"
         if (alertOffline) {
-            personToNotify.deviceNotification("Backup battery is offline! (mine)")
+            personToNotify.deviceNotification("Backup battery is offline!")
         }
     } else {
         log.warn "Unknown powerSource value: ${evt.value}"

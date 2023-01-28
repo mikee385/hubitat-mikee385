@@ -1,11 +1,11 @@
 {
     "packageName": "Backup Battery Automation",
     "author": "Michael Pierce",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Move debug method to external library",
-    "dateReleased": "2022-02-05",
+    "releaseNotes": "Add shutdown when battery charge is low and add Device Monitor",
+    "dateReleased": "2023-01-28",
     "apps": [
         {
             "id": "3773bced-1945-464b-ab83-95aa5f752708",
