@@ -1,11 +1,11 @@
 {
     "packageName": "Person Automation",
     "author": "Michael Pierce",
-    "version": "10.4.0",
+    "version": "10.5.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Set person awake if bedroom door open when bedtime ends",
-    "dateReleased": "2022-10-08",
+    "releaseNotes": "Set person asleep if bedroom door is closed when bedtime starts",
+    "dateReleased": "2023-01-30",
     "apps": [
         {
             "id": "3288efcf-5bf5-42ba-a7a8-5086b36b11a4",

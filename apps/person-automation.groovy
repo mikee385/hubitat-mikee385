@@ -1,7 +1,7 @@
 /**
  *  Person Automation
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2023 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.4.0" }
+String getVersionNum() { return "10.5.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -126,8 +126,12 @@ def initialize() {
     if (bedroomDoor) {
         subscribe(bedroomDoor, "contact", doorHandler_SleepStatus)
         
+        def currentTime = new Date()
+        if (bedtimeStart) {
+            def bedtime = timeToday(bedtimeStart)
+            schedule("$currentTime.seconds $bedtime.minutes $bedtime.hours * * ? *", bedtimeHandler_SleepStatus)
+        }
         if (bedtimeEnd) {
-            def currentTime = new Date()
             def wakeTime = timeToday(bedtimeEnd)
             schedule("$currentTime.seconds $wakeTime.minutes $wakeTime.hours * * ? *", wakeTimeHandler_SleepStatus)
         }
@@ -235,6 +239,16 @@ def doorHandler_SleepStatus(evt) {
             } 
         }
     }
+}
+
+def bedtimeHandler_SleepStatus(evt) {
+    logDebug("bedtimeHandler_SleepStatus")
+    
+    if (person.currentValue("presence") == "present" && person.currentValue("sleeping") == "not sleeping") {
+        if (bedroomDoor.currentValue("contact") == "closed") {
+            runIn(10*60, personAsleep)
+        }
+    } 
 }
 
 def personAsleep() {
