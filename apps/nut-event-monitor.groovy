@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.0.1" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -161,7 +161,7 @@ def initialize() {
     if(!state.accessToken) {
         createAccessToken()
     }
-    state.notifyEventUrl = "${getFullLocalApiServerUrl()}/notify/event?access_token=$state.accessToken"
+    state.notifyEventUrl = "${getFullLocalApiServerUrl()}/notify/$UPSNAME/$NOTIFYTYPE?access_token=$state.accessToken"
 }
 
 def childDevice() {
@@ -179,8 +179,8 @@ def eventHandler_ShutdownHub(evt) {
 
     if (!state.shuttingDown) {
         state.shuttingDown = true
-        log.warn "${batteryName} is shutting down..."
-        personToNotify.deviceNotification("${batteryName} is shutting down...")
+        log.warn "${upsName} is shutting down..."
+        personToNotify.deviceNotification("${upsName} is shutting down...")
         runIn(15, shutdownHub)
     }
 }
@@ -192,85 +192,85 @@ def shutdownHub() {
 def powerHandler_BatteryAlert(evt) {
     logDebug("powerHandler_BatteryAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} is on battery!")
+    personToNotify.deviceNotification("${upsName} is on battery!")
 }
 
 def powerHandler_MainsAlert(evt) {
     logDebug("powerHandler_MainsAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} power has been restored!")
+    personToNotify.deviceNotification("${upsName} power has been restored!")
 }
 
 def powerHandler_UnknownAlert(evt) {
     logDebug("powerHandler_UnknownAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} power is unknown!")
+    personToNotify.deviceNotification("${upsName} power is unknown!")
 }
 
 def networkHandler_OnlineAlert(evt) {
     logDebug("networkHandler_OnlineAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} is online!")
+    personToNotify.deviceNotification("${upsName} is online!")
 }
 
 def networkHandler_OfflineAlert(evt) {
     logDebug("networkHandler_OfflineAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} is offline!")
+    personToNotify.deviceNotification("${upsName} is offline!")
 }
 
 def eventHandler_OnlineAlert(evt) {
     logDebug("eventHandler_OnlineAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received online event!")
+    personToNotify.deviceNotification("${upsName} received online event!")
 }
 
 def eventHandler_OnbattAlert(evt) {
     logDebug("eventHandler_OnbattAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received onbatt event!")
+    personToNotify.deviceNotification("${upsName} received onbatt event!")
 }
 
 def eventHandler_LowbattAlert(evt) {
     logDebug("eventHandler_LowbattAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received lowbatt event!")
+    personToNotify.deviceNotification("${upsName} received lowbatt event!")
 }
 
 def eventHandler_FsdAlert(evt) {
     logDebug("eventHandler_FsdAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received fsd event!")
+    personToNotify.deviceNotification("${upsName} received fsd event!")
 }
 
 def eventHandler_CommokAlert(evt) {
     logDebug("eventHandler_CommokAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received commok event!")
+    personToNotify.deviceNotification("${upsName} received commok event!")
 }
 
 def eventHandler_CommbadAlert(evt) {
     logDebug("eventHandler_CommbadAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received commbad event!")
+    personToNotify.deviceNotification("${upsName} received commbad event!")
 }
 
 def eventHandler_ShutdownAlert(evt) {
     logDebug("eventHandler_ShutdownAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received shutdown event!")
+    personToNotify.deviceNotification("${upsName} received shutdown event!")
 }
 
 def eventHandler_ReplbattAlert(evt) {
     logDebug("eventHandler_ReplbattAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received replbatt event!")
+    personToNotify.deviceNotification("${upsName} received replbatt event!")
 }
 
 def eventHandler_NocommAlert(evt) {
     logDebug("eventHandler_NocommAlert: ${evt.device} changed to ${evt.value}")
     
-    personToNotify.deviceNotification("${batteryName} received nocomm event!")
+    personToNotify.deviceNotification("${upsName} received nocomm event!")
 }
 
 def urlHandler_notifyEvent() {

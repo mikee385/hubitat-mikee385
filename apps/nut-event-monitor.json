@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use standard name and type responses from UPSMON",
+    "releaseNotes": "Fix issues with batteryName instead of upsName",
     "dateReleased": "2023-02-03",
     "apps": [
         {
             "id": "c79e2c5e-5b45-4271-b768-eb9749070b39",
             "name": "NUT Event Monitor",
-            "version": "2.0.0",,
+            "version": "2.0.1",,
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/nut-event-monitor.groovy",
             "required": true,
