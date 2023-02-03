@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.2" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -192,30 +192,35 @@ def shutdownHub() {
 def powerHandler_BatteryAlert(evt) {
     logDebug("powerHandler_BatteryAlert: ${evt.device} changed to ${evt.value}")
     
+    log.info "${upsName} is on battery!"
     personToNotify.deviceNotification("${upsName} is on battery!")
 }
 
 def powerHandler_MainsAlert(evt) {
     logDebug("powerHandler_MainsAlert: ${evt.device} changed to ${evt.value}")
     
+    log.info "${upsName} power has been restored!"
     personToNotify.deviceNotification("${upsName} power has been restored!")
 }
 
 def powerHandler_UnknownAlert(evt) {
     logDebug("powerHandler_UnknownAlert: ${evt.device} changed to ${evt.value}")
     
+    log.warn "${upsName} power is unknown!"
     personToNotify.deviceNotification("${upsName} power is unknown!")
 }
 
 def networkHandler_OnlineAlert(evt) {
     logDebug("networkHandler_OnlineAlert: ${evt.device} changed to ${evt.value}")
     
+    log.info "${upsName} is online!"
     personToNotify.deviceNotification("${upsName} is online!")
 }
 
 def networkHandler_OfflineAlert(evt) {
     logDebug("networkHandler_OfflineAlert: ${evt.device} changed to ${evt.value}")
     
+    log.warn "${upsName} is offline!"
     personToNotify.deviceNotification("${upsName} is offline!")
 }
 
