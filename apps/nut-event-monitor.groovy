@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -281,5 +281,5 @@ def eventHandler_NocommAlert(evt) {
 def urlHandler_notifyEvent() {
     logDebug("urlHandler_notifyEvent: ${params.upsName} changed to ${params.event}")
     
-    childDevice().parse(params.event)
+    childDevice().handleEvent(params.event)
 }

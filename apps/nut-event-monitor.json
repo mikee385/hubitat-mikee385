@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add additional logging",
+    "releaseNotes": "Rename parse to handleEvent and set power to unknown during shutdown or bad comm events",
     "dateReleased": "2023-02-03",
     "apps": [
         {
             "id": "c79e2c5e-5b45-4271-b768-eb9749070b39",
             "name": "NUT Event Monitor",
-            "version": "2.1.0",
+            "version": "2.2.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/nut-event-monitor.groovy",
             "required": true,
@@ -21,7 +21,7 @@
         {
             "id": "42d49f27-0256-4bce-bb19-44970d42ed6a",
             "name": "NUT Event Monitor",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/nut-event-monitor.groovy",
             "required": true

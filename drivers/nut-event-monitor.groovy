@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -48,49 +48,52 @@ def logDebug(msg) {
     }
 }
 
-def parse(message) {
-    logDebug("parse: ${message}")
+def handleEvent(notifyType) {
+    logDebug("handleEvent: ${notifyType}")
     
-    if (message == "ONLINE") {
+    if (notifyType == "ONLINE") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "powerSource", value: "mains")
         sendEvent(name: "lastEvent", value: "online", isStateChange: true)
     
-    } else if (message == "ONBATT") {
+    } else if (notifyType == "ONBATT") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "powerSource", value: "battery")
         sendEvent(name: "lastEvent", value: "onbatt", isStateChange: true)
     
-    } else if (message == "LOWBATT") {
+    } else if (notifyType == "LOWBATT") {
         sendEvent(name: "networkStatus", value: "online")
-        sendEvent(name: "powerSource", value: "battery")
         sendEvent(name: "lastEvent", value: "lowbatt", isStateChange: true)
     
-    } else if (message == "FSD") {
+    } else if (notifyType == "FSD") {
         sendEvent(name: "networkStatus", value: "offline")
+        sendEvent(name: "powerSource", value: "unknown")
         sendEvent(name: "lastEvent", value: "fsd", isStateChange: true)
     
-    } else if (message == "COMMOK") {
+    } else if (notifyType == "COMMOK") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "lastEvent", value: "commok", isStateChange: true)
     
-    } else if (message == "COMMBAD") {
+    } else if (notifyType == "COMMBAD") {
         sendEvent(name: "networkStatus", value: "offline")
+        sendEvent(name: "powerSource", value: "unknown")
         sendEvent(name: "lastEvent", value: "commbad", isStateChange: true)
     
-    } else if (message == "SHUTDOWN") {
+    } else if (notifyType == "SHUTDOWN") {
         sendEvent(name: "networkStatus", value: "offline")
+        sendEvent(name: "powerSource", value: "unknown")
         sendEvent(name: "lastEvent", value: "shutdown", isStateChange: true)
     
-    } else if (message == "REPLBATT") {
+    } else if (notifyType == "REPLBATT") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "lastEvent", value: "replbatt", isStateChange: true)
     
-    } else if (message == "NOCOMM") {
+    } else if (notifyType == "NOCOMM") {
         sendEvent(name: "networkStatus", value: "offline")
+        sendEvent(name: "powerSource", value: "unknown")
         sendEvent(name: "lastEvent", value: "nocomm", isStateChange: true)
     
     } else {
-        log.warn "Unknown message: ${message}"
+        log.warn "Unknown event: ${notifyType}"
     }
 }
