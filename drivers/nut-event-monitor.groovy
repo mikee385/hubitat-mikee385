@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -30,6 +30,10 @@ String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()}
         attribute "networkStatus", "enum", ["online", "offline"]
         attribute "lastEvent", "enum", ["online", "onbatt", "lowbatt", "fsd", "commok", "commbad", "shutdown", "replbatt", "nocomm"]
     }
+    preferences {
+        input name: "upsName", type: "text", title: "UPS Name:", required: true, displayDuringSetup: true
+    	input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, displayDuringSetup: true
+    }
 }
 
 def installed() {
@@ -38,45 +42,51 @@ def installed() {
     sendEvent(name: "lastEvent", value: "nocomm")
 }
 
-def parse(String message) {
+def logDebug(msg) {
+    if (logEnable) {
+        log.debug msg
+    }
+}
+
+def parse(message) {
     logDebug("parse: ${message}")
     
-    if (message == "online") {
+    if (message == "ONLINE") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "powerSource", value: "mains")
         sendEvent(name: "lastEvent", value: "online", isStateChange: true)
     
-    } else if (message == "onbatt") {
+    } else if (message == "ONBATT") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "powerSource", value: "battery")
         sendEvent(name: "lastEvent", value: "onbatt", isStateChange: true)
     
-    } else if (message == "lowbatt") {
+    } else if (message == "LOWBATT") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "powerSource", value: "battery")
         sendEvent(name: "lastEvent", value: "lowbatt", isStateChange: true)
     
-    } else if (message == "fsd") {
+    } else if (message == "FSD") {
         sendEvent(name: "networkStatus", value: "offline")
         sendEvent(name: "lastEvent", value: "fsd", isStateChange: true)
     
-    } else if (message == "commok") {
+    } else if (message == "COMMOK") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "lastEvent", value: "commok", isStateChange: true)
     
-    } else if (message == "commbad") {
+    } else if (message == "COMMBAD") {
         sendEvent(name: "networkStatus", value: "offline")
         sendEvent(name: "lastEvent", value: "commbad", isStateChange: true)
     
-    } else if (message == "shutdown") {
+    } else if (message == "SHUTDOWN") {
         sendEvent(name: "networkStatus", value: "offline")
         sendEvent(name: "lastEvent", value: "shutdown", isStateChange: true)
     
-    } else if (message == "replbatt") {
+    } else if (message == "REPLBATT") {
         sendEvent(name: "networkStatus", value: "online")
         sendEvent(name: "lastEvent", value: "replbatt", isStateChange: true)
     
-    } else if (message == "nocomm") {
+    } else if (message == "NOCOMM") {
         sendEvent(name: "networkStatus", value: "offline")
         sendEvent(name: "lastEvent", value: "nocomm", isStateChange: true)
     

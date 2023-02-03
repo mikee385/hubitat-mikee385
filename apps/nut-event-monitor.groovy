@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "1.0.0" }
+String getVersionNum() { return "2.0.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -33,7 +33,7 @@ definition(
 preferences {
     page(name: "settings", title: "NUT Event Monitor", install: true, uninstall: true) {
         section {
-            input name: "batteryName", type: "string", title: "Battery Name", required: true
+            input name: "upsName", type: "string", title: "UPS Name", required: true
         }
         section("Shutdown Hub") {
             input "shutdownOnFsd", "bool", title: "Shutdown when FSD event recieved?", required: true, defaultValue: false
@@ -69,7 +69,7 @@ preferences {
 }
 
 mappings {
-    path("/notify/:event") {
+    path("/notify/:upsName/:event") {
         action: [
             GET: "urlHandler_notifyEvent"
         ]
@@ -168,7 +168,8 @@ def childDevice() {
     def childID = "nutEventMonitor:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        child = addChildDevice("mikee385", "NUT Event Monitor", childID, 1234, [label: batteryName, isComponent: true])
+        child = addChildDevice("mikee385", "NUT Event Monitor", childID, 1234, [label: upsName, isComponent: true])
+        child.updateSetting("upsName", [value: upsName, type: "text"])
     }
     return child
 }
@@ -273,7 +274,7 @@ def eventHandler_NocommAlert(evt) {
 }
 
 def urlHandler_notifyEvent() {
-    logDebug("urlHandler_notifyEvent")
+    logDebug("urlHandler_notifyEvent: ${params.upsName} changed to ${params.event}")
     
     childDevice().parse(params.event)
 }
