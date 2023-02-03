@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.1" }
+String getVersionNum() { return "2.0.2" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -161,7 +161,7 @@ def initialize() {
     if(!state.accessToken) {
         createAccessToken()
     }
-    state.notifyEventUrl = "${getFullLocalApiServerUrl()}/notify/$UPSNAME/$NOTIFYTYPE?access_token=$state.accessToken"
+    state.notifyEventUrl = "${getFullLocalApiServerUrl()}/notify/\$UPSNAME/\$NOTIFYTYPE?access_token=$state.accessToken"
 }
 
 def childDevice() {
