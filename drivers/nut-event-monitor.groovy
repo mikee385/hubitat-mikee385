@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.5.0" }
+String getVersionNum() { return "3.6.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -113,13 +113,17 @@ def handleEvent(notifyType) {
 }
 
 def refresh() {
+    unschedule("terminateConnection")
+    telnetClose()
+    
     try {
-        telnetClose()
 		telnetConnect([termChars:[10]], nutServerHost, nutServerPort.toInteger(), null, null)
 		sendCommand("GET VAR ${upsName} ups.status")
-		sendCommand("LOGOUT")
+		runIn(30, terminateConnection)
         
 	} catch (err) {
+	    telnetClose()
+	    
 		log.error "Refresh telnet connection error: ${err}"
 		sendEvent(name: "networkStatus", value: "offline")
         sendEvent(name: "powerSource", value: "unknown")
@@ -128,7 +132,18 @@ def refresh() {
 	}
 }
 
+def terminateConnection() {
+    telnetClose()
+    
+    log.error "No response from telnet command"
+	sendEvent(name: "networkStatus", value: "offline")
+    sendEvent(name: "powerSource", value: "unknown")
+    sendEvent(name: "lastEvent", value: "nocomm")
+}
+
 def parse(String message) {
+    unschedule("terminateConnection")
+    
     log.debug "parse: ${message}"
     
     def online = false
@@ -183,9 +198,6 @@ def parse(String message) {
         
         }
     
-    } else if (message == "OK Goodbye") {
-		// Do nothing
-    
     } else {
         log.error "Unknown message: ${message}"
         sendEvent(name: "networkStatus", value: "offline")
@@ -193,9 +205,13 @@ def parse(String message) {
         sendEvent(name: "lastEvent", value: "commbad")
         
     }
+    
+    telnetClose()
 }
 
 def telnetStatus(String message) {
+    unschedule("terminateConnection")
+    
     if (message == "receive error: Stream is closed") {
         log.debug "telnetStatus: ${message}"
     
@@ -206,6 +222,8 @@ def telnetStatus(String message) {
         sendEvent(name: "lastEvent", value: "commbad")
     
 	}
+	
+	telnetClose()
 }
 
 def sendCommand(cmd) {
