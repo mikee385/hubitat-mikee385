@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove isStateChange when parsing status during refresh",
+    "releaseNotes": "Change log.info to log.debug",
     "dateReleased": "2023-02-03",
     "apps": [
         {
@@ -21,7 +21,7 @@
         {
             "id": "42d49f27-0256-4bce-bb19-44970d42ed6a",
             "name": "NUT Event Monitor",
-            "version": "3.3.0",
+            "version": "3.4.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/nut-event-monitor.groovy",
             "required": true

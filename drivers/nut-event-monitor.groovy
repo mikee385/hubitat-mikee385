@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.3.0" }
+String getVersionNum() { return "3.4.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -152,25 +152,25 @@ def parse(String message) {
         }
         
         if (nocomm) {
-            log.info "parse: status is OFF"
+            log.debug "parse: status is OFF"
             sendEvent(name: "networkStatus", value: "offline")
             sendEvent(name: "powerSource", value: "unknown")
             sendEvent(name: "lastEvent", value: "nocomm")
         
         } else if (fsd) {
-            log.info "parse: status is FSD"
+            log.debug "parse: status is FSD"
             sendEvent(name: "networkStatus", value: "offline")
             sendEvent(name: "powerSource", value: "unknown")
             sendEvent(name: "lastEvent", value: "fsd")
         
         } else if (onbatt) {
-            log.info "parse: status is OB"
+            log.debug "parse: status is OB"
             sendEvent(name: "networkStatus", value: "online")
             sendEvent(name: "powerSource", value: "battery")
             sendEvent(name: "lastEvent", value: "onbatt")
         
         } else if (online) {
-            log.info "parse: status is OL"
+            log.debug "parse: status is OL"
             sendEvent(name: "networkStatus", value: "online")
             sendEvent(name: "powerSource", value: "mains")
             sendEvent(name: "lastEvent", value: "online")
