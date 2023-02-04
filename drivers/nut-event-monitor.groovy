@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -118,25 +118,66 @@ def refresh() {
 		sendCommand("GET VAR ${upsName} ups.status")
         sendCommand("LOGOUT")
         telnetClose()
+        
 	} catch (err) {
 		log.error "Refresh telnet connection error: ${err}"
+		sendEvent(name: "networkStatus", value: "offline")
+        sendEvent(name: "powerSource", value: "unknown")
+        sendEvent(name: "lastEvent", value: "commbad", isStateChange: true)
+	
 	}
 }
 
 def parse(String message) {
     log.debug "parse: ${message}"
     
+    def online = false
+    def onbatt = false
+    def fsd = false
+    def nocomm = false
+    
     def values = message.split(" ")
     if (values[0] == "VAR" && values[1] == upsName && values[2] == "ups.status") {
         for (int i = 3; i < values.size(); i++) {
             def status = values[i].replace("\"", "")
             if (status == "OL") {
-                log.info "parse: status is OL"
+                online = true
             } else if (status == "OB") {
-                log.info "parse: status is OB"
-            } else {
-                log.error "Unknown status: ${status}" 
+                onbatt = true
+            } else if (status == "FSD") {
+                fsd = true
+            } else if (status == "OFF") {
+                nocomm = true
             }
+        }
+        
+        if (nocomm) {
+            log.info "parse: status is OFF"
+            sendEvent(name: "networkStatus", value: "offline")
+            sendEvent(name: "powerSource", value: "unknown")
+            sendEvent(name: "lastEvent", value: "nocomm", isStateChange: true)
+        
+        } else if (fsd) {
+            log.info "parse: status is FSD"
+            sendEvent(name: "networkStatus", value: "offline")
+            sendEvent(name: "powerSource", value: "unknown")
+            sendEvent(name: "lastEvent", value: "fsd", isStateChange: true)
+        
+        } else if (onbatt) {
+            log.info "parse: status is OB"
+            sendEvent(name: "networkStatus", value: "online")
+            sendEvent(name: "powerSource", value: "battery")
+            sendEvent(name: "lastEvent", value: "onbatt", isStateChange: true)
+        
+        } else if (online) {
+            log.info "parse: status is OL"
+            sendEvent(name: "networkStatus", value: "online")
+            sendEvent(name: "powerSource", value: "mains")
+            sendEvent(name: "lastEvent", value: "online", isStateChange: true)
+            
+        } else {
+            log.error "Unknown status: ${message}" 
+        
         }
     } else {
         log.error "Unknown message: ${message}"
