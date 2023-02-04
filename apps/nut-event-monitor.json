@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename parse to handleEvent and set power to unknown during shutdown or bad comm events",
+    "releaseNotes": "Initial implementation of refresh capability using telnet",
     "dateReleased": "2023-02-03",
     "apps": [
         {
@@ -21,7 +21,7 @@
         {
             "id": "42d49f27-0256-4bce-bb19-44970d42ed6a",
             "name": "NUT Event Monitor",
-            "version": "2.1.0",
+            "version": "3.0.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/nut-event-monitor.groovy",
             "required": true

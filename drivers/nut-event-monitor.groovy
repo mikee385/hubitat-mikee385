@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "3.0.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -24,15 +24,20 @@ String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()}
 		author: "Michael Pierce", 
 		importUrl: "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/nut-event-monitor.groovy"
 	) {
+        capability "Initialize"
         capability "PowerSource"
+        capability "Refresh"
         capability "Sensor"
+        capability "Telnet"
         
         attribute "networkStatus", "enum", ["online", "offline"]
         attribute "lastEvent", "enum", ["online", "onbatt", "lowbatt", "fsd", "commok", "commbad", "shutdown", "replbatt", "nocomm"]
     }
     preferences {
         input name: "upsName", type: "text", title: "UPS Name:", required: true, displayDuringSetup: true
-    	input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, displayDuringSetup: true
+        input name: "nutServerHost", type: "text", description: "IP or hostname of NUT server", title: "NUT server hostname"
+        input name: "nutServerPort", type: "number", description: "Port number of NUT server", title: "NUT server port number", defaultValue: 3493, range: "1..65535"
+        input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, displayDuringSetup: true
     }
 }
 
@@ -40,6 +45,15 @@ def installed() {
     sendEvent(name: "networkStatus", value: "offline")
     sendEvent(name: "powerSource", value: "unknown")
     sendEvent(name: "lastEvent", value: "nocomm")
+}
+
+def initialize() {
+    refresh()
+}
+
+def updated() {
+    unschedule()
+    initialize()
 }
 
 def logDebug(msg) {
@@ -96,4 +110,28 @@ def handleEvent(notifyType) {
     } else {
         log.warn "Unknown event: ${notifyType}"
     }
+}
+
+def refresh() {
+    try {
+		telnetConnect([termChars:[10]], nutServerHost, nutServerPort.toInteger(), null, null)
+		sendCommand("GET VAR ${upsName} ups.status")
+        sendCommand("LOGOUT")
+        telnetClose()
+	} catch (err) {
+		log.error "Refresh telnet connection error: ${err}"
+	}
+}
+
+def parse(String message) {
+    log.debug "parse: ${message}"
+}
+
+def telnetStatus(String message) {
+    log.error "telnetStatus: ${message}"
+}
+
+def sendCommand(cmd) {
+	log.debug "sendCommand: ${cmd}"
+	return sendHubCommand(new hubitat.device.HubAction("${cmd}", hubitat.device.Protocol.TELNET))
 }
