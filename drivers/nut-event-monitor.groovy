@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.0.0" }
+String getVersionNum() { return "3.1.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -125,10 +125,30 @@ def refresh() {
 
 def parse(String message) {
     log.debug "parse: ${message}"
+    
+    def values = message.split(" ")
+    if (values[0] == "VAR" && values[1] == upsName && values[2] == "ups.status") {
+        for (int i = 3; i < values.size(); i++) {
+            def status = values[i].replace("\"", "")
+            if (status == "OL") {
+                log.info "parse: status is OL"
+            } else if (status == "OB") {
+                log.info "parse: status is OB"
+            } else {
+                log.error "Unknown status: ${status}" 
+            }
+        }
+    } else {
+        log.error "Unknown message: ${message}"
+    } 
 }
 
 def telnetStatus(String message) {
-    log.error "telnetStatus: ${message}"
+    if (message == "receive error: Stream is closed") {
+        log.debug "telnetStatus: ${message}"
+    } else {
+        log.error "telnetStatus: ${message}"
+	}
 }
 
 def sendCommand(cmd) {
