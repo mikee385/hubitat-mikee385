@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.6.0" }
+String getVersionNum() { return "3.7.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -42,6 +42,8 @@ String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()}
 }
 
 def installed() {
+    logDebug("installed")
+    
     sendEvent(name: "networkStatus", value: "offline")
     sendEvent(name: "powerSource", value: "unknown")
     sendEvent(name: "lastEvent", value: "nocomm")
@@ -116,6 +118,8 @@ def refresh() {
     unschedule("terminateConnection")
     telnetClose()
     
+    logDebug("refresh")
+    
     try {
 		telnetConnect([termChars:[10]], nutServerHost, nutServerPort.toInteger(), null, null)
 		sendCommand("GET VAR ${upsName} ups.status")
@@ -144,7 +148,7 @@ def terminateConnection() {
 def parse(String message) {
     unschedule("terminateConnection")
     
-    log.debug "parse: ${message}"
+    logDebug("parse: ${message}")
     
     def online = false
     def onbatt = false
@@ -167,25 +171,25 @@ def parse(String message) {
         }
         
         if (nocomm) {
-            log.debug "parse: status is OFF"
+            logDebug("parse: status is OFF")
             sendEvent(name: "networkStatus", value: "offline")
             sendEvent(name: "powerSource", value: "unknown")
             sendEvent(name: "lastEvent", value: "nocomm")
         
         } else if (fsd) {
-            log.debug "parse: status is FSD"
+            logDebug("parse: status is FSD")
             sendEvent(name: "networkStatus", value: "offline")
             sendEvent(name: "powerSource", value: "unknown")
             sendEvent(name: "lastEvent", value: "fsd")
         
         } else if (onbatt) {
-            log.debug "parse: status is OB"
+            logDebug("parse: status is OB")
             sendEvent(name: "networkStatus", value: "online")
             sendEvent(name: "powerSource", value: "battery")
             sendEvent(name: "lastEvent", value: "onbatt")
         
         } else if (online) {
-            log.debug "parse: status is OL"
+            logDebug("parse: status is OL")
             sendEvent(name: "networkStatus", value: "online")
             sendEvent(name: "powerSource", value: "mains")
             sendEvent(name: "lastEvent", value: "online")
@@ -213,7 +217,7 @@ def telnetStatus(String message) {
     unschedule("terminateConnection")
     
     if (message == "receive error: Stream is closed") {
-        log.debug "telnetStatus: ${message}"
+        logDebug("telnetStatus: ${message}")
     
     } else {
         log.error "telnetStatus: ${message}"
@@ -227,6 +231,6 @@ def telnetStatus(String message) {
 }
 
 def sendCommand(cmd) {
-	log.debug "sendCommand: ${cmd}"
+	logDebug("sendCommand: ${cmd}")
 	return sendHubCommand(new hubitat.device.HubAction("${cmd}", hubitat.device.Protocol.TELNET))
 }
