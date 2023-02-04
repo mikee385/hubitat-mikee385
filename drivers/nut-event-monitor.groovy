@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.2.0" }
+String getVersionNum() { return "3.3.0" }
 String getVersionLabel() { return "NUT Event Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -123,7 +123,7 @@ def refresh() {
 		log.error "Refresh telnet connection error: ${err}"
 		sendEvent(name: "networkStatus", value: "offline")
         sendEvent(name: "powerSource", value: "unknown")
-        sendEvent(name: "lastEvent", value: "commbad", isStateChange: true)
+        sendEvent(name: "lastEvent", value: "commbad")
 	
 	}
 }
@@ -155,25 +155,25 @@ def parse(String message) {
             log.info "parse: status is OFF"
             sendEvent(name: "networkStatus", value: "offline")
             sendEvent(name: "powerSource", value: "unknown")
-            sendEvent(name: "lastEvent", value: "nocomm", isStateChange: true)
+            sendEvent(name: "lastEvent", value: "nocomm")
         
         } else if (fsd) {
             log.info "parse: status is FSD"
             sendEvent(name: "networkStatus", value: "offline")
             sendEvent(name: "powerSource", value: "unknown")
-            sendEvent(name: "lastEvent", value: "fsd", isStateChange: true)
+            sendEvent(name: "lastEvent", value: "fsd")
         
         } else if (onbatt) {
             log.info "parse: status is OB"
             sendEvent(name: "networkStatus", value: "online")
             sendEvent(name: "powerSource", value: "battery")
-            sendEvent(name: "lastEvent", value: "onbatt", isStateChange: true)
+            sendEvent(name: "lastEvent", value: "onbatt")
         
         } else if (online) {
             log.info "parse: status is OL"
             sendEvent(name: "networkStatus", value: "online")
             sendEvent(name: "powerSource", value: "mains")
-            sendEvent(name: "lastEvent", value: "online", isStateChange: true)
+            sendEvent(name: "lastEvent", value: "online")
             
         } else {
             log.error "Unknown status: ${message}" 
