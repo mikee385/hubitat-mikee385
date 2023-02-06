@@ -136,13 +136,6 @@
             "tags": [ "Automations & Groups", "Presence & Location" ]
         },
         {
-            "name": "NUT Event Monitor",
-            "category": "Integrations",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/nut-event-monitor.json",
-            "description": "Listens for events from a UPS monitor and shutdown controller (UPSMON)",
-            "tags": [ "Automations & Groups", "Energy Monitoring", "Monitoring", "Notifications" ]
-        },
-        {
             "name": "Pantry Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.json",
@@ -272,13 +265,6 @@
             "name": "Echo Glow Routines",
             "category": "Utility",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-routines.json",
-            "description": "Driver providing buttons representing different scenes that can be shared with Alexa to create routines that interact with physical Echo Glow devices.",
-            "tags": [ "Lights & Switches", "Misc. Devices", "Voice Assistants" ]
-        },
-        {
-            "name": "Echo Glow Device",
-            "category": "Utility",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-device.json",
             "description": "Driver providing buttons representing different scenes that can be shared with Alexa to create routines that interact with physical Echo Glow devices.",
             "tags": [ "Lights & Switches", "Misc. Devices", "Voice Assistants" ]
         },
