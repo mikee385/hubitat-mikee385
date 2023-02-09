@@ -1,11 +1,11 @@
 /**
  *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 4.5.0
+ *  version: 4.6.0
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Exclude Echo Glow Routines from device checks
- *  dateReleased: 2023-01-20
+ *  releaseNotes: Exclude NUT Child UPS from unchanged device checks
+ *  dateReleased: 2023-02-08
  *
  *  Copyright 2023 Michael Pierce
  *
@@ -51,11 +51,15 @@ import groovy.transform.Field
     "Konke ZigBee Temperature Humidity Sensor"
 ]
     
- @Field static final List excludedInactiveDeviceTypes = [
+@Field static final List excludedInactiveDeviceTypes = [
     "LG ThinQ Dryer",
     "LG ThinQ Washer",
     "Philips Dimmer Button Controller", 
     "Roku TV"
+]
+
+@Field static final List excludedUnchangedDeviceTypes = [
+    "NUT Child UPS"
 ]
 
 def initializeDeviceChecks() {
@@ -174,7 +178,8 @@ def deviceCheck(evt) {
             if (!device.hasCapability("PresenceSensor")) {
                 inactiveThresholds.add([device: device, inactiveHours: 24])
             }
-        
+        }
+        if (!excludedUnchangedDeviceTypes.contains(device.getTypeName())) {
             if (device.hasCapability("TemperatureMeasurement")) {
                 unchangedThresholds.add([device: device, attribute: "temperature", inactiveHours: 24])
                 
