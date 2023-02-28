@@ -1,7 +1,7 @@
 /**
  *  Roomba Automation
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2023 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.2.1" }
+String getVersionNum() { return "12.3.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -245,22 +245,41 @@ def startCycle() {
     }
 
     if (currentTimeIsBetween(roombaStartTime, location.sunset) && everyoneAway) {
-        if (childDevice().currentValue("switch") == "off") {
-            personToNotify.deviceNotification("Do you want to run $roomba?")
-        } else if (roomba.currentValue("consumableStatus") == "maintenance_required") {
-            personToNotify.deviceNotification("$roomba could not start because the bin is full!")
-        } else if (roomba.currentValue("consumableStatus") == "missing") {
-            personToNotify.deviceNotification("$roomba could not start because the bin is missing!")
-        } else if (roomba.currentValue("consumableStatus") != "good") {
-            personToNotify.deviceNotification("$roomba could not start because of an unknown error with the bin!")
-        } else if (roomba.currentValue("battery") <= 10) {
-            personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
-        } else if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
-            roomba.start()
+        if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
+            if (isReadyToRun()) {
+                roomba.start()
+            } 
         } else if (roomba.currentValue("cycle") != "none" && roomba.currentValue("phase") == "stop") {
-            roomba.resume()
+            if (isReadyToRun()) {
+                roomba.resume()
+            } 
         }
     }
+}
+
+def isReadyToRun() {
+    if (childDevice().currentValue("switch") == "off") {
+        personToNotify.deviceNotification("Do you want to run $roomba?")
+        return false
+    
+    } else if (roomba.currentValue("consumableStatus") == "maintenance_required") {
+        personToNotify.deviceNotification("$roomba could not start because the bin is full!")
+        return false
+    
+    } else if (roomba.currentValue("consumableStatus") == "missing") {
+        personToNotify.deviceNotification("$roomba could not start because the bin is missing!")
+        return false
+    
+    } else if (roomba.currentValue("consumableStatus") != "good") {
+        personToNotify.deviceNotification("$roomba could not start because of an unknown error with the bin!")
+        return false
+    
+    } else if (roomba.currentValue("battery") <= 10) {
+        personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
+        return false
+    }
+    
+    return true
 }
 
 def pauseCycle() {
