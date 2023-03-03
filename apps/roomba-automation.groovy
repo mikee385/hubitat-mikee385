@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.3.0" }
+String getVersionNum() { return "12.4.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -104,7 +104,7 @@ def initialize() {
     for (pauseDoor in pauseDoors) {
         subscribe(pauseDoor, "contact.open", doorOpenedHandler)
     }
-    subscribe(childDevice(), "switch", switchHandler)
+    subscribe(child, "switch", switchHandler)
 
     // Runtime Tracking
     subscribe(roomba, "phase", phaseHandler)
@@ -296,23 +296,18 @@ def cancelCycle() {
 }
 
 def checkCycle() {
-    if (childDevice().currentValue("switch") == "on") {
-        def anyoneHome = false
-        for (person in getPeople()) {
-            if (person.currentValue("presence") == "present") {
-                anyoneHome = true
-                break
-            }
+    def anyoneHome = false
+    for (person in getPeople()) {
+        if (person.currentValue("presence") == "present") {
+            anyoneHome = true
+            break
         }
+    }
         
-        if (anyoneHome) {
-            unschedule("checkCycle")
-            roomba.stop()
-        }
-    } else {
+    if (anyoneHome) {
         unschedule("checkCycle")
         roomba.stop()
-    } 
+    }
 }
 
 def phaseHandler(evt) {
