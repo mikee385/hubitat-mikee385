@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.0.0" }
+String getVersionNum() { return "2.1.0" }
 String getVersionLabel() { return "Echo Glow Routines, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -75,57 +75,74 @@ def childDevice(name) {
     def child = getChildDevice(childID)
     if (!child) {
         child = addChildDevice("hubitat", "Generic Component Contact/Switch", childID, [label: name, isComponent: true])
+        
         child.updateSetting("logEnable", [value: "false", type: "bool"])
         child.updateSetting("txtEnable", [value: "false", type: "bool"])
         child.updateDataValue("Name", name)
-        childOff(child)
+        
+        child.sendEvent(name: "switch", value: "off")
+        child.sendEvent(name: "contact", value: "closed")
     }
     return child
 }
 
-def childOn(child) {
-    child.sendEvent(name: "switch", value: "on")
-    child.sendEvent(name: "contact", value: "open")
-}
-
-def childOff(child) {
-    child.sendEvent(name: "switch", value: "off")
-    child.sendEvent(name: "contact", value: "closed")
-}
-
 def bedtimeSoon() {
-    childOn(bedtimeSoonDevice())
-    childOff(bedtimeNowDevice())
-    childOff(wakeUpDevice())
+    bedtimeSoonDevice().sendEvent(name: "switch", value: "on")
+    bedtimeNowDevice().sendEvent(name: "switch", value: "off")
+    wakeUpDevice().sendEvent(name: "switch", value: "off")
+    
+    bedtimeSoonDevice().sendEvent(name: "contact", value: "open")
+    runIn(1, bedtimeSoonClosed)
     
     sendEvent(name: "lastRoutine", value: "bedtimeSoon", isStateChange: true)
-    sendEvent(name: "contact", value: "open")
+}
+
+def bedtimeSoonClosed() {
+    bedtimeSoonDevice().sendEvent(name: "contact", value: "closed")
 }
 
 def bedtimeNow() {
-    childOff(bedtimeSoonDevice())
-    childOn(bedtimeNowDevice())
-    childOff(wakeUpDevice())
+    bedtimeSoonDevice().sendEvent(name: "switch", value: "off")
+    bedtimeNowDevice().sendEvent(name: "switch", value: "on")
+    wakeUpDevice().sendEvent(name: "switch", value: "off")
+    
+    bedtimeNowDevice().sendEvent(name: "contact", value: "open")
+    runIn(1, bedtimeNowClosed)
     
     sendEvent(name: "lastRoutine", value: "bedtimeNow", isStateChange: true)
-    sendEvent(name: "contact", value: "open")
+}
+
+def bedtimeNowClosed() {
+    bedtimeNowDevice().sendEvent(name: "contact", value: "closed")
 }
 
 def wakeUp() {
-    childOff(bedtimeSoonDevice())
-    childOff(bedtimeNowDevice())
-    childOn(wakeUpDevice())
+    bedtimeSoonDevice().sendEvent(name: "switch", value: "off")
+    bedtimeNowDevice().sendEvent(name: "switch", value: "off")
+    wakeUpDevice().sendEvent(name: "switch", value: "on")
+    
+    wakeUpDevice().sendEvent(name: "contact", value: "open")
+    runIn(1, wakeUpClosed)
     
     sendEvent(name: "lastRoutine", value: "wakeUp", isStateChange: true)
-    sendEvent(name: "contact", value: "open")
+}
+
+def wakeUpClosed() {
+    wakeUpDevice().sendEvent(name: "contact", value: "closed")
 }
 
 def glowsOff() {
-    childOff(bedtimeSoonDevice())
-    childOff(bedtimeNowDevice())
-    childOff(wakeUpDevice())
+    bedtimeSoonDevice().sendEvent(name: "switch", value: "off")
+    bedtimeNowDevice().sendEvent(name: "switch", value: "off")
+    wakeUpDevice().sendEvent(name: "switch", value: "off")
+    
+    sendEvent(name: "contact", value: "open")
+    runIn(1, glowsOffClosed)
     
     sendEvent(name: "lastRoutine", value: "glowsOff", isStateChange: true)
+}
+
+def glowsOffClosed() {
     sendEvent(name: "contact", value: "closed")
 }
 
