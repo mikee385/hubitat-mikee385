@@ -118,7 +118,7 @@ def personHandler(evt) {
     logDebug("${evt.device} changed to ${evt.value}")
 
     if (evt.value != "home") {
-        unsubscribe("reminderAlert")
+        unschedule("reminderAlert")
         
         if (exteriorDoor.currentValue("contact") == "open") {
             notifier.deviceNotification("$exteriorDoor is still open!")
