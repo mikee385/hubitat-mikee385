@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.4.0" }
+String getVersionNum() { return "12.5.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -47,6 +47,9 @@ preferences {
         section("People") {
             input "everydayPeople", "capability.presenceSensor", title: "Every Day", multiple: true, required: false
             input "weekendPeople", "capability.presenceSensor", title: "Weekend Only", multiple: true, required: false
+        }
+        section("Doors") {
+            input "closedDoors", "capability.contactSensor", title: "Doors that should be Closed", multiple: true, required: false
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -258,8 +261,20 @@ def startCycle() {
 }
 
 def isReadyToRun() {
+    def message = "Do you want to run $roomba?"
+    
+    def openDoors = []
+    for (door in closedDoors) {
+        if (door.currentValue("contact") == "open") {
+            openDoors.add(door)
+        }
+    }
+    if (openDoors) {
+        message += "\nWARNING: Doors are open!\n" + openDoors.join("\n")
+    } 
+    
     if (childDevice().currentValue("switch") == "off") {
-        personToNotify.deviceNotification("Do you want to run $roomba?")
+        personToNotify.deviceNotification(message)
         return false
     
     } else if (roomba.currentValue("consumableStatus") == "maintenance_required") {
@@ -277,6 +292,11 @@ def isReadyToRun() {
     } else if (roomba.currentValue("battery") <= 10) {
         personToNotify.deviceNotification("$roomba could not start because the battery is dead!")
         return false
+    
+    } else if (openDoors) {
+        personToNotify.deviceNotification(message)
+        return false
+        
     }
     
     return true
