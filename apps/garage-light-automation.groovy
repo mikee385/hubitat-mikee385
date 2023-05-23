@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.0.0" }
+String getVersionNum() { return "9.1.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -35,9 +35,16 @@ preferences {
     page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
         section {
             input "zone", "device.OccupancyStatus", title: "Zone", multiple: false, required: true
+        }
+        section {
             input "overheadDoor", "capability.contactSensor", title: "Overhead Door", multiple: false, required: true
             input "entryDoor", "capability.contactSensor", title: "Entry Door", multiple: false, required: true
             input "sideDoor", "capability.contactSensor", title: "Side Door", multiple: false, required: true
+        }
+        section {
+            input "additionalDoors", "capability.contactSensor", title: "Additional Doors", multiple: true, required: false
+        }
+        section {
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
             input "garageLight", "capability.switch", title: "Garage Light", multiple: false, required: true
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
