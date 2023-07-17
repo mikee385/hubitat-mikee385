@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "13.0.0" }
+String getVersionNum() { return "13.1.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -38,6 +38,12 @@ preferences {
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
             input "lights", "capability.switch", title: "Lights", multiple: true, required: true
+        }
+        section("Fans") {
+            input "fans", "capability.switch", title: "Fans", multiple: true, required: false
+            input "fanTemperatureSensor", "capability.temperatureMeasurement", title: "Temperature Sensor", multiple: false, required: false
+            input "fanTemperatureValue", "decimal", title: "Turn on fan when temperture is above (°F):", required: false, defaultValue: 80
+            
         }
         section("Outdoor Sensors") {
             input "sunlight", "capability.switch", title: "Sunlight", multiple: false, required: true
@@ -78,6 +84,12 @@ def initialize() {
     }
     subscribe(personToNotify, "sleeping", personHandler_LightAlert)
     
+    // Fan Alert
+    for (fan in fans) {
+        subscribe(fan, "switch", fanHandler_FanAlert)
+    }
+    subscribe(personToNotify, "sleeping", personHandler_FanAlert)
+    
     // Door Alert
     subscribe(door, "contact", doorHandler_DoorAlert)
     subscribe(personToNotify, "presence", personHandler_DoorAlert)
@@ -96,10 +108,23 @@ def initialize() {
 def zoneHandler_Occupied(evt) {
     logDebug("zoneHandler_Occupied: ${evt.device} changed to ${evt.value}")
     
-    // Light Switch
+    // Lights
     if (sunlight.currentValue("switch") == "off") {
         for (light in lights) {
             light.on()
+        }
+    }
+    
+    // Fans
+    if (fanTemperatureSensor && fanTemperatureValue) {
+        if (fanTemperatureSensor.currentValue("temperature") >= fanTemperatureValue) {
+            for (fan in fans) {
+                fan.on()
+            }
+        }
+    } else {
+        for (fan in fans) {
+            fan.on()
         }
     }
     
@@ -113,9 +138,14 @@ def zoneHandler_Occupied(evt) {
 def zoneHandler_Vacant(evt) {
     logDebug("zoneHandler_Vacant: ${evt.device} changed to ${evt.value}")
     
-    // Light Switch
+    // Lights
     for (light in lights) {
         light.off()
+    }
+    
+    // Fans
+    for (fan in fans) {
+        fan.off()
     }
     
     // Cameras
@@ -179,6 +209,37 @@ def personHandler_LightAlert(evt) {
 def lightAlert(evt) {
     personToNotify.deviceNotification("Should the ${evt.device} still be on?")
     runIn(60*30, lightAlert, [data: [device: "${evt.device}"]])
+}
+
+def fanHandler_FanAlert(evt) {
+    logDebug("fanHandler_FanAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "on") {
+        if (personToNotify.currentValue("sleeping") == "not sleeping") {
+            runIn(60*5, fanAlert, [data: [device: "${evt.device}"]])
+        }
+    } else {
+        unschedule("fanAlert")
+    }
+}
+
+def personHandler_FanAlert(evt) {
+    logDebug("personHandler_FanAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "sleeping") {
+        unschedule("fanAlert")
+        
+        for (fan in fans) {
+            if (fan.currentValue("switch") == "on") {
+                personToNotify.deviceNotification("$fan is still on!")
+            }
+        }
+    }
+}
+
+def fanAlert(evt) {
+    personToNotify.deviceNotification("Should the ${evt.device} still be on?")
+    runIn(60*30, fanAlert, [data: [device: "${evt.device}"]])
 }
 
 def doorHandler_DoorAlert(evt) {
