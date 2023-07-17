@@ -42,7 +42,7 @@ preferences {
         section("Fans") {
             input "fans", "capability.switch", title: "Fans", multiple: true, required: false
             input "fanTemperatureSensor", "capability.temperatureMeasurement", title: "Temperature Sensor", multiple: false, required: false
-            input "fanTemperatureValue", "decimal", title: "Turn on fan when temperture is above (°F):", required: false, defaultValue: 80
+            input "fanTemperatureValue", "decimal", title: "Turn on fan when temperature is above (°F):", required: false, defaultValue: 80
             
         }
         section("Outdoor Sensors") {
