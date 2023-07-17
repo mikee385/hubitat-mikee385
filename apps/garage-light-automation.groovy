@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.1.0" }
+String getVersionNum() { return "9.1.1" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -42,7 +42,7 @@ preferences {
             input "sideDoor", "capability.contactSensor", title: "Side Door", multiple: false, required: true
         }
         section {
-            input "additionalDoors", "capability.contactSensor", title: "Additional Doors", multiple: true, required: false
+            input "additionalDoors", "capability.garageDoorControl", title: "Additional Doors", multiple: true, required: false
         }
         section {
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
