@@ -4,8 +4,8 @@
     "version": "13.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add automation for fans based on occupancy",
-    "dateReleased": "2023-07-17",
+    "releaseNotes": "Supress light and fan alerts when porch is occupied",
+    "dateReleased": "2023-07-22",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",

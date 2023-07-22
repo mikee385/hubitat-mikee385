@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "13.1.0" }
+String getVersionNum() { return "13.2.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -184,7 +184,7 @@ def lightHandler_LightAlert(evt) {
     logDebug("lightHandler_LightAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        if (personToNotify.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("sleeping") == "not sleeping" && zone.currentValue("occupancy") != "occupied") {
             runIn(60*5, lightAlert, [data: [device: "${evt.device}"]])
         }
     } else {
@@ -215,7 +215,7 @@ def fanHandler_FanAlert(evt) {
     logDebug("fanHandler_FanAlert: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "on") {
-        if (personToNotify.currentValue("sleeping") == "not sleeping") {
+        if (personToNotify.currentValue("sleeping") == "not sleeping" && zone.currentValue("occupancy") != "occupied") {
             runIn(60*5, fanAlert, [data: [device: "${evt.device}"]])
         }
     } else {
