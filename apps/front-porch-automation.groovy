@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "Front Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -195,6 +195,8 @@ def personHandler_LockAlert(evt) {
 }
 
 def lockAlert() {
-    personToNotify.deviceNotification("Should the $lock still be unlocked?")
-    runIn(60*30, lockAlert)
+    if (lock.currentValue("lock") == "unlocked") {
+        personToNotify.deviceNotification("Should the $lock still be unlocked?")
+        runIn(60*30, lockAlert)
+    } 
 }
