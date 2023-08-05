@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.3.1" }
+String getVersionNum() { return "10.3.2" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -184,21 +184,21 @@ def scheduleBedtime() {
 }
 
 def bedtimeSoon1() {
-    bedtimeSoon()
+    echoGlowRoutines.bedtimeSoon()
 }
 
 def bedtimeSoon2() {
-    bedtimeSoon()
-}
-
-def bedtimeSoon() {
     echoGlowRoutines.bedtimeSoon()
 }
 
 def routineHandler_BedtimeSoon(evt) {
     logDebug("routineHandler_BedtimeSoon: ${evt.device} changed to ${evt.value}")
     
-    unschedule("bedtimeSoon")
+    if (now() < timeToday(timeToNotify1).getTime()) {
+        unschedule("bedtimeSoon1")
+    } else {
+        unschedule("bedtimeSoon2")
+    }
     unschedule("glowsOff")
     
     if (state.lastRoutine != "BedtimeSoon") {
@@ -227,7 +227,11 @@ def routineHandler_BedtimeNow(evt) {
         unschedule("bedtimeNow")
     }
     
-    unschedule("bedtimeSoon")
+    if (now() < timeToday(timeToNotify1).getTime()) {
+        unschedule("bedtimeSoon1")
+    } else {
+        unschedule("bedtimeSoon2")
+    }
     unschedule("glowsOff")
     
     if (state.lastRoutine != "BedtimeNow") {
@@ -333,7 +337,8 @@ def switchHandler_Schedule(evt) {
     if (evt.value == "on") {
         initializeBedtimeSchedule()
     } else {
-        unschedule("bedtimeSoon")
+        unschedule("bedtimeSoon1")
+        unschedule("bedtimeSoon2")
         unschedule("scheduleBedtime")
     } 
 }
@@ -341,7 +346,7 @@ def switchHandler_Schedule(evt) {
 def urlHandler_bedtimeSoon(evt) {
     logDebug("urlHandler_bedtimeSoon")
     
-    bedtimeSoon()
+    bedtimeSoon1()
 }
 
 def urlHandler_bedtimeNow(evt) {
