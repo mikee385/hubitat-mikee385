@@ -1,7 +1,7 @@
 /**
  *  Echo Glow Automation
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2023 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.2.0" }
+String getVersionNum() { return "10.3.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -48,7 +48,8 @@ preferences {
         }
         section("Daily Schedule") {
             input "daysToNotify", "enum", title: "Days of the Week", multiple: true, required: false, options: daysOfWeek
-            input "timeToNotify", "time", title: "Time", required: true, defaultValue: "18:55"
+            input "timeToNotify1", "time", title: "Time 1", required: true, defaultValue: "18:55"
+            input "timeToNotify2", "time", title: "Time 2", required: false, defaultValue: "19:40"
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
@@ -169,8 +170,12 @@ def initializeBedtimeSchedule() {
 def scheduleBedtime() {
     if (daysToNotify) {
         def daysFilter = daysToNotify.collect { (daysOfWeek.indexOf(it)+1).toString() }.join(",")
-        def timeToNotifyToday = timeToday(timeToNotify)
-        schedule("0 $timeToNotifyToday.minutes $timeToNotifyToday.hours ? * $daysFilter *", bedtimeSoon)
+        
+        def timeToNotify1Today = timeToday(timeToNotify1)
+        schedule("0 $timeToNotify1Today.minutes $timeToNotify1Today.hours ? * $daysFilter *", bedtimeSoon)
+        
+        def timeToNotify2Today = timeToday(timeToNotify2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * $daysFilter *", bedtimeSoon)
     }
 }
 

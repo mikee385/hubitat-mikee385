@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "10.2.0",
+    "version": "10.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Replace bedroom door with Person Status",
-    "dateReleased": "2023-01-21",
+    "releaseNotes": "Add a second bedtime",
+    "dateReleased": "2023-08-05",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
