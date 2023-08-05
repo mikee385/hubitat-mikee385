@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.3.0" }
+String getVersionNum() { return "10.3.1" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -48,7 +48,7 @@ preferences {
         }
         section("Daily Schedule") {
             input "daysToNotify", "enum", title: "Days of the Week", multiple: true, required: false, options: daysOfWeek
-            input "timeToNotify1", "time", title: "Time 1", required: true, defaultValue: "18:55"
+            input "timeToNotify1", "time", title: "Time 1", required: false, defaultValue: "18:55"
             input "timeToNotify2", "time", title: "Time 2", required: false, defaultValue: "19:40"
         }
         section("Alerts") {
@@ -171,12 +171,24 @@ def scheduleBedtime() {
     if (daysToNotify) {
         def daysFilter = daysToNotify.collect { (daysOfWeek.indexOf(it)+1).toString() }.join(",")
         
-        def timeToNotify1Today = timeToday(timeToNotify1)
-        schedule("0 $timeToNotify1Today.minutes $timeToNotify1Today.hours ? * $daysFilter *", bedtimeSoon)
+        if (timeToNotify1) {
+            def timeToNotify1Today = timeToday(timeToNotify1)
+            schedule("0 $timeToNotify1Today.minutes $timeToNotify1Today.hours ? * $daysFilter *", bedtimeSoon1)
+        } 
         
-        def timeToNotify2Today = timeToday(timeToNotify2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * $daysFilter *", bedtimeSoon)
+        if (timeToNotify2) {
+            def timeToNotify2Today = timeToday(timeToNotify2)
+            schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * $daysFilter *", bedtimeSoon2)
+        } 
     }
+}
+
+def bedtimeSoon1() {
+    bedtimeSoon()
+}
+
+def bedtimeSoon2() {
+    bedtimeSoon()
 }
 
 def bedtimeSoon() {
