@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.3.2" }
+String getVersionNum() { return "10.3.3" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -194,7 +194,7 @@ def bedtimeSoon2() {
 def routineHandler_BedtimeSoon(evt) {
     logDebug("routineHandler_BedtimeSoon: ${evt.device} changed to ${evt.value}")
     
-    if (now() < timeToday(timeToNotify1).getTime()) {
+    if (now() < timeToday(timeToNotify1).getTime() + 1*60*1000) {
         unschedule("bedtimeSoon1")
     } else {
         unschedule("bedtimeSoon2")
@@ -227,7 +227,7 @@ def routineHandler_BedtimeNow(evt) {
         unschedule("bedtimeNow")
     }
     
-    if (now() < timeToday(timeToNotify1).getTime()) {
+    if (now() < timeToday(timeToNotify1).getTime() + 6*60*1000) {
         unschedule("bedtimeSoon1")
     } else {
         unschedule("bedtimeSoon2")
