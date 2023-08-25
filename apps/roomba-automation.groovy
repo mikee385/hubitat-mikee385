@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.6.0" }
+String getVersionNum() { return "12.7.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -37,6 +37,7 @@ preferences {
         section {
             input "roomba", "device.Roomba", title: "Roomba", multiple: false, required: true
             input "roombaStartTime", "time", title: "Start Time", required: true
+            input "roombaEndTime", "time", title: "End Time", required: true
             input "minimumMinutes", "number", title: "Minimum Duration (in minutes)", required: true
             input "roombaResetTime", "time", title: "Reset Time", required: true
         }
@@ -249,7 +250,7 @@ def startCycle() {
         }
     }
 
-    if (currentTimeIsBetween(roombaStartTime, location.sunset) && everyoneAway) {
+    if (currentTimeIsBetween(roombaStartTime, roombaEndTime) && everyoneAway) {
         if (roomba.currentValue("cycle") == "none" && state.durationMinutes < minimumMinutes) {
             if (isReadyToRun()) {
                 roomba.start()
