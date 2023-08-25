@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.5.0" }
+String getVersionNum() { return "12.6.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -163,20 +163,22 @@ def getPeople() {
 }
 
 def everydayPersonHandler(evt) {
-    personHandler(evt)
-}
-
-def weekendPersonHandler(evt) {
-    if (isWeekend()) {
-        personHandler(evt)
-    } 
-}
-
-def personHandler(evt) {
-    logDebug("personHandler: ${evt.device} changed to ${evt.value}")
+    logDebug("everydayPersonHandler: ${evt.device} changed to ${evt.value}")
     
     if (evt.value == "present") {
         cancelCycle()
+    } else {
+        startCycle()
+    }
+}
+
+def weekendPersonHandler(evt) {
+    logDebug("weekendPersonHandler: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "present") {
+        if (isWeekend()) {
+            cancelCycle()
+        } 
     } else {
         startCycle()
     }

@@ -1,11 +1,11 @@
 {
     "packageName": "Roomba Automation",
     "author": "Michael Pierce",
-    "version": "12.5.0",
+    "version": "12.6.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Check if doors are open before starting Roomba",
-    "dateReleased": "2023-05-06",
+    "releaseNotes": "Start Roomba when a weekend person leaves during the week",
+    "dateReleased": "2023-08-25",
     "apps": [
         {
             "id": "8f28ae8c-f76b-44de-99bb-42d5b77cbaef",
