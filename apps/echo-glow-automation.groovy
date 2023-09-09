@@ -14,14 +14,11 @@
  *
  */
  
-String getVersionNum() { return "10.3.3" }
+String getVersionNum() { return "11.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
-#include mikee385.time-library
-
-def getDaysOfWeek() { ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] }
 
 definition(
     name: "Echo Glow Automation",
@@ -46,10 +43,16 @@ preferences {
             input "rokuDevices", "device.RokuTV", title: "Roku Devices", multiple: true, required: false
             input "bedtimeNowPause", "bool", title: "Pause when Bedtime Now?", required: true, defaultValue: false
         }
-        section("Daily Schedule") {
-            input "daysToNotify", "enum", title: "Days of the Week", multiple: true, required: false, options: daysOfWeek
-            input "timeToNotify1", "time", title: "Time 1", required: false, defaultValue: "18:55"
-            input "timeToNotify2", "time", title: "Time 2", required: false, defaultValue: "19:40"
+        section("Daily Schedule") { 
+            input "time1", "time", title: "Time 1", required: false, defaultValue: "18:55"
+            
+            input "sundayTime2", "time", title: "Sunday Time 2", required: false, defaultValue: "19:10"
+            input "mondayTime2", "time", title: "Monday Time 2", required: false, defaultValue: "19:10"
+            input "tuesdayTime2", "time", title: "Tuesday Time 2", required: false, defaultValue: "19:10"
+            input "wednesdayTime2", "time", title: "Wednesday Time 2", required: false, defaultValue: "19:10"
+            input "thursdayTime2", "time", title: "Thursday Time 2", required: false, defaultValue: "19:10"
+            input "fridayTime2", "time", title: "Friday Time 2", required: false, defaultValue: "19:25"
+            input "saturdayTime2", "time", title: "Saturday Time 2", required: false, defaultValue: "19:25"
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
@@ -162,24 +165,41 @@ def childDevice() {
 def initializeBedtimeSchedule() {
     scheduleBedtime()
         
-    def resetToday = timeToday("23:59")
+    def resetToday = timeToday("00:01")
     def currentTime = new Date()
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", scheduleBedtime)
 }
 
 def scheduleBedtime() {
-    if (daysToNotify) {
-        def daysFilter = daysToNotify.collect { (daysOfWeek.indexOf(it)+1).toString() }.join(",")
-        
-        if (timeToNotify1) {
-            def timeToNotify1Today = timeToday(timeToNotify1)
-            schedule("0 $timeToNotify1Today.minutes $timeToNotify1Today.hours ? * $daysFilter *", bedtimeSoon1)
-        } 
-        
-        if (timeToNotify2) {
-            def timeToNotify2Today = timeToday(timeToNotify2)
-            schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * $daysFilter *", bedtimeSoon2)
-        } 
+    if (timeToNotify1) {
+        def timeToNotify1Today = timeToday(timeToNotify1)
+        schedule("0 $timeToNotify1Today.minutes $timeToNotify1Today.hours * * ? *", bedtimeSoon1)
+    }
+    
+    def currentTime = new Date()
+    def currentDay = currentTime[Calendar.DAY_OF_WEEK]
+    
+    if (currentDay == 1 && sundayTime2) {
+        def timeToNotify2Today = timeToday(sundayTime2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 1 *", bedtimeSoon2)
+    } else if (currentDay == 2 && mondayTime2) {
+        def timeToNotify2Today = timeToday(mondayTime2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 2 *", bedtimeSoon2)
+    } else if (currentDay == 3 && tuesdayTime2) {
+        def timeToNotify2Today = timeToday(tuesdayTime2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 3 *", bedtimeSoon2)
+    } else if (currentDay == 4 && wednesdayTime2) {
+        def timeToNotify2Today = timeToday(wednesdayTime2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 4 *", bedtimeSoon2)
+    } else if (currentDay == 5 && thursdayTime2) {
+        def timeToNotify2Today = timeToday(thursdayTime2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 5 *", bedtimeSoon2)
+    } else if (currentDay == 6 && fridayTime2) {
+        def timeToNotify2Today = timeToday(fridayTime2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 6 *", bedtimeSoon2)
+    } else if (currentDay == 7 && saturdayTime2) {
+        def timeToNotify2Today = timeToday(saturdayTime2)
+        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 7 *", bedtimeSoon2)
     }
 }
 
@@ -194,7 +214,7 @@ def bedtimeSoon2() {
 def routineHandler_BedtimeSoon(evt) {
     logDebug("routineHandler_BedtimeSoon: ${evt.device} changed to ${evt.value}")
     
-    if (now() < timeToday(timeToNotify1).getTime() + 1*60*1000) {
+    if (now() < timeToday(time1).getTime() + 1*60*1000) {
         unschedule("bedtimeSoon1")
     } else {
         unschedule("bedtimeSoon2")
@@ -227,7 +247,7 @@ def routineHandler_BedtimeNow(evt) {
         unschedule("bedtimeNow")
     }
     
-    if (now() < timeToday(timeToNotify1).getTime() + 6*60*1000) {
+    if (now() < timeToday(time1).getTime() + 6*60*1000) {
         unschedule("bedtimeSoon1")
     } else {
         unschedule("bedtimeSoon2")
