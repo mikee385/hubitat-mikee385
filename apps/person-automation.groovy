@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "10.5.0" }
+String getVersionNum() { return "10.6.0" }
 String getVersionLabel() { return "Person Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -308,12 +308,11 @@ def inconsistencyCheck() {
     
     if (life360Sensor) {
         if (life360Sensor.currentValue("presence") != presenceValue) {
-            def message = "WARNING: $life360Sensor failed to change to $presenceValue!"
-            log.warn(message)
-            personToNotify.deviceNotification(message)
-            
             if (life360Refresh) {
                 life360Refresh.push(1)
+                runIn(30, life360InconsistencyCheck)
+            } else {
+                life360InconsistentAlert(presenceValue)
             }
         }
     }
@@ -325,6 +324,19 @@ def inconsistencyCheck() {
             personToNotify.deviceNotification(message)
         }
     }
+}
+
+def life360InconsistencyCheck() {
+    def presenceValue = person.currentValue("presence")
+    if (life360Sensor.currentValue("presence") != presenceValue) {
+        life360InconsistentAlert(presenceValue)
+    }
+}
+
+def life360InconsistentAlert(presenceValue) {
+    def message = "WARNING: $life360Sensor failed to change to $presenceValue!"
+    log.warn(message)
+    personToNotify.deviceNotification(message)
 }
 
 def personHandler_AsleepWhenAway(evt) {
