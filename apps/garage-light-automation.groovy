@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.1.1" }
+String getVersionNum() { return "9.2.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -43,6 +43,7 @@ preferences {
         }
         section {
             input "additionalDoors", "capability.garageDoorControl", title: "Additional Doors", multiple: true, required: false
+            input "alertInconsistent", "bool", title: "Alert when Inconsistent?", required: true, defaultValue: false
         }
         section {
             input "motionSensor", "capability.motionSensor", title: "Motion Sensor", multiple: false, required: true
@@ -101,6 +102,14 @@ def initialize() {
     subscribe(sideDoor, "contact", sideDoorHandler_DoorAlert)
     subscribe(personToNotify, "presence", personHandler_DoorAlert)
     subscribe(personToNotify, "sleeping", personHandler_DoorAlert)
+    
+    // Inconsistency Checks
+    if (alertInconsistent) {
+        subscribe(overheadDoor, "contact", deviceHandler_InconsistencyCheck)
+        for (door in additionalDoors) {
+            subscribe(door, "door", deviceHandler_InconsistencyCheck)
+        } 
+    }
     
     // Device Checks
     initializeDeviceChecks()
@@ -320,6 +329,40 @@ def personHandler_DoorAlert(evt) {
         }
         if (sideDoor.currentValue("contact") == "open") {
             personToNotify.deviceNotification("$sideDoor is still open!")
+        }
+    }
+}
+
+def deviceHandler_InconsistencyCheck(evt) {
+    logDebug("deviceHandler_InconsistencyCheck: ${evt.device} changed to ${evt.value}")
+    
+    if (evt.value == "open") {
+        runIn(10, inconsistencyCheck_Open)
+    } else if (evt.value == "closed") {
+        runIn(10, inconsistencyCheck_Closed)
+    }
+}
+
+def inconsistencyCheck_Open() {
+    inconsistencyCheck("open")
+}
+
+def inconsistencyCheck_Closed() {
+    inconsistencyCheck("closed")
+}
+
+def inconsistencyCheck(doorValue) {
+    if (overheadDoor.currentValue("contact") != doorValue) {
+        def message = "WARNING: $overheadDoor failed to change to $doorValue!"
+        log.warn(message)
+        personToNotify.deviceNotification(message)
+    }
+    
+    for (door in additionalDoors) {
+        if (door.currentValue("door") != doorValue) {
+            def message = "WARNING: $door failed to change to $doorValue!"
+            log.warn(message)
+            personToNotify.deviceNotification(message)
         }
     }
 }
