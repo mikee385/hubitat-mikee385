@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "11.0.0" }
+String getVersionNum() { return "11.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -40,8 +40,8 @@ preferences {
             input "kidPerson", "device.PersonStatus", title: "Kid", multiple: false, required: false
         }
         section("Media Devices") {
-            input "rokuDevices", "device.RokuTV", title: "Roku Devices", multiple: true, required: false
-            input "bedtimeNowPause", "bool", title: "Pause when Bedtime Now?", required: true, defaultValue: false
+            input "rokuDevicesToPause", "device.RokuTV", title: "Roku Devices to Pause", multiple: true, required: false
+            input "rokuDevicesToTurnOff", "device.RokuTV", title: "Roku Devices to Turn Off", multiple: true, required: false
         }
         section("Daily Schedule") { 
             input "time1", "time", title: "Time 1", required: false, defaultValue: "18:55"
@@ -259,11 +259,15 @@ def routineHandler_BedtimeNow(evt) {
             personToNotify.deviceNotification("Bedtime Now!")
         }
         
-        if (bedtimeNowPause && rokuDevices) {
-            for (rokuDevice in rokuDevices) {
+        if (rokuDevicesToPause) {
+            for (rokuDevice in rokuDevicesToPause) {
                 rokuDevice.queryMediaPlayer()
             }
             runIn(2, pauseRoku)
+        }
+        
+        for (rokuDevice in rokuDevicesToTurnOff) {
+            rokuDevice.off()
         }
         
         state.lastRoutine = "BedtimeNow"
@@ -271,7 +275,7 @@ def routineHandler_BedtimeNow(evt) {
 }
 
 def pauseRoku() {
-    for (rokuDevice in rokuDevices) {
+    for (rokuDevice in rokuDevicesToPause) {
         if (rokuDevice.currentValue("transportStatus") == "playing" && rokuDevice.currentValue("application") != "Live TV") {
             rokuDevice.pause()
             rokuDevice.queryMediaPlayer()
