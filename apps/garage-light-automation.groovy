@@ -1,7 +1,7 @@
 /**
  *  Garage Light Automation
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2024 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "9.2.0" }
+String getVersionNum() { return "9.3.0" }
 String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -335,11 +335,12 @@ def personHandler_DoorAlert(evt) {
 
 def deviceHandler_InconsistencyCheck(evt) {
     logDebug("deviceHandler_InconsistencyCheck: ${evt.device} changed to ${evt.value}")
+    //log.info "${evt.device} changed to ${evt.value}"
     
     if (evt.value == "open") {
-        runIn(10, inconsistencyCheck_Open)
+        runIn(15, inconsistencyCheck_Open)
     } else if (evt.value == "closed") {
-        runIn(10, inconsistencyCheck_Closed)
+        runIn(15, inconsistencyCheck_Closed)
     }
 }
 
@@ -352,6 +353,8 @@ def inconsistencyCheck_Closed() {
 }
 
 def inconsistencyCheck(doorValue) {
+    //log.info "${overheadDoor}: expected=${doorValue}, actual=${overheadDoor.currentValue('contact')}"
+
     if (overheadDoor.currentValue("contact") != doorValue) {
         def message = "WARNING: $overheadDoor failed to change to $doorValue!"
         log.warn(message)
@@ -359,6 +362,8 @@ def inconsistencyCheck(doorValue) {
     }
     
     for (door in additionalDoors) {
+        //log.info "${door}: expected=${doorValue}, actual=${door.currentValue('door')}"
+
         if (door.currentValue("door") != doorValue) {
             def message = "WARNING: $door failed to change to $doorValue!"
             log.warn(message)
