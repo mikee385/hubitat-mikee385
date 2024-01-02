@@ -1,7 +1,7 @@
 /**
  *  Echo Glow Automation
  *
- *  Copyright 2023 Michael Pierce
+ *  Copyright 2024 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "11.1.0" }
+String getVersionNum() { return "11.1.1" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -171,35 +171,35 @@ def initializeBedtimeSchedule() {
 }
 
 def scheduleBedtime() {
-    if (timeToNotify1) {
-        def timeToNotify1Today = timeToday(timeToNotify1)
-        schedule("0 $timeToNotify1Today.minutes $timeToNotify1Today.hours * * ? *", bedtimeSoon1)
+    if (time1) {
+        def time1Today = timeToday(time1)
+        schedule("0 $time1Today.minutes $time1Today.hours * * ? *", bedtimeSoon1)
     }
     
     def currentTime = new Date()
     def currentDay = currentTime[Calendar.DAY_OF_WEEK]
     
     if (currentDay == 1 && sundayTime2) {
-        def timeToNotify2Today = timeToday(sundayTime2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 1 *", bedtimeSoon2)
+        def time2Today = timeToday(sundayTime2)
+        schedule("0 $time2Today.minutes $time2Today.hours ? * 1 *", bedtimeSoon2)
     } else if (currentDay == 2 && mondayTime2) {
-        def timeToNotify2Today = timeToday(mondayTime2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 2 *", bedtimeSoon2)
+        def time2Today = timeToday(mondayTime2)
+        schedule("0 $time2Today.minutes $time2Today.hours ? * 2 *", bedtimeSoon2)
     } else if (currentDay == 3 && tuesdayTime2) {
-        def timeToNotify2Today = timeToday(tuesdayTime2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 3 *", bedtimeSoon2)
+        def time2Today = timeToday(tuesdayTime2)
+        schedule("0 $time2Today.minutes $time2Today.hours ? * 3 *", bedtimeSoon2)
     } else if (currentDay == 4 && wednesdayTime2) {
-        def timeToNotify2Today = timeToday(wednesdayTime2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 4 *", bedtimeSoon2)
+        def time2Today = timeToday(wednesdayTime2)
+        schedule("0 $time2Today.minutes $time2Today.hours ? * 4 *", bedtimeSoon2)
     } else if (currentDay == 5 && thursdayTime2) {
-        def timeToNotify2Today = timeToday(thursdayTime2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 5 *", bedtimeSoon2)
+        def time2Today = timeToday(thursdayTime2)
+        schedule("0 $time2Today.minutes $time2Today.hours ? * 5 *", bedtimeSoon2)
     } else if (currentDay == 6 && fridayTime2) {
-        def timeToNotify2Today = timeToday(fridayTime2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 6 *", bedtimeSoon2)
+        def time2Today = timeToday(fridayTime2)
+        schedule("0 $time2Today.minutes $time2Today.hours ? * 6 *", bedtimeSoon2)
     } else if (currentDay == 7 && saturdayTime2) {
-        def timeToNotify2Today = timeToday(saturdayTime2)
-        schedule("0 $timeToNotify2Today.minutes $timeToNotify2Today.hours ? * 7 *", bedtimeSoon2)
+        def time2Today = timeToday(saturdayTime2)
+        schedule("0 $time2Today.minutes $time2Today.hours ? * 7 *", bedtimeSoon2)
     }
 }
 

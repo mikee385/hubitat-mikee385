@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "11.1.0",
+    "version": "11.1.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Separate Roku devices to pause and turn off",
-    "dateReleased": "2023-10-17",
+    "releaseNotes": "Fix incorrect variable names for schedule times",
+    "dateReleased": "2024-01-01",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
