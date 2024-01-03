@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.2" }
+String getVersionNum() { return "12.0.3" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -197,7 +197,7 @@ def initializeBedtimeSchedule() {
 def resetBedtime() {
     if (time1) {
         if (time1Variable) {
-            setGlobalVar(time1Variable, time1)
+            setGlobalVar(time1Variable, "9999-99-99" + time1.substring(10))
         }
         scheduleBedtime1(time1)
     }
@@ -224,7 +224,7 @@ def resetBedtime() {
     
     if (time2) {
         if (time2Variable) {
-            setGlobalVar(time2Variable, time2)
+            setGlobalVar(time2Variable, "9999-99-99" + time2.substring(10))
         }
         scheduleBedtime2(time2)
     } 
@@ -243,13 +243,13 @@ def scheduleBedtime2(time2Value) {
 def variableHandler_Time1(evt) {
     logDebug("variableHandler_Time1: ${evt.device} changed to ${evt.value}")
     
-    scheduleBedtime1(evt.value)
+    scheduleBedtime1("2000-01-01" + evt.value.substring(10))
 }
 
 def variableHandler_Time2(evt) {
     logDebug("variableHandler_Time2: ${evt.device} changed to ${evt.value}")
     
-    scheduleBedtime2(evt.value)
+    scheduleBedtime2("2000-01-01" + evt.value.substring(10)))
 }
 
 def bedtimeSoon1() {
