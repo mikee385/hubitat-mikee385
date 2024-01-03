@@ -249,7 +249,7 @@ def variableHandler_Time1(evt) {
 def variableHandler_Time2(evt) {
     logDebug("variableHandler_Time2: ${evt.device} changed to ${evt.value}")
     
-    scheduleBedtime2("2000-01-01" + evt.value.substring(10)))
+    scheduleBedtime2("2000-01-01" + evt.value.substring(10))
 }
 
 def bedtimeSoon1() {
