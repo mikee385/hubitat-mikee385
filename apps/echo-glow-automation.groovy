@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.0" }
+String getVersionNum() { return "12.0.1" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -181,10 +181,10 @@ def childDevice() {
 
 def initializeBedtimeSchedule() {
     if (time1Variable) {
-        subscribe(location, "variable:${time1Variable}", scheduleBedtime1)
+        subscribe(location, "variable:${time1Variable}", variableHandler_Time1)
     }
     if (time2Variable) {
-        subscribe(location, "variable:${time2Variable}", scheduleBedtime2)
+        subscribe(location, "variable:${time2Variable}", variableHandler_Time2)
     } 
     
     resetBedtime()
