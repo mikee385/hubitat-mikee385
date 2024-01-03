@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.1" }
+String getVersionNum() { return "12.0.2" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -198,9 +198,8 @@ def resetBedtime() {
     if (time1) {
         if (time1Variable) {
             setGlobalVar(time1Variable, time1)
-        } else {
-            scheduleBedtime1(time1)
-        } 
+        }
+        scheduleBedtime1(time1)
     }
     
     def currentTime = new Date()
@@ -226,9 +225,8 @@ def resetBedtime() {
     if (time2) {
         if (time2Variable) {
             setGlobalVar(time2Variable, time2)
-        } else {
-            scheduleBedtime2(time2)
         }
+        scheduleBedtime2(time2)
     } 
 }
 
