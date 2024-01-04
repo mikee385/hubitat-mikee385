@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.3" }
+String getVersionNum() { return "12.0.4" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -382,7 +382,7 @@ def routineHandler_GlowsOff(evt) {
     }
     
     if (childDevice().currentValue("switch") == "on") {
-        scheduleBedtime()
+        resetBedtime()
     } 
 }
 
