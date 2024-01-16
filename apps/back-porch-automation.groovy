@@ -1,7 +1,7 @@
 /**
  *  Back Porch Automation
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2024 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "13.2.0" }
+String getVersionNum() { return "13.3.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -95,11 +95,10 @@ def initialize() {
     subscribe(personToNotify, "presence", personHandler_DoorAlert)
     subscribe(personToNotify, "sleeping", personHandler_DoorAlert)
     
-    // Lock Alert
-    subscribe(door, "contact", doorHandler_LockAlert)
-    subscribe(lock, "contact", lockHandler_LockAlert)
-    subscribe(personToNotify, "presence", personHandler_LockAlert)
-    subscribe(personToNotify, "sleeping", personHandler_LockAlert)
+    // Occupancy Alert
+    subscribe(zone, "occupancy", zoneHandler_OccupancyAlert)
+    subscribe(personToNotify, "presence", personHandler_OccupancyAlert)
+    subscribe(personToNotify, "sleeping", personHandler_OccupancyAlert)
     
     // Device Checks
     initializeDeviceChecks()
@@ -273,35 +272,33 @@ def doorAlert() {
     } 
 }
 
-def doorHandler_LockAlert(evt) {
-    logDebug("doorHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+def zoneHandler_OccupancyAlert(evt) {
+    logDebug("zoneHandler_OccupancyAlert: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "open") {
-        unschedule("lockAlert")
+    if (evt.value == "vacant") {
+        unschedule("occupancyAlert")
     } else {
         if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
-            runIn(60*5, lockAlert)
+            runIn(60*5, occupancyAlert)
         }
     }
 }
 
-def lockHandler_LockAlert(evt) {
-    logDebug("lockHandler_LockAlert: ${evt.device} changed to ${evt.value}")
-    
-    unschedule("lockAlert")
-}
-
-def personHandler_LockAlert(evt) {
-    logDebug("personHandler_LockAlert: ${evt.device} changed to ${evt.value}")
+def personHandler_OccupancyAlert(evt) {
+    logDebug("personHandler_OccupancyAlert: ${evt.device} changed to ${evt.value}")
     
     if (personToNotify.currentValue("presence") == "not present" || personToNotify.currentValue("sleeping") == "sleeping") {
-        unschedule("lockAlert")
+        unschedule("occupancyAlert")
+        
+        if (zone.currentValue("occupancy") != "vacant") {
+            personToNotify.deviceNotification("Back Porch is still occupied!")
+        }
     }
 }
 
-def lockAlert() {
-    if (zone.currentValue("occupancy") == "occupied") {
-        personToNotify.deviceNotification("Should the $lock still be unlocked?")
-        runIn(60*30, lockAlert)
+def occupancyAlert() {
+    if (zone.currentValue("occupancy") != "vacant") {
+        personToNotify.deviceNotification("Should the Back Porch still be occupied?")
+        runIn(60*30, occupancyAlert)
     } 
 }

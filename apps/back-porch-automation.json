@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "13.2.0",
+    "version": "13.3.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Supress light and fan alerts when porch is occupied",
-    "dateReleased": "2023-07-22",
+    "releaseNotes": "Change lock alerts to occupancy alerts",
+    "dateReleased": "2024-01-16",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
