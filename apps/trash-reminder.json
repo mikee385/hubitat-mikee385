@@ -1,11 +1,11 @@
 {
     "packageName": "Trash Reminder",
     "author": "Michael Pierce",
-    "version": "3.1.0",
+    "version": "3.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Improve time range handling",
-    "dateReleased": "2022-08-28",
+    "releaseNotes": "Remove alternating weeks for recycle",
+    "dateReleased": "2024-04-07",
     "apps": [
         {
             "id": "77aa6509-9292-4b58-a56f-34e7f0077a84",

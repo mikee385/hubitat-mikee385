@@ -1,7 +1,7 @@
 /**
  *  Trash Reminder
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2024 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "3.1.0" }
+String getVersionNum() { return "3.2.0" }
 String getVersionLabel() { return "Trash Reminder, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -60,8 +60,8 @@ def initialize() {
     subscribe(personToNotify, "presence", personHandler_TrashReminder)
     subscribe(personToNotify, "sleeping", personHandler_TrashReminder)
     
-    def currentTime = new Date()
-    schedule("$currentTime.seconds 0 0 ? * 1 *", updateRecycleWeek)
+    //def currentTime = new Date()
+    //schedule("$currentTime.seconds 0 0 ? * 1 *", updateRecycleWeek)
 }
 
 def personHandler_TrashReminder(evt) {
