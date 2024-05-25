@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.0.4" }
+String getVersionNum() { return "12.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -316,7 +316,9 @@ def routineHandler_BedtimeNow(evt) {
         }
         
         for (rokuDevice in rokuDevicesToTurnOff) {
-            rokuDevice.off()
+            if (rokuDevice.currentValue("application") != "Nintendo Switch") {
+                rokuDevice.off()
+            } 
         }
         
         state.lastRoutine = "BedtimeNow"

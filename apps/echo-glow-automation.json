@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "12.0.4",
+    "version": "12.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix remaining usage of removed method 'scheduleBedtime'",
-    "dateReleased": "2024-01-03",
+    "releaseNotes": "Prevent Roku off when playing video games",
+    "dateReleased": "2024-05-24",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
