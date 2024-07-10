@@ -1,11 +1,11 @@
 {
     "packageName": "Window Alerts",
     "author": "Michael Pierce",
-    "version": "5.0.0",
+    "version": "5.0.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Rename Device Checker to Device Monitor",
-    "dateReleased": "2022-08-07",
+    "releaseNotes": "Fix an incorrect variable name",
+    "dateReleased": "2024-07-09",
     "apps": [
         {
             "id": "5513b8d1-02cd-4af9-b20c-7fab56c2742d",
