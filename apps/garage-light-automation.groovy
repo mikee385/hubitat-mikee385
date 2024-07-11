@@ -14,14 +14,15 @@
  *
  */
  
-String getVersionNum() { return "9.3.0" }
-String getVersionLabel() { return "Garage Light Automation, version ${getVersionNum()} on ${getPlatform()}" }
+String getAppName() { return "Garage Light Automation" }
+String getAppVersion() { return "9.4.0" }
+String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
 #include mikee385.device-monitor-library
 
 definition(
-    name: "Garage Light Automation",
+    name: getAppName(),
     namespace: "mikee385",
     author: "Michael Pierce",
     description: "Turns the garage light on and off based on the occupancy of the garage and the status of the doors.",
@@ -32,7 +33,7 @@ definition(
 )
 
 preferences {
-    page(name: "settings", title: "Garage Light Automation", install: true, uninstall: true) {
+    page(name: "settings", title: getAppTitle(), install: true, uninstall: true) {
         section {
             input "zone", "device.OccupancyStatus", title: "Zone", multiple: false, required: true
         }
@@ -252,8 +253,10 @@ def personHandler_LightAlert(evt) {
 }
 
 def lightAlert() {
-    personToNotify.deviceNotification("Should the $garageLight still be on?")
-    runIn(60*30, lightAlert)
+    if (state.lightSwitch == "on") {
+        personToNotify.deviceNotification("Should the $garageLight still be on?")
+        runIn(60*30, lightAlert)
+    } 
 }
 
 def overheadDoorHandler_DoorAlert(evt) {
