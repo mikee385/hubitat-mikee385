@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.2.0" }
+String getVersionNum() { return "12.2.1" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -328,7 +328,7 @@ def routineHandler_BedtimeNow(evt) {
 def pauseRoku() {
     for (rokuDevice in rokuDevicesToPause) {
         if (rokuDevice.currentValue("transportStatus") == "playing") {
-            if (rokuDevice.currentValue("application") == "Live TV") {
+            if (rokuDevice.currentValue("application").startsWith("Live")) {
                 rokuDevice.mute()
             } else {
                 rokuDevice.pause()

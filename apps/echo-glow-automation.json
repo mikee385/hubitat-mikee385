@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "12.2.0",
+    "version": "12.2.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Mute Live TV instead of pausing",
-    "dateReleased": "2024-08-04",
+    "releaseNotes": "Fix detection of Live TV",
+    "dateReleased": "2024-08-06",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
