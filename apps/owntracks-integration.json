@@ -1,0 +1,30 @@
+{
+    "packageName": "OwnTracks Integration",
+    "author": "Michael Pierce",
+    "minimumHEVersion": "2.2.8",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial commit",
+    "dateReleased": "2024-08-16",
+    "apps": [
+        {
+            "id": "536135a8-3675-424b-bd4c-5497169f697e",
+            "name": "OwnTracks Integration",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/owntracks-integration.groovy",
+            "required": true,
+            "oauth": true,
+            "primary": true
+        }
+    ],
+    "drivers": [
+        {
+            "id": "89a09070-ff74-45be-be84-b2078a0edea0",
+            "name": "OwnTracks Device",
+            "version": "1.0.0",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/owntracks-device.groovy",
+            "required": true
+        }
+    ]
+}
