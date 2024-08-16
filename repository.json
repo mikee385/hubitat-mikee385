@@ -220,6 +220,13 @@
             "tags": [ "Notifications"]
         },
         {
+            "name": "URL Logger",
+            "category": "Notifications",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/url-logger.json",
+            "description": "Provides a URL to log HTTP messages from an external source (e.g. Locative, Owntracks).",
+            "tags": [ "Notifications", "Tools & Utilities" ]
+        },
+        {
             "name": "Vacation Alerts",
             "category": "Notifications",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/vacation-alerts.json",
