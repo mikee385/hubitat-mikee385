@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "OwnTracks Integration" }
-String getAppVersion() { return "1.0.0" }
+String getAppVersion() { return "1.1.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -37,6 +37,7 @@ preferences {
             input name: "presenceName", type: "string", title: "Location name to use for presence", required: true
         }
         section {
+            input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
     }
@@ -91,7 +92,6 @@ def childDevice() {
 }
 
 def urlHandler_update() {
-    logDebug("urlHandler_update")
     logDebug(request.JSON)
     
     childDevice().update(request.JSON)

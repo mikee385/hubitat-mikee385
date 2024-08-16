@@ -1,7 +1,7 @@
 /**
  *  Locative Integration
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2024 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.1" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "Locative Integration, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,7 +36,6 @@ preferences {
             input name: "presenceId", type: "string", title: "ID to use for presence", required: true
         }
         section {
-            input name: "enableMessageLog", type: "bool", title: "Enable logging of Locative message?", defaultValue: false
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -92,11 +91,7 @@ def childDevice() {
 }
 
 def urlHandler_update() {
-    logDebug("urlHandler_update")
-    
-    if (enableMessageLog) {
-        log.info request.body
-    }
+    logDebug(request.body)
     
     def queryParams = request.body.split("&")
     def mapParams = queryParams.collectEntries { param -> param.split('=').collect { URLDecoder.decode(it) }}
