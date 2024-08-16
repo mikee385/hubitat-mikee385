@@ -136,6 +136,13 @@
             "tags": [ "Automations & Groups", "Presence & Location" ]
         },
         {
+            "name": "OwnTracks Integration",
+            "category": "Integrations",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/owntracks-integration.json",
+            "description": "Provides a URL endpoint for OwnTracks and parses the response into device attributes.",
+            "tags": [ "Presence & Location" ]
+        },
+        {
             "name": "Pantry Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/pantry-automation.json",
