@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "12.2.1",
+    "version": "12.2.2",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix detection of Live TV",
-    "dateReleased": "2024-08-06",
+    "releaseNotes": "Fix bedtime scheduling when switch is off",
+    "dateReleased": "2024-10-12",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",

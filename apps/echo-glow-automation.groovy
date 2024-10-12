@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.2.1" }
+String getVersionNum() { return "12.2.2" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -152,10 +152,10 @@ def initialize() {
     if (time2Variable) {
         addInUseGlobalVar(time2Variable)
     }
-    if (childDevice().currentValue("switch") == "on") {
+    if (child.currentValue("switch") == "on") {
         initializeBedtimeSchedule()
     }
-    subscribe(childDevice(), "switch", switchHandler_Schedule)
+    subscribe(child, "switch", switchHandler_Schedule)
     
     // Device Checks
     initializeDeviceChecks()
@@ -195,38 +195,40 @@ def initializeBedtimeSchedule() {
 }
 
 def resetBedtime() {
-    if (time1) {
-        if (time1Variable) {
-            setGlobalVar(time1Variable, "9999-99-99" + time1.substring(10))
+    if (childDevice().currentValue("switch") == "on") {
+        if (time1) {
+            if (time1Variable) {
+                setGlobalVar(time1Variable, "9999-99-99" + time1.substring(10))
+            }
+            scheduleBedtime1(time1)
         }
-        scheduleBedtime1(time1)
-    }
-    
-    def currentTime = new Date()
-    def currentDay = currentTime[Calendar.DAY_OF_WEEK]
-    
-    def time2 = null
-    if (currentDay == 1 && sundayTime2) {
-        time2 = sundayTime2
-    } else if (currentDay == 2 && mondayTime2) {
-        time2 = mondayTime2
-    } else if (currentDay == 3 && tuesdayTime2) {
-        time2 = tuesdayTime2
-    } else if (currentDay == 4 && wednesdayTime2) {
-        time2 = wednesdayTime2
-    } else if (currentDay == 5 && thursdayTime2) {
-        time2 = thursdayTime2
-    } else if (currentDay == 6 && fridayTime2) {
-        time2 = fridayTime2
-    } else if (currentDay == 7 && saturdayTime2) {
-        time2 = saturdayTime2
-    }
-    
-    if (time2) {
-        if (time2Variable) {
-            setGlobalVar(time2Variable, "9999-99-99" + time2.substring(10))
+        
+        def currentTime = new Date()
+        def currentDay = currentTime[Calendar.DAY_OF_WEEK]
+        
+        def time2 = null
+        if (currentDay == 1 && sundayTime2) {
+            time2 = sundayTime2
+        } else if (currentDay == 2 && mondayTime2) {
+            time2 = mondayTime2
+        } else if (currentDay == 3 && tuesdayTime2) {
+            time2 = tuesdayTime2
+        } else if (currentDay == 4 && wednesdayTime2) {
+            time2 = wednesdayTime2
+        } else if (currentDay == 5 && thursdayTime2) {
+            time2 = thursdayTime2
+        } else if (currentDay == 6 && fridayTime2) {
+            time2 = fridayTime2
+        } else if (currentDay == 7 && saturdayTime2) {
+            time2 = saturdayTime2
         }
-        scheduleBedtime2(time2)
+        
+        if (time2) {
+            if (time2Variable) {
+                setGlobalVar(time2Variable, "9999-99-99" + time2.substring(10))
+            }
+            scheduleBedtime2(time2)
+        }
     } 
 }
 
@@ -387,9 +389,7 @@ def routineHandler_GlowsOff(evt) {
         state.lastRoutine = "GlowsOff"
     }
     
-    if (childDevice().currentValue("switch") == "on") {
-        resetBedtime()
-    } 
+    resetBedtime()
 }
 
 def personHandler_GlowsOff(evt) {
