@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.1.0" }
+String getVersionNum() { return "5.2.0" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -36,8 +36,17 @@ preferences {
     page(name: "settings", title: "Holiday Lights Automation", install: true, uninstall: true) {
         section {
             input "lights", "capability.switch", title: "Holiday Lights", multiple: true, required: true
-            input "onRoutines", "capability.switch", title: "On Routines", multiple: true, required: false
-            input "offRoutines", "capability.switch", title: "Off Routines", multiple: true, required: false
+        }
+        section { 
+            input "onRoutines", "capability.switch", title: "Turn on when:", multiple: true, required: false
+            input "onSunset", "bool", title: "Turn on at sunset?", required: true, defaultValue: false
+            input "onHome", "bool", title: "Turn on when Home?", required: true, defaultValue: false
+        }
+        section { 
+            input "offRoutines", "capability.switch", title: "Turn off when:", multiple: true, required: false
+            input "offSunrise", "bool", title: "Turn off at sunrise?", required: true, defaultValue: false
+            input "offSleep", "bool", title: "Turn off when Sleep?", required: true, defaultValue: false
+            input "offAway", "bool", title: "Turn off when Away?", required: true, defaultValue: false
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -77,15 +86,23 @@ def updated() {
 }
 
 def initialize() {
-    // Light Switch
+    // Turn On
     for (routine in onRoutines) {
         subscribe(routine, "switch.on", onRoutineHandler_LightSwitch)
     }
+    if (onSunset) {
+        subscribe(location, "sunset", sunsetHandler_LightSwitch)
+    }
+    
+    // Turn Off
     for (routine in offRoutines) {
         subscribe(routine, "switch.on", offRoutineHandler_LightSwitch)
     }
-    subscribe(location, "sunrise", sunriseHandler_LightSwitch)
-    subscribe(location, "sunset", sunsetHandler_LightSwitch)
+    if (offSunrise) {
+        subscribe(location, "sunrise", sunriseHandler_LightSwitch)
+    } 
+    
+    // Modes
     subscribe(location, "mode", modeHandler_LightSwitch)
     
     // Device Checks
@@ -137,13 +154,17 @@ def sunsetHandler_LightSwitch(evt) {
 def modeHandler_LightSwitch(evt) {
     logDebug("modeHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (evt.value == "Home") {
+    if (evt.value == "Home" && onHome) {
         if (currentTimeIsBetween(location.sunset, "23:59")) {
             for (light in lights) {
                 light.on()
             }
         }
-    } else if (evt.value == "Sleep") {
+    } else if (evt.value == "Sleep" && offSleep) {
+        for (light in lights) {
+            light.off()
+        }
+    } else if (evt.value == "Away" && offAway) {
         for (light in lights) {
             light.off()
         }

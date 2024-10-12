@@ -1,11 +1,11 @@
 {
     "packageName": "Holiday Lights Automation",
     "author": "Michael Pierce",
-    "version": "5.1.0",
+    "version": "5.2.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Improve time range handling",
-    "dateReleased": "2022-08-28",
+    "releaseNotes": "Add toggles for sunrise, sunset, and modes",
+    "dateReleased": "2022-10-12",
     "apps": [
         {
             "id": "2c6a175b-4cf6-4336-ba71-eddbedc538a4",
