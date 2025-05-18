@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "13.0.0" }
+String getVersionNum() { return "13.1.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -66,6 +66,9 @@ preferences {
             input "thursdayTime2", "time", title: "Thursday Time", required: false, defaultValue: "19:55"
             input "fridayTime2", "time", title: "Friday Time", required: false, defaultValue: "19:55"
             input "saturdayTime2", "time", title: "Saturday Time", required: false, defaultValue: "19:55"
+        }
+        section("Off Time") {
+            input "offTime", "time", title: "Turn Glows Off at", required: false, defaultValue: "16:45"
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
@@ -205,6 +208,11 @@ def resetBedtime() {
         def currentTime = new Date()
         def currentDay = currentTime[Calendar.DAY_OF_WEEK]
         
+        if (offTime) {
+            def offToday = timeToday(offTime)
+            schedule("$currentTime.seconds $offToday.minutes $offToday.hours * * ? *", glowsOff)
+        }
+    
         def time1 = null
         if (currentDay == 1 && sundayTime1) {
             time1 = sundayTime1

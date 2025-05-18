@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "13.0.0",
+    "version": "13.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Use a separate schedule for every day of the week for Bedtime 1",
-    "dateReleased": "2025-05-17",
+    "releaseNotes": "Add a time to turn off the glows each day",
+    "dateReleased": "2025-05-18",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
