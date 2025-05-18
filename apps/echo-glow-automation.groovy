@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.2.2" }
+String getVersionNum() { return "13.0.0" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -48,18 +48,24 @@ preferences {
         section("Bedtime 1") {
             input "time1Variable", "enum", title: "Hub Variable", multiple: false, required: false, options: globalVars
             
-            input "time1", "time", title: "Time", required: false, defaultValue: "18:55"
+            input "sundayTime1", "time", title: "Sunday Time", required: false, defaultValue: "18:55"
+            input "mondayTime1", "time", title: "Monday Time", required: false, defaultValue: "18:55"
+            input "tuesdayTime1", "time", title: "Tuesday Time", required: false, defaultValue: "18:55"
+            input "wednesdayTime1", "time", title: "Wednesday Time", required: false, defaultValue: "18:55"
+            input "thursdayTime1", "time", title: "Thursday Time", required: false, defaultValue: "18:55"
+            input "fridayTime1", "time", title: "Friday Time", required: false, defaultValue: "18:55"
+            input "saturdayTime1", "time", title: "Saturday Time", required: false, defaultValue: "18:55"
         }
         section("Bedtime 2") {
             input "time2Variable", "enum", title: "Hub Variable", multiple: false, required: false, options: globalVars
             
-            input "sundayTime2", "time", title: "Sunday Time", required: false, defaultValue: "19:10"
-            input "mondayTime2", "time", title: "Monday Time", required: false, defaultValue: "19:10"
-            input "tuesdayTime2", "time", title: "Tuesday Time", required: false, defaultValue: "19:10"
-            input "wednesdayTime2", "time", title: "Wednesday Time", required: false, defaultValue: "19:10"
-            input "thursdayTime2", "time", title: "Thursday Time", required: false, defaultValue: "19:10"
-            input "fridayTime2", "time", title: "Friday Time", required: false, defaultValue: "19:25"
-            input "saturdayTime2", "time", title: "Saturday Time", required: false, defaultValue: "19:25"
+            input "sundayTime2", "time", title: "Sunday Time", required: false, defaultValue: "19:55"
+            input "mondayTime2", "time", title: "Monday Time", required: false, defaultValue: "19:55"
+            input "tuesdayTime2", "time", title: "Tuesday Time", required: false, defaultValue: "19:55"
+            input "wednesdayTime2", "time", title: "Wednesday Time", required: false, defaultValue: "19:55"
+            input "thursdayTime2", "time", title: "Thursday Time", required: false, defaultValue: "19:55"
+            input "fridayTime2", "time", title: "Friday Time", required: false, defaultValue: "19:55"
+            input "saturdayTime2", "time", title: "Saturday Time", required: false, defaultValue: "19:55"
         }
         section("Alerts") {
             input "bedtimeSoonAlert", "bool", title: "Alert when Bedtime Soon?", required: true, defaultValue: false
@@ -196,15 +202,32 @@ def initializeBedtimeSchedule() {
 
 def resetBedtime() {
     if (childDevice().currentValue("switch") == "on") {
+        def currentTime = new Date()
+        def currentDay = currentTime[Calendar.DAY_OF_WEEK]
+        
+        def time1 = null
+        if (currentDay == 1 && sundayTime1) {
+            time1 = sundayTime1
+        } else if (currentDay == 2 && mondayTime1) {
+            time1 = mondayTime1
+        } else if (currentDay == 3 && tuesdayTime1) {
+            time1 = tuesdayTime1
+        } else if (currentDay == 4 && wednesdayTime1) {
+            time1 = wednesdayTime1
+        } else if (currentDay == 5 && thursdayTime1) {
+            time1 = thursdayTime1
+        } else if (currentDay == 6 && fridayTime1) {
+            time1 = fridayTime1
+        } else if (currentDay == 7 && saturdayTime1) {
+            time1 = saturdayTime1
+        }
+        
         if (time1) {
             if (time1Variable) {
                 setGlobalVar(time1Variable, "9999-99-99" + time1.substring(10))
             }
             scheduleBedtime1(time1)
         }
-        
-        def currentTime = new Date()
-        def currentDay = currentTime[Calendar.DAY_OF_WEEK]
         
         def time2 = null
         if (currentDay == 1 && sundayTime2) {
