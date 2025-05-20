@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "13.1.1" }
+String getVersionNum() { return "13.1.2" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -205,26 +205,7 @@ def initializeBedtimeSchedule() {
 
 def resetBedtime() {
     if (childDevice().currentValue("switch") == "on") {
-        def currentTime = new Date()
-        def currentDay = currentTime[Calendar.DAY_OF_WEEK]
-        
-        def time1 = null
-        if (currentDay == 1 && sundayTime1) {
-            time1 = sundayTime1
-        } else if (currentDay == 2 && mondayTime1) {
-            time1 = mondayTime1
-        } else if (currentDay == 3 && tuesdayTime1) {
-            time1 = tuesdayTime1
-        } else if (currentDay == 4 && wednesdayTime1) {
-            time1 = wednesdayTime1
-        } else if (currentDay == 5 && thursdayTime1) {
-            time1 = thursdayTime1
-        } else if (currentDay == 6 && fridayTime1) {
-            time1 = fridayTime1
-        } else if (currentDay == 7 && saturdayTime1) {
-            time1 = saturdayTime1
-        }
-        
+        def time1 = calcTime1()
         if (time1) {
             if (time1Variable) {
                 setGlobalVar(time1Variable, "9999-99-99" + time1.substring(10))
@@ -232,23 +213,7 @@ def resetBedtime() {
             scheduleBedtime1(time1)
         }
         
-        def time2 = null
-        if (currentDay == 1 && sundayTime2) {
-            time2 = sundayTime2
-        } else if (currentDay == 2 && mondayTime2) {
-            time2 = mondayTime2
-        } else if (currentDay == 3 && tuesdayTime2) {
-            time2 = tuesdayTime2
-        } else if (currentDay == 4 && wednesdayTime2) {
-            time2 = wednesdayTime2
-        } else if (currentDay == 5 && thursdayTime2) {
-            time2 = thursdayTime2
-        } else if (currentDay == 6 && fridayTime2) {
-            time2 = fridayTime2
-        } else if (currentDay == 7 && saturdayTime2) {
-            time2 = saturdayTime2
-        }
-        
+        def time2 = calcTime2()
         if (time2) {
             if (time2Variable) {
                 setGlobalVar(time2Variable, "9999-99-99" + time2.substring(10))
@@ -256,6 +221,56 @@ def resetBedtime() {
             scheduleBedtime2(time2)
         }
     } 
+}
+
+def calcTime1() {
+    def currentTime = new Date()
+    def currentDay = currentTime[Calendar.DAY_OF_WEEK]
+        
+    def time1 = null
+    
+    if (currentDay == 1 && sundayTime1) {
+        time1 = sundayTime1
+    } else if (currentDay == 2 && mondayTime1) {
+        time1 = mondayTime1
+    } else if (currentDay == 3 && tuesdayTime1) {
+        time1 = tuesdayTime1
+    } else if (currentDay == 4 && wednesdayTime1) {
+        time1 = wednesdayTime1
+    } else if (currentDay == 5 && thursdayTime1) {
+        time1 = thursdayTime1
+    } else if (currentDay == 6 && fridayTime1) {
+        time1 = fridayTime1
+    } else if (currentDay == 7 && saturdayTime1) {
+        time1 = saturdayTime1
+    }
+    
+    return time1
+}
+
+def calcTime2() {
+    def currentTime = new Date()
+    def currentDay = currentTime[Calendar.DAY_OF_WEEK]
+        
+    def time2 = null
+    
+    if (currentDay == 1 && sundayTime2) {
+        time2 = sundayTime2
+    } else if (currentDay == 2 && mondayTime2) {
+        time2 = mondayTime2
+    } else if (currentDay == 3 && tuesdayTime2) {
+        time2 = tuesdayTime2
+    } else if (currentDay == 4 && wednesdayTime2) {
+        time2 = wednesdayTime2
+    } else if (currentDay == 5 && thursdayTime2) {
+        time2 = thursdayTime2
+    } else if (currentDay == 6 && fridayTime2) {
+        time2 = fridayTime2
+    } else if (currentDay == 7 && saturdayTime2) {
+        time2 = saturdayTime2
+    }
+    
+    return time2
 }
 
 def scheduleBedtime1(time1Value) {
@@ -291,7 +306,13 @@ def bedtimeSoon2() {
 def routineHandler_BedtimeSoon(evt) {
     logDebug("routineHandler_BedtimeSoon: ${evt.device} changed to ${evt.value}")
     
-    if (now() < timeToday(time1).getTime() + 1*60*1000) {
+    def time1 = null
+    if (time1Variable) {
+        time1 = getGlobalVar(time1Variable)?.value
+    } else { 
+        time1 = calcTime1()
+    }
+    if (time1 && (now() < timeToday(time1).getTime() + 1*60*1000)) {
         unschedule("bedtimeSoon1")
     } else {
         unschedule("bedtimeSoon2")
@@ -324,7 +345,13 @@ def routineHandler_BedtimeNow(evt) {
         unschedule("bedtimeNow")
     }
     
-    if (now() < timeToday(time1).getTime() + 6*60*1000) {
+    def time1 = null
+    if (time1Variable) {
+        time1 = getGlobalVar(time1Variable)?.value
+    } else { 
+        time1 = calcTime1()
+    } 
+    if (time1 && (now() < timeToday(time1).getTime() + 6*60*1000)) {
         unschedule("bedtimeSoon1")
     } else {
         unschedule("bedtimeSoon2")

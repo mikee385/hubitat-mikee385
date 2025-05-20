@@ -1,11 +1,11 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "13.1.1",
+    "version": "13.1.2",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Schedule the naptime reset only if BedtimeNow is run before it",
-    "dateReleased": "2025-05-18",
+    "releaseNotes": "Fix incorrect usage of time1 when manualling triggering bedtime",
+    "dateReleased": "2025-05-20",
     "apps": [
         {
             "id": "9aad4bc1-f61f-4da4-aa80-ebe33d75c937",
