@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "13.1.2" }
+String getVersionNum() { return "13.1.3" }
 String getVersionLabel() { return "Echo Glow Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -308,7 +308,7 @@ def routineHandler_BedtimeSoon(evt) {
     
     def time1 = null
     if (time1Variable) {
-        time1 = getGlobalVar(time1Variable)?.value
+        time1 = "2000-01-01" + getGlobalVar(time1Variable).value.substring(10)
     } else { 
         time1 = calcTime1()
     }
@@ -347,7 +347,7 @@ def routineHandler_BedtimeNow(evt) {
     
     def time1 = null
     if (time1Variable) {
-        time1 = getGlobalVar(time1Variable)?.value
+        time1 = "2000-01-01" + getGlobalVar(time1Variable).value.substring(10)
     } else { 
         time1 = calcTime1()
     } 

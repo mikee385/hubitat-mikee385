@@ -1,10 +1,10 @@
 {
     "packageName": "Echo Glow Automation",
     "author": "Michael Pierce",
-    "version": "13.1.2",
+    "version": "13.1.3",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix incorrect usage of time1 when manualling triggering bedtime",
+    "releaseNotes": "Fix handling of GlobalVar DateTime",
     "dateReleased": "2025-05-20",
     "apps": [
         {
