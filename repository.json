@@ -171,6 +171,13 @@
             "tags": [ "Automations & Groups", "Presence & Location" ]
         },
         {
+            "name": "Roborock Automation",
+            "category": "Control",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roborock-automation.json",
+            "description": "Starts and stops the Roborock Robot Vacuum based on a schedule and presence.",
+            "tags": [ "Automations & Groups", "Cleaning Devices" ]
+        },
+        {
             "name": "Roomba Automation",
             "category": "Control",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roomba-automation.json",

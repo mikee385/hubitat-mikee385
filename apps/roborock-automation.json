@@ -1,0 +1,20 @@
+{
+    "packageName": "Roborock Automation",
+    "author": "Michael Pierce",
+    "version": "1.0.0",
+    "minimumHEVersion": "2.2.8",
+    "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
+    "releaseNotes": "Initial release",
+    "dateReleased": "2025-12-15",
+    "apps": [
+        {
+            "id": "42c4ee90-b642-4121-aa3f-cda9d2753e94",
+            "name": "Roborock Automation",
+            "namespace": "mikee385",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/roborock-automation.groovy",
+            "required": true,
+            "oauth": false,
+            "primary": true
+        }
+    ]
+}
