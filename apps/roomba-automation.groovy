@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "12.7.0" }
+String getVersionNum() { return "12.8.0" }
 String getVersionLabel() { return "Roomba Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -122,6 +122,11 @@ def initialize() {
     
     def resetToday = timeToday(roombaResetTime)
     schedule("$currentTime.seconds $resetToday.minutes $resetToday.hours * * ? *", dailyReset)
+    
+    // Pause Alert
+    subscribe(roomba, "phase", roombaHandler_PauseAlert)
+    subscribe(personToNotify, "presence", personHandler_PauseAlert)
+    subscribe(personToNotify, "sleeping", personHandler_PauseAlert)
     
     // Device Checks
     initializeDeviceChecks()
@@ -370,4 +375,36 @@ def dailyReset() {
     logDebug("dailyReset")
     
     state.durationMinutes = 0
+}
+
+def roombaHandler_PauseAlert(evt) {
+    logDebug("roombaHandler_PauseAlert: ${evt.device} changed to ${evt.value}")
+    if (evt.value == "stop" || evt.value == "stuck") {
+        if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+            runIn(60*5, pauseAlert)
+        }
+    } else {
+        unschedule("pauseAlert")
+    }
+}
+
+def personHandler_PauseAlert(evt) {
+    logDebug("personHandler_PauseAlert: ${evt.device} changed to ${evt.value}")
+    
+    if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
+        if (roomba.currentValue("phase") == "stop" || roomba.currentValue("phase") == "stuck") {
+            pauseAlert()
+        }
+    } else {
+        unschedule("pauseAlert")
+        
+        if (roomba.currentValue("phase") == "stop" || roomba.currentValue("phase") == "stuck") {
+            personToNotify.deviceNotification("$roomba is still paused!")
+        }
+    }
+}
+
+def pauseAlert(evt) {
+    personToNotify.deviceNotification("Should $roomba still be paused?")
+    runIn(60*30, pauseAlert)
 }
