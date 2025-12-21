@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Roborock Automation" }
-String getAppVersion() { return "1.0.0" }
+String getAppVersion() { return "2.0.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -79,8 +79,10 @@ def updated() {
 }
 
 def initialize() {
-    // Child Device
-    def child = childDevice()
+    // Child Devices
+    def automationSwitch = childDevice("Automation")
+    def cleaningSwitch = childDevice("Cleaning")
+    def pauseSwitch = childDevice("Pause")
 
     // Create state
     if (state.startTime == null) {
@@ -108,7 +110,9 @@ def initialize() {
     for (pauseDoor in pauseDoors) {
         subscribe(pauseDoor, "contact.open", doorOpenedHandler)
     }
-    subscribe(child, "switch", switchHandler)
+    subscribe(automationSwitch, "switch", automationSwitchHandler)
+    subscribe(cleaningSwitch, "switch", cleaningSwitchHandler)
+    subscribe(pauseSwitch, "switch", pauseSwitchHandler)
 
     // Runtime Tracking
     subscribe(vacuum, "switch", vacuumSwitchHandler)
@@ -143,11 +147,15 @@ def initialize() {
     }
 }
 
-def childDevice() {
-    def childID = "vacuum:" + app.getId()
+def childDevice(name) {
+    def childID = "vacuum:${app.getId()}:$name"
     def child = getChildDevice(childID)
     if (!child) {
-        child = addChildDevice("hubitat", "Virtual Switch", childID, 1234, [label: app.label, isComponent: false])
+        child = addChildDevice("hubitat", "Virtual Switch", childID, 1234, [label: "${app.label} $name", isComponent: false])
+        child.updateSetting("logEnable", [value: "false", type: "bool"])
+        child.updateSetting("txtEnable", [value: "false", type: "bool"])
+        child.updateDataValue("Name", name)
+        child.sendEvent(name: "switch", value: "off")
     }
     return child
 }
@@ -193,34 +201,54 @@ def weekendPersonHandler(evt) {
 def buttonPushedHandler(evt) {
     logDebug("buttonPushedHandler: ${evt.device} changed to ${evt.value}")
 
-    vacuum.appPause()
+    pauseCycle()
 }
 
 def buttonDoubleTappedHandler(evt) {
     logDebug("buttonDoubleTappedHandler: ${evt.device} changed to ${evt.value}")
 
-    vacuum.appClean()
+    cleanCycle()
 }
 
 def buttonHeldHandler(evt) {
     logDebug("buttonHeldHandler: ${evt.device} changed to ${evt.value}")
 
-    vacuum.appClean()
+    cleanCycle()
 }
 
 def doorOpenedHandler(evt) {
     logDebug("doorOpenedHandler: ${evt.device} changed to ${evt.value}")
 
-    vacuum.appPause()
+    pauseCycle()
 }
 
-def switchHandler(evt) {
-    logDebug("switchHandler: ${evt.device} changed to ${evt.value}")
+def automationSwitchHandler(evt) {
+    logDebug("automationSwitchHandler: ${evt.device} changed to ${evt.value}")
 
     if (evt.value == "on") {
         startCycle()
     } else {
-        vacuum.appPause()
+        pauseCycle()
+    } 
+}
+
+def cleaningSwitchHandler(evt) {
+    logDebug("cleaningSwitchHandler: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value == "on") {
+        cleanCycle()
+    } else {
+        cancelCycle()
+    }
+}
+
+def pauseSwitchHandler(evt) {
+    logDebug("pauseSwitchHandler: ${evt.device} changed to ${evt.value}")
+
+    if (evt.value == "on") {
+        pauseCycle()
+    } else {
+        cleanCycle()
     } 
 }
 
@@ -236,11 +264,11 @@ def startCycle() {
     if (currentTimeIsBetween(vacuumStartTime, vacuumEndTime) && everyoneAway) {
         if (vacuum.currentValue("switch") == "off" && state.durationMinutes < minimumMinutes) {
             if (isReadyToRun()) {
-                vacuum.appClean()
+                cleanCycle()
             } 
-        } else if (vacuum.currentValue("state") == "paused") {
+        } else if (isPaused()) {
             if (isReadyToRun()) {
-                vacuum.appClean()
+                cleanCycle()
             } 
         }
     }
@@ -259,7 +287,7 @@ def isReadyToRun() {
         message += "\nWARNING: Doors are open!\n" + openDoors.join("\n")
     } 
     
-    if (childDevice().currentValue("switch") == "off") {
+    if (childDevice("Automation").currentValue("switch") == "off") {
         personToNotify.deviceNotification(message)
         return false
     
@@ -274,6 +302,19 @@ def isReadyToRun() {
     }
     
     return true
+}
+
+def isPaused() {
+    if (vacuum.currentValue("switch") == "on" && vacuum.currentValue("state") != "cleaning") {
+        return true
+    }
+    return false 
+}
+
+def cleanCycle() {
+    if (vacuum.currentValue("state") != "cleaning") {
+        vacuum.appClean()
+    }
 }
 
 def pauseCycle() {
@@ -297,6 +338,12 @@ def vacuumStateHandler(evt) {
         state.endTime = now()
         state.durationMinutes += (state.endTime - state.startTime)/1000.0/60.0
     }
+    
+    if (isPaused()) {
+        childDevice("Pause").on()
+    } else {
+        childDevice("Pause").off()
+    }
 }
 
 def vacuumSwitchHandler(evt) {
@@ -306,10 +353,13 @@ def vacuumSwitchHandler(evt) {
         if (state.durationMinutes >= 0.5) {
             personToNotify.deviceNotification("$vacuum has cleaned for ${Math.round(state.durationMinutes)} minutes today!")
         }
+        childDevice("Cleaning").off()
+        childDevice("Pause").off()
     } else {
         if (location.mode == "Away") {
             personToNotify.deviceNotification("$vacuum has started!")
         }
+        childDevice("Cleaning").on()
     }
 }
 
@@ -327,7 +377,7 @@ def dailyReset() {
 
 def vacuumHandler_PauseAlert(evt) {
     logDebug("vacuumHandler_PauseAlert: ${evt.device} changed to ${evt.value}")
-    if (evt.value == "paused") {
+    if (isPaused()) {
         if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
             runIn(60*5, pauseAlert)
         }
@@ -340,13 +390,13 @@ def personHandler_PauseAlert(evt) {
     logDebug("personHandler_PauseAlert: ${evt.device} changed to ${evt.value}")
     
     if (personToNotify.currentValue("presence") == "present" && personToNotify.currentValue("sleeping") == "not sleeping") {
-        if (vacuum.currentValue("state") == "paused") {
+        if (isPaused()) {
             pauseAlert()
         }
     } else {
         unschedule("pauseAlert")
         
-        if (vacuum.currentValue("state") == "paused") {
+        if (isPaused()) {
             personToNotify.deviceNotification("$vacuum is still paused!")
         }
     }

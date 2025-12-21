@@ -1,11 +1,11 @@
 {
     "packageName": "Roborock Automation",
     "author": "Michael Pierce",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Initial release",
-    "dateReleased": "2025-12-15",
+    "releaseNotes": "Add child switches for Cleaning and Pause",
+    "dateReleased": "2025-12-20",
     "apps": [
         {
             "id": "42c4ee90-b642-4121-aa3f-cda9d2753e94",
