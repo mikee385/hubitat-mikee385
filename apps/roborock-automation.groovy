@@ -1,7 +1,7 @@
 /**
  *  Roborock Automation
  *
- *  Copyright 2023 Michael Pierce
+ *  Copyright 2025 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Roborock Automation" }
-String getAppVersion() { return "2.0.0" }
+String getAppVersion() { return "2.0.1" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -305,7 +305,7 @@ def isReadyToRun() {
 }
 
 def isPaused() {
-    if (vacuum.currentValue("switch") == "on" && vacuum.currentValue("state") != "cleaning") {
+    if ((vacuum.currentValue("switch") == "on") && (vacuum.currentValue("state") in ["paused", "sleeping"])) {
         return true
     }
     return false 
@@ -331,6 +331,10 @@ def cancelCycle() {
 
 def vacuumStateHandler(evt) {
     logDebug("vacuumStateHandler: ${evt.device} changed to ${evt.value}")
+    
+    if (!(evt.value in ["cleaning", "paused", "sleeping", "returning dock", "charging", "charged", "in error"])) {
+        personToNotify.deviceNotification("$vacuum has unknown state: ${evt.value}")
+    }
     
     if (evt.value == "cleaning") {
         state.startTime = now()
@@ -403,6 +407,8 @@ def personHandler_PauseAlert(evt) {
 }
 
 def pauseAlert(evt) {
-    personToNotify.deviceNotification("Should $vacuum still be paused?")
-    runIn(60*30, pauseAlert)
+    if (isPaused()) { 
+        personToNotify.deviceNotification("Should $vacuum still be paused?")
+        runIn(60*30, pauseAlert)
+    }
 }
