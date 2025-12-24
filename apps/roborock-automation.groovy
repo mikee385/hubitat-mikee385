@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Roborock Automation" }
-String getAppVersion() { return "2.0.1" }
+String getAppVersion() { return "2.0.2" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -332,7 +332,7 @@ def cancelCycle() {
 def vacuumStateHandler(evt) {
     logDebug("vacuumStateHandler: ${evt.device} changed to ${evt.value}")
     
-    if (!(evt.value in ["cleaning", "paused", "sleeping", "returning dock", "charging", "charged", "in error"])) {
+    if (!(evt.value in ["cleaning", "paused", "sleeping", "returning dock", "emptying dust bin", "charging", "charged", "in error"])) {
         personToNotify.deviceNotification("$vacuum has unknown state: ${evt.value}")
     }
     
