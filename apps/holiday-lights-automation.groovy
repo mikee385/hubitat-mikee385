@@ -1,7 +1,7 @@
 /**
  *  Holiday Lights Automation
  *
- *  Copyright 2022 Michael Pierce
+ *  Copyright 2026 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.2.0" }
+String getVersionNum() { return "5.3.0" }
 String getVersionLabel() { return "Holiday Lights Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -144,10 +144,8 @@ def sunriseHandler_LightSwitch(evt) {
 def sunsetHandler_LightSwitch(evt) {
     logDebug("sunsetHandler_LightSwitch: ${evt.device} changed to ${evt.value}")
     
-    if (location.mode == "Home") {
-        for (light in lights) {
-            light.on()
-        }
+    for (light in lights) {
+        light.on()
     }
 }
 
