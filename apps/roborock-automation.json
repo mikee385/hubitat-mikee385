@@ -1,11 +1,11 @@
 {
     "packageName": "Roborock Automation",
     "author": "Michael Pierce",
-    "version": "2.0.2",
+    "version": "2.1.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Add known state for emptying dust bin",
-    "dateReleased": "2025-12-24",
+    "releaseNotes": "Add known states for room clean and docking",
+    "dateReleased": "2026-01-22",
     "apps": [
         {
             "id": "42c4ee90-b642-4121-aa3f-cda9d2753e94",

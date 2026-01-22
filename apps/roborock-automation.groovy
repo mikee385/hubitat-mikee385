@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Roborock Automation" }
-String getAppVersion() { return "2.0.2" }
+String getAppVersion() { return "2.1.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -136,7 +136,7 @@ def initialize() {
     initializeDeviceChecks()
     
     // Initialize state
-    def deviceRunning = vacuum.currentValue("state") == "cleaning"
+    def deviceRunning = vacuum.currentValue("state") in cleanStates()
     def stateRunning = state.endTime < state.startTime
     
     if (deviceRunning && !stateRunning) {
@@ -159,6 +159,10 @@ def childDevice(name) {
     }
     return child
 }
+
+def cleanStates() { return ["cleaning", "room clean"] }
+def pausedStates() { return ["paused", "sleeping"] }
+def otherStates() { return ["returning dock", "docking", "emptying dust bin", "charging", "charged", "in error"] }
 
 def isWeekend() {
     def date = new Date()
@@ -305,26 +309,26 @@ def isReadyToRun() {
 }
 
 def isPaused() {
-    if ((vacuum.currentValue("switch") == "on") && (vacuum.currentValue("state") in ["paused", "sleeping"])) {
+    if ((vacuum.currentValue("switch") == "on") && (vacuum.currentValue("state") in pausedStates())) {
         return true
     }
     return false 
 }
 
 def cleanCycle() {
-    if (vacuum.currentValue("state") != "cleaning") {
+    if (!(vacuum.currentValue("state") in cleanStates())) {
         vacuum.appClean()
     }
 }
 
 def pauseCycle() {
-    if (vacuum.currentValue("state") == "cleaning") {
+    if (vacuum.currentValue("state") in cleanStates()) {
         vacuum.appPause()
     }
 }
 
 def cancelCycle() {
-    if (vacuum.currentValue("state") == "cleaning") {
+    if (vacuum.currentValue("state") in cleanStates()) {
         vacuum.appDock()
     }
 }
@@ -332,11 +336,11 @@ def cancelCycle() {
 def vacuumStateHandler(evt) {
     logDebug("vacuumStateHandler: ${evt.device} changed to ${evt.value}")
     
-    if (!(evt.value in ["cleaning", "paused", "sleeping", "returning dock", "emptying dust bin", "charging", "charged", "in error"])) {
+    if (!(evt.value in cleanStates()) && !(evt.value in pausedStates()) && !(evt.value in otherStates()) {
         personToNotify.deviceNotification("$vacuum has unknown state: ${evt.value}")
     }
     
-    if (evt.value == "cleaning") {
+    if (evt.value in cleanStates()) {
         state.startTime = now()
     } else if (state.endTime < state.startTime) { // should only be true while vacuum is running
         state.endTime = now()
