@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Roborock Automation" }
-String getAppVersion() { return "2.1.0" }
+String getAppVersion() { return "2.1.1" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -162,7 +162,7 @@ def childDevice(name) {
 
 def cleanStates() { return ["cleaning", "room clean"] }
 def pausedStates() { return ["paused", "sleeping"] }
-def otherStates() { return ["returning dock", "docking", "emptying dust bin", "charging", "charged", "in error"] }
+def otherStates() { return ["returning dock", "docking", "emptying dust bin", "charging", "charged", "idle", "in error"] }
 
 def isWeekend() {
     def date = new Date()
