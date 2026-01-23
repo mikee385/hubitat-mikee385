@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.4.0" }
+String getAppVersion() { return "0.5.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -86,7 +86,10 @@ def initialize() {
         
         confAlertOn: 75
     ]
+    
     state.clearScheduled = false
+    state.rainConfirmed = state.rainConfirmed ?: false
+    state.rainPredicted = state.rainPredicted ?: false
     
     // Rain Alert
     subscribe(temperatureSensor, "temperature", sensorHandler)
@@ -131,19 +134,6 @@ def calculate() {
     
     logDebug("probability: ${prob}, confidence : ${conf}")
     
-    // Prediction
-    def rainLikelySoon = (prob >= cfg.probAlertOn)
-    def wasPredicted = state.rainPredicted ?: false
-    
-    if (rainLikelySoon && !wasPredicted) { 
-        logInfo("🌧️ Rain likely soon: ${prob}%")
-        state.rainPredicted = true
-    }
-
-    if (wasPredicted && prob < cfg.probAlertOff) {
-        state.rainPredicted = false
-    }
-    
     // Confirmation
     def rainConfirmed = (conf >= cfg.confAlertOn)
     def wasConfirmed = state.rainConfirmed ?: false
@@ -163,6 +153,21 @@ def calculate() {
         logInfo("☀️ Rain has stopped, waiting ${hold} minutes")
         state.clearScheduled = true
         runIn(hold * 60, "clearRainState")
+    }
+    
+    // Prediction
+    def rainLikelySoon = (prob >= cfg.probAlertOn)
+    def wasPredicted = state.rainPredicted ?: false
+    
+    if (rainLikelySoon && !wasPredicted) {
+        if (!rainConfirmed && !wasConfirmed) {
+            logInfo("🌧️ Rain likely soon: ${prob}%")
+        } 
+        state.rainPredicted = true
+    }
+
+    if (wasPredicted && prob < cfg.probAlertOff) {
+        state.rainPredicted = false
     }
 }
 
@@ -269,6 +274,6 @@ def clearRainState() {
     state.clearScheduled = false
     state.rainConfirmed = false
     state.rainPredicted = false
-    
+        
     logInfo("☀️ Sensor is dry")
 }
