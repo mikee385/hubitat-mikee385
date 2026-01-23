@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.8.0" }
+String getAppVersion() { return "0.9.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -213,12 +213,13 @@ def confidenceScore(tempC, rh, wind, rainRaw) {
 
     def sWind = (wind <= 0.5) ? 0.8 : 1.0
 
-    return 100.0 * (
+    score = 100.0 * (
         0.45 * sRH +
         0.35 * sDew +
         0.15 * sVPD +
         0.05 * sWind
     )
+    return clamp(score, 0.0, 100.0)
 }
 
 def probabilityScore(tempC, rh, wind) {
@@ -241,21 +242,18 @@ def probabilityScore(tempC, rh, wind) {
     def sRHtrend = clamp(dRH / cfg.rhTrendMax, 0.0, 1.0)
     def sVPDtrend = clamp(dVPD / cfg.vpdTrendMax, 0.0, 1.0)
     def sWindTrend = clamp(dWind / cfg.windTrendMax, 0.0, 1.0)
-
-    def raw =
-        0.40 * sRHabs +
-        0.30 * sRHtrend +
-        0.20 * sVPDtrend +
-        (hasWind ? 0.10 * sWindTrend : 0.0)
-
-    def maxWeight = hasWind ? 1.0 : 0.90
-    def normalized = (raw / maxWeight) * 100.0
-
+    
     state.prevRH = rh
     state.prevVPD = vpd
     state.prevWind = wind
 
-    return clamp(normalized, 0.0, 100.0)
+    score = 100.0 * (
+        0.40 * sRHabs +
+        0.30 * sRHtrend +
+        0.20 * sVPDtrend +
+        0.10 * sWindTrend
+    )
+    return clamp(score, 0.0, 100.0)
 }
 
 def dryingHoldMinutes(vpd) {
