@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.1.0" }
+String getAppVersion() { return "0.2.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -65,12 +65,26 @@ def initialize() {
     state.cfg = [
         rhConfMin: 60,
         rhConfSpan: 30,
+        rhProbMin: 70,
+        rhProbSpan: 25,
+        
+        dewNear: 2.0,
+        dewFar: 5.0,
+        
         vpdWet: 0.3,
         vpdDry: 1.0,
-        dewNear: 2,
-        dewFar: 5,
+        
+        rhTrendMax: 3,       // % per sample
+        vpdTrendMax: 0.15,   // kPa per sample
+        windTrendMax: 2.0,   // m/s per sample
+        
         dryHoldMin: 5,
-        dryHoldMax: 15
+        dryHoldMax: 15,
+        
+        probAlertOn: 75,
+        probAlertOff: 60,
+        
+        confAlertOn: 75
     ]
     
     // Rain Alert
@@ -100,6 +114,8 @@ def sensorHandler(evt) {
 }
 
 def calculate() {
+    def cfg = state.cfg
+    
     def tempF = temperatureSensor.currentValue("temperature")
     def rh = humiditySensor.currentValue("humidity")
     def rainRateInHr = rainSensor.currentValue("precip_1hr")
@@ -109,22 +125,41 @@ def calculate() {
     def windMS = windMPH != null ? windMPH * 0.44704 : null
     def rainRaw = (rainRateInHr ?: 0) > 0
     
-    def conf = confidenceScore(tempC, rh, windMS, rainRaw)
+    // Prediction
     def prob = probabilityScore(tempC, rh, windMS)
+    def rainLikelySoon = (prob >= cfg.probAlertOn)
+    
+    logInfo("probability: ${prob}")
+    
+    def wasPredicted = state.rainPredicted ?: false
+    
+    if (rainLikelySoon && !wasPredicted) {
+        logInfo("🌧️ Rain likely soon: ${prob}%")
+        state.rainPredicted = true
+    }
+
+    if (wasPredicted && prob < cfg.probAlertOff) {
+        state.rainPredicted = false
+    }
+    
+    // Confirmation
+    def conf = confidenceScore(tempC, rh, windMS, rainRaw)
+    def rainConfirmed = (conf >= cfg.confAlertOn)
     
     logInfo("confidence : ${conf}")
-    logInfo("probability: ${prob}")
+    
+    def wasConfirmed = state.rainConfirmed ?: false
 
-    def rainConfirmed = (conf >= 75)
-    def rainLikelySoon = (prob >= 75)
+    if (rainConfirmed && !wasConfirmed) {
+        logInfo("🌧️ Rain confirmed: ${conf}%")
+        state.rainConfirmed = true
+    }
 
-    //if (state.wasRaining && !rainConfirmed) {
-    //    def vpd = vaporPressureDeficit(tempC, rh)
-    //    def hold = dryingHoldMinutes(vpd)
-    //    runIn(hold * 60, "clearRainState")
-    //}
-
-    state.wasRaining = rainConfirmed
+    if (wasConfirmed && !rainConfirmed) {
+        def vpd = vaporPressureDeficit(tempC, rh)
+        def hold = dryingHoldMinutes(vpd)
+        runIn(hold * 60, "clearRainState")
+    }
 }
 
 def clamp(val, minVal, maxVal) {
@@ -224,4 +259,9 @@ def dryingHoldMinutes(vpd) {
             (cfg.dryHoldMax - cfg.dryHoldMin) * (vpd / cfg.vpdDry)
 
     return clamp(t, cfg.dryHoldMin, cfg.dryHoldMax)
+}
+
+def clearRainState() {
+    state.rainConfirmed = false
+    state.rainPredicted = false
 }
