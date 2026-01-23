@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.2.0" }
+String getAppVersion() { return "0.3.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -155,9 +155,11 @@ def calculate() {
         state.rainConfirmed = true
     }
 
-    if (wasConfirmed && !rainConfirmed) {
+    if (wasConfirmed && !rainConfirmed) { 
         def vpd = vaporPressureDeficit(tempC, rh)
         def hold = dryingHoldMinutes(vpd)
+        
+        logInfo("☀️ Rain has stopped, waiting ${hold} minutes")
         runIn(hold * 60, "clearRainState")
     }
 }
@@ -264,4 +266,6 @@ def dryingHoldMinutes(vpd) {
 def clearRainState() {
     state.rainConfirmed = false
     state.rainPredicted = false
+    
+    logInfo("☀️ Sensor is dry")
 }
