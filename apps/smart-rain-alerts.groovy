@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.5.0" }
+String getAppVersion() { return "0.6.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -107,7 +107,6 @@ def initialize() {
 def logInfo(msg) {
     if (enableInfoLog) {
         log.info msg
-        personToNotify.deviceNotification(msg)
     }
 }
 
@@ -142,7 +141,10 @@ def calculate() {
         unschedule("clearRainState")
         state.clearScheduled = false
         
-        logInfo("🌧️ Rain confirmed: ${conf}%")
+        msg = "🌧️ Rain confirmed: ${conf}%"
+        logInfo(msg)
+        sendAlert(msg)
+        
         state.rainConfirmed = true
     }
 
@@ -150,7 +152,10 @@ def calculate() {
         def vpd = vaporPressureDeficit(tempC, rh)
         def hold = dryingHoldMinutes(vpd)
         
-        logInfo("☀️ Rain has stopped, waiting ${hold} minutes")
+        msg = "☀️ Rain has stopped, waiting ${hold} minutes"
+        logInfo(msg)
+        sendAlert(msg)
+        
         state.clearScheduled = true
         runIn(hold * 60, "clearRainState")
     }
@@ -161,7 +166,9 @@ def calculate() {
     
     if (rainLikelySoon && !wasPredicted) {
         if (!rainConfirmed && !wasConfirmed) {
-            logInfo("🌧️ Rain likely soon: ${prob}%")
+            msg = "🌧️ Rain likely soon: ${prob}%"
+            logInfo(msg)
+            sendAlert(msg)
         } 
         state.rainPredicted = true
     }
@@ -274,6 +281,12 @@ def clearRainState() {
     state.clearScheduled = false
     state.rainConfirmed = false
     state.rainPredicted = false
-        
-    logInfo("☀️ Sensor is dry")
+    
+    msg = "☀️ Sensor is dry"
+    logInfo(msg)
+    sendAlert(msg)
+}
+
+def sendAlert(msg) {
+    personToNotify.deviceNotification(msg)
 }
