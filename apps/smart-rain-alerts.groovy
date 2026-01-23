@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.3.0" }
+String getAppVersion() { return "0.4.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -86,6 +86,7 @@ def initialize() {
         
         confAlertOn: 75
     ]
+    state.clearScheduled = false
     
     // Rain Alert
     subscribe(temperatureSensor, "temperature", sensorHandler)
@@ -108,9 +109,9 @@ def logInfo(msg) {
 }
 
 def sensorHandler(evt) {
-    logDebug("sensorHandler: ${evt.device} changed to ${evt.value}")
+    //logDebug("sensorHandler: ${evt.device} changed to ${evt.value}")
     
-    runIn(5, "calculate") //debounce
+    runIn(5, "calculate", [overwrite: true]) //debounce
 }
 
 def calculate() {
@@ -125,15 +126,16 @@ def calculate() {
     def windMS = windMPH != null ? windMPH * 0.44704 : null
     def rainRaw = (rainRateInHr ?: 0) > 0
     
-    // Prediction
     def prob = probabilityScore(tempC, rh, windMS)
+    def conf = confidenceScore(tempC, rh, windMS, rainRaw)
+    
+    logDebug("probability: ${prob}, confidence : ${conf}")
+    
+    // Prediction
     def rainLikelySoon = (prob >= cfg.probAlertOn)
-    
-    logInfo("probability: ${prob}")
-    
     def wasPredicted = state.rainPredicted ?: false
     
-    if (rainLikelySoon && !wasPredicted) {
+    if (rainLikelySoon && !wasPredicted) { 
         logInfo("🌧️ Rain likely soon: ${prob}%")
         state.rainPredicted = true
     }
@@ -143,23 +145,23 @@ def calculate() {
     }
     
     // Confirmation
-    def conf = confidenceScore(tempC, rh, windMS, rainRaw)
     def rainConfirmed = (conf >= cfg.confAlertOn)
-    
-    logInfo("confidence : ${conf}")
-    
     def wasConfirmed = state.rainConfirmed ?: false
 
     if (rainConfirmed && !wasConfirmed) {
+        unschedule("clearRainState")
+        state.clearScheduled = false
+        
         logInfo("🌧️ Rain confirmed: ${conf}%")
         state.rainConfirmed = true
     }
 
-    if (wasConfirmed && !rainConfirmed) { 
+    if (wasConfirmed && !rainConfirmed && !state.clearScheduled) { 
         def vpd = vaporPressureDeficit(tempC, rh)
         def hold = dryingHoldMinutes(vpd)
         
         logInfo("☀️ Rain has stopped, waiting ${hold} minutes")
+        state.clearScheduled = true
         runIn(hold * 60, "clearRainState")
     }
 }
@@ -264,6 +266,7 @@ def dryingHoldMinutes(vpd) {
 }
 
 def clearRainState() {
+    state.clearScheduled = false
     state.rainConfirmed = false
     state.rainPredicted = false
     
