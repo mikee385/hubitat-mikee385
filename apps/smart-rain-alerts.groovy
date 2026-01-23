@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.7.0" }
+String getAppVersion() { return "0.8.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -35,10 +35,7 @@ definition(
 preferences {
     page(name: "settings", title: getAppTitle(), install: true, uninstall: true) {
         section {
-            input "temperatureSensor", "capability.temperatureMeasurement", title: "Temperature Sensor", multiple: false, required: true
-            input "humiditySensor", "capability.relativeHumidityMeasurement", title: "Humidity Sensor", multiple: false, required: true
-            input "rainSensor", "device.AmbientWeatherDevice", title: "Rain Sensor", multiple: false, required: true
-            input "windSensor", "device.AmbientWeatherDevice", title: "Wind Sensor", multiple: false, required: false
+            input "weatherStation", "device.AmbientWeatherDevice", title: "Weather Station", multiple: false, required: true
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -92,13 +89,7 @@ def initialize() {
     state.rainPredicted = state.rainPredicted ?: false
     
     // Rain Alert
-    subscribe(temperatureSensor, "temperature", sensorHandler)
-    subscribe(humiditySensor, "humidity", sensorHandler)
-    subscribe(rainSensor, "precip_1hr", sensorHandler)
-    
-    if (windSensor != null) {
-        subscribe(windSensor, "wind", sensorHandler)
-    } 
+    subscribe(weatherStation, "dateutc", sensorHandler)
     
     // Device Checks
     initializeDeviceChecks()
@@ -113,20 +104,20 @@ def logInfo(msg) {
 def sensorHandler(evt) {
     //logDebug("sensorHandler: ${evt.device} changed to ${evt.value}")
     
-    runIn(5, "calculate", [overwrite: true]) //debounce
+    calculate()
 }
 
 def calculate() {
     def cfg = state.cfg
     
-    def tempF = temperatureSensor.currentValue("temperature")
-    def rh = humiditySensor.currentValue("humidity")
-    def rainRateInHr = rainSensor.currentValue("precip_1hr")
-    def windMPH = windSensor != null ? windSensor.currentValue("wind") : null
+    def tempF = weatherStation.currentValue("temperature")
+    def rh = weatherStation.currentValue("humidity")
+    def rainRateInHr = weatherStation.currentValue("precip_1hr")
+    def windMPH = weatherStation.currentValue("wind")
 
     def tempC = (tempF - 32.0) * 5.0 / 9.0
-    def windMS = windMPH != null ? windMPH * 0.44704 : null
-    def rainRaw = (rainRateInHr ?: 0.0) > 0.0
+    def windMS = windMPH * 0.44704
+    def rainRaw = (rainRateInHr > 0.0)
     
     def prob = probabilityScore(tempC, rh, windMS)
     def conf = confidenceScore(tempC, rh, windMS, rainRaw)
@@ -220,7 +211,7 @@ def confidenceScore(tempC, rh, wind, rainRaw) {
         (vpd >= cfg.vpdDry) ? 0.0 :
         (cfg.vpdDry - vpd) / (cfg.vpdDry - cfg.vpdWet)
 
-    def sWind = (wind != null && wind <= 0.5) ? 0.8 : 1.0
+    def sWind = (wind <= 0.5) ? 0.8 : 1.0
 
     return 100.0 * (
         0.45 * sRH +
@@ -240,7 +231,7 @@ def probabilityScore(tempC, rh, wind) {
 
     def dRH   = rh - prevRH
     def dVPD  = prevVPD - vpd
-    def dWind = (wind != null && prevWind != null) ? (wind - prevWind) : 0
+    def dWind = wind - prevWind
 
     def sRHabs = clamp(
         (rh - cfg.rhProbMin) / cfg.rhProbSpan,
@@ -249,9 +240,7 @@ def probabilityScore(tempC, rh, wind) {
 
     def sRHtrend = clamp(dRH / cfg.rhTrendMax, 0.0, 1.0)
     def sVPDtrend = clamp(dVPD / cfg.vpdTrendMax, 0.0, 1.0)
-
-    def hasWind = (wind != null && prevWind != null)
-    def sWindTrend = hasWind ? clamp(dWind / cfg.windTrendMax, 0.0, 1.0) : 0.0
+    def sWindTrend = clamp(dWind / cfg.windTrendMax, 0.0, 1.0)
 
     def raw =
         0.40 * sRHabs +
