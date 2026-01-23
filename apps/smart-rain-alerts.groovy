@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.6.0" }
+String getAppVersion() { return "0.7.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -63,10 +63,10 @@ def updated() {
 def initialize() {
     // Initialize State
     state.cfg = [
-        rhConfMin: 60,
-        rhConfSpan: 30,
-        rhProbMin: 70,
-        rhProbSpan: 25,
+        rhConfMin: 60.0,
+        rhConfSpan: 30.0,
+        rhProbMin: 70.0,
+        rhProbSpan: 25.0,
         
         dewNear: 2.0,
         dewFar: 5.0,
@@ -74,17 +74,17 @@ def initialize() {
         vpdWet: 0.3,
         vpdDry: 1.0,
         
-        rhTrendMax: 3,       // % per sample
+        rhTrendMax: 3.0,     // % per sample
         vpdTrendMax: 0.15,   // kPa per sample
         windTrendMax: 2.0,   // m/s per sample
         
-        dryHoldMin: 5,
-        dryHoldMax: 15,
+        dryHoldMin: 5.0,
+        dryHoldMax: 15.0,
         
-        probAlertOn: 75,
-        probAlertOff: 60,
+        probAlertOn: 75.0,
+        probAlertOff: 60.0,
         
-        confAlertOn: 75
+        confAlertOn: 75.0
     ]
     
     state.clearScheduled = false
@@ -124,9 +124,9 @@ def calculate() {
     def rainRateInHr = rainSensor.currentValue("precip_1hr")
     def windMPH = windSensor != null ? windSensor.currentValue("wind") : null
 
-    def tempC = (tempF - 32) * 5.0 / 9.0
+    def tempC = (tempF - 32.0) * 5.0 / 9.0
     def windMS = windMPH != null ? windMPH * 0.44704 : null
-    def rainRaw = (rainRateInHr ?: 0) > 0
+    def rainRaw = (rainRateInHr ?: 0.0) > 0.0
     
     def prob = probabilityScore(tempC, rh, windMS)
     def conf = confidenceScore(tempC, rh, windMS, rainRaw)
@@ -198,7 +198,7 @@ def dewPoint(tempC, rh) {
 }
 
 def confidenceScore(tempC, rh, wind, rainRaw) {
-    if (!rainRaw) return 0
+    if (!rainRaw) return 0.0
 
     def cfg = state.cfg
     def vpd = vaporPressureDeficit(tempC, rh)
@@ -207,7 +207,7 @@ def confidenceScore(tempC, rh, wind, rainRaw) {
 
     def sRH = clamp(
         (rh - cfg.rhConfMin) / cfg.rhConfSpan,
-        0, 1
+        0.0, 1.0
     )
 
     def sDew =
@@ -222,7 +222,7 @@ def confidenceScore(tempC, rh, wind, rainRaw) {
 
     def sWind = (wind != null && wind <= 0.5) ? 0.8 : 1.0
 
-    return 100 * (
+    return 100.0 * (
         0.45 * sRH +
         0.35 * sDew +
         0.15 * sVPD +
@@ -244,29 +244,29 @@ def probabilityScore(tempC, rh, wind) {
 
     def sRHabs = clamp(
         (rh - cfg.rhProbMin) / cfg.rhProbSpan,
-        0, 1
+        0.0, 1.0
     )
 
-    def sRHtrend = clamp(dRH / cfg.rhTrendMax, 0, 1)
-    def sVPDtrend = clamp(dVPD / cfg.vpdTrendMax, 0, 1)
+    def sRHtrend = clamp(dRH / cfg.rhTrendMax, 0.0, 1.0)
+    def sVPDtrend = clamp(dVPD / cfg.vpdTrendMax, 0.0, 1.0)
 
     def hasWind = (wind != null && prevWind != null)
-    def sWindTrend = hasWind ? clamp(dWind / cfg.windTrendMax, 0, 1) : 0
+    def sWindTrend = hasWind ? clamp(dWind / cfg.windTrendMax, 0.0, 1.0) : 0.0
 
     def raw =
         0.40 * sRHabs +
         0.30 * sRHtrend +
         0.20 * sVPDtrend +
-        (hasWind ? 0.10 * sWindTrend : 0)
+        (hasWind ? 0.10 * sWindTrend : 0.0)
 
     def maxWeight = hasWind ? 1.0 : 0.90
-    def normalized = (raw / maxWeight) * 100
+    def normalized = (raw / maxWeight) * 100.0
 
     state.prevRH = rh
     state.prevVPD = vpd
     state.prevWind = wind
 
-    return clamp(normalized, 0, 100)
+    return clamp(normalized, 0.0, 100.0)
 }
 
 def dryingHoldMinutes(vpd) {
