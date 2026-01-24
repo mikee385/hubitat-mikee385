@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.20.0" }
+String getAppVersion() { return "0.21.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -105,7 +105,7 @@ def initialize() {
         probAlertOn  : 75.0,  // % probability → rain likely soon
         probAlertOff : 60.0,  // % probability → clear prediction
 
-        confAlertOn  : 80.0,  // % confidence → rain confirmed
+        confAlertOn  : 75.0,  // % confidence → rain confirmed
         
         
         // ─────────────────────────────────────────────
@@ -314,6 +314,8 @@ def temperatureFactor(tempC) {
 }
 
 def confidenceScore(tempC, rh, wind, vpd, rainRateInHr) {
+    if (rainRateInHr <= 0.0) return 0.0
+
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
@@ -336,21 +338,18 @@ def confidenceScore(tempC, rh, wind, vpd, rainRateInHr) {
 
     def sWind = clamp(wind / 2.0, 0.8, 1.0)
     
-    def sRain = clamp(rainRateInHr / 0.04, 0.0, 1.0)
-
     def score =
         100.0 * (
-            0.35 * sRH +
-            0.30 * sDew +
+            0.45 * sRH +
+            0.35 * sDew +
             0.15 * sVPD +
-            0.05 * sWind +
-            0.15 * sRain
+            0.05 * sWind
         )
 
     logDebug(
         String.format(
-            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f Rain=%.2f | ΔT=%.2f°C VPD=%.2f kPa → %.1f%%",
-            sRH, sDew, sVPD, sWind, sRain,
+            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f | ΔT=%.2f°C VPD=%.2f kPa → %.1f%%",
+            sRH, sDew, sVPD, sWind,
             deltaT, vpd, score
         )
     )
