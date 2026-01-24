@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.17.0" }
+String getAppVersion() { return "0.18.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -194,7 +194,6 @@ def calculate() {
 
     def tempC = (tempF - 32.0) * 5.0 / 9.0
     def windMS = windMPH * 0.44704
-    def rainRaw = (rainRateInHr > 0.0) 
     
     // Core Calculations
     def vpd = vaporPressureDeficit(tempC, rh)
@@ -203,12 +202,12 @@ def calculate() {
     def prob = probabilityScore(tempC, rh, windMS, vpd)
     prob = clamp(prob * tf.prob, 0.0, 100.0)
     
-    def rawConf = confidenceScore(tempC, rh, windMS, vpd, rainRaw)
+    def rawConf = confidenceScore(tempC, rh, windMS, vpd, rainRateInHr)
     rawConf = clamp(rawConf * tf.conf, 0.0, 100.0)
 
     // Confidence decay smoothing
     def prevEffConf = state.prevEffConf ?: rawConf
-    def effConf = rainRaw
+    def effConf = (rainRateInHr > 0.0)
         ? rawConf
         : Math.max(rawConf, prevEffConf - cfg.confDecayPerSample)
 
@@ -310,7 +309,7 @@ def temperatureFactor(tempC) {
     ]
 }
 
-def confidenceScore(tempC, rh, wind, vpd, rainRaw) {
+def confidenceScore(tempC, rh, wind, vpd, rainRateInHr) {
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
@@ -333,7 +332,7 @@ def confidenceScore(tempC, rh, wind, vpd, rainRaw) {
 
     def sWind = clamp(wind / 2.0, 0.8, 1.0)
     
-    def sRain = rainRaw ? 1.0 : 0.0
+    def sRain = clamp(rainRateInHr / 0.04, 0.0, 1.0)
 
     def score =
         100.0 * (
