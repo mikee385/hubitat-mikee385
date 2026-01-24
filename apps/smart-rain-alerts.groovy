@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.18.0" }
+String getAppVersion() { return "0.19.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -345,9 +345,9 @@ def confidenceScore(tempC, rh, wind, vpd, rainRateInHr) {
 
     logDebug(
         String.format(
-            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f Rain=%.2f | ΔT=%.2f°C VPD=%.2f kPa",
+            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f Rain=%.2f | ΔT=%.2f°C VPD=%.2f kPa → %.1f%%",
             sRH, sDew, sVPD, sWind, sRain,
-            deltaT, vpd
+            deltaT, vpd, score
         )
     )
 
