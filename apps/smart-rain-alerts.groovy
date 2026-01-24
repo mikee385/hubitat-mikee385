@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.12.0" }
+String getAppVersion() { return "0.12.1" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -203,7 +203,7 @@ def calculate() {
         unschedule("clearRainState")
         state.clearScheduled = false
         
-        def msg = "🌧️ Rain confirmed: ${effConf.round(1)}%"
+        def msg = "🌧️ Rain confirmed: ${conf.round(1)}%"
         logInfo(msg)
         sendAlert(msg)
         
