@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.13.0" }
+String getAppVersion() { return "0.14.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -99,14 +99,6 @@ def initialize() {
 
 
         // ─────────────────────────────────────────────
-        // Drying hold time after rain stops (minutes)
-        // Modified further by VPD and temperature
-        // ─────────────────────────────────────────────
-        dryHoldMin : 5.0,    // minutes (hot, dry air)
-        dryHoldMax : 15.0,   // minutes (cool, humid air)
-
-
-        // ─────────────────────────────────────────────
         // Alert thresholds (% score)
         // Hysteresis prevents alert flapping
         // ─────────────────────────────────────────────
@@ -146,18 +138,9 @@ def initialize() {
         // ─────────────────────────────────────────────
         confCoolBoost  : 1.10,  // Cold drizzle persists
         confHotDampen  : 0.90,  // Hot rain dries faster
-
-
-        // ─────────────────────────────────────────────
-        // Seasonal drying-time multipliers (unitless)
-        // Applied to drying hold minutes
-        // ─────────────────────────────────────────────
-        dryHoldCoolBoost : 1.30,  // Cold, humid air stays wet
-        dryHoldHotDampen : 0.75   // Hot air dries quickly
     ]
     
     // Initialize State
-    state.clearScheduled = false
     state.rainConfirmed = state.rainConfirmed ?: false
     state.rainPredicted = state.rainPredicted ?: false
     
@@ -223,27 +206,20 @@ def calculate() {
     def wasConfirmed = state.rainConfirmed ?: false
 
     if (rainConfirmed && !wasConfirmed) {
-        unschedule("clearRainState")
-        state.clearScheduled = false
-        
         def msg = "🌧️ Rain confirmed: ${effConf.round(1)}%"
         logInfo(msg)
         sendAlert(msg)
         
-        state.prevEffConf = rawConf
         state.rainConfirmed = true
     }
 
-    if (wasConfirmed && !rainConfirmed && !state.clearScheduled) { 
-        def hold = dryingHoldMinutes(vpd)
-        hold = clamp(hold * tf.dry, cfg.dryHoldMin, cfg.dryHoldMax)
-        
-        def msg = "☀️ Rain has stopped, waiting ${hold.round(0)} minutes"
+    if (wasConfirmed && !rainConfirmed) { 
+        def msg = "☀️ Rain has stopped: ${effConf.round(1)}%"
         logInfo(msg)
         sendAlert(msg)
         
-        state.clearScheduled = true
-        runIn(Math.round(hold * 60) as Integer, "clearRainState")
+        state.rainConfirmed = false
+        state.rainPredicted = false
     }
     
     // Prediction
@@ -290,14 +266,12 @@ def temperatureFactor(tempC) {
         return [
             prob: cfg.probCoolBoost,
             conf: cfg.confCoolBoost,
-            dry:  cfg.dryHoldCoolBoost
         ]
     }
     if (tempC >= cfg.tempHot) {
         return [
             prob: cfg.probHotDampen,
             conf: cfg.confHotDampen,
-            dry:  cfg.dryHoldHotDampen
         ]
     }
 
@@ -307,7 +281,6 @@ def temperatureFactor(tempC) {
     return [
         prob: cfg.probCoolBoost + t * (cfg.probHotDampen - cfg.probCoolBoost),
         conf: cfg.confCoolBoost + t * (cfg.confHotDampen - cfg.confCoolBoost),
-        dry:  cfg.dryHoldCoolBoost + t * (cfg.dryHoldHotDampen - cfg.dryHoldCoolBoost)
     ]
 }
 
@@ -395,24 +368,6 @@ def probabilityScore(tempC, rh, wind, vpd) {
     )
 
     return clamp(score, 0.0, 100.0)
-}
-
-def dryingHoldMinutes(vpd) {
-    def cfg = state.cfg
-    def t = cfg.dryHoldMax -
-            (cfg.dryHoldMax - cfg.dryHoldMin) * (vpd / cfg.vpdDry)
-
-    return clamp(t, cfg.dryHoldMin, cfg.dryHoldMax)
-}
-
-def clearRainState() {
-    state.clearScheduled = false
-    state.rainConfirmed = false
-    state.rainPredicted = false
-    
-    def msg = "☀️ Sensor is dry"
-    logInfo(msg)
-    sendAlert(msg)
 }
 
 def sendAlert(msg) {
