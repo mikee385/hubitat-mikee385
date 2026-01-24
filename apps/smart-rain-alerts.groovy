@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.9.0" }
+String getAppVersion() { return "0.10.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -58,32 +58,97 @@ def updated() {
 }
 
 def initialize() {
-    // Initialize State
+    
     state.cfg = [
-        rhConfMin: 60.0,
-        rhConfSpan: 30.0,
-        rhProbMin: 70.0,
-        rhProbSpan: 25.0,
-        
-        dewNear: 2.0,
-        dewFar: 5.0,
-        
-        vpdWet: 0.3,
-        vpdDry: 1.0,
-        
-        rhTrendMax: 3.0,     // % per sample
-        vpdTrendMax: 0.15,   // kPa per sample
-        windTrendMax: 2.0,   // m/s per sample
-        
-        dryHoldMin: 5.0,
-        dryHoldMax: 15.0,
-        
-        probAlertOn: 75.0,
-        probAlertOff: 60.0,
-        
-        confAlertOn: 75.0
+
+        // ─────────────────────────────────────────────
+        // Relative Humidity thresholds (% RH)
+        // Used for absolute humidity scoring
+        // ─────────────────────────────────────────────
+        rhConfMin  : 60.0,   // % RH where confidence begins contributing
+        rhConfSpan : 30.0,   // % RH span to reach full confidence
+
+        rhProbMin  : 70.0,   // % RH where probability begins contributing
+        rhProbSpan : 25.0,   // % RH span to reach full probability
+
+
+        // ─────────────────────────────────────────────
+        // Dew Point proximity thresholds (°C)
+        // deltaT = air temp − dew point
+        // Smaller deltaT = higher rain likelihood
+        // ─────────────────────────────────────────────
+        dewNear : 2.0,   // °C → air nearly saturated
+        dewFar  : 5.0,   // °C → dry separation
+
+
+        // ─────────────────────────────────────────────
+        // Vapor Pressure Deficit thresholds (kPa)
+        // Lower VPD = wetter air
+        // ─────────────────────────────────────────────
+        vpdWet : 0.30,   // kPa → surfaces stay wet
+        vpdDry : 1.00,   // kPa → rapid drying
+
+
+        // ─────────────────────────────────────────────
+        // Trend normalization maxima (per sample)
+        // Assumes ~5 minute sampling interval
+        // ─────────────────────────────────────────────
+        rhTrendMax   : 3.0,    // % RH change per sample
+        vpdTrendMax  : 0.15,   // kPa change per sample
+        windTrendMax : 2.0,    // m/s change per sample
+
+
+        // ─────────────────────────────────────────────
+        // Drying hold time after rain stops (minutes)
+        // Modified further by VPD and temperature
+        // ─────────────────────────────────────────────
+        dryHoldMin : 5.0,    // minutes (hot, dry air)
+        dryHoldMax : 15.0,   // minutes (cool, humid air)
+
+
+        // ─────────────────────────────────────────────
+        // Alert thresholds (% score)
+        // Hysteresis prevents alert flapping
+        // ─────────────────────────────────────────────
+        probAlertOn  : 75.0,  // % probability → rain likely soon
+        probAlertOff : 60.0,  // % probability → clear prediction
+
+        confAlertOn  : 75.0,  // % confidence → rain confirmed
+
+
+        // ─────────────────────────────────────────────
+        // Temperature breakpoints (°C)
+        // Used for seasonal intelligence scaling
+        // ─────────────────────────────────────────────
+        tempCool : 10.0,   // ~50°F → cool drizzle regimes
+        tempHot  : 35.0,   // ~95°F → hot summer storms
+
+
+        // ─────────────────────────────────────────────
+        // Seasonal probability multipliers (unitless)
+        // Applied AFTER raw probability score
+        // ─────────────────────────────────────────────
+        probCoolBoost  : 1.15,  // Cold rain more trustworthy
+        probHotDampen  : 0.85,  // Hot rain needs stronger signals
+
+
+        // ─────────────────────────────────────────────
+        // Seasonal confidence multipliers (unitless)
+        // Applied AFTER raw confidence score
+        // ─────────────────────────────────────────────
+        confCoolBoost  : 1.10,  // Cold drizzle persists
+        confHotDampen  : 0.90,  // Hot rain dries faster
+
+
+        // ─────────────────────────────────────────────
+        // Seasonal drying-time multipliers (unitless)
+        // Applied to drying hold minutes
+        // ─────────────────────────────────────────────
+        dryHoldCoolBoost : 1.30,  // Cold, humid air stays wet
+        dryHoldHotDampen : 0.75   // Hot air dries quickly
     ]
     
+    // Initialize State
     state.clearScheduled = false
     state.rainConfirmed = state.rainConfirmed ?: false
     state.rainPredicted = state.rainPredicted ?: false
@@ -110,6 +175,7 @@ def sensorHandler(evt) {
 def calculate() {
     def cfg = state.cfg
     
+    // Sensor Data
     def tempF = weatherStation.currentValue("temperature")
     def rh = weatherStation.currentValue("humidity")
     def rainRateInHr = weatherStation.currentValue("precip_1hr")
@@ -119,8 +185,15 @@ def calculate() {
     def windMS = windMPH * 0.44704
     def rainRaw = (rainRateInHr > 0.0)
     
-    def prob = probabilityScore(tempC, rh, windMS)
-    def conf = confidenceScore(tempC, rh, windMS, rainRaw)
+    // Core Calculations
+    def vpd = vaporPressureDeficit(tempC, rh)
+    def tf = temperatureFactor(tempC)
+
+    def prob = probabilityScore(tempC, rh, windMS, vpd)
+    prob = clamp(prob * tf.prob, 0.0, 100.0)
+    
+    def conf = confidenceScore(tempC, rh, windMS, vpd, rainRaw)
+    conf = clamp(conf * tf.conf, 0.0, 100.0)
     
     logDebug("probability: ${prob}, confidence : ${conf}")
     
@@ -140,8 +213,8 @@ def calculate() {
     }
 
     if (wasConfirmed && !rainConfirmed && !state.clearScheduled) { 
-        def vpd = vaporPressureDeficit(tempC, rh)
         def hold = dryingHoldMinutes(vpd)
+        hold = clamp(hold * tf.dry, cfg.dryHoldMin, cfg.dryHoldMax)
         
         msg = "☀️ Rain has stopped, waiting ${hold} minutes"
         logInfo(msg)
@@ -188,11 +261,38 @@ def dewPoint(tempC, rh) {
     return (243.5 * alpha) / (17.67 - alpha)
 }
 
-def confidenceScore(tempC, rh, wind, rainRaw) {
+def temperatureFactor(tempC) {
+    def cfg = state.cfg
+
+    if (tempC <= cfg.tempCool) {
+        return [
+            prob: cfg.probCoolBoost,
+            conf: cfg.confCoolBoost,
+            dry:  cfg.dryHoldCoolBoost
+        ]
+    }
+    if (tempC >= cfg.tempHot) {
+        return [
+            prob: cfg.probHotDampen,
+            conf: cfg.confHotDampen,
+            dry:  cfg.dryHoldHotDampen
+        ]
+    }
+
+    // Linear interpolation between cool ↔ hot
+    def t = (tempC - cfg.tempCool) / (cfg.tempHot - cfg.tempCool)
+
+    return [
+        prob: cfg.probCoolBoost + t * (cfg.probHotDampen - cfg.probCoolBoost),
+        conf: cfg.confCoolBoost + t * (cfg.confHotDampen - cfg.confCoolBoost),
+        dry:  cfg.dryHoldCoolBoost + t * (cfg.dryHoldHotDampen - cfg.dryHoldCoolBoost)
+    ]
+}
+
+def confidenceScore(tempC, rh, wind, vpd, rainRaw) {
     if (!rainRaw) return 0.0
 
     def cfg = state.cfg
-    def vpd = vaporPressureDeficit(tempC, rh)
     def dew = dewPoint(tempC, rh)
     def deltaT = tempC - dew
 
@@ -211,7 +311,7 @@ def confidenceScore(tempC, rh, wind, rainRaw) {
         (vpd >= cfg.vpdDry) ? 0.0 :
         (cfg.vpdDry - vpd) / (cfg.vpdDry - cfg.vpdWet)
 
-    def sWind = (wind <= 0.5) ? 0.8 : 1.0
+    def sWind = clamp(wind / 2.0, 0.8, 1.0)
 
     score = 100.0 * (
         0.45 * sRH +
@@ -222,10 +322,9 @@ def confidenceScore(tempC, rh, wind, rainRaw) {
     return clamp(score, 0.0, 100.0)
 }
 
-def probabilityScore(tempC, rh, wind) {
+def probabilityScore(tempC, rh, wind, vpd) {
     def cfg = state.cfg
-    def vpd = vaporPressureDeficit(tempC, rh)
-
+    
     def prevRH   = state.prevRH   ?: rh
     def prevVPD  = state.prevVPD  ?: vpd
     def prevWind = state.prevWind ?: wind
