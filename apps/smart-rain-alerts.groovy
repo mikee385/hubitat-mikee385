@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.14.0" }
+String getAppVersion() { return "0.15.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -166,15 +166,35 @@ def sensorHandler(evt) {
 def calculate() {
     def cfg = state.cfg
     
-    // Sensor Data
+    // Previous Sensor Data
+    def prevTempF     = state.prevTempF
+    def prevRHraw     = state.prevRHraw
+    def prevRainRate  = state.prevRainRate
+    def prevWindMPH   = state.prevWindMPH
+    
+    // Current Sensor Data
     def tempF = weatherStation.currentValue("temperature")
     def rh = weatherStation.currentValue("humidity")
     def rainRateInHr = weatherStation.currentValue("precip_1hr")
     def windMPH = weatherStation.currentValue("wind")
+    
+    logDebug(
+        String.format(
+            "RAW ▶ T=%.1f°F (%+.1f) RH=%.0f%% (%+.1f) Rain=%.3f in/hr (%+.3f) Wind=%.1f mph (%+.1f)",
+            tempF,
+            prevTempF != null ? (tempF - prevTempF) : 0.0,
+            rh,
+            prevRHraw != null ? (rh - prevRHraw) : 0.0,
+            rainRateInHr,
+            prevRainRate != null ? (rainRateInHr - prevRainRate) : 0.0,
+            windMPH,
+            prevWindMPH != null ? (windMPH - prevWindMPH) : 0.0
+        )
+    )
 
     def tempC = (tempF - 32.0) * 5.0 / 9.0
     def windMS = windMPH * 0.44704
-    def rainRaw = (rainRateInHr > 0.0)
+    def rainRaw = (rainRateInHr > 0.0) 
     
     // Core Calculations
     def vpd = vaporPressureDeficit(tempC, rh)
@@ -201,7 +221,7 @@ def calculate() {
         )
     )
 
-    // Confirmation
+    // Confidence
     def rainConfirmed = (effConf >= cfg.confAlertOn)
     def wasConfirmed = state.rainConfirmed ?: false
 
@@ -238,6 +258,12 @@ def calculate() {
     if (wasPredicted && prob < cfg.probAlertOff) {
         state.rainPredicted = false
     }
+    
+    // Save Sensor Data
+    state.prevTempF    = tempF
+    state.prevRHraw    = rh
+    state.prevRainRate = rainRateInHr
+    state.prevWindMPH  = windMPH
 }
 
 def clamp(val, minVal, maxVal) {
