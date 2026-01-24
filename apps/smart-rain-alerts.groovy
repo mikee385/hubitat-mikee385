@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.10.0" }
+String getAppVersion() { return "0.11.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -195,8 +195,6 @@ def calculate() {
     def conf = confidenceScore(tempC, rh, windMS, vpd, rainRaw)
     conf = clamp(conf * tf.conf, 0.0, 100.0)
     
-    logDebug("probability: ${prob}, confidence : ${conf}")
-    
     // Confirmation
     def rainConfirmed = (conf >= cfg.confAlertOn)
     def wasConfirmed = state.rainConfirmed ?: false
@@ -313,12 +311,22 @@ def confidenceScore(tempC, rh, wind, vpd, rainRaw) {
 
     def sWind = clamp(wind / 2.0, 0.8, 1.0)
 
-    score = 100.0 * (
-        0.45 * sRH +
-        0.35 * sDew +
-        0.15 * sVPD +
-        0.05 * sWind
+    def score =
+        100.0 * (
+            0.45 * sRH +
+            0.35 * sDew +
+            0.15 * sVPD +
+            0.05 * sWind
+        )
+
+    logDebug(
+        String.format(
+            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f | ΔT=%.2f°C VPD=%.2fkPa → %.1f%%",
+            sRH, sDew, sVPD, sWind, 
+            deltaT, vpd, score
+        )
     )
+
     return clamp(score, 0.0, 100.0)
 }
 
@@ -338,20 +346,30 @@ def probabilityScore(tempC, rh, wind, vpd) {
         0.0, 1.0
     )
 
-    def sRHtrend = clamp(dRH / cfg.rhTrendMax, 0.0, 1.0)
-    def sVPDtrend = clamp(dVPD / cfg.vpdTrendMax, 0.0, 1.0)
+    def sRHtrend   = clamp(dRH   / cfg.rhTrendMax,   0.0, 1.0)
+    def sVPDtrend  = clamp(dVPD  / cfg.vpdTrendMax,  0.0, 1.0)
     def sWindTrend = clamp(dWind / cfg.windTrendMax, 0.0, 1.0)
     
-    state.prevRH = rh
-    state.prevVPD = vpd
+    state.prevRH   = rh
+    state.prevVPD  = vpd
     state.prevWind = wind
 
-    score = 100.0 * (
-        0.40 * sRHabs +
-        0.30 * sRHtrend +
-        0.20 * sVPDtrend +
-        0.10 * sWindTrend
+    def score =
+        100.0 * (
+            0.40 * sRHabs +
+            0.30 * sRHtrend +
+            0.20 * sVPDtrend +
+            0.10 * sWindTrend
+        )
+
+    logDebug(
+        String.format(
+            "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f | ΔRH=%.2f%% ΔVPD=%.3fkPa ΔWind=%.2fm/s → %.1f%%",
+            sRHabs, sRHtrend, sVPDtrend, sWindTrend,
+            dRH, dVPD, dWind, score
+        )
     )
+
     return clamp(score, 0.0, 100.0)
 }
 
