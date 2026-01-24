@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.12.2" }
+String getAppVersion() { return "0.13.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -114,6 +114,14 @@ def initialize() {
         probAlertOff : 60.0,  // % probability → clear prediction
 
         confAlertOn  : 75.0,  // % confidence → rain confirmed
+        
+        
+        // ─────────────────────────────────────────────
+        // Confidence decay (per sample)
+        // Limits how fast rain confidence may fall
+        // Assumes ~5 minute evaluation cadence
+        // ─────────────────────────────────────────────
+        confDecayPerSample : 10.0,  // % confidence drop allowed per run
 
 
         // ─────────────────────────────────────────────
@@ -192,21 +200,37 @@ def calculate() {
     def prob = probabilityScore(tempC, rh, windMS, vpd)
     prob = clamp(prob * tf.prob, 0.0, 100.0)
     
-    def conf = confidenceScore(tempC, rh, windMS, vpd, rainRaw)
-    conf = clamp(conf * tf.conf, 0.0, 100.0)
+    def rawConf = confidenceScore(tempC, rh, windMS, vpd, rainRaw)
+    rawConf = clamp(rawConf * tf.conf, 0.0, 100.0)
+
+    // Confidence decay smoothing
+    def prevEffConf = state.prevEffConf ?: rawConf
+    def effConf = rainRaw
+        ? rawConf
+        : Math.max(rawConf, prevEffConf - cfg.confDecayPerSample)
+
+    state.prevEffConf = effConf
     
+    logDebug(
+        String.format(
+            "CONF RAW=%.1f%% → EFFECTIVE=%.1f%%",
+            rawConf, effConf
+        )
+    )
+
     // Confirmation
-    def rainConfirmed = (conf >= cfg.confAlertOn)
+    def rainConfirmed = (effConf >= cfg.confAlertOn)
     def wasConfirmed = state.rainConfirmed ?: false
 
     if (rainConfirmed && !wasConfirmed) {
         unschedule("clearRainState")
         state.clearScheduled = false
         
-        def msg = "🌧️ Rain confirmed: ${conf.round(1)}%"
+        def msg = "🌧️ Rain confirmed: ${effConf.round(1)}%"
         logInfo(msg)
         sendAlert(msg)
         
+        state.prevEffConf = rawConf
         state.rainConfirmed = true
     }
 
@@ -321,9 +345,9 @@ def confidenceScore(tempC, rh, wind, vpd, rainRaw) {
 
     logDebug(
         String.format(
-            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f | ΔT=%.2f°C VPD=%.2fkPa → %.1f%%",
+            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f | ΔT=%.2f°C VPD=%.2fkPa",
             sRH, sDew, sVPD, sWind, 
-            deltaT, vpd, score
+            deltaT, vpd
         )
     )
 
