@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.19.0" }
+String getAppVersion() { return "0.20.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -199,24 +199,28 @@ def calculate() {
     def vpd = vaporPressureDeficit(tempC, rh)
     def tf = temperatureFactor(tempC)
 
-    def prob = probabilityScore(tempC, rh, windMS, vpd)
-    prob = clamp(prob * tf.prob, 0.0, 100.0)
-    
-    def rawConf = confidenceScore(tempC, rh, windMS, vpd, rainRateInHr)
-    rawConf = clamp(rawConf * tf.conf, 0.0, 100.0)
+    def baseProb = probabilityScore(tempC, rh, windMS, vpd)
+    def adjProb  = clamp(baseProb * tf.prob, 0.0, 100.0)
+
+    def baseConf = confidenceScore(tempC, rh, windMS, vpd, rainRateInHr)
+    def adjConf  = clamp(baseConf * tf.conf, 0.0, 100.0)
 
     // Confidence decay smoothing
-    def prevEffConf = state.prevEffConf ?: rawConf
+    def prevEffConf = state.prevEffConf ?: adjConf
     def effConf = (rainRateInHr > 0.0)
-        ? rawConf
-        : Math.max(rawConf, prevEffConf - cfg.confDecayPerSample)
+        ? adjConf
+        : Math.max(adjConf, prevEffConf - cfg.confDecayPerSample)
 
     state.prevEffConf = effConf
-    
+
     logDebug(
         String.format(
-            "CONF ▶ RAW=%.1f%% → EFFECTIVE=%.1f%%",
-            rawConf, effConf
+            "SCORE ▶ Prob=%.1f%% (Base=%.1f ×%.2f) | Conf=%.1f%% (Base=%.1f ×%.2f → %.1f) → Eff=%.1f",
+            adjProb,
+            baseProb, tf.prob,
+            adjConf,
+            baseConf, tf.conf, adjConf,
+            effConf
         )
     )
 
