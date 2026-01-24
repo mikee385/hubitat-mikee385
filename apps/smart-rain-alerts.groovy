@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.11.0" }
+String getAppVersion() { return "0.12.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -203,7 +203,7 @@ def calculate() {
         unschedule("clearRainState")
         state.clearScheduled = false
         
-        msg = "🌧️ Rain confirmed: ${conf}%"
+        def msg = "🌧️ Rain confirmed: ${effConf.round(1)}%"
         logInfo(msg)
         sendAlert(msg)
         
@@ -214,7 +214,7 @@ def calculate() {
         def hold = dryingHoldMinutes(vpd)
         hold = clamp(hold * tf.dry, cfg.dryHoldMin, cfg.dryHoldMax)
         
-        msg = "☀️ Rain has stopped, waiting ${hold} minutes"
+        def msg = "☀️ Rain has stopped, waiting ${hold.round(0)} minutes"
         logInfo(msg)
         sendAlert(msg)
         
@@ -228,7 +228,7 @@ def calculate() {
     
     if (rainLikelySoon && !wasPredicted) {
         if (!rainConfirmed && !wasConfirmed) {
-            msg = "🌧️ Rain likely soon: ${prob}%"
+            def msg = "🌧️ Rain likely soon: ${prob.round(1)}%"
             logInfo(msg)
             sendAlert(msg)
         } 
@@ -386,7 +386,7 @@ def clearRainState() {
     state.rainConfirmed = false
     state.rainPredicted = false
     
-    msg = "☀️ Sensor is dry"
+    def msg = "☀️ Sensor is dry"
     logInfo(msg)
     sendAlert(msg)
 }
