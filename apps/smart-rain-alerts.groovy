@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.12.1" }
+String getAppVersion() { return "0.12.2" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -219,7 +219,7 @@ def calculate() {
         sendAlert(msg)
         
         state.clearScheduled = true
-        runIn(hold * 60, "clearRainState")
+        runIn(Math.round(hold * 60) as Integer, "clearRainState")
     }
     
     // Prediction
