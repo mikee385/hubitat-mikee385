@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.22.0" }
+String getAppVersion() { return "0.23.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -273,6 +273,7 @@ def calculate() {
     // Drizzle
     def drizzleDetected =
         (rainRateInHr <= 0.0) &&
+        (effConf <= cfg.drizzleConfCap) &&
         (effConf >= cfg.drizzleConfOn)
 
     if (drizzleDetected && !state.drizzleDetected) {
