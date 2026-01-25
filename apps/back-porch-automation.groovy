@@ -1,7 +1,7 @@
 /**
  *  Back Porch Automation
  *
- *  Copyright 2024 Michael Pierce
+ *  Copyright 2026 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "13.3.0" }
+String getVersionNum() { return "13.4.0" }
 String getVersionLabel() { return "Back Porch Automation, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -37,7 +37,7 @@ preferences {
             input "zone", "device.OccupancyStatus", title: "Zone", multiple: false, required: true
             input "door", "capability.contactSensor", title: "Door", multiple: false, required: true
             input "lock", "capability.contactSensor", title: "Door Lock", multiple: false, required: true
-            input "lights", "capability.switch", title: "Lights", multiple: true, required: true
+            input "lights", "capability.switch", title: "Lights", multiple: true, required: false
         }
         section("Fans") {
             input "fans", "capability.switch", title: "Fans", multiple: true, required: false

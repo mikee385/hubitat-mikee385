@@ -1,11 +1,11 @@
 {
     "packageName": "Back Porch Automation",
     "author": "Michael Pierce",
-    "version": "13.3.0",
+    "version": "13.4.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change lock alerts to occupancy alerts",
-    "dateReleased": "2024-01-16",
+    "releaseNotes": "Change lights to optional",
+    "dateReleased": "2026-01-24",
     "apps": [
         {
             "id": "168a22e9-216e-4c50-8875-17d98568edf7",
