@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.21.1" }
+String getAppVersion() { return "0.22.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -117,6 +117,19 @@ def initialize() {
 
 
         // ─────────────────────────────────────────────
+        // Drizzle detection controls
+        // ─────────────────────────────────────────────
+        drizzleConfCap  : 55.0,   // Max confidence allowed without rain sensor
+        
+        // ─────────────────────────────────────────────
+        // Drizzle detection thresholds
+        // Atmospheric rain without gauge confirmation
+        // ─────────────────────────────────────────────
+        drizzleConfOn  : 45.0,  // % → drizzle likely
+        drizzleConfOff : 35.0,  // % → drizzle ended
+        
+        
+        // ─────────────────────────────────────────────
         // Temperature breakpoints (°C)
         // Used for seasonal intelligence scaling
         // ─────────────────────────────────────────────
@@ -141,8 +154,9 @@ def initialize() {
     ]
     
     // Initialize State
-    state.rainConfirmed = state.rainConfirmed ?: false
-    state.rainPredicted = state.rainPredicted ?: false
+    state.rainConfirmed   = state.rainConfirmed ?: false
+    state.rainPredicted   = state.rainPredicted ?: false
+    state.drizzleDetected = state.drizzleDetected ?: false
     
     // Rain Alert
     subscribe(weatherStation, "dateutc", sensorHandler)
@@ -204,13 +218,23 @@ def calculate() {
 
     def baseConf = confidenceScore(tempC, rh, windMS, vpd, rainRateInHr)
     def adjConf  = clamp(baseConf * tf.conf, 0.0, 100.0)
+    
+    if (rainRateInHr <= 0.0 && adjConf > cfg.drizzleConfCap) {
+        adjConf = cfg.drizzleConfCap
+    }
 
     // Confidence decay smoothing
     def prevEffConf = state.prevEffConf ?: adjConf
-    def effConf = (rainRateInHr > 0.0)
-        ? adjConf
-        : Math.max(adjConf, prevEffConf - cfg.confDecayPerSample)
-
+    def effConf
+    if (rainRateInHr > 0.0) {
+        effConf = adjConf
+    } else {
+        def decayed = (state.prevEffConf ?: adjConf) - cfg.confDecayPerSample
+        effConf = Math.max(
+            Math.min(adjConf, state.prevEffConf ?: adjConf),
+            decayed
+        )
+    }
     state.prevEffConf = effConf
 
     logDebug(
@@ -233,7 +257,8 @@ def calculate() {
         logInfo(msg)
         sendAlert(msg)
         
-        state.rainConfirmed = true
+        state.rainConfirmed   = true
+        state.drizzleDetected = false
     }
 
     if (wasConfirmed && !rainConfirmed) { 
@@ -245,11 +270,32 @@ def calculate() {
         state.rainPredicted = false
     }
     
+    // Drizzle
+    def drizzleDetected =
+        (rainRateInHr <= 0.0) &&
+        (effConf >= cfg.drizzleConfOn)
+
+    if (drizzleDetected && !state.drizzleDetected) {
+        def msg = "🌦️ Drizzle detected -- wet conditions likely: ${effConf.round(1)}%"
+        logInfo(msg)
+        sendAlert(msg)
+        
+        state.drizzleDetected = true
+    }
+    
+    if (state.drizzleDetected && effConf < cfg.drizzleConfOff) {
+        def msg = "🌤️ Drizzle ended -- conditions drying: ${effConf.round(1)}%"
+        logInfo(msg)
+        sendAlert(msg)
+        
+        state.drizzleDetected = false
+    }
+    
     // Probability
     def rainLikelySoon = (adjProb >= cfg.probAlertOn)
     def wasPredicted = state.rainPredicted ?: false
     
-    if (rainLikelySoon && !wasPredicted) {
+    if (!state.drizzleDetected && rainLikelySoon && !wasPredicted) {
         if (!rainConfirmed && !wasConfirmed) {
             def msg = "🌧️ Rain likely soon: ${adjProb.round(1)}%"
             logInfo(msg)
@@ -314,8 +360,6 @@ def temperatureFactor(tempC) {
 }
 
 def confidenceScore(tempC, rh, wind, vpd, rainRateInHr) {
-    if (rainRateInHr <= 0.0) return 0.0
-
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
