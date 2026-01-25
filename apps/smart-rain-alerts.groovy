@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.25.0" }
+String getAppVersion() { return "0.26.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -102,10 +102,10 @@ def initialize() {
         // Alert thresholds (% score)
         // Hysteresis prevents alert flapping
         // ─────────────────────────────────────────────
-        probAlertOn  : 75.0,  // % probability → rain likely soon
-        probAlertOff : 60.0,  // % probability → clear prediction
+        wetTrendOn  : 75.0,  // % probability → rain likely soon
+        wetTrendOff : 60.0,  // % probability → clear prediction
 
-        confAlertOn  : 75.0,  // % confidence → rain confirmed
+        wetnessConfMin  : 75.0,  // % confidence → rain confirmed
         
         
         // ─────────────────────────────────────────────
@@ -134,7 +134,7 @@ def initialize() {
     
     // Initialize State
     state.rainConfirmed   = state.rainConfirmed ?: false
-    state.rainPredicted   = state.rainPredicted ?: false
+    state.wetTrendActive  = state.wetTrendActive ?: false
     
     // Rain Alert
     subscribe(weatherStation, "dateutc", sensorHandler)
@@ -191,15 +191,15 @@ def calculate() {
     def vpd = vaporPressureDeficit(tempC, rh)
     def tf = temperatureFactor(tempC)
 
-    def baseProb = probabilityScore(tempC, rh, windMS, vpd)
+    def baseProb = wetTrendScore(tempC, rh, windMS, vpd)
     def adjProb  = clamp(baseProb * tf.prob, 0.0, 100.0)
 
-    def baseConf = confidenceScore(tempC, rh, windMS, vpd)
+    def baseConf = wetnessConfidence(tempC, rh, windMS, vpd)
     def adjConf  = clamp(baseConf * tf.conf, 0.0, 100.0)
     
     logDebug(
         String.format(
-            "SCORE ▶ Prob=%.1f%% (Base=%.1f ×%.2f) | Conf=%.1f%% (Base=%.1f ×%.2f)",
+            "SCORE ▶ Trend=%.1f%% (Base=%.1f ×%.2f) | Conf=%.1f%% (Base=%.1f ×%.2f)",
             adjProb,
             baseProb, tf.prob,
             adjConf,
@@ -212,7 +212,7 @@ def calculate() {
     def wasConfirmed = state.rainConfirmed ?: false
 
     if (isRaining && !wasConfirmed) {
-        if (adjConf >= cfg.confAlertOn) {
+        if (adjConf >= cfg.wetnessConfMin) {
             sendAlert("🌧️ Rain confirmed: ${adjConf.round(1)}%")
         
             state.rainConfirmed = true
@@ -221,7 +221,7 @@ def calculate() {
         } 
     }
     
-    if (wasConfirmed && isRaining && adjConf < cfg.confAlertOn) {
+    if (wasConfirmed && isRaining && adjConf < cfg.wetnessConfMin) {
         sendAlert("⚠️ Rain confidence lost: ${adjConf.round(1)}%")
         
         state.rainConfirmed = false
@@ -229,24 +229,23 @@ def calculate() {
 
     if (wasConfirmed && !isRaining) { 
         sendAlert("☀️ Rain has stopped")
-        
         state.rainConfirmed = false
     }
     
     // Probability
-    def rainLikelySoon = (adjProb >= cfg.probAlertOn)
-    def wasPredicted = state.rainPredicted ?: false
+    def wetTrendActive = (adjProb >= cfg.wetTrendOn)
+    def wasTrendActive = state.wetTrendActive ?: false
     
-    if (rainLikelySoon && !wasPredicted) {
+    if (wetTrendActive && !wasTrendActive) {
         sendAlert("💦 Environment is wetter, rain likely: ${adjProb.round(1)}%")
         
-        state.rainPredicted = true
+        state.wetTrendActive = true
     }
 
-    if (wasPredicted && adjProb < cfg.probAlertOff) {
-        sendAlert("🌵 Environment is dryer: ${adjProb.round(1)}%")
+    if (wasTrendActive && adjProb < cfg.wetTrendOff) {
+        sendAlert("🌵 Environment is drier: ${adjProb.round(1)}%")
         
-        state.rainPredicted = false
+        state.wetTrendActive = false
     }
     
     // Save Sensor Data
@@ -300,7 +299,7 @@ def temperatureFactor(tempC) {
     ]
 }
 
-def confidenceScore(tempC, rh, wind, vpd) {
+def wetnessConfidence(tempC, rh, wind, vpd) {
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
@@ -342,7 +341,7 @@ def confidenceScore(tempC, rh, wind, vpd) {
     return clamp(score, 0.0, 100.0)
 }
 
-def probabilityScore(tempC, rh, wind, vpd) {
+def wetTrendScore(tempC, rh, wind, vpd) {
     def cfg = state.cfg
     
     def prevRH   = state.prevRH   ?: rh
