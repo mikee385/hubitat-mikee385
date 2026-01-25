@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.23.0" }
+String getAppVersion() { return "0.24.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -253,18 +253,14 @@ def calculate() {
     def wasConfirmed = state.rainConfirmed ?: false
 
     if (rainConfirmed && !wasConfirmed) {
-        def msg = "🌧️ Rain confirmed: ${effConf.round(1)}%"
-        logInfo(msg)
-        sendAlert(msg)
+        sendAlert("🌧️ Rain confirmed: ${effConf.round(1)}%")
         
         state.rainConfirmed   = true
         state.drizzleDetected = false
     }
 
     if (wasConfirmed && !rainConfirmed) { 
-        def msg = "☀️ Rain has stopped: ${effConf.round(1)}%"
-        logInfo(msg)
-        sendAlert(msg)
+        sendAlert("☀️ Rain has stopped: ${effConf.round(1)}%")
         
         state.rainConfirmed = false
         state.rainPredicted = false
@@ -277,17 +273,13 @@ def calculate() {
         (effConf >= cfg.drizzleConfOn)
 
     if (drizzleDetected && !state.drizzleDetected) {
-        def msg = "🌦️ Drizzle detected -- wet conditions likely: ${effConf.round(1)}%"
-        logInfo(msg)
-        sendAlert(msg)
+        sendAlert("🌦️ Drizzle detected -- wet conditions likely: ${effConf.round(1)}%")
         
         state.drizzleDetected = true
     }
     
     if (state.drizzleDetected && effConf < cfg.drizzleConfOff) {
-        def msg = "🌤️ Drizzle ended -- conditions drying: ${effConf.round(1)}%"
-        logInfo(msg)
-        sendAlert(msg)
+        sendAlert("🌤️ Drizzle ended -- conditions drying: ${effConf.round(1)}%")
         
         state.drizzleDetected = false
     }
@@ -298,9 +290,7 @@ def calculate() {
     
     if (!state.drizzleDetected && rainLikelySoon && !wasPredicted) {
         if (!rainConfirmed && !wasConfirmed) {
-            def msg = "🌧️ Rain likely soon: ${adjProb.round(1)}%"
-            logInfo(msg)
-            sendAlert(msg)
+            sendAlert("🌧️ Rain likely soon: ${adjProb.round(1)}%")
         } 
         state.rainPredicted = true
     }
@@ -446,5 +436,6 @@ def probabilityScore(tempC, rh, wind, vpd) {
 }
 
 def sendAlert(msg) {
+    logInfo(msg)
     personToNotify.deviceNotification(msg)
 }
