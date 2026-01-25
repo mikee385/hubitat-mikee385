@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.21.0" }
+String getAppVersion() { return "0.21.1" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -246,19 +246,19 @@ def calculate() {
     }
     
     // Probability
-    def rainLikelySoon = (prob >= cfg.probAlertOn)
+    def rainLikelySoon = (adjProb >= cfg.probAlertOn)
     def wasPredicted = state.rainPredicted ?: false
     
     if (rainLikelySoon && !wasPredicted) {
         if (!rainConfirmed && !wasConfirmed) {
-            def msg = "🌧️ Rain likely soon: ${prob.round(1)}%"
+            def msg = "🌧️ Rain likely soon: ${adjProb.round(1)}%"
             logInfo(msg)
             sendAlert(msg)
         } 
         state.rainPredicted = true
     }
 
-    if (wasPredicted && prob < cfg.probAlertOff) {
+    if (wasPredicted && adjProb < cfg.probAlertOff) {
         state.rainPredicted = false
     }
     
