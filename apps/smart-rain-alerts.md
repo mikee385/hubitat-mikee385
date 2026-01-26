@@ -9,7 +9,7 @@ Rather than attempting to “detect rain” from environmental data alone, the a
 
 This separation avoids overfitting, reduces alert noise, and keeps alerts aligned with real human decisions.
 
-—
+---
 
 ## Core Design Philosophy
 
@@ -25,20 +25,20 @@ This separation avoids overfitting, reduces alert noise, and keeps alerts aligne
    - Alerts exist to influence behavior.
    - State latches and hysteresis are preferred over raw thresholds.
 
-—
+---
 
 ## High-Level Concepts
 
 The app computes two independent scores:
 
 | Score | What it Represents | What it Does *Not* Do |
-|——|-——————|————————|
+|------|-------------------|------------------------|
 | **Probability** | Whether the environment is trending from dry → wet | Detect rain |
 | **Confidence** | Whether conditions support rain *if the sensor reports rain* | Detect rain |
 
 Rain detection itself is handled **exclusively** by the rain sensor.
 
-—
+---
 
 ## Rain Detection & Confirmation Logic
 
@@ -52,18 +52,18 @@ The app tracks three mutually exclusive rain-related states:
 
 State transitions — not raw values — drive alerts.
 
-—
+---
 
 ### Alerts
 
 | Condition | Alert |
-|-———|-——|
+|----------|-------|
 | Rain sensor > 0 AND confidence ≥ threshold | 🌧️ Rain confirmed |
 | Rain sensor > 0 AND confidence < threshold | ⚠️ Rain sensor false positive |
 | Rain confirmed → confidence drops below threshold | ⚠️ Rain confidence lost |
 | Rain confirmed → rain sensor returns to zero | ☀️ Rain has stopped |
 
-—
+---
 
 ### Key Assumptions
 
@@ -71,7 +71,7 @@ State transitions — not raw values — drive alerts.
 - Environmental conditions can **invalidate** a rain reading but cannot replace it.
 - Confidence decay is intentionally **disabled** to keep semantics clean and predictable.
 
-—
+---
 
 ## Physical Foundations
 
@@ -89,13 +89,13 @@ Where:
 - `T` = air temperature (°C)
 - `eₛ` = kPa
 
-—
+---
 
 ### Actual Vapor Pressure
 
 e = (RH / 100) × eₛ
 
-—
+---
 
 ### Vapor Pressure Deficit (VPD)
 
@@ -107,7 +107,7 @@ Interpretation:
 
 VPD is a better drying metric than relative humidity alone.
 
-—
+---
 
 ### Dew Point
 
@@ -123,7 +123,7 @@ The key derived metric:
 
 Smaller `ΔT` indicates conditions closer to condensation and precipitation.
 
-—
+---
 
 ## Confidence Score (Rain Plausibility)
 
@@ -135,7 +135,7 @@ Confidence answers:
 
 It is a **sanity check**, not a detector.
 
-—
+---
 
 ### Inputs
 
@@ -146,7 +146,7 @@ It is a **sanity check**, not a detector.
 
 Confidence is **ignored** unless the rain sensor reports rain.
 
-—
+---
 
 ### Normalized Components
 
@@ -160,7 +160,7 @@ Defaults:
 
 Below ~60% RH, rain is implausible. Above ~90%, additional RH adds little value.
 
-—
+---
 
 #### Dew Point Proximity
 
@@ -173,7 +173,7 @@ Defaults:
 - `dewNear = 2°C`
 - `dewFar = 5°C`
 
-—
+---
 
 #### Vapor Pressure Deficit
 
@@ -186,7 +186,7 @@ Defaults:
 - `vpdWet = 0.30 kPa`
 - `vpdDry = 1.00 kPa`
 
-—
+---
 
 #### Wind Speed
 
@@ -194,7 +194,7 @@ sWind = clamp( wind / 2.0 , 0.8 , 1.0 )
 
 This is a weak modifier intended only to reflect rain survivability.
 
-—
+---
 
 ### Weighted Score
 
@@ -208,7 +208,7 @@ Confidence =
 
 No decay is applied. Confidence always reflects *current* conditions.
 
-—
+---
 
 ## Probability Score (Environmental Trend)
 
@@ -220,7 +220,7 @@ Probability answers:
 
 It is **not** a precipitation forecast.
 
-—
+---
 
 ### Inputs
 
@@ -229,7 +229,7 @@ It is **not** a precipitation forecast.
 - VPD trend
 - Wind trend
 
-—
+---
 
 ### Absolute Humidity Term
 
@@ -239,7 +239,7 @@ Defaults:
 - `rhProbMin = 70%`
 - `rhProbSpan = 25%`
 
-—
+---
 
 ### Trend Terms (per sample)
 
@@ -258,7 +258,7 @@ Defaults assume ~5-minute sampling:
 - `vpdTrendMax = 0.15 kPa`
 - `windTrendMax = 2 m/s`
 
-—
+---
 
 ### Weighted Score
 
@@ -270,18 +270,18 @@ Probability =
 0.10 × sWindtrend
 )
 
-—
+---
 
 ### Alerts
 
 | Condition | Alert |
-|-———|-——|
+|----------|-------|
 | Probability crosses upper threshold | 💦 Environment is wetter, rain likely |
 | Probability drops below lower threshold | 🌵 Environment is drier |
 
 Hysteresis prevents flapping.
 
-—
+---
 
 ## Seasonal Intelligence
 
@@ -290,14 +290,14 @@ Temperature-based scaling is applied **after** raw score calculation.
 ### Temperature Breakpoints
 
 | Setting | Default |
-|-——|———|
+|-------|---------|
 | `tempCool` | 10°C |
 | `tempHot` | 35°C |
 
 ### Scaling
 
 | Condition | Probability | Confidence |
-|-———|————|————|
+|----------|------------|------------|
 | Cool | Boost | Boost |
 | Hot | Dampen | Dampen |
 
@@ -307,7 +307,7 @@ Rationale:
 - Cold drizzle persists under marginal conditions
 - Hot rain requires stronger signals and dries faster
 
-—
+---
 
 ## Configuration Tuning Guidance
 
@@ -325,7 +325,7 @@ Rationale:
 - Score weight ordering
 - Removing latches or hysteresis
 
-—
+---
 
 ## Known Limitations & Gotchas
 
@@ -342,7 +342,7 @@ Rationale:
 - Rain sensors quantize small amounts (e.g., 0.1 mm).
 - This can appear binary at low rainfall rates.
 
-—
+---
 
 ## Debug Logging
 
@@ -353,7 +353,7 @@ The app logs:
 
 This is intentional and designed for long-term tuning.
 
-—
+---
 
 ## Future Improvements (Ideas)
 
@@ -365,7 +365,7 @@ Not commitments:
 - Visual trend graphs
 - Climate-adaptive tuning
 
-—
+---
 
 ## Guiding Principle Going Forward
 
@@ -373,7 +373,7 @@ Not commitments:
 
 All future changes should be evaluated against that standard.
 
-—
+---
 
 ## License
 
