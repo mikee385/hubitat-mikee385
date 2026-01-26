@@ -88,7 +88,7 @@ Environmental scoring is built on established meteorological relationships. Cons
 Saturation vapor pressure represents the maximum water vapor pressure air can hold at a given temperature. The app uses the Magnus–Tetens approximation:
 
 $$
-e_s(T) = 0.6108 \cdot \exp!\left(\frac{17.27 \cdot T}{T + 237.3}\right)
+e_s(T) = 0.6108 \cdot \exp\left(\frac{17.27 \cdot T}{T + 237.3}\right)
 $$
 
 Where:
@@ -130,7 +130,7 @@ VPD is a more reliable drying metric than relative humidity alone.
 Using the Magnus formula:
 
 $$
-\alpha = \ln!\left(\frac{RH}{100}\right) + \frac{17.27 \cdot T}{237.3 + T}
+\alpha = \ln\left(\frac{RH}{100}\right) + \frac{17.27 \cdot T}{237.3 + T}
 $$
 
 $$
@@ -179,7 +179,7 @@ Each component is normalized to a 0–1 range, then combined and scaled to a 0�
 Relative humidity contributes strongly up to near-saturation:
 
 $$
-s_{RH} = \mathrm{clamp}!\left(\frac{RH - RH_{min}}{RH_{span}},;0,;1\right)
+s_{RH} = \mathrm{clamp}\left(\frac{RH - RH_{min}}{RH_{span}}, 0, 1\right)
 $$
 
 Default values:
@@ -205,8 +205,8 @@ Dew point proximity reflects how close the air is to condensation:
 
 VPD contributes inversely:
 
-- $s_{VPD} = 1.0) when (VPD \le 0.30\ \text{kPa}$
-- $s_{VPD} = 0.0) when (VPD \ge 1.00\ \text{kPa}$
+- $s_{VPD} = 1.0$ when $VPD \le 0.30\ \text{kPa}$
+- $s_{VPD} = 0.0$ when $VPD \ge 1.00\ \text{kPa}$
 - Linear interpolation otherwise
 
 ---
@@ -216,7 +216,7 @@ VPD contributes inversely:
 Wind is a weak modifier reflecting rain survivability:
 
 $$
-s_{Wind} = \mathrm{clamp}!\left(\frac{Wind_{m/s}}{2.0},;0.8,;1.0\right)
+s_{Wind} = \mathrm{clamp}\left(\frac{Wind_{m/s}}{2.0}, 0.8, 1.0\right)
 $$
 
 Higher wind slightly improves plausibility by reducing evaporation near surfaces.
@@ -263,7 +263,7 @@ It is **not** a precipitation forecast and is not expected to predict all rain e
 ### Baseline Relative Humidity
 
 $$
-s_{RH,abs} = \mathrm{clamp}!\left(\frac{RH - RH_{min}}{RH_{span}},;0,;1\right)
+s_{RH,abs} = \mathrm{clamp}\left(\frac{RH - RH_{min}}{RH_{span}}, 0, 1\right)
 $$
 
 Defaults:
@@ -289,17 +289,17 @@ $$
 
 Normalized trend components:
 
-$
-s_{RH,trend} = \mathrm{clamp}!\left(\frac{\Delta RH}{RH_{max}},;0,;1\right)
-$
+$$
+s_{RH,trend} = \mathrm{clamp}\left(\frac{\Delta RH}{RH_{max}}, 0, 1\right)
+$$
 
-$
-s_{VPD,trend} = \mathrm{clamp}!\left(\frac{\Delta VPD}{VPD_{max}},;0,;1\right)
-$
+$$
+s_{VPD,trend} = \mathrm{clamp}\left(\frac{\Delta VPD}{VPD_{max}}, 0, 1\right)
+$$
 
-$
-s_{Wind,trend} = \mathrm{clamp}!\left(\frac{\Delta Wind}{Wind_{max}},;0,;1\right)
-$
+$$
+s_{Wind,trend} = \mathrm{clamp}\left(\frac{\Delta Wind}{Wind_{max}}, 0, 1\right)
+$$
 
 Defaults assume ~5-minute sampling:
 
