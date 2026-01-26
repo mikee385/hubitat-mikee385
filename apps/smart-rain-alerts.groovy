@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.27.0" }
+String getAppVersion() { return "0.28.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -135,6 +135,7 @@ def initialize() {
     // Initialize State
     state.rainConfirmed   = state.rainConfirmed ?: false
     state.wetTrendActive  = state.wetTrendActive ?: false
+    state.falsePositive   = state.falsePositive ?: false
     
     // Rain Alert
     subscribe(weatherStation, "dateutc", sensorHandler)
@@ -210,27 +211,36 @@ def calculate() {
     // Confidence
     def isRaining = (rainRateInHr > 0)
     def wasConfirmed = state.rainConfirmed ?: false
+    def wasFalsePositive = state.falsePositive ?: false
 
     if (isRaining && !wasConfirmed) {
         if (adjConf >= cfg.wetConfMin) {
             sendAlert("🌧️ Rain confirmed: ${adjConf.round(1)}%")
         
             state.rainConfirmed = true
-        } else {
+            state.falsePositive = false
+        } else if (!wasFalsePositive) {
             sendAlert("⚠️ Rain sensor reports rain, but conditions don’t support it: ${adjConf.round(1)}%")
+            
+            state.falsePositive = true
         } 
     }
     
-    if (wasConfirmed && isRaining && adjConf < cfg.wetnessConfMin) {
+    if (wasConfirmed && isRaining && adjConf < cfg.wetConfMin) {
         sendAlert("⚠️ Rain confidence lost: ${adjConf.round(1)}%")
         
         state.rainConfirmed = false
+        state.falsePositive = true
     }
 
     if (wasConfirmed && !isRaining) { 
         sendAlert("☀️ Rain has stopped")
         
         state.rainConfirmed = false
+    }
+        
+     if (!isRaining) {
+        state.falsePositive = false
     }
     
     // Probability
