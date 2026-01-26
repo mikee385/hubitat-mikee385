@@ -184,8 +184,8 @@ $$
 
 Default values:
 
-- $RH_{min} = 60%$
-- $RH_{span} = 30%$
+- $RH_{min} = 60\%$
+- $RH_{span} = 30\%$
 
 Below ~60% RH, rain is implausible. Above ~90%, additional RH adds little information.
 
@@ -268,8 +268,8 @@ $$
 
 Defaults:
 
-- $RH_{min} = 70%$
-- $RH_{span} = 25%$
+- $RH_{min} = 70\%$
+- $RH_{span} = 25\%$
 
 ---
 
@@ -303,7 +303,7 @@ $$
 
 Defaults assume ~5-minute sampling:
 
-- $RH_{max} = 3%$
+- $RH_{max} = 3\%$
 - $VPD_{max} = 0.15\ \text{kPa}$
 - $Wind_{max} = 2\ \text{m/s}$
 
