@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.28.0" }
+String getAppVersion() { return "0.29.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -99,6 +99,20 @@ def initialize() {
 
 
         // ─────────────────────────────────────────────
+        // Barometric Pressure trends (inHg per sample)
+        // Uses ABSOLUTE pressure (baromabsin)
+        // Pressure is contextual only -- never a detector
+        // ─────────────────────────────────────────────
+        pressureDropMax : 0.03,   // inHg → strong falling pressure
+        pressureRiseMax : 0.02,   // inHg → strong rising pressure
+
+        // Pressure-based confidence modifier
+        // Falling pressure reinforces wet-signal confidence
+        pressureBonusStart : -0.01,  // inHg → slight falling pressure
+        pressureBonusMax   : -0.04,  // inHg → strong low-pressure system
+
+
+        // ─────────────────────────────────────────────
         // Alert thresholds (% score)
         // Hysteresis prevents alert flapping
         // ─────────────────────────────────────────────
@@ -160,22 +174,26 @@ def calculate() {
     def cfg = state.cfg
     
     // Previous Sensor Data
-    def prevTempF     = state.prevTempF
-    def prevRHraw     = state.prevRHraw
-    def prevRainRate  = state.prevRainRate
-    def prevWindMPH   = state.prevWindMPH
+    def prevTempF      = state.prevTempF
+    def prevPressInHg  = state.prevPressInHg
+    def prevRHraw      = state.prevRHraw
+    def prevRainRate   = state.prevRainRate
+    def prevWindMPH    = state.prevWindMPH
     
     // Current Sensor Data
-    def tempF = weatherStation.currentValue("temperature")
-    def rh = weatherStation.currentValue("humidity")
+    def tempF        = weatherStation.currentValue("temperature")
+    def pressInHg    = weatherStation.currentValue("pressure")
+    def rh           = weatherStation.currentValue("humidity")
     def rainRateInHr = weatherStation.currentValue("precip_1hr")
-    def windMPH = weatherStation.currentValue("wind")
+    def windMPH      = weatherStation.currentValue("wind")
     
     logDebug(
         String.format(
-            "SENS ▶ T=%.1f°F (%+.1f) RH=%.0f%% (%+.1f) Rain=%.3f in/hr (%+.3f) Wind=%.1f mph (%+.1f)",
+            "SENS ▶ T=%.1f°F (%+.1f) P=%.1f inHg (%+.1f) RH=%.0f%% (%+.1f) Rain=%.3f in/hr (%+.3f) Wind=%.1f mph (%+.1f)",
             tempF,
             prevTempF != null ? (tempF - prevTempF) : 0.0,
+            pressInHg,
+            prevPressInHg != null ? (pressInHg - prevPressInHg) : 0.0,
             rh,
             prevRHraw != null ? (rh - prevRHraw) : 0.0,
             rainRateInHr,
@@ -185,17 +203,19 @@ def calculate() {
         )
     )
 
-    def tempC = (tempF - 32.0) * 5.0 / 9.0
+    def tempC  = (tempF - 32.0) * 5.0 / 9.0
     def windMS = windMPH * 0.44704
+
+    def dPress = (prevPressInHg != null) ? (pressInHg - prevPressInHg) : 0.0
     
     // Core Calculations
     def vpd = vaporPressureDeficit(tempC, rh)
     def tf = temperatureFactor(tempC)
 
-    def baseProb = probabilityScore(tempC, rh, windMS, vpd)
+    def baseProb = probabilityScore(tempC, pressInHg, rh, windMS, vpd)
     def adjProb  = clamp(baseProb * tf.prob, 0.0, 100.0)
 
-    def baseConf = confidenceScore(tempC, rh, windMS, vpd)
+    def baseConf = confidenceScore(tempC, dPress, rh, windMS, vpd)
     def adjConf  = clamp(baseConf * tf.conf, 0.0, 100.0)
     
     logDebug(
@@ -260,10 +280,11 @@ def calculate() {
     }
     
     // Save Sensor Data
-    state.prevTempF    = tempF
-    state.prevRHraw    = rh
-    state.prevRainRate = rainRateInHr
-    state.prevWindMPH  = windMPH
+    state.prevTempF     = tempF
+    state.prevPressInHg = pressInHg
+    state.prevRHraw     = rh
+    state.prevRainRate  = rainRateInHr
+    state.prevWindMPH   = windMPH
 }
 
 def clamp(val, minVal, maxVal) {
@@ -310,7 +331,7 @@ def temperatureFactor(tempC) {
     ]
 }
 
-def confidenceScore(tempC, rh, wind, vpd) {
+def confidenceScore(tempC, dPress, rh, wind, vpd) {
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
@@ -333,62 +354,76 @@ def confidenceScore(tempC, rh, wind, vpd) {
 
     def sWind = clamp(wind / 2.0, 0.8, 1.0)
     
-    def score =
-        100.0 * (
-            0.45 * sRH +
-            0.35 * sDew +
-            0.15 * sVPD +
-            0.05 * sWind
+    def sPress = 
+        (dPress >= cfg.pressureBonusStart) ? 0.0 :
+        clamp(
+            (cfg.pressureBonusStart - dPress) /
+            (cfg.pressureBonusStart - cfg.pressureBonusMax),
+            0.0, 1.0
         )
 
+    def score =
+        100.0 * (
+            0.40 * sRH +
+            0.30 * sDew +
+            0.15 * sVPD +
+            0.05 * sWind +
+            0.10 * sPress
+        ) 
+    
     logDebug(
         String.format(
-            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f | ΔT=%.2f°C VPD=%.2f kPa → %.1f%%",
-            sRH, sDew, sVPD, sWind,
-            deltaT, vpd, score
+            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f P=%.2f | ΔT=%.2f°C ΔP=%.2f inHg VPD=%.2f kPa → %.1f%%",
+            sRH, sDew, sVPD, sWind, sPress,
+            deltaT, dPress, vpd, score
         )
     )
 
     return clamp(score, 0.0, 100.0)
 }
 
-def probabilityScore(tempC, rh, wind, vpd) {
+def probabilityScore(tempC, pressInHg, rh, wind, vpd) {
     def cfg = state.cfg
     
-    def prevRH   = state.prevRH   ?: rh
-    def prevVPD  = state.prevVPD  ?: vpd
-    def prevWind = state.prevWind ?: wind
+    def prevRH    = state.prevRH    ?: rh
+    def prevVPD   = state.prevVPD   ?: vpd
+    def prevWind  = state.prevWind  ?: wind
+    def prevPress = state.prevPress ?: pressInHg
 
-    def dRH   = rh - prevRH
-    def dVPD  = prevVPD - vpd
-    def dWind = wind - prevWind
+    def dRH    = rh - prevRH
+    def dVPD   = prevVPD - vpd
+    def dWind  = wind - prevWind
+    def dPress = prevPress - pressInHg
 
     def sRHabs = clamp(
         (rh - cfg.rhProbMin) / cfg.rhProbSpan,
         0.0, 1.0
     )
 
-    def sRHtrend   = clamp(dRH   / cfg.rhTrendMax,   0.0, 1.0)
-    def sVPDtrend  = clamp(dVPD  / cfg.vpdTrendMax,  0.0, 1.0)
-    def sWindTrend = clamp(dWind / cfg.windTrendMax, 0.0, 1.0)
+    def sRHtrend    = clamp(dRH    / cfg.rhTrendMax,      0.0, 1.0)
+    def sVPDtrend   = clamp(dVPD   / cfg.vpdTrendMax,     0.0, 1.0)
+    def sWindTrend  = clamp(dWind  / cfg.windTrendMax,    0.0, 1.0)
+    def sPressTrend = clamp(dPress / cfg.pressureDropMax, 0.0, 1.0)
     
-    state.prevRH   = rh
-    state.prevVPD  = vpd
-    state.prevWind = wind
+    state.prevRH    = rh
+    state.prevVPD   = vpd
+    state.prevWind  = wind
+    state.prevPress = pressInHg
 
     def score =
         100.0 * (
-            0.40 * sRHabs +
-            0.30 * sRHtrend +
+            0.35 * sRHabs +
+            0.25 * sRHtrend +
             0.20 * sVPDtrend +
-            0.10 * sWindTrend
+            0.10 * sWindTrend +
+            0.10 * sPressTrend
         )
 
     logDebug(
         String.format(
-            "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f | ΔRH=%.2f%% ΔVPD=%.3f kPa ΔWind=%.2f m/s → %.1f%%",
-            sRHabs, sRHtrend, sVPDtrend, sWindTrend,
-            dRH, dVPD, dWind, score
+            "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f P↑=%.2f | ΔRH=%.2f%% ΔVPD=%.3f kPa ΔWind=%.2f m/s ΔP=%.2f inHg → %.1f%%",
+            sRHabs, sRHtrend, sVPDtrend, sWindTrend, sPressTrend,
+            dRH, dVPD, dWind, dPress, score
         )
     )
 

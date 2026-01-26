@@ -147,6 +147,23 @@ Smaller values of $\Delta T$ indicate conditions closer to condensation and prec
 
 ---
 
+### Barometric Pressure
+
+Barometric pressure reflects the total weight of the atmosphere above the sensor.
+
+The app does **not** use absolute pressure values. Instead, it relies on **pressure trends**, which are far more reliable indicators of changing weather conditions.
+
+#### Interpretation
+
+- Falling pressure → increasing atmospheric instability → rain more plausible
+- Rising pressure → stabilizing air → rain less likely
+
+Pressure is used only as:
+- A **trend signal** for Probability
+- A **plausibility modifier** for Confidence
+
+---
+
 ## Confidence Score (Rain Plausibility)
 
 ### Purpose
@@ -167,6 +184,7 @@ Confidence is ignored unless the rain sensor reports rain.
 - Dew point proximity
 - Vapor pressure deficit
 - Wind speed
+- Barometric pressure trend
 
 Each component is normalized to a 0–1 range, then combined and scaled to a 0–100 score.
 
@@ -223,15 +241,28 @@ Higher wind slightly improves plausibility by reducing evaporation near surfaces
 
 ---
 
+#### Barometric Pressure Trend
+
+Pressure contributes only when **falling**, improving rain plausibility.
+
+- No contribution when pressure is steady or rising
+- Increasing contribution as pressure falls
+- Saturates at strong pressure drops
+
+Pressure cannot confirm rain by itself, but it can increase confidence that a rain sensor reading is physically plausible.
+
+---
+
 ### Weighted Confidence Score
 
 $$
 Confidence =
 100 \cdot \left(
-0.45 \cdot s_{RH} +
-0.35 \cdot s_{Dew} +
+0.40 \cdot s_{RH} +
+0.30 \cdot s_{Dew} +
 0.15 \cdot s_{VPD} +
-0.05 \cdot s_{Wind}
+0.05 \cdot s_{Wind} +
+0.10 \cdot s_{Pressure}
 \right)
 $$
 
@@ -257,6 +288,7 @@ It is **not** a precipitation forecast and is not expected to predict all rain e
 - Relative humidity trend
 - Vapor pressure deficit trend
 - Wind trend
+- Barometric pressure trend
 
 ---
 
@@ -314,10 +346,11 @@ Defaults assume ~5-minute sampling:
 $$
 Probability =
 100 \cdot \left(
-0.40 \cdot s_{RH,abs} +
-0.30 \cdot s_{RH,trend} +
+0.35 \cdot s_{RH,abs} +
+0.25 \cdot s_{RH,trend} +
 0.20 \cdot s_{VPD,trend} +
-0.10 \cdot s_{Wind,trend}
+0.10 \cdot s_{Wind,trend} +
+0.10 \cdot s_{Pressure,trend}
 \right)
 $$
 
@@ -399,6 +432,11 @@ Rationale:
 
 - Rain sensors quantize small amounts (e.g., 0.1 mm).
 - This can appear binary at low rainfall rates.
+
+### Pressure Lag
+
+- Pressure changes are gradual and may lag precipitation onset.
+- Pressure improves plausibility and trend detection but does not replace direct rain sensing.
 
 ---
 
