@@ -164,6 +164,22 @@ Pressure is used only as:
 
 ---
 
+### Solar Radiation
+
+Solar radiation measures incoming shortwave energy from the sun, expressed in watts per square meter (W/m²).
+
+Solar radiation is a strong indicator of **cloud cover and atmospheric clearing**, which directly affects rain plausibility.
+
+#### Interpretation
+
+- Low solar radiation → thick cloud cover → rain more plausible
+- High solar radiation → sun breaking through → rain less plausible
+
+Solar radiation is **never used to detect rain**.  
+It is applied only as a **negative plausibility modifier** when evaluating confidence.
+
+---
+
 ## Confidence Score (Rain Plausibility)
 
 ### Purpose
@@ -185,6 +201,7 @@ Confidence is ignored unless the rain sensor reports rain.
 - Vapor pressure deficit
 - Wind speed
 - Barometric pressure trend
+- Solar radiation
 
 Each component is normalized to a 0–1 range, then combined and scaled to a 0–100 score.
 
@@ -253,16 +270,31 @@ Pressure cannot confirm rain by itself, but it can increase confidence that a ra
 
 ---
 
+#### Solar Radiation
+
+Solar radiation reduces rain plausibility when sunlight is strong.
+
+- No penalty under cloudy or overcast conditions
+- Increasing penalty as sunlight strengthens
+- Fully suppresses contribution under strong direct sun
+
+This reflects the physical reality that sustained rainfall rarely coincides with high solar irradiance.
+
+Solar radiation **cannot invalidate rain by itself**, but it can reduce confidence when conditions contradict a rain sensor reading.
+
+---
+
 ### Weighted Confidence Score
 
 $$
 Confidence =
 100 \cdot \left(
-0.40 \cdot s_{RH} +
+0.38 \cdot s_{RH} +
 0.30 \cdot s_{Dew} +
 0.15 \cdot s_{VPD} +
 0.05 \cdot s_{Wind} +
-0.10 \cdot s_{Pressure}
+0.10 \cdot s_{Pressure} +
+0.02 \cdot s_{Solar}
 \right)
 $$
 
@@ -437,6 +469,11 @@ Rationale:
 
 - Pressure changes are gradual and may lag precipitation onset.
 - Pressure improves plausibility and trend detection but does not replace direct rain sensing.
+
+### Solar Transients
+
+- Brief sun breaks during light rain can temporarily reduce confidence.
+- This behavior is intentional and reflects physical plausibility, not sensor error.
 
 ---
 

@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.29.0" }
+String getAppVersion() { return "0.30.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -90,26 +90,31 @@ def initialize() {
 
 
         // ─────────────────────────────────────────────
+        // Pressure-based confidence modifier
+        // Falling pressure reinforces wet-signal confidence
+        // Uses RELATIVE (sea-level) pressure (baromrelin)
+        // Pressure is used ONLY for trend detection, not absolute thresholds
+        // ─────────────────────────────────────────────
+        pressureBonusStart : -0.01,  // inHg → slight falling pressure
+        pressureBonusMax   : -0.04,  // inHg → strong low-pressure system
+
+
+        // ─────────────────────────────────────────────
+        // Solar radiation context (W/m² per sample)
+        // High solar reduces rain plausibility
+        // ─────────────────────────────────────────────
+        solarBrightMin : 400.0,  // W/m² → sun breaks through
+        solarBrightMax : 800.0,  // W/m² → strong direct sun
+
+
+        // ─────────────────────────────────────────────
         // Trend normalization maxima (per sample)
         // Assumes ~5 minute sampling interval
         // ─────────────────────────────────────────────
-        rhTrendMax   : 3.0,    // % RH change per sample
-        vpdTrendMax  : 0.15,   // kPa change per sample
-        windTrendMax : 2.0,    // m/s change per sample
-
-
-        // ─────────────────────────────────────────────
-        // Barometric Pressure trends (inHg per sample)
-        // Uses ABSOLUTE pressure (baromabsin)
-        // Pressure is contextual only -- never a detector
-        // ─────────────────────────────────────────────
-        pressureDropMax : 0.03,   // inHg → strong falling pressure
-        pressureRiseMax : 0.02,   // inHg → strong rising pressure
-
-        // Pressure-based confidence modifier
-        // Falling pressure reinforces wet-signal confidence
-        pressureBonusStart : -0.01,  // inHg → slight falling pressure
-        pressureBonusMax   : -0.04,  // inHg → strong low-pressure system
+        rhTrendMax       : 3.0,    // % RH change per sample
+        vpdTrendMax      : 0.15,   // kPa change per sample
+        windTrendMax     : 2.0,    // m/s change per sample
+        pressureTrendMax : 0.03,   // inHg per sample
 
 
         // ─────────────────────────────────────────────
@@ -179,6 +184,7 @@ def calculate() {
     def prevRHraw      = state.prevRHraw
     def prevRainRate   = state.prevRainRate
     def prevWindMPH    = state.prevWindMPH
+    def prevSolar      = state.prevSolar
     
     // Current Sensor Data
     def tempF        = weatherStation.currentValue("temperature")
@@ -186,10 +192,11 @@ def calculate() {
     def rh           = weatherStation.currentValue("humidity")
     def rainRateInHr = weatherStation.currentValue("precip_1hr")
     def windMPH      = weatherStation.currentValue("wind")
+    def solarWm2     = weatherStation.currentValue("solarradiation")
     
     logDebug(
         String.format(
-            "SENS ▶ T=%.1f°F (%+.1f) P=%.1f inHg (%+.1f) RH=%.0f%% (%+.1f) Rain=%.3f in/hr (%+.3f) Wind=%.1f mph (%+.1f)",
+            "SENS ▶ T=%.1f°F (%+.1f) P=%.1f inHg (%+.1f) RH=%.0f%% (%+.1f) Rain=%.3f in/hr (%+.3f) Wind=%.1f mph (%+.1f) Solar=%.0f W/m² (%+.0f)",
             tempF,
             prevTempF != null ? (tempF - prevTempF) : 0.0,
             pressInHg,
@@ -199,7 +206,9 @@ def calculate() {
             rainRateInHr,
             prevRainRate != null ? (rainRateInHr - prevRainRate) : 0.0,
             windMPH,
-            prevWindMPH != null ? (windMPH - prevWindMPH) : 0.0
+            prevWindMPH != null ? (windMPH - prevWindMPH) : 0.0,
+            solarWm2,
+            prevSolar != null ? (solarWm2 - prevSolar) : 0.0
         )
     )
 
@@ -215,7 +224,7 @@ def calculate() {
     def baseProb = probabilityScore(tempC, pressInHg, rh, windMS, vpd)
     def adjProb  = clamp(baseProb * tf.prob, 0.0, 100.0)
 
-    def baseConf = confidenceScore(tempC, dPress, rh, windMS, vpd)
+    def baseConf = confidenceScore(tempC, dPress, rh, windMS, vpd, solarWm2)
     def adjConf  = clamp(baseConf * tf.conf, 0.0, 100.0)
     
     logDebug(
@@ -285,6 +294,7 @@ def calculate() {
     state.prevRHraw     = rh
     state.prevRainRate  = rainRateInHr
     state.prevWindMPH   = windMPH
+    state.prevSolar     = solarWm2
 }
 
 def clamp(val, minVal, maxVal) {
@@ -331,7 +341,7 @@ def temperatureFactor(tempC) {
     ]
 }
 
-def confidenceScore(tempC, dPress, rh, wind, vpd) {
+def confidenceScore(tempC, dPress, rh, wind, vpd, solar) {
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
@@ -361,21 +371,30 @@ def confidenceScore(tempC, dPress, rh, wind, vpd) {
             (cfg.pressureBonusStart - cfg.pressureBonusMax),
             0.0, 1.0
         )
+        
+    def sSolar =
+        (solar <= cfg.solarBrightMin) ? 1.0 :
+        (solar >= cfg.solarBrightMax) ? 0.0 :
+        1.0 - (
+            (solar - cfg.solarBrightMin) /
+            (cfg.solarBrightMax - cfg.solarBrightMin)
+        )
 
     def score =
         100.0 * (
-            0.40 * sRH +
+            0.38 * sRH +
             0.30 * sDew +
             0.15 * sVPD +
             0.05 * sWind +
-            0.10 * sPress
-        ) 
+            0.10 * sPress +
+            0.02 * sSolar
+        )
     
     logDebug(
         String.format(
-            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f P=%.2f | ΔT=%.2f°C ΔP=%.2f inHg VPD=%.2f kPa → %.1f%%",
-            sRH, sDew, sVPD, sWind, sPress,
-            deltaT, dPress, vpd, score
+            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f P=%.2f Sun=%.2f | ΔT=%.2f°C ΔP=%.2f inHg VPD=%.2f kPa Solar=%.0f W/m² → %.1f%%",
+            sRH, sDew, sVPD, sWind, sPress, sSolar,
+            deltaT, dPress, vpd, solar, score
         )
     )
 
@@ -400,10 +419,10 @@ def probabilityScore(tempC, pressInHg, rh, wind, vpd) {
         0.0, 1.0
     )
 
-    def sRHtrend    = clamp(dRH    / cfg.rhTrendMax,      0.0, 1.0)
-    def sVPDtrend   = clamp(dVPD   / cfg.vpdTrendMax,     0.0, 1.0)
-    def sWindTrend  = clamp(dWind  / cfg.windTrendMax,    0.0, 1.0)
-    def sPressTrend = clamp(dPress / cfg.pressureDropMax, 0.0, 1.0)
+    def sRHtrend    = clamp(dRH    / cfg.rhTrendMax,       0.0, 1.0)
+    def sVPDtrend   = clamp(dVPD   / cfg.vpdTrendMax,      0.0, 1.0)
+    def sWindTrend  = clamp(dWind  / cfg.windTrendMax,     0.0, 1.0)
+    def sPressTrend = clamp(dPress / cfg.pressureTrendMax, 0.0, 1.0)
     
     state.prevRH    = rh
     state.prevVPD   = vpd
@@ -421,7 +440,7 @@ def probabilityScore(tempC, pressInHg, rh, wind, vpd) {
 
     logDebug(
         String.format(
-            "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f P↑=%.2f | ΔRH=%.2f%% ΔVPD=%.3f kPa ΔWind=%.2f m/s ΔP=%.2f inHg → %.1f%%",
+            "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f P↓=%.2f | ΔRH=%.2f%% ΔVPD=%.3f kPa ΔWind=%.2f m/s ΔP=%.2f inHg → %.1f%%",
             sRHabs, sRHtrend, sVPDtrend, sWindTrend, sPressTrend,
             dRH, dVPD, dWind, dPress, score
         )
