@@ -6,7 +6,7 @@ Rather than attempting to “detect rain” from environmental data alone, the a
 
 - **Detection** (what is actually happening),
 - **Confirmation** (whether a sensor reading makes physical sense),
-- **Trends** (whether conditions are becoming wetter or drier).
+- **Trends** (whether conditions suggest rain is becoming more or less likely).
 
 This separation avoids overfitting, reduces alert noise, and keeps alerts aligned with real human decisions.
 
@@ -37,7 +37,7 @@ The app computes two independent scores:
 
 | Score           | What it Represents                                           | What it Does *Not* Do |
 | --------------- | ------------------------------------------------------------ | --------------------- |
-| **Probability** | Whether the environment is trending from dry → wet           | Detect rain           |
+| **Probability** | Whether atmospheric trends suggest that rain is likely       | Detect rain           |
 | **Confidence**  | Whether conditions support rain *if the sensor reports rain* | Detect rain           |
 
 Rain detection itself is handled **exclusively** by the rain sensor.
@@ -65,7 +65,9 @@ State transitions — not raw values — drive alerts.
 | Rain sensor > 0 AND confidence ≥ threshold        | 🌧️ Rain confirmed            |
 | Rain sensor > 0 AND confidence < threshold        | ⚠️ Rain sensor false positive |
 | Rain confirmed → confidence drops below threshold | ⚠️ Rain confidence lost       |
-| Rain confirmed → rain sensor returns to zero      | ☀️ Rain has stopped           |
+| Rain confirmed → rain sensor returns to zero      | ⛅️ Rain has stopped           |
+
+"Rain has stopped" reflects the *rain sensor state*, not a guarantee of clear skies.
 
 ---
 
@@ -308,9 +310,14 @@ No decay is applied. Confidence always reflects **current environmental conditio
 
 Probability answers:
 
-> **“Is the environment becoming wetter?”**
+> **“Do atmospheric trends suggest that rain is likely?”**
 
-It is **not** a precipitation forecast and is not expected to predict all rain events.
+Probability does **not** represent a transition from “dry” to “wet,” and it does not measure environmental wetness.
+
+The environment can become wetter (e.g., rising humidity, lower VPD) without ever producing a high Probability score.  
+Probability increases only when **specific short-term atmospheric trends** commonly associated with imminent rainfall are present.
+
+However, it is **not** a precipitation forecast and is not expected to predict all rain events.
 
 ---
 
@@ -390,10 +397,15 @@ $$
 
 ### Probability Alerts
 
-| Condition                               | Alert                                 |
-| --------------------------------------- | ------------------------------------- |
-| Probability crosses upper threshold     | 💦 Environment is wetter, rain likely |
-| Probability drops below lower threshold | 🌵 Environment is drier               |
+Probability alerts are **edge-triggered only on rising conditions**.
+
+| Condition                           | Alert                  |
+| ----------------------------------- | ---------------------- |
+| Probability crosses upper threshold | 🌦️ Rain may be starting |
+
+When Probability later falls below the lower threshold, **no alert is generated**.
+
+This reflects that Probability is a *pattern-detection signal*, not a weather state, and avoids misleading “all clear” messages.
 
 Hysteresis prevents alert flapping.
 
@@ -457,7 +469,8 @@ Rationale:
 
 ### Long Wet Periods
 
-- Probability may remain elevated for days.
+- Probability may remain elevated for extended periods when atmospheric dynamics remain rain-favorable.
+- This does **not** imply rain is ongoing or guaranteed.
 - This behavior is expected and not a bug.
 
 ### Sensor Resolution

@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.30.0" }
+String getAppVersion() { return "0.31.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -263,7 +263,7 @@ def calculate() {
     }
 
     if (wasConfirmed && !isRaining) { 
-        sendAlert("☀️ Rain has stopped")
+        sendAlert("⛅️ Rain has stopped")
         
         state.rainConfirmed = false
     }
@@ -277,14 +277,12 @@ def calculate() {
     def wasTrendActive = state.wetTrendActive ?: false
     
     if (wetTrendActive && !wasTrendActive) {
-        sendAlert("💦 Environment is wetter, rain likely: ${adjProb.round(1)}%")
+        sendAlert("🌦️ Rain may be starting: ${adjProb.round(1)}%")
         
         state.wetTrendActive = true
     }
 
     if (wasTrendActive && adjProb < cfg.wetTrendOff) {
-        sendAlert("🌵 Environment is drier: ${adjProb.round(1)}%")
-        
         state.wetTrendActive = false
     }
     
