@@ -21,7 +21,7 @@ This separation avoids overfitting, reduces alert noise, and keeps alerts aligne
 
 2. **Environmental data cannot detect rain**
 
-   - Temperature, humidity, dew point, wind, and vapor pressure deficit (VPD) describe *conditions*, not precipitation.
+   - Temperature, pressure, humidity, dew point, wind, solar radiation, and vapor pressure deficit (VPD) describe *conditions*, not precipitation.
    - These values are useful only as **context** or **sanity checks**.
 
 3. **Alerts should reflect state transitions, not continuous conditions**
@@ -161,6 +161,7 @@ The app does **not** use absolute pressure values. Instead, it relies on **press
 - Rising pressure → stabilizing air → rain less likely
 
 Pressure is used only as:
+
 - A **trend signal** for Probability
 - A **plausibility modifier** for Confidence
 
@@ -358,9 +359,13 @@ $$
 \Delta Wind = Wind - Wind_{prev}
 $$
 
-Normalized trend components:
-
 $$
+\Delta Pressure = Pressure_{prev} - Pressure
+$$
+ 
+Normalized trend components:
+ 
+$$ 
 s_{RH,trend} = \mathrm{clamp}\left(\frac{\Delta RH}{RH_{max}}, 0, 1\right)
 $$
 
@@ -372,11 +377,16 @@ $$
 s_{Wind,trend} = \mathrm{clamp}\left(\frac{\Delta Wind}{Wind_{max}}, 0, 1\right)
 $$
 
+$$
+s_{Pressure,trend} = \mathrm{clamp}\left(\frac{\Delta Pressure}{Pressure_{max}}, 0, 1\right)
+$$
+
 Defaults assume ~5-minute sampling:
 
 - $RH_{max} = 3\%$
 - $VPD_{max} = 0.15\ \text{kPa}$
 - $Wind_{max} = 2\ \text{m/s}$
+- $Pressure_{max} = 0.03\ \text{inHg}$
 
 ---
 
@@ -417,10 +427,10 @@ Temperature-based scaling is applied **after** raw score calculation.
 
 ### Temperature Breakpoints
 
-| Setting        | Default |
-| -------------- | ------- |
-| Cool threshold | 10 °C   |
-| Hot threshold  | 35 °C   |
+| Setting        | Default         |
+| -------------- | --------------- |
+| Cool threshold | 10 °C / 50 °F   |
+| Hot threshold  | 35 °C / 95 °F   |
 
 ### Scaling Behavior
 
