@@ -83,6 +83,9 @@ State transitions — not raw values — drive alerts.
 
 Environmental scoring is built on established meteorological relationships. Constants and formulations are chosen for internal consistency rather than theoretical purity.
 
+The definitions and normalized quantities in this section are reused by both the
+Probability and Confidence scoring systems unless explicitly noted otherwise.
+
 ---
 
 ### Saturation Vapor Pressure
@@ -110,6 +113,12 @@ Where:
 
 - $RH$ is relative humidity in percent
 
+Interpretation:
+
+- Actual vapor pressure represents the portion of saturation vapor pressure
+  currently occupied by water vapor.
+- It is an intermediate value used to compute VPD and dew point.
+
 ---
 
 ### Vapor Pressure Deficit (VPD)
@@ -132,11 +141,11 @@ VPD is a more reliable drying metric than relative humidity alone.
 Using the Magnus formula:
 
 $$
-\alpha = \ln\left(\frac{RH}{100}\right) + \frac{17.27 \cdot T}{237.3 + T}
+\alpha = \ln\left(\frac{RH}{100}\right) + \frac{17.67 \cdot T}{243.5 + T}
 $$
 
 $$
-T_d = \frac{237.3 \cdot \alpha}{17.27 - \alpha}
+T_d = \frac{243.5 \cdot \alpha}{17.67 - \alpha}
 $$
 
 The key derived metric used by the app is the dew point depression:
@@ -151,19 +160,36 @@ Smaller values of $\Delta T$ indicate conditions closer to condensation and prec
 
 ### Barometric Pressure
 
-Barometric pressure reflects the total weight of the atmosphere above the sensor.
+Barometric pressure represents the total weight of the atmosphere above the sensor.
+Changes in pressure reflect large-scale vertical air motion and synoptic weather patterns.
 
-The app does **not** use absolute pressure values. Instead, it relies on **pressure trends**, which are far more reliable indicators of changing weather conditions.
+The app does **not** use absolute pressure values. Instead, it relies exclusively on **pressure trends**, which are more reliable and location-independent indicators of changing weather conditions.
 
-#### Interpretation
+#### Pressure Trend
 
-- Falling pressure → increasing atmospheric instability → rain more plausible
-- Rising pressure → stabilizing air → rain less likely
+Pressure trend is defined as the change in pressure between consecutive samples:
 
-Pressure is used only as:
+$$
+\Delta P = P_{prev} - P
+$$
 
-- A **trend signal** for Probability
-- A **plausibility modifier** for Confidence
+Where:
+
+- $P$ is the current barometric pressure
+- $P_{prev}$ is the previous sample’s pressure
+
+Interpretation:
+
+- $\Delta P > 0$ → pressure is falling
+- $\Delta P < 0$ → pressure is rising
+
+Pressure trend represents **atmospheric instability**, not precipitation.
+It is used by:
+
+- **Probability**, as a trend signal
+- **Confidence**, as a plausibility modifier
+
+Pressure alone cannot detect or confirm rain.
 
 ---
 
@@ -171,15 +197,16 @@ Pressure is used only as:
 
 Solar radiation measures incoming shortwave energy from the sun, expressed in watts per square meter (W/m²).
 
-Solar radiation is a strong indicator of **cloud cover and atmospheric clearing**, which directly affects rain plausibility.
+It serves as a proxy for **cloud cover, atmospheric clearing, and convective suppression**, all of which influence rain plausibility.
 
-#### Interpretation
+Solar radiation is **never used to detect rain**.
+
+Interpretation:
 
 - Low solar radiation → thick cloud cover → rain more plausible
-- High solar radiation → sun breaking through → rain less plausible
+- High solar radiation → atmospheric clearing → rain less plausible
 
-Solar radiation is **never used to detect rain**.  
-It is applied only as a **negative plausibility modifier** when evaluating confidence.
+Solar radiation provides **context**, not confirmation, and is used only as a plausibility modifier in the Confidence score.
 
 ---
 
@@ -263,27 +290,35 @@ Higher wind slightly improves plausibility by reducing evaporation near surfaces
 
 #### Barometric Pressure Trend
 
-Pressure contributes only when **falling**, improving rain plausibility.
+Barometric pressure contributes to confidence only when pressure is **falling at a meaningful rate**, reflecting increasing atmospheric instability:
 
-- No contribution when pressure is steady or rising
-- Increasing contribution as pressure falls
-- Saturates at strong pressure drops
+- $s_{Pressure} = 0.0$ when $\Delta P \le 0.01\ \text{inHg}$
+- $s_{Pressure} = 1.0$ when $\Delta P \ge 0.04\ \text{inHg}$
+- Linear interpolation otherwise
 
-Pressure cannot confirm rain by itself, but it can increase confidence that a rain sensor reading is physically plausible.
+Interpretation:
+
+- Minor pressure noise contributes nothing
+- Sustained falling pressure increases rain plausibility
+- Strong pressure drops saturate the contribution
 
 ---
 
 #### Solar Radiation
 
-Solar radiation reduces rain plausibility when sunlight is strong.
+Solar radiation acts as a **negative plausibility modifier**, reflecting cloud cover and atmospheric clearing. It reduces confidence under strong sunlight but never contributes negative weight:
 
-- No penalty under cloudy or overcast conditions
-- Increasing penalty as sunlight strengthens
-- Fully suppresses contribution under strong direct sun
+- $s_{Solar} = 1.0$ when $Solar \le 400\ \text{W/m}^2$
+- $s_{Solar} = 0.0$ when $Solar \ge 800\ \text{W/m}^2$
+- Linear interpolation otherwise
 
-This reflects the physical reality that sustained rainfall rarely coincides with high solar irradiance.
+Interpretation:
 
-Solar radiation **cannot invalidate rain by itself**, but it can reduce confidence when conditions contradict a rain sensor reading.
+- Overcast conditions strongly support rain plausibility
+- Increasing sunlight reduces confidence
+- Strong direct sun suppresses the contribution entirely
+
+Solar radiation cannot invalidate rain by itself but meaningfully reduces confidence when observed conditions contradict sustained precipitation.
 
 ---
 

@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.31.0" }
+String getAppVersion() { return "0.32.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -95,8 +95,8 @@ def initialize() {
         // Uses RELATIVE (sea-level) pressure (baromrelin)
         // Pressure is used ONLY for trend detection, not absolute thresholds
         // ─────────────────────────────────────────────
-        pressureBonusStart : -0.01,  // inHg → slight falling pressure
-        pressureBonusMax   : -0.04,  // inHg → strong low-pressure system
+        pressureBonusStart : 0.01,  // inHg → slight falling pressure
+        pressureBonusMax   : 0.04,  // inHg → strong low-pressure system
 
 
         // ─────────────────────────────────────────────
@@ -114,7 +114,7 @@ def initialize() {
         rhTrendMax       : 3.0,    // % RH change per sample
         vpdTrendMax      : 0.15,   // kPa change per sample
         windTrendMax     : 2.0,    // m/s change per sample
-        pressureTrendMax : 0.03,   // inHg per sample
+        pressureTrendMax : 0.03,  // inHg per sample
 
 
         // ─────────────────────────────────────────────
@@ -215,7 +215,7 @@ def calculate() {
     def tempC  = (tempF - 32.0) * 5.0 / 9.0
     def windMS = windMPH * 0.44704
 
-    def dPress = (prevPressInHg != null) ? (pressInHg - prevPressInHg) : 0.0
+    def dPress = (prevPressInHg != null) ? (prevPressInHg - pressInHg) : 0.0
     
     // Core Calculations
     def vpd = vaporPressureDeficit(tempC, rh)
@@ -362,14 +362,12 @@ def confidenceScore(tempC, dPress, rh, wind, vpd, solar) {
 
     def sWind = clamp(wind / 2.0, 0.8, 1.0)
     
-    def sPress = 
-        (dPress >= cfg.pressureBonusStart) ? 0.0 :
-        clamp(
-            (cfg.pressureBonusStart - dPress) /
-            (cfg.pressureBonusStart - cfg.pressureBonusMax),
-            0.0, 1.0
-        )
-        
+    def sPress =
+        (dPress <= cfg.pressureBonusStart) ? 0.0 :
+        (dPress >= cfg.pressureBonusMax)   ? 1.0 :
+        (dPress - cfg.pressureBonusStart) /
+        (cfg.pressureBonusMax - cfg.pressureBonusStart)
+            
     def sSolar =
         (solar <= cfg.solarBrightMin) ? 1.0 :
         (solar >= cfg.solarBrightMax) ? 0.0 :
