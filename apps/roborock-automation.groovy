@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Roborock Automation" }
-String getAppVersion() { return "2.1.2" }
+String getAppVersion() { return "3.0.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -35,8 +35,13 @@ definition(
 
 preferences {
     page(name: "settings", title: getAppTitle(), install: true, uninstall: true) {
+        List availableRooms = (state.availableRooms ?: [:]).collect{it.key}.sort()
+            
         section {
             input "vacuum", "device.RoborockRobotVacuum", title: "Roborock Robot Vacuum", multiple: false, required: true
+            input "selectedRooms", "enum", title: "Select rooms to clean (leave blank for full clean)", options: availableRooms, multiple: true, required: false
+        }
+        section("Times") { 
             input "vacuumStartTime", "time", title: "Start Time", required: true
             input "vacuumEndTime", "time", title: "End Time", required: true
             input "minimumMinutes", "number", title: "Minimum Duration (in minutes)", required: true
@@ -94,6 +99,12 @@ def initialize() {
     if (state.durationMinutes == null) {
         state.durationMinutes = 0
     }
+    
+    // Rooms
+    def availableRooms = vacuum.currentValue("rooms")
+    state.availableRooms = availableRooms ?: [:]
+
+    subscribe(vacuum, "rooms", roomsChangedHandler)
     
     // Clean Status
     for (person in everydayPeople) {
@@ -169,6 +180,52 @@ def isWeekend() {
     def day = date[Calendar.DAY_OF_WEEK]
     
     return day == 1 || day == 7
+}
+
+def roomsChangedHandler(evt) {
+    logDebug("roomsChangedHandler: ${evt.device} changed to ${evt.value}")
+    
+    state.availableRooms = evt.value ?: [:]
+}
+
+def roomNamesToIds(selected) {
+    if (!selected) return ""
+
+    def roomsDict = state.availableRooms ?: [:]
+    def validIds = []
+    def invalidNames = []
+
+    for (name in selected) {
+        def id = null
+        for (entry in roomsDict) {
+            if (entry.value == name) {
+                id = entry.key
+                break
+            }
+        }
+        if (id) {
+            validIds.add(id)
+        } else {
+            invalidNames.add(name)
+        }
+    }
+
+    if (invalidNames) {
+        if (validIds) {
+            def message = "WARNING: Some selected rooms are not valid: ${invalidNames}"
+            log.warn message
+            personToNotify.deviceNotification(message)
+        
+        } else {
+            def message = "ERROR: No selected rooms are valid: ${invalidNames}" 
+            log.error message
+            personToNotify.deviceNotification(message)
+            
+            return null
+        }
+    }
+
+    return validIds.join(" ")
 }
 
 def getPeople() {
@@ -317,8 +374,15 @@ def isPaused() {
 
 def cleanCycle() {
     if (!(vacuum.currentValue("state") in cleanStates())) {
-        vacuum.appClean()
-    }
+        if (selectedRooms) {
+            def roomIDs = roomNamesToIds(selectedRooms)
+            if (roomIDs) {
+                vacuum.appRoomClean(roomIDs)
+            }
+        } else {
+            vacuum.appClean()
+        }
+    } 
 }
 
 def pauseCycle() {

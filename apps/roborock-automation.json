@@ -1,11 +1,11 @@
 {
     "packageName": "Roborock Automation",
     "author": "Michael Pierce",
-    "version": "2.1.2",
+    "version": "3.0.0",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix missing parenthesis",
-    "dateReleased": "2026-01-22",
+    "releaseNotes": "Add selection of rooms to clean",
+    "dateReleased": "2026-02-01",
     "apps": [
         {
             "id": "42c4ee90-b642-4121-aa3f-cda9d2753e94",
