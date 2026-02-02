@@ -4,7 +4,7 @@
     "version": "3.0.1",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix incorrect handling of avaialble rooms",
+    "releaseNotes": "Fix incorrect handling of available rooms",
     "dateReleased": "2026-02-01",
     "apps": [
         {
