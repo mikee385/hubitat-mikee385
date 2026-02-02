@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Roborock Automation" }
-String getAppVersion() { return "3.0.0" }
+String getAppVersion() { return "3.0.1" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -35,7 +35,7 @@ definition(
 
 preferences {
     page(name: "settings", title: getAppTitle(), install: true, uninstall: true) {
-        List availableRooms = (state.availableRooms ?: [:]).collect{it.key}.sort()
+        List availableRooms = (state.availableRooms ?: [:]).collect{it.value}.sort()
             
         section {
             input "vacuum", "device.RoborockRobotVacuum", title: "Roborock Robot Vacuum", multiple: false, required: true
@@ -101,7 +101,7 @@ def initialize() {
     }
     
     // Rooms
-    def availableRooms = vacuum.currentValue("rooms")
+    def availableRooms = new groovy.json.JsonSlurper().parseText(vacuum.currentValue("rooms"))
     state.availableRooms = availableRooms ?: [:]
 
     subscribe(vacuum, "rooms", roomsChangedHandler)
@@ -185,7 +185,7 @@ def isWeekend() {
 def roomsChangedHandler(evt) {
     logDebug("roomsChangedHandler: ${evt.device} changed to ${evt.value}")
     
-    state.availableRooms = evt.value ?: [:]
+    state.availableRooms = new groovy.json.JsonSlurper().parseText(evt.value) ?: [:]
 }
 
 def roomNamesToIds(selected) {
