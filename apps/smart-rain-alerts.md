@@ -62,7 +62,8 @@ State transitions — not raw values — drive alerts.
 
 | Condition                                         | Alert                         |
 | ------------------------------------------------- | ----------------------------- |
-| Rain sensor > 0 AND confidence ≥ threshold        | 🌧️ Rain confirmed            |
+| Rain sensor > 0 AND rain rate ≥ threshold         | 🌧️ Rain confirmed             |
+| Rain sensor > 0 AND confidence ≥ threshold        | 🌧️ Rain confirmed             |
 | Rain sensor > 0 AND confidence < threshold        | ⚠️ Rain sensor false positive |
 | Rain confirmed → confidence drops below threshold | ⚠️ Rain confidence lost       |
 | Rain confirmed → rain sensor returns to zero      | ⛅️ Rain has stopped           |
@@ -71,7 +72,15 @@ State transitions — not raw values — drive alerts.
 
 ---
 
-### Key Assumptions
+### Rain Rate Override
+
+A sufficiently high measured rain rate is treated as definitive evidence of rain, even if atmospheric confidence is still below the normal confirmation threshold.
+
+This prevents false “sensor disagreement” alerts during fast-onset or convective rainfall, where environmental indicators may lag behind observed precipitation.
+
+---
+
+## Key Assumptions
 
 - The rain sensor is *usually* correct but can glitch.
 - Environmental conditions can **invalidate** a rain reading but cannot replace it.
@@ -183,7 +192,10 @@ Interpretation:
 - $\Delta P > 0$ → pressure is falling
 - $\Delta P < 0$ → pressure is rising
 
+Pressure contribution begins at `pressureConfStart` and saturates at `pressureConfMax`. Falling pressure increases rain plausibility by signaling approaching weather systems.
+
 Pressure trend represents **atmospheric instability**, not precipitation.
+
 It is used by:
 
 - **Probability**, as a trend signal
@@ -206,7 +218,7 @@ Interpretation:
 - Low solar radiation → thick cloud cover → rain more plausible
 - High solar radiation → atmospheric clearing → rain less plausible
 
-Solar radiation provides **context**, not confirmation, and is used only as a plausibility modifier in the Confidence score.
+Solar influence transitions between `solarOvercast` (thick cloud cover) and `solarClear` (strong direct sunlight). Solar radiation provides **context**, not confirmation, and is used only as a plausibility modifier in the Confidence score.
 
 ---
 
@@ -448,11 +460,11 @@ Probability alerts are **edge-triggered only on rising conditions**.
 | ----------------------------------- | ---------------------- |
 | Probability crosses upper threshold | 🌦️ Rain may be starting |
 
-When Probability later falls below the lower threshold, **no alert is generated**.
+Once Probability later falls below the lower threshold, **no alert is generated**.
 
-This reflects that Probability is a *pattern-detection signal*, not a weather state, and avoids misleading “all clear” messages.
+Probability alerts are suppressed while rain is confirmed to avoid redundant or confusing notifications during an active rain event.
 
-Hysteresis prevents alert flapping.
+This reflects that Probability is a *pattern-detection signal*, not a weather state, and avoids misleading “all clear” messages. Hysteresis prevents alert flapping.
 
 ---
 
