@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.32.0" }
+String getAppVersion() { return "0.33.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -115,6 +115,14 @@ def initialize() {
         vpdTrendMax      : 0.15,   // kPa change per sample
         windTrendMax     : 2.0,    // m/s change per sample
         pressureTrendMax : 0.03,  // inHg per sample
+        
+
+        // ─────────────────────────────────────────────
+        // Rain sensor validation thresholds
+        // Used to immediately confirm rain when rate is high
+        // Bypasses environmental confidence checks
+        // ─────────────────────────────────────────────
+        rainRateConfirm : 0.1,  // in/hr → definite rain (e.g., moderate+ rainfall)
 
 
         // ─────────────────────────────────────────────
@@ -243,20 +251,20 @@ def calculate() {
     def wasFalsePositive = state.falsePositive ?: false
 
     if (isRaining && !wasConfirmed) {
-        if (adjConf >= cfg.wetConfMin) {
-            sendAlert("🌧️ Rain confirmed: ${adjConf.round(1)}%")
+        if (adjConf >= cfg.wetConfMin || rainRateInHr >= cfg.rainRateConfirm) {
+            sendAlert("🌧️ Rain confirmed: ${adjConf.round(1)}%, ${rainRateInHr.round(2)} in./hr")
         
             state.rainConfirmed = true
             state.falsePositive = false
         } else if (!wasFalsePositive) {
-            sendAlert("⚠️ Rain sensor reports rain, but conditions don’t support it: ${adjConf.round(1)}%")
+            sendAlert("⚠️ Rain sensor reports rain, but conditions don’t support it: ${adjConf.round(1)}%, ${rainRateInHr.round(2)} in./hr")
             
             state.falsePositive = true
         } 
     }
     
     if (wasConfirmed && isRaining && adjConf < cfg.wetConfMin) {
-        sendAlert("⚠️ Rain confidence lost: ${adjConf.round(1)}%")
+        sendAlert("⚠️ Rain confidence lost: ${adjConf.round(1)}%, ${rainRateInHr.round(2)} in./hr")
         
         state.rainConfirmed = false
         state.falsePositive = true
@@ -276,7 +284,7 @@ def calculate() {
     def wetTrendActive = (adjProb >= cfg.wetTrendOn)
     def wasTrendActive = state.wetTrendActive ?: false
     
-    if (wetTrendActive && !wasTrendActive) {
+    if (wetTrendActive && !wasTrendActive && !state.rainConfirmed) {
         sendAlert("🌦️ Rain may be starting: ${adjProb.round(1)}%")
         
         state.wetTrendActive = true
