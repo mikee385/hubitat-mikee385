@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.33.0" }
+String getAppVersion() { return "0.34.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -90,32 +90,37 @@ def initialize() {
 
 
         // ─────────────────────────────────────────────
-        // Pressure-based confidence modifier
-        // Falling pressure reinforces wet-signal confidence
-        // Uses RELATIVE (sea-level) pressure (baromrelin)
-        // Pressure is used ONLY for trend detection, not absolute thresholds
+        // Barometric Pressure trend thresholds (inHg)
+        // Used for confidence and probability modifiers
+        // Positive ΔP indicates falling pressure
         // ─────────────────────────────────────────────
-        pressureBonusStart : 0.01,  // inHg → slight falling pressure
-        pressureBonusMax   : 0.04,  // inHg → strong low-pressure system
+        pressureConfStart : 0.01,  // inHg → minimum falling pressure to contribute
+        pressureConfMax   : 0.04,  // inHg → strong pressure drop (saturates contribution)
 
 
         // ─────────────────────────────────────────────
-        // Solar radiation context (W/m² per sample)
-        // High solar reduces rain plausibility
+        // Solar Radiation thresholds (W/m²)
+        // Used as a plausibility suppressor under strong sunlight
         // ─────────────────────────────────────────────
-        solarBrightMin : 400.0,  // W/m² → sun breaks through
-        solarBrightMax : 800.0,  // W/m² → strong direct sun
+        solarOvercast : 400.0,  // W/m² → thick cloud cover
+        solarClear    : 800.0,  // W/m² → strong direct sun
+
+
+        // ─────────────────────────────────────────────
+        // Wind normalization thresholds
+        // ─────────────────────────────────────────────
+        windConfMax : 2.0,  // m/s → caps wind plausibility benefit
 
 
         // ─────────────────────────────────────────────
         // Trend normalization maxima (per sample)
         // Assumes ~5 minute sampling interval
         // ─────────────────────────────────────────────
-        rhTrendMax       : 3.0,    // % RH change per sample
-        vpdTrendMax      : 0.15,   // kPa change per sample
-        windTrendMax     : 2.0,    // m/s change per sample
-        pressureTrendMax : 0.03,  // inHg per sample
-        
+        rhTrendMax        : 3.0,   // % RH change per sample
+        vpdTrendMax       : 0.15,  // kPa change per sample
+        windTrendMax      : 2.0,   // m/s change per sample
+        pressureTrendMax  : 0.03,  // inHg per sample
+
 
         // ─────────────────────────────────────────────
         // Rain sensor validation thresholds
@@ -147,16 +152,16 @@ def initialize() {
         // Seasonal probability multipliers (unitless)
         // Applied AFTER raw probability score
         // ─────────────────────────────────────────────
-        probCoolBoost  : 1.15,  // Cold rain more trustworthy
-        probHotDampen  : 0.85,  // Hot rain needs stronger signals
+        probCoolBoost : 1.15,  // Cold rain more trustworthy
+        probHotDampen : 0.85,  // Hot rain needs stronger signals
 
 
         // ─────────────────────────────────────────────
         // Seasonal confidence multipliers (unitless)
         // Applied AFTER raw confidence score
         // ─────────────────────────────────────────────
-        confCoolBoost  : 1.10,  // Cold drizzle persists
-        confHotDampen  : 0.90,  // Hot rain dries faster
+        confCoolBoost : 1.10,  // Cold drizzle persists
+        confHotDampen : 0.90,  // Hot rain dries faster
     ]
     
     // Initialize State
@@ -368,20 +373,20 @@ def confidenceScore(tempC, dPress, rh, wind, vpd, solar) {
         (vpd >= cfg.vpdDry) ? 0.0 :
         (cfg.vpdDry - vpd) / (cfg.vpdDry - cfg.vpdWet)
 
-    def sWind = clamp(wind / 2.0, 0.8, 1.0)
+    def sWind = clamp(wind / cfg.windConfMax, 0.8, 1.0)
     
     def sPress =
-        (dPress <= cfg.pressureBonusStart) ? 0.0 :
-        (dPress >= cfg.pressureBonusMax)   ? 1.0 :
-        (dPress - cfg.pressureBonusStart) /
-        (cfg.pressureBonusMax - cfg.pressureBonusStart)
+        (dPress < cfg.pressureConfStart) ? 0.0 :
+        (dPress >= cfg.pressureConfMax)  ? 1.0 :
+        (dPress - cfg.pressureConfStart) /
+        (cfg.pressureConfMax - cfg.pressureConfStart)
             
     def sSolar =
-        (solar <= cfg.solarBrightMin) ? 1.0 :
-        (solar >= cfg.solarBrightMax) ? 0.0 :
+        (solar <= cfg.solarOvercast) ? 1.0 :
+        (solar >= cfg.solarClear)    ? 0.0 :
         1.0 - (
-            (solar - cfg.solarBrightMin) /
-            (cfg.solarBrightMax - cfg.solarBrightMin)
+            (solar - cfg.solarOvercast) /
+            (cfg.solarClear - cfg.solarOvercast)
         )
 
     def score =
