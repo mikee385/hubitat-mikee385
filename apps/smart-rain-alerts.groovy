@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.36.0" }
+String getAppVersion() { return "0.37.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -254,27 +254,37 @@ def calculate() {
     def isRaining = (rainRateInHr > 0)
     def wasConfirmed = state.rainConfirmed ?: false
     def wasFalsePositive = state.falsePositive ?: false
-    
-    def confStr = String.format(
-        "(confidence=%.1f%%, rate=%.2f in./hr)",
-        adjConf, rainRateInHr
-    )
 
     if (isRaining && !wasConfirmed) {
         if (adjConf >= cfg.wetConfMin || rainRateInHr >= cfg.rainRateConfirm) {
-            sendAlert("🌧️ Rain confirmed $confStr")
+            sendAlert(
+                String.format(
+                    "🌧️ Rain confirmed (confidence=%.1f%%, rate=%.2f in./hr)",
+                    adjConf, rainRateInHr
+                )
+            )
         
             state.rainConfirmed = true
             state.falsePositive = false
         } else if (!wasFalsePositive) {
-            sendAlert("⚠️ Rain sensor reports rain, but conditions don’t support it $confStr")
+            sendAlert(
+                String.format(
+                    "⚠️ Rain sensor reports rain, but conditions don’t support it (confidence=%.1f%%, rate=%.2f in./hr)",
+                    adjConf, rainRateInHr
+                )
+            )
             
             state.falsePositive = true
         } 
     }
     
     if (wasConfirmed && isRaining && adjConf < cfg.wetConfMin) {
-        sendAlert("⚠️ Rain confidence lost $confStr")
+        sendAlert(
+            String.format(
+                "⚠️ Rain confidence lost(confidence=%.1f%%, rate=%.2f in./hr)",
+                adjConf, rainRateInHr
+            )
+        )
         
         state.rainConfirmed = false
         state.falsePositive = true
@@ -294,13 +304,13 @@ def calculate() {
     def wetTrendActive = (adjProb >= cfg.wetTrendOn)
     def wasTrendActive = state.wetTrendActive ?: false
     
-    def probStr = String.format(
-        "(probability=%.1f%%)",
-        adjProb
-    )
-    
     if (wetTrendActive && !wasTrendActive && !state.rainConfirmed) {
-        sendAlert("🌦️ Rain may be starting $probStr")
+        sendAlert(
+            String.format(
+                "🌦️ Rain may be starting (probability=%.1f%%)",
+                adjProb
+            )
+        )
         
         state.wetTrendActive = true
     }
