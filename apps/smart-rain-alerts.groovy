@@ -281,7 +281,7 @@ def calculate() {
     if (wasConfirmed && isRaining && adjConf < cfg.wetConfMin) {
         sendAlert(
             String.format(
-                "⚠️ Rain confidence lost(confidence=%.1f%%, rate=%.2f in./hr)",
+                "⚠️ Rain confidence lost (confidence=%.1f%%, rate=%.2f in./hr)",
                 adjConf, rainRateInHr
             )
         )
