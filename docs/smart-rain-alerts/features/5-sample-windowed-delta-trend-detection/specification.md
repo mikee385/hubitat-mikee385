@@ -12,7 +12,7 @@ This change is intended to improve noise resistance, emphasize sustained atmosph
 
 ## Relevant Files
 
-[Code](https://github.com/mikee385/hubitat-mikee385/blob/master/apps/smart-rain-alerts.groovy)
+[Code](https://github.com/mikee385/hubitat-mikee385/blob/master/apps/smart-rain-alerts.groovy)  
 [README](https://github.com/mikee385/hubitat-mikee385/blob/master/apps/smart-rain-alerts.md)
 
 ---
@@ -29,7 +29,7 @@ delta = currentReading − previousReading
 
 While responsive, this approach is sensitive to:
 
- 
+
 - Sensor jitter
 - Gust-level wind spikes
 - Irregular reporting intervals
@@ -60,22 +60,73 @@ This preserves the meaning of trend signals while improving stability.
 
 ## Window Size
 
-The rolling history window shall contain:
+The rolling history window shall:
 
- 
-- Exactly **5 samples**
-- Stored per-sensor metric
-- Updated whenever new sensor readings are processed
-- Maintained in chronological order
-- Trimmed to the most recent five values
 
-This window size balances:
+- Contain **up to 5 samples**
+- Store samples independently per metric
+- Be updated whenever new sensor readings are processed
+- Be maintained in chronological order
+- Be trimmed to the most recent five values using FIFO behavior
+- Work immediately with any number of samples (1–5)
 
- 
-- Noise reduction
-- Storm responsiveness
-- Interpretability
-- Alignment with atmospheric change timescales
+### FIFO Behavior
+
+When a new sample is added:
+
+```
+append new sample
+if window size > 5:
+    remove oldest sample
+```
+
+No special batching or synchronization between metrics is required.  
+Each metric maintains its own independent rolling window.
+
+---
+
+## Partial Window Behavior
+
+Trend scoring shall:
+
+
+- Operate immediately upon receiving the first reading
+- Work correctly with 1–4 samples
+- Not wait for a fully populated 5-sample window
+
+### First Sample Rule
+
+When only one sample exists in a window:
+
+```
+windowedDelta = 0
+```
+
+Because:
+
+```
+newestSample == oldestSample
+```
+
+This ensures deterministic and stable startup behavior.
+
+---
+
+## State Reset Behavior
+
+If the app is:
+
+
+- Updated
+- Reinstalled
+- Or its `state` is cleared
+
+The system shall:
+
+
+- Rebuild windows naturally from new readings
+- Apply no special initialization logic
+- Resume normal trend behavior as samples accumulate
 
 ---
 
@@ -97,13 +148,27 @@ Unlike averaging or smoothing, this approach preserves strong directional signal
 
 The following atmospheric trend signals shall use the windowed-delta calculation:
 
- 
+
 - Relative Humidity (RH)
 - Vapor Pressure Deficit (VPD)
 - Wind Speed
 - Barometric Pressure
 
 Each metric retains its existing interpretation within the probability model.
+
+---
+
+## Metric Storage Rules
+
+Each metric maintains an independent rolling window.
+
+
+- RH window stores RH values
+- Wind window stores wind speed values
+- Pressure window stores pressure values
+- VPD window stores **computed VPD values**
+
+The VPD window shall store derived VPD values after calculation, not raw sensor inputs.
 
 ---
 
@@ -115,19 +180,31 @@ Windowed deltas must preserve the existing directional meaning used by the proba
 Conceptual definitions:
 
 ```
-RH trend     = newestRH − oldestRH
-Wind trend   = newestWind − oldestWind
-VPD trend    = oldestVPD − newestVPD
-Pressure trend = oldestPressure − newestPressure
+RH trend        = newestRH − oldestRH
+Wind trend      = newestWind − oldestWind
+VPD trend       = oldestVPD − newestVPD
+Pressure trend  = oldestPressure − newestPressure
 ```
 
 This maintains the existing interpretation:
 
- 
+
 - Rising humidity increases rain probability
 - Increasing wind increases rain probability
 - Falling VPD increases rain probability
 - Falling pressure increases rain probability
+
+---
+
+## Pressure Trend Usage
+
+Both uses of pressure delta shall use the windowed delta:
+
+
+- Probability scoring
+- Confidence scoring
+
+There shall be no remaining single-interval pressure delta calculations.
 
 ---
 
@@ -137,7 +214,7 @@ This change is strictly a **measurement improvement**, not a scoring-model redes
 
 The following shall remain unchanged:
 
- 
+
 - Probability score structure
 - Trend weighting
 - TrendMax configuration values
@@ -149,11 +226,35 @@ The trend layer continues to represent **environmental movement**, but with impr
 
 ---
 
+## TrendMax Semantics
+
+After this change, TrendMax configuration values represent:
+
+> The maximum expected change across the window
+
+They are no longer interpreted as per-sample limits, but as window-scale normalization limits.
+
+No change to the actual configuration values is introduced by this specification.
+
+---
+
+## Sample Acceptance
+
+A new sample shall:
+
+
+- Always be added to its metric window
+- Not be conditionally filtered based on completeness
+
+This preserves system determinism and avoids hidden data suppression.
+
+---
+
 ## Expected Behavioral Improvements
 
 The windowed-delta approach should produce the following outcomes:
 
- 
+
 - Reduced sensitivity to single anomalous readings
 - Suppression of wind gust spikes
 - Stronger detection of sustained atmospheric change
@@ -168,7 +269,7 @@ The windowed-delta approach should produce the following outcomes:
 
 This change does **not** introduce:
 
- 
+
 - Rolling averages in the probability score
 - Momentum scoring
 - Rate-of-change calculations
@@ -186,7 +287,7 @@ The system remains a **storm detection model**, not a predictive weather model.
 
 Trend logging should continue to reflect:
 
- 
+
 - The calculated delta values
 - Directional interpretation
 - Probability contribution of each signal
@@ -209,6 +310,16 @@ to:
 5-sample windowed delta detection
 ```
 
+The system:
+
+
+- Works immediately with partial windows
+- Uses FIFO rolling metric windows
+- Uses windowed pressure deltas in both scoring paths
+- Treats TrendMax as window-scale normalization limits
+- Rebuilds naturally after state reset
+- Stores computed VPD values in its own window
+
 This preserves the original scoring philosophy while improving signal reliability, robustness to noise, and detection of sustained atmospheric changes that precede rainfall.
 
-The probability model, thresholds, and user-visible behavior should remain conceptually consistent while becoming more stable and trustworthy.
+The probability model, thresholds, and user-visible behavior remain conceptually consistent while becoming more stable and trustworthy.
