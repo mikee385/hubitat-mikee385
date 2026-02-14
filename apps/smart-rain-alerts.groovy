@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.37.0" }
+String getAppVersion() { return "0.38.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -165,9 +165,14 @@ def initialize() {
     ]
     
     // Initialize State
-    state.rainConfirmed   = state.rainConfirmed ?: false
+    state.rainConfirmed   = state.rainConfirmed  ?: false
     state.wetTrendActive  = state.wetTrendActive ?: false
-    state.falsePositive   = state.falsePositive ?: false
+    state.falsePositive   = state.falsePositive  ?: false
+
+    state.rhHist    = state.rhHist    ?: []
+    state.windHist  = state.windHist  ?: []
+    state.pressHist = state.pressHist ?: []
+    state.vpdHist   = state.vpdHist   ?: [] 
     
     // Rain Alert
     subscribe(weatherStation, "dateutc", sensorHandler)
@@ -227,17 +232,21 @@ def calculate() {
 
     def tempC  = (tempF - 32.0) * 5.0 / 9.0
     def windMS = windMPH * 0.44704
-
-    def dPress = (prevPressInHg != null) ? (prevPressInHg - pressInHg) : 0.0
+    def vpd    = vaporPressureDeficit(tempC, rh)
     
+    // Trend Histories
+    updateHistory(state.rhHist   , rh)
+    updateHistory(state.windHist , windMS)
+    updateHistory(state.pressHist, pressInHg)
+    updateHistory(state.vpdHist  , vpd)
+
     // Core Calculations
-    def vpd = vaporPressureDeficit(tempC, rh)
     def tf = temperatureFactor(tempC)
 
-    def baseProb = probabilityScore(tempC, pressInHg, rh, windMS, vpd)
+    def baseProb = probabilityScore(rh)
     def adjProb  = clamp(baseProb * tf.prob, 0.0, 100.0)
 
-    def baseConf = confidenceScore(tempC, dPress, rh, windMS, vpd, solarWm2)
+    def baseConf = confidenceScore(tempC, rh, windMS, vpd, solarWm2)
     def adjConf  = clamp(baseConf * tf.conf, 0.0, 100.0)
     
     logDebug(
@@ -332,6 +341,22 @@ def clamp(val, minVal, maxVal) {
     return Math.max(minVal, Math.min(maxVal, val))
 }
 
+def updateHistory(history, value) {
+    history.add(value)
+    
+    if (history.size() > 5) {
+        history.remove(0)
+    }
+}
+
+def rateOfChange(history) {
+    if (history == null || history.size() < 2) {
+        return 0.0
+    }
+
+    return history[-1] - history[0]
+}
+
 def saturationVaporPressure(tempC) {
     return 0.6108 * Math.exp((17.27 * tempC) / (tempC + 237.3))
 }
@@ -372,11 +397,13 @@ def temperatureFactor(tempC) {
     ]
 }
 
-def confidenceScore(tempC, dPress, rh, wind, vpd, solar) {
+def confidenceScore(tempC, rh, wind, vpd, solar) {
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
     def deltaT = tempC - dew
+    
+    def dPress = -rateOfChange(state.pressHist)
 
     def sRH = clamp(
         (rh - cfg.rhConfMin) / cfg.rhConfSpan,
@@ -430,18 +457,13 @@ def confidenceScore(tempC, dPress, rh, wind, vpd, solar) {
     return clamp(score, 0.0, 100.0)
 }
 
-def probabilityScore(tempC, pressInHg, rh, wind, vpd) {
+def probabilityScore(rh) {
     def cfg = state.cfg
     
-    def prevRH    = state.prevRH    ?: rh
-    def prevVPD   = state.prevVPD   ?: vpd
-    def prevWind  = state.prevWind  ?: wind
-    def prevPress = state.prevPress ?: pressInHg
-
-    def dRH    = rh - prevRH
-    def dVPD   = prevVPD - vpd
-    def dWind  = wind - prevWind
-    def dPress = prevPress - pressInHg
+    def dRH    =  rateOfChange(state.rhHist)
+    def dVPD   = -rateOfChange(state.vpdHist)
+    def dWind  =  rateOfChange(state.windHist)
+    def dPress = -rateOfChange(state.pressHist)
 
     def sRHabs = clamp(
         (rh - cfg.rhProbMin) / cfg.rhProbSpan,
@@ -452,11 +474,6 @@ def probabilityScore(tempC, pressInHg, rh, wind, vpd) {
     def sVPDtrend   = clamp(dVPD   / cfg.vpdTrendMax,      0.0, 1.0)
     def sWindTrend  = clamp(dWind  / cfg.windTrendMax,     0.0, 1.0)
     def sPressTrend = clamp(dPress / cfg.pressureTrendMax, 0.0, 1.0)
-    
-    state.prevRH    = rh
-    state.prevVPD   = vpd
-    state.prevWind  = wind
-    state.prevPress = pressInHg
 
     def score =
         100.0 * (

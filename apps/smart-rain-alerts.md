@@ -176,16 +176,14 @@ The app does **not** use absolute pressure values. Instead, it relies exclusivel
 
 #### Pressure Trend
 
-Pressure trend is defined as the change in pressure between consecutive samples:
+Pressure trend is defined as the change in pressure across the rolling 5-sample window:
 
-$$
-\Delta P = P_{prev} - P
-$$
+$\Delta P = P_{oldest} - P_{newest}$ (over window)
 
 Where:
 
-- $P$ is the current barometric pressure
-- $P_{prev}$ is the previous sample’s pressure
+- $P_{newest}$ is the barometric pressure from the most recent sample
+- $P_{oldest}$ is the barometric pressure from the oldest sample in the window
 
 Interpretation:
 
@@ -392,24 +390,50 @@ Defaults:
 
 ---
 
-### Trend Terms (per sample)
+### Trend Terms (5-sample windowed delta)
+
+Trend signals are computed using a rolling 5-sample window to reduce sensor noise and short-term oscillation.
+
+For a history window:
+
+$X_1$, $X_2$, $X_3$, $X_4$, $X_5$
+
+the windowed delta is defined as:
 
 $$
-\Delta RH = RH - RH_{prev}
+\Delta X = X_{5} − X_{1}
+$$
+
+This represents short-term directional movement rather than instantaneous per-sample change.
+
+The app computes trend terms as follows (over window):
+
+$$
+\Delta RH = RH_{newest}- RH_{oldest}
 $$
 
 $$
-\Delta VPD = VPD_{prev} - VPD
+\Delta VPD = VPD_{oldest} - VPD_{newest}
 $$
 
 $$
-\Delta Wind = Wind - Wind_{prev}
+\Delta Wind = Wind_{newest} - Wind_{oldest}
 $$
 
 $$
-\Delta Pressure = Pressure_{prev} - Pressure
+\Delta Pressure = Pressure_{oldest} - Pressure_{newest}
 $$
- 
+
+Interpretation:
+
+- RH trend → humidity rising across the window
+- VPD trend → air becoming more saturated
+- Wind trend → strengthening surface mixing
+- Pressure trend → falling pressure over time
+
+Windowed deltas provide more stable atmospheric trend detection than
+single-sample differences.
+
 Normalized trend components:
  
 $$ 
