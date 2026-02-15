@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.39.0" }
+String getAppVersion() { return "0.40.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -120,6 +120,12 @@ def initialize() {
         vpdTrendMax       : 0.15,  // kPa change per sample
         windTrendMax      : 2.0,   // m/s change per sample
         pressureTrendMax  : 0.03,  // inHg per sample
+        
+        
+        // ─────────────────────────────────────────────
+        // Stale sensor data handling
+        // ─────────────────────────────────────────────
+        staleThresholdMinutes : 45,
 
 
         // ─────────────────────────────────────────────
@@ -174,11 +180,17 @@ def initialize() {
     state.pressHist = state.pressHist ?: []
     state.vpdHist   = state.vpdHist   ?: [] 
     
+    state.lastProcessedTimestamp = state.lastProcessedTimestamp ?: null
+    
     // Rain Alert
     subscribe(weatherStation, "dateutc", sensorHandler)
     
     // Device Checks
     initializeDeviceChecks()
+    
+    // Initial Calculations
+    subscribe(location, "systemStart", sensorHandler)
+    calculate()
 }
 
 def logInfo(msg) {
@@ -195,6 +207,31 @@ def sensorHandler(evt) {
 
 def calculate() {
     def cfg = state.cfg
+    
+     // Duplicate Data Detection
+    def ts = weatherStation.currentValue("dateutc")
+    def lastTs = state.lastProcessedTimestamp
+    if (lastTs != null && ts == lastTs) {
+        logDebug("Skipping duplicate sensor update")
+        return
+    }
+
+    // Stale Data Detection
+    if (lastTs != null) {
+        def minutes = minutesBetween(ts, lastTs)
+        logDebug("Δtime=${minutes} minutes")
+        
+        if (minutes >= cfg.staleThresholdMinutes) {
+            sendAlert(
+                String.format(
+                    "Clearing histories after %.1f minute sensor gap",
+                    minutes
+                )
+            )
+
+            clearHistories()
+        }
+    }
     
     // Previous Sensor Data
     def prevTempF      = state.prevTempF
@@ -304,7 +341,7 @@ def calculate() {
     }
 
     if (wasConfirmed && !isRaining) { 
-        sendAlert("⛅️ Rain has stopped")
+        sendAlert("⛅️ Rain has stopped!")
         
         state.rainConfirmed = false
     }
@@ -340,6 +377,8 @@ def calculate() {
     state.prevRainRate  = rainRateInHr
     state.prevWindMPH   = windMPH
     state.prevSolar     = solarWm2
+    
+    state.lastProcessedTimestamp = ts
 }
 
 def clamp(val, minVal, maxVal) {
@@ -360,6 +399,24 @@ def rateOfChange(history) {
     }
 
     return history[-1] - history[0]
+}
+
+def clearHistories() {
+    state.rhHist    = []
+    state.windHist  = []
+    state.pressHist = []
+    state.vpdHist   = []
+
+    state.prevTempF     = null
+    state.prevPressInHg = null
+    state.prevRHraw     = null
+    state.prevRainRate  = null
+    state.prevWindMPH   = null
+    state.prevSolar     = null
+}
+
+def minutesBetween(ts1, ts2) {
+    return (ts1 - ts2) / 60000.0
 }
 
 def saturationVaporPressure(tempC) {

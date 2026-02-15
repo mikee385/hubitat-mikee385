@@ -461,6 +461,21 @@ Defaults assume ~5-minute sampling:
 
 ---
 
+### Stale Sensor Data Handling
+
+Trend histories depend on regular weather station updates.  
+If the time between processed updates exceeds `staleThresholdMinutes` (default: 45 minutes), the app:
+
+- Clears all trend history windows
+- Resets previous-value tracking variables
+- Resumes normal processing on the next update
+
+This prevents outdated sensor values from producing misleading trend calculations after connectivity interruptions, station outages, or long gaps between updates.
+
+If a weather update arrives with the same timestamp as the last processed update, it is ignored to avoid polluting trend histories with duplicate samples.
+
+---
+
 ### Weighted Probability Score
 
 $$
