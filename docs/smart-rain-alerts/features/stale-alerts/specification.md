@@ -7,20 +7,24 @@ The goal is to alert the user when the weather station stops reporting data and 
 
 ## Requirements
 
-- Schedule a process to check for staleness, rather than relying on event subscriptions. It could run at regular intervals, or it could be scheduled as-hoc as needed. 
+- Keep a unified staleness definition and handling with the existing stale history handling. Use the existing thresholds and checks for staleness.
+ 
+- Schedule a process every 5 minutes to check for staleness. 
 
-- Staleness checks should also be performed on event subscriptions, in case the weather sense sends an update that contains old data.
+- Staleness checks should also be performed on event subscriptions and during initialize(), in case the weather sensor sends an update that contains old data.
 
 - Staleness should be checked against the dateutc value from the weather station. It should not check individual sensors.
 
-- An alert should be displayed when staleness first occurs, but not repeatedly. 
+- An alert should be displayed when staleness first occurs, but not repeatedly. Use a state  variable to track staleness status. 
  
 - The existing "device checks" functionality should be used to repeat the alert once per day. 
+ 
+- When staleness occurs, clear the state variables for sensor history, previous values, and flags for rain confirmed, false positive, and wet trend active.
   
-- An alert should be displayed when the weather station starts reporting new data again. 
+- An alert should be displayed when the weather station resumes reporting fresh data. 
  
-- Consider clearing the rain confirmed, false positive, and wet trend active variables when staleness is detected, although this may not be necessary, since these are already cleared as soon as the data is restored.
+- Avoid creating a situation where the staleness alert is sent, but the history is not cleared. 
  
-- Try to be as consistent as possible with the existing stale history handling. Try not to create a situation where the staleness alert is sent, but the history is not cleared. Try not to create a situation where the history is cleared, but the staleness alert is not sent. 
+- Avoid creating a situation where the history is cleared, but the staleness alert is not sent. 
 
 - The existing stale history handling can be modified to align with these new requirements, if necessary.
