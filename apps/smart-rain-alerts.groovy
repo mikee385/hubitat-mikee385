@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.41.0" }
+String getAppVersion() { return "0.42.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -187,7 +187,7 @@ def initialize() {
     subscribe(weatherStation, "dateutc", sensorHandler)
     
     // Staleness Check
-    runEvery5Minutes("checkForStaleness")
+    runEvery5Minutes("scheduleCheck_Staleness")
     
     // Device Checks
     initializeDeviceChecks()
@@ -213,17 +213,25 @@ def sensorHandler(evt) {
 def calculate() {
     def cfg = state.cfg
     
+    // Null Data Detection
+    def missingAttributes = checkForNullData()
+    if (missingAttributes) {
+        logDebug("Skipping calculations -- sensor data is null: ${missingAttributes.join(', ')}")
+        return
+    }
+    
+    def ts = weatherStation.currentValue("dateutc")
+    
     // Stale Data Detection
-    checkForStaleness()
-    if (state.isStale) {
+    def staleNow = checkForStaleness(ts)
+    if (staleNow) {
         logDebug("Skipping calculations -- sensor data is stale")
         return
     }
 
     // Duplicate Data Detection
-    def ts = weatherStation.currentValue("dateutc")
-    def lastTs = state.lastProcessedTimestamp
-    if (lastTs != null && ts == lastTs) {
+    def duplicateUpdate = checkForDuplicate(ts)
+    if (duplicateUpdate) {
         logDebug("Skipping calculations -- duplicate sensor data")
         return
     }
@@ -534,15 +542,36 @@ def probabilityScore(rh) {
     return clamp(score, 0.0, 100.0)
 }
 
-def checkForStaleness() {
+def checkForNullData() {
+    def requiredAttributes = [
+        "dateutc",
+        "temperature",
+        "pressure",
+        "humidity",
+        "precip_1hr",
+        "wind",
+        "solarradiation",
+    ]
+    def missingAttributes  = []
+    
+    for (attribute in requiredAttributes) {
+        def value = weatherStation.currentValue(attribute)
+        if (value == null) {
+            missingAttributes.add(attribute)
+        }
+    }
+    
+    return missingAttributes
+}
+
+def checkForStaleness(ts) {
     def cfg = state.cfg
     
-    def ts = weatherStation.currentValue("dateutc")
     def last = ts.toLong()
     def now = new Date().time
     
     def ageMinutes = (now - last) / 60000.0
-    logDebug("Δtime=${ageMinutes} minutes")
+    logDebug("Staleness check ▶ age=${ageMinutes} minutes")
     
     def staleNow = ageMinutes >= cfg.staleThresholdMinutes
 
@@ -553,6 +582,8 @@ def checkForStaleness() {
     if (!staleNow && state.isStale) {
         handleStaleRecovered()
     }
+    
+    return staleNow 
 }
 
 def handleStaleDetected() {
@@ -587,6 +618,13 @@ def clearTrendState() {
     state.wetTrendActive = false
 }
 
+def scheduleCheck_Staleness(evt) {
+    def lastTs = state.lastProcessedTimestamp
+    if (lastTs != null) { 
+        checkForStaleness(lastTs)
+    } 
+}
+
 def deviceCheck_Staleness(evt) {
     logDebug("deviceCheck_Staleness")
     
@@ -596,6 +634,15 @@ def deviceCheck_Staleness(evt) {
     } else if (state.isStale) {
         deviceMonitor.addInactiveMessage(weatherStation.id, "${weatherStation}* - ${timeSince(lastTs)}")
     }
+}
+
+def checkForDuplicate(ts) {
+    def lastTs = state.lastProcessedTimestamp
+    if (lastTs != null && ts == lastTs) {
+        return true
+    }
+    
+    return false
 }
 
 def sendAlert(msg) {
