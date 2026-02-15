@@ -467,12 +467,15 @@ Trend histories depend on regular weather station updates.
 If the time between processed updates exceeds `staleThresholdMinutes` (default: 45 minutes), the app:
 
 - Clears all trend history windows
-- Resets previous-value tracking variables
-- Resumes normal processing on the next update
+- Resets previous-value tracking variables and rain-related state flags
+- Sends a one-time staleness alert
+- Sends a recovery alert when fresh data resumes
+
+Staleness is checked on scheduled intervals, on sensor updates, and during initialization to ensure consistent handling.
 
 This prevents outdated sensor values from producing misleading trend calculations after connectivity interruptions, station outages, or long gaps between updates.
 
-If a weather update arrives with the same timestamp as the last processed update, it is ignored to avoid polluting trend histories with duplicate samples.
+If a weather update arrives with the same timestamp as the last processed update, it is ignored to prevent duplicate processing and history distortion.
 
 ---
 

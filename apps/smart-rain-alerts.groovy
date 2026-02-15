@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.40.0" }
+String getAppVersion() { return "0.41.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -181,12 +181,17 @@ def initialize() {
     state.vpdHist   = state.vpdHist   ?: [] 
     
     state.lastProcessedTimestamp = state.lastProcessedTimestamp ?: null
+    state.isStale = state.isStale ?: false
     
     // Rain Alert
     subscribe(weatherStation, "dateutc", sensorHandler)
     
+    // Staleness Check
+    runEvery5Minutes("checkForStaleness")
+    
     // Device Checks
     initializeDeviceChecks()
+    subscribe(deviceMonitor, "deviceCheck.active", deviceCheck_Staleness)
     
     // Initial Calculations
     subscribe(location, "systemStart", sensorHandler)
@@ -208,29 +213,19 @@ def sensorHandler(evt) {
 def calculate() {
     def cfg = state.cfg
     
-     // Duplicate Data Detection
-    def ts = weatherStation.currentValue("dateutc")
-    def lastTs = state.lastProcessedTimestamp
-    if (lastTs != null && ts == lastTs) {
-        logDebug("Skipping duplicate sensor update")
+    // Stale Data Detection
+    checkForStaleness()
+    if (state.isStale) {
+        logDebug("Skipping calculations -- sensor data is stale")
         return
     }
 
-    // Stale Data Detection
-    if (lastTs != null) {
-        def minutes = minutesBetween(ts, lastTs)
-        logDebug("Δtime=${minutes} minutes")
-        
-        if (minutes >= cfg.staleThresholdMinutes) {
-            sendAlert(
-                String.format(
-                    "Clearing histories after %.1f minute sensor gap",
-                    minutes
-                )
-            )
-
-            clearHistories()
-        }
+    // Duplicate Data Detection
+    def ts = weatherStation.currentValue("dateutc")
+    def lastTs = state.lastProcessedTimestamp
+    if (lastTs != null && ts == lastTs) {
+        logDebug("Skipping calculations -- duplicate sensor data")
+        return
     }
     
     // Previous Sensor Data
@@ -401,24 +396,6 @@ def rateOfChange(history) {
     return history[-1] - history[0]
 }
 
-def clearHistories() {
-    state.rhHist    = []
-    state.windHist  = []
-    state.pressHist = []
-    state.vpdHist   = []
-
-    state.prevTempF     = null
-    state.prevPressInHg = null
-    state.prevRHraw     = null
-    state.prevRainRate  = null
-    state.prevWindMPH   = null
-    state.prevSolar     = null
-}
-
-def minutesBetween(ts1, ts2) {
-    return (ts1 - ts2) / 60000.0
-}
-
 def saturationVaporPressure(tempC) {
     return 0.6108 * Math.exp((17.27 * tempC) / (tempC + 237.3))
 }
@@ -555,6 +532,70 @@ def probabilityScore(rh) {
     )
 
     return clamp(score, 0.0, 100.0)
+}
+
+def checkForStaleness() {
+    def cfg = state.cfg
+    
+    def ts = weatherStation.currentValue("dateutc")
+    def last = ts.toLong()
+    def now = new Date().time
+    
+    def ageMinutes = (now - last) / 60000.0
+    logDebug("Δtime=${ageMinutes} minutes")
+    
+    def staleNow = ageMinutes >= cfg.staleThresholdMinutes
+
+    if (staleNow && !state.isStale) {
+        handleStaleDetected()
+    }
+
+    if (!staleNow && state.isStale) {
+        handleStaleRecovered()
+    }
+}
+
+def handleStaleDetected() {
+    state.isStale = true
+
+    clearTrendState()
+
+    sendAlert("❌ $weatherStation data is stale!")
+}
+
+def handleStaleRecovered() {
+    state.isStale = false
+    
+    sendAlert("✅ $weatherStation data is updating again!")
+}
+
+def clearTrendState() {
+    state.rhHist    = []
+    state.windHist  = []
+    state.pressHist = []
+    state.vpdHist   = []
+
+    state.prevTempF     = null
+    state.prevPressInHg = null
+    state.prevRHraw     = null
+    state.prevRainRate  = null
+    state.prevWindMPH   = null
+    state.prevSolar     = null
+
+    state.rainConfirmed = false
+    state.falsePositive = false
+    state.wetTrendActive = false
+}
+
+def deviceCheck_Staleness(evt) {
+    logDebug("deviceCheck_Staleness")
+    
+    def lastTs = state.lastProcessedTimestamp
+    if (lastTs == null) {
+        deviceMonitor.addInactiveMessage(weatherStation.id, "${weatherStation}* - No Activity")
+    } else if (state.isStale) {
+        deviceMonitor.addInactiveMessage(weatherStation.id, "${weatherStation}* - ${timeSince(lastTs)}")
+    }
 }
 
 def sendAlert(msg) {
