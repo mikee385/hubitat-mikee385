@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.38.0" }
+String getAppVersion() { return "0.39.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -268,17 +268,20 @@ def calculate() {
         if (adjConf >= cfg.wetConfMin || rainRateInHr >= cfg.rainRateConfirm) {
             sendAlert(
                 String.format(
-                    "🌧️ Rain confirmed (confidence=%.1f%%, rate=%.2f in./hr)",
+"""🌧️ Rain confirmed!
+(confidence=%.1f%%, rate=%.2f in./hr)""",
                     adjConf, rainRateInHr
                 )
             )
         
             state.rainConfirmed = true
             state.falsePositive = false
+        
         } else if (!wasFalsePositive) {
             sendAlert(
                 String.format(
-                    "⚠️ Rain sensor reports rain, but conditions don’t support it (confidence=%.1f%%, rate=%.2f in./hr)",
+"""⚠️ Rain sensor reports rain, but conditions don’t support it.
+(confidence=%.1f%%, rate=%.2f in./hr)""",
                     adjConf, rainRateInHr
                 )
             )
@@ -290,7 +293,8 @@ def calculate() {
     if (wasConfirmed && isRaining && adjConf < cfg.wetConfMin) {
         sendAlert(
             String.format(
-                "⚠️ Rain confidence lost (confidence=%.1f%%, rate=%.2f in./hr)",
+"""⚠️ Rain confidence lost.
+(confidence=%.1f%%, rate=%.2f in./hr)""",
                 adjConf, rainRateInHr
             )
         )
@@ -316,7 +320,8 @@ def calculate() {
     if (wetTrendActive && !wasTrendActive && !state.rainConfirmed) {
         sendAlert(
             String.format(
-                "🌦️ Rain may be starting (probability=%.1f%%)",
+"""🌦️ Rain may be starting!
+(probability=%.1f%%)""",
                 adjProb
             )
         )
