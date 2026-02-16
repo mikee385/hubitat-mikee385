@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.42.0" }
+String getAppVersion() { return "0.43.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -220,17 +220,17 @@ def calculate() {
         return
     }
     
-    def ts = weatherStation.currentValue("dateutc")
+    def sensorTimestamp = weatherStation.currentValue("dateutc")?.toLong()
     
     // Stale Data Detection
-    def staleNow = checkForStaleness(ts)
+    def staleNow = checkForStaleness(sensorTimestamp)
     if (staleNow) {
         logDebug("Skipping calculations -- sensor data is stale")
         return
     }
 
     // Duplicate Data Detection
-    def duplicateUpdate = checkForDuplicate(ts)
+    def duplicateUpdate = checkForDuplicate(sensorTimestamp)
     if (duplicateUpdate) {
         logDebug("Skipping calculations -- duplicate sensor data")
         return
@@ -381,7 +381,7 @@ def calculate() {
     state.prevWindMPH   = windMPH
     state.prevSolar     = solarWm2
     
-    state.lastProcessedTimestamp = ts
+    state.lastProcessedTimestamp = sensorTimestamp
 }
 
 def clamp(val, minVal, maxVal) {
@@ -567,10 +567,9 @@ def checkForNullData() {
 def checkForStaleness(ts) {
     def cfg = state.cfg
     
-    def last = ts.toLong()
     def now = new Date().time
     
-    def ageMinutes = (now - last) / 60000.0
+    def ageMinutes = (now - ts) / 60000.0
     logDebug("Staleness check ▶ age=${ageMinutes} minutes")
     
     def staleNow = ageMinutes >= cfg.staleThresholdMinutes
@@ -618,7 +617,7 @@ def clearTrendState() {
     state.wetTrendActive = false
 }
 
-def scheduleCheck_Staleness(evt) {
+def scheduleCheck_Staleness() {
     def lastTs = state.lastProcessedTimestamp
     if (lastTs != null) { 
         checkForStaleness(lastTs)
