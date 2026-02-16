@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.44.0" }
+String getAppVersion() { return "0.45.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -281,16 +281,6 @@ def calculate() {
 
     def baseConf = confidenceScore(tempC, rh, windMS, vpd, solarWm2)
     def adjConf  = clamp(baseConf * tf.conf, 0.0, 100.0)
-    
-    logDebug(
-        String.format(
-            "SCORE ▶ Prob=%.1f%% (Base=%.1f ×%.2f) | Conf=%.1f%% (Base=%.1f ×%.2f)",
-            adjProb,
-            baseProb, tf.prob,
-            adjConf,
-            baseConf, tf.conf
-        )
-    )
 
     // Confidence
     def isRaining = (rainRateInHr > 0)
@@ -365,6 +355,20 @@ def calculate() {
     if (wasTrendActive && adjProb < cfg.wetTrendOff) {
         state.wetTrendActive = false
     }
+    
+    // Status
+    def status = deriveStatus(adjProb)
+    
+    logDebug(
+        String.format(
+            "STATE ▶ Prob=%.1f%% (Base=%.1f ×%.2f) | Conf=%.1f%% (Base=%.1f ×%.2f) | Status=%s",
+            adjProb,
+            baseProb, tf.prob,
+            adjConf,
+            baseConf, tf.conf,
+            status
+        )
+    )
     
     // Save Sensor Data
     state.prevTempF     = tempF
@@ -533,6 +537,26 @@ def probabilityScore(rh) {
     )
 
     return clamp(score, 0.0, 100.0)
+}
+
+def deriveStatus(probability) {
+    if (state.isStale) {
+        return "Sensor Stale"
+    }
+
+    if (state.rainConfirmed) {
+        return "Raining"
+    }
+
+    if (probability >= state.cfg.wetTrendOn) {
+        return "Rain Likely"
+    }
+
+    if (probability >= state.cfg.wetTrendOff) {
+        return "Watching"
+    }
+
+    return "Idle"
 }
 
 def checkForNullData() {
