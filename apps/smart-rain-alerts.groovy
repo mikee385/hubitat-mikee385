@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.43.0" }
+String getAppVersion() { return "0.44.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -40,7 +40,6 @@ preferences {
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
             input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
-            input name: "enableInfoLog", type: "bool", title: "Enable info logging?", defaultValue: false
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
@@ -196,12 +195,6 @@ def initialize() {
     // Initial Calculations
     subscribe(location, "systemStart", sensorHandler)
     calculate()
-}
-
-def logInfo(msg) {
-    if (enableInfoLog) {
-        log.info msg
-    }
 }
 
 def sensorHandler(evt) {
@@ -645,6 +638,6 @@ def checkForDuplicate(ts) {
 }
 
 def sendAlert(msg) {
-    logInfo(msg)
+    log.info msg
     personToNotify.deviceNotification(msg)
 }
