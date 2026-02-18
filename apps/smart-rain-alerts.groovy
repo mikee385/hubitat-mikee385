@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.46.0" }
+String getAppVersion() { return "0.47.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -268,10 +268,10 @@ def calculate() {
     def vpd    = vaporPressureDeficit(tempC, rh)
     
     // Trend Histories
-    updateHistory(state.rhHist   , rh)
-    updateHistory(state.windHist , windMS)
-    updateHistory(state.pressHist, pressInHg)
-    updateHistory(state.vpdHist  , vpd)
+    updateHistory("rhHist"   , rh)
+    updateHistory("windHist" , windMS)
+    updateHistory("pressHist", pressInHg)
+    updateHistory("vpdHist"  , vpd)
 
     // Core Calculations
     def tf = temperatureFactor(tempC)
@@ -385,12 +385,16 @@ def clamp(val, minVal, maxVal) {
     return Math.max(minVal, Math.min(maxVal, val))
 }
 
-def updateHistory(history, value) {
+def updateHistory(key, value) {
+    def history = (state[key] ?: []).toList()
+
     history.add(value)
     
     if (history.size() > 5) {
         history.remove(0)
     }
+
+    state[key] = history
 }
 
 def rateOfChange(history) {
