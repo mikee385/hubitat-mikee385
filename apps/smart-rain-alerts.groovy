@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.45.0" }
+String getAppVersion() { return "0.46.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -398,7 +398,7 @@ def rateOfChange(history) {
         return 0.0
     }
 
-    return history[-1] - history[0]
+    return (history[-1] - history[0]) / (history.size() - 1)
 }
 
 def saturationVaporPressure(tempC) {
