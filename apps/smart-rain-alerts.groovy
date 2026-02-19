@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.47.0" }
+String getAppVersion() { return "0.48.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -289,6 +289,10 @@ def calculate() {
 
     if (isRaining && !wasConfirmed) {
         if (adjConf >= cfg.wetConfMin || rainRateInHr >= cfg.rainRateConfirm) {
+            if (state.falsePositive) {
+                logInfo("🌧️ Rain confirmation resolved previous false positive.")
+            }
+
             sendAlert(
                 String.format(
 """🌧️ Rain confirmed!
