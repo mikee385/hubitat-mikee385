@@ -85,6 +85,7 @@ This prevents false “sensor disagreement” alerts during fast-onset or convec
 - The rain sensor is *usually* correct but can glitch.
 - Environmental conditions can **invalidate** a rain reading but cannot replace it.
 - Confidence decay is intentionally **disabled** to keep semantics clean and predictable.
+- Confidence reflects current environmental conditions and is seasonally scaled by temperature.
 
 ---
 
@@ -157,13 +158,13 @@ $$
 T_d = \frac{243.5 \cdot \alpha}{17.67 - \alpha}
 $$
 
-The key derived metric used by the app is the dew point depression:
+The key derived metric used by the app is the dew point spread:
 
 $$
-\Delta T = T - T_d
+Spread = T - T_d
 $$
 
-Smaller values of $\Delta T$ indicate conditions closer to condensation and precipitation.
+Smaller values of $Spread$ indicate conditions closer to condensation and precipitation.
 
 ---
 
@@ -178,7 +179,7 @@ The app does **not** use absolute pressure values. Instead, it relies exclusivel
 
 Pressure trend is defined as the change in pressure across the rolling 5-sample window:
 
-$\Delta P = P_{oldest} - P_{newest}$ (over window)
+$\Delta P = (P_{oldest} - P_{newest}) / (N - 1)$ (over window)
 
 Where:
 
@@ -270,8 +271,8 @@ Below ~60% RH, rain is implausible. Above ~90%, additional RH adds little inform
 
 Dew point proximity reflects how close the air is to condensation:
 
-- $s_{Dew} = 1.0$ when $\Delta T \le 2^\circ C$
-- $s_{Dew} = 0.0$ when $\Delta T \ge 5^\circ C$
+- $s_{Dew} = 1.0$ when $Spread \le 2^\circ C$
+- $s_{Dew} = 0.0$ when $Spread \ge 5^\circ C$
 - Linear interpolation between these bounds
 
 ---
@@ -392,16 +393,10 @@ Defaults:
 
 ### Trend Terms (5-sample windowed delta)
 
-Trend signals are computed using a rolling 5-sample window to reduce sensor noise and short-term oscillation.
-
-For a history window:
-
-$X_1$, $X_2$, $X_3$, $X_4$, $X_5$
-
-the windowed delta is defined as:
+Trend signals are computed as the average per-sample change across a rolling 5-sample window to reduce sensor noise and short-term oscillation:
 
 $$
-\Delta X = X_{5} − X_{1}
+\Delta X = (X_{newest} − X_{oldest}) / (N − 1)
 $$
 
 This represents short-term directional movement rather than instantaneous per-sample change.
@@ -409,19 +404,19 @@ This represents short-term directional movement rather than instantaneous per-sa
 The app computes trend terms as follows (over window):
 
 $$
-\Delta RH = RH_{newest}- RH_{oldest}
+\Delta RH = (RH_{newest}- RH_{oldest}) / (N - 1)
 $$
 
 $$
-\Delta VPD = VPD_{oldest} - VPD_{newest}
+\Delta VPD = (VPD_{oldest} - VPD_{newest}) / (N - 1)
 $$
 
 $$
-\Delta Wind = Wind_{newest} - Wind_{oldest}
+\Delta Wind = (Wind_{newest} - Wind_{oldest}) / (N - 1)
 $$
 
 $$
-\Delta Pressure = Pressure_{oldest} - Pressure_{newest}
+\Delta Pressure = (Pressure_{oldest} - Pressure_{newest}) / (N - 1)
 $$
 
 Interpretation:
