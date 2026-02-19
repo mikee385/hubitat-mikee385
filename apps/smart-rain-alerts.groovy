@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.48.0" }
+String getAppVersion() { return "0.49.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -590,6 +590,11 @@ def checkForNullData() {
 }
 
 def checkForStaleness(ts) {
+    if (ts == null) {
+        logDebug("Staleness check ▶ timestamp missing")
+        return false
+    }
+
     def cfg = state.cfg
     
     def now = new Date().time
