@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.49.0" }
+String getAppVersion() { return "0.50.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -73,8 +73,8 @@ def initialize() {
 
         // ─────────────────────────────────────────────
         // Dew Point proximity thresholds (°C)
-        // deltaT = air temp − dew point
-        // Smaller deltaT = higher rain likelihood
+        // dewPointSpread = air temp − dew point
+        // Smaller dewPointSpread = higher rain likelihood
         // ─────────────────────────────────────────────
         dewNear : 2.0,   // °C → air nearly saturated
         dewFar  : 5.0,   // °C → dry separation
@@ -453,9 +453,9 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
     def cfg = state.cfg
     
     def dew = dewPoint(tempC, rh)
-    def deltaT = tempC - dew
+    def dewPointSpread = tempC - dew
     
-    def dPress = -rateOfChange(state.pressHist)
+    def pressureDrop = -rateOfChange(state.pressHist)
 
     def sRH = clamp(
         (rh - cfg.rhConfMin) / cfg.rhConfSpan,
@@ -463,9 +463,9 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
     )
 
     def sDew =
-        (deltaT <= cfg.dewNear) ? 1.0 :
-        (deltaT >= cfg.dewFar)  ? 0.0 :
-        (cfg.dewFar - deltaT) / (cfg.dewFar - cfg.dewNear)
+        (dewPointSpread <= cfg.dewNear) ? 1.0 :
+        (dewPointSpread >= cfg.dewFar)  ? 0.0 :
+        (cfg.dewFar - dewPointSpread) / (cfg.dewFar - cfg.dewNear)
 
     def sVPD =
         (vpd <= cfg.vpdWet) ? 1.0 :
@@ -475,9 +475,9 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
     def sWind = clamp(wind / cfg.windConfMax, 0.8, 1.0)
     
     def sPress =
-        (dPress < cfg.pressureConfStart) ? 0.0 :
-        (dPress >= cfg.pressureConfMax)  ? 1.0 :
-        (dPress - cfg.pressureConfStart) /
+        (pressureDrop < cfg.pressureConfStart) ? 0.0 :
+        (pressureDrop >= cfg.pressureConfMax)  ? 1.0 :
+        (pressureDrop - cfg.pressureConfStart) /
         (cfg.pressureConfMax - cfg.pressureConfStart)
             
     def sSolar =
@@ -502,7 +502,7 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
         String.format(
             "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f P=%.2f Sun=%.2f | ΔT=%.2f°C ΔP=%.2f inHg VPD=%.2f kPa Solar=%.0f W/m² → %.1f%%",
             sRH, sDew, sVPD, sWind, sPress, sSolar,
-            deltaT, dPress, vpd, solar, score
+            dewPointSpread, pressureDrop, vpd, solar, score
         )
     )
 
@@ -512,20 +512,20 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
 def probabilityScore(rh) {
     def cfg = state.cfg
     
-    def dRH    =  rateOfChange(state.rhHist)
-    def dVPD   = -rateOfChange(state.vpdHist)
-    def dWind  =  rateOfChange(state.windHist)
-    def dPress = -rateOfChange(state.pressHist)
+    def humidityRise =  rateOfChange(state.rhHist)
+    def vpdDrop      = -rateOfChange(state.vpdHist)
+    def windIncrease =  rateOfChange(state.windHist)
+    def pressureDrop = -rateOfChange(state.pressHist)
 
     def sRHabs = clamp(
         (rh - cfg.rhProbMin) / cfg.rhProbSpan,
         0.0, 1.0
     )
 
-    def sRHtrend    = clamp(dRH    / cfg.rhTrendMax,       0.0, 1.0)
-    def sVPDtrend   = clamp(dVPD   / cfg.vpdTrendMax,      0.0, 1.0)
-    def sWindTrend  = clamp(dWind  / cfg.windTrendMax,     0.0, 1.0)
-    def sPressTrend = clamp(dPress / cfg.pressureTrendMax, 0.0, 1.0)
+    def sRHtrend    = clamp(humidityRise / cfg.rhTrendMax,       0.0, 1.0)
+    def sVPDtrend   = clamp(vpdDrop      / cfg.vpdTrendMax,      0.0, 1.0)
+    def sWindTrend  = clamp(windIncrease / cfg.windTrendMax,     0.0, 1.0)
+    def sPressTrend = clamp(pressureDrop / cfg.pressureTrendMax, 0.0, 1.0)
 
     def score =
         100.0 * (
@@ -540,7 +540,7 @@ def probabilityScore(rh) {
         String.format(
             "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f P↓=%.2f | ΔRH=%.2f%% ΔVPD=%.3f kPa ΔWind=%.2f m/s ΔP=%.2f inHg → %.1f%%",
             sRHabs, sRHtrend, sVPDtrend, sWindTrend, sPressTrend,
-            dRH, dVPD, dWind, dPress, score
+            humidityRise, vpdDrop, windIncrease, pressureDrop, score
         )
     )
 
