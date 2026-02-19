@@ -60,13 +60,13 @@ State transitions — not raw values — drive alerts.
 
 ### Alerts
 
-| Condition                                         | Alert                         |
-| ------------------------------------------------- | ----------------------------- |
-| Rain sensor > 0 AND rain rate ≥ threshold         | 🌧️ Rain confirmed             |
-| Rain sensor > 0 AND confidence ≥ threshold        | 🌧️ Rain confirmed             |
-| Rain sensor > 0 AND confidence < threshold        | ⚠️ Rain sensor false positive |
-| Rain confirmed → confidence drops below threshold | ⚠️ Rain confidence lost       |
-| Rain confirmed → rain sensor returns to zero      | ⛅️ Rain has stopped           |
+| Condition                                                        | Alert                         |
+| ---------------------------------------------------------------- | ----------------------------- |
+| Rain sensor > 0 AND confidence ≥ threshold                       | 🌧️ Rain confirmed             |
+| Rain sensor > 0 AND rain rate ≥ override threshold               | 🌧️ Rain confirmed (rate override) |
+| Rain sensor > 0 AND neither threshold met                        | ⚠️ Rain sensor false positive |
+| Rain confirmed → confidence drops below threshold                | ⚠️ Rain confidence lost       |
+| Rain confirmed → rain sensor returns to zero                     | ⛅️ Rain has stopped           |
 
 "Rain has stopped" reflects the *rain sensor state*, not a guarantee of clear skies.
 
@@ -456,24 +456,6 @@ Defaults assume ~5-minute sampling:
 
 ---
 
-### Stale Sensor Data Handling
-
-Trend histories depend on regular weather station updates.  
-If the time between processed updates exceeds `staleThresholdMinutes` (default: 45 minutes), the app:
-
-- Clears all trend history windows
-- Resets previous-value tracking variables and rain-related state flags
-- Sends a one-time staleness alert
-- Sends a recovery alert when fresh data resumes
-
-Staleness is checked on scheduled intervals, on sensor updates, and during initialization to ensure consistent handling.
-
-This prevents outdated sensor values from producing misleading trend calculations after connectivity interruptions, station outages, or long gaps between updates.
-
-If a weather update arrives with the same timestamp as the last processed update, it is ignored to prevent duplicate processing and history distortion.
-
----
-
 ### Weighted Probability Score
 
 $$
@@ -502,6 +484,24 @@ Once Probability later falls below the lower threshold, **no alert is generated*
 Probability alerts are suppressed while rain is confirmed to avoid redundant or confusing notifications during an active rain event.
 
 This reflects that Probability is a *pattern-detection signal*, not a weather state, and avoids misleading “all clear” messages. Hysteresis prevents alert flapping.
+
+---
+
+## Stale Sensor Data Handling
+
+Trend histories depend on regular weather station updates.  
+If the time between processed updates exceeds `staleThresholdMinutes` (default: 45 minutes), the app:
+
+- Clears all trend history windows
+- Resets previous-value tracking variables and rain-related state flags
+- Sends a one-time staleness alert
+- Sends a recovery alert when fresh data resumes
+
+Staleness is checked on scheduled intervals, on sensor updates, and during initialization to ensure consistent handling.
+
+This prevents outdated sensor values from producing misleading trend calculations after connectivity interruptions, station outages, or long gaps between updates.
+
+If a weather update arrives with the same timestamp as the last processed update, it is ignored to prevent duplicate processing and history distortion.
 
 ---
 
