@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.51.0" }
+String getAppVersion() { return "0.52.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -34,8 +34,14 @@ definition(
 
 preferences {
     page(name: "settings", title: getAppTitle(), install: true, uninstall: true) {
-        section {
+        section("Sensors") {
             input "weatherStation", "device.AmbientWeatherDevice", title: "Weather Station", multiple: false, required: true
+        }
+        section("Logs") {
+            input "enableSensorLog", "bool", title: "Log Sensor Data?", required: true, defaultValue: false
+            input "enableScoreLog", "bool", title: "Log Score Calculations?", required: true, defaultValue: false
+            input "enableStateLog", "bool", title: "Log State?", required: true, defaultValue: false
+            input "enableStalenessLog", "bool", title: "Log Staleness Checks?", required: true, defaultValue: false
         }
         section {
             input "deviceMonitor", "device.DeviceMonitor", title: "Device Monitor", multiple: false, required: true
@@ -198,7 +204,7 @@ def initialize() {
 }
 
 def sensorHandler(evt) {
-    //logDebug("sensorHandler: ${evt.device} changed to ${evt.value}")
+    logDebug("sensorHandler: ${evt.device} changed to ${evt.value}")
     
     calculate()
 }
@@ -209,7 +215,7 @@ def calculate() {
     // Null Data Detection
     def missingAttributes = checkForNullData()
     if (missingAttributes) {
-        logDebug("Skipping calculations -- sensor data is null: ${missingAttributes.join(', ')}")
+        log.warn("Skipping calculations -- sensor data is null: ${missingAttributes.join(', ')}")
         return
     }
     
@@ -218,14 +224,14 @@ def calculate() {
     // Stale Data Detection
     def staleNow = checkForStaleness(sensorTimestamp)
     if (staleNow) {
-        logDebug("Skipping calculations -- sensor data is stale")
+        log.warn("Skipping calculations -- sensor data is stale") 
         return
     }
 
     // Duplicate Data Detection
     def duplicateUpdate = checkForDuplicate(sensorTimestamp)
     if (duplicateUpdate) {
-        logDebug("Skipping calculations -- duplicate sensor data")
+        log.debug("Skipping calculations -- duplicate sensor data")
         return
     }
     
@@ -245,23 +251,25 @@ def calculate() {
     def windMPH      = weatherStation.currentValue("wind")
     def solarWm2     = weatherStation.currentValue("solarradiation")
     
-    logDebug(
-        String.format(
-            "SENS ▶ T=%.1f°F (%+.1f) P=%.1f inHg (%+.1f) RH=%.0f%% (%+.1f) Rain=%.3f in/hr (%+.3f) Wind=%.1f mph (%+.1f) Solar=%.0f W/m² (%+.0f)",
-            tempF,
-            prevTempF != null ? (tempF - prevTempF) : 0.0,
-            pressInHg,
-            prevPressInHg != null ? (pressInHg - prevPressInHg) : 0.0,
-            rh,
-            prevRHraw != null ? (rh - prevRHraw) : 0.0,
-            rainRateInHr,
-            prevRainRate != null ? (rainRateInHr - prevRainRate) : 0.0,
-            windMPH,
-            prevWindMPH != null ? (windMPH - prevWindMPH) : 0.0,
-            solarWm2,
-            prevSolar != null ? (solarWm2 - prevSolar) : 0.0
-        )
-    )
+    if (enableSensorLog) {
+        log.debug(
+            String.format(
+                "SENS ▶ T=%.1f°F (%+.1f) P=%.1f inHg (%+.1f) RH=%.0f%% (%+.1f) Rain=%.3f in/hr (%+.3f) Wind=%.1f mph (%+.1f) Solar=%.0f W/m² (%+.0f)",
+                tempF,
+                prevTempF != null ? (tempF - prevTempF) : 0.0,
+                pressInHg,
+                prevPressInHg != null ? (pressInHg - prevPressInHg) : 0.0,
+                rh,
+                prevRHraw != null ? (rh - prevRHraw) : 0.0,
+                rainRateInHr,
+                prevRainRate != null ? (rainRateInHr - prevRainRate) : 0.0,
+                windMPH,
+                prevWindMPH != null ? (windMPH - prevWindMPH) : 0.0,
+                solarWm2,
+                prevSolar != null ? (solarWm2 - prevSolar) : 0.0
+            )
+        ) 
+    }
 
     def tempC  = (tempF - 32.0) * 5.0 / 9.0
     def windMS = windMPH * 0.44704
@@ -290,7 +298,7 @@ def calculate() {
     if (isRaining && !wasConfirmed) {
         if (adjConf >= cfg.wetConfMin || rainRateInHr >= cfg.rainRateConfirm) {
             if (state.falsePositive) {
-                logInfo("🌧️ Rain confirmation resolved previous false positive.")
+                log.info("🌧️ Rain confirmation resolved previous false positive.")
             }
 
             sendAlert(
@@ -363,16 +371,18 @@ def calculate() {
     // Status
     def status = deriveStatus(adjProb)
     
-    logDebug(
-        String.format(
-            "STATE ▶ Prob=%.1f%% (Base=%.1f ×%.2f) | Conf=%.1f%% (Base=%.1f ×%.2f) | Status=%s",
-            adjProb,
-            baseProb, tf.prob,
-            adjConf,
-            baseConf, tf.conf,
-            status
+    if (enableStateLog) {
+        log.info(
+            String.format(
+                "STATE ▶ Prob=%.1f%% (Base=%.1f ×%.2f) | Conf=%.1f%% (Base=%.1f ×%.2f) | Status=%s",
+                adjProb,
+                baseProb, tf.prob,
+                adjConf,
+                baseConf, tf.conf,
+                status
+            )
         )
-    )
+    }
     
     // Save Sensor Data
     state.prevTempF     = tempF
@@ -498,13 +508,15 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
             0.02 * sSolar
         )
     
-    logDebug(
-        String.format(
-            "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f P=%.2f Sun=%.2f | ΔT=%.2f°C ΔP=%.2f inHg VPD=%.2f kPa Solar=%.0f W/m² → %.1f%%",
-            sRH, sDew, sVPD, sWind, sPress, sSolar,
-            dewPointSpread, pressureDrop, vpd, solar, score
-        )
-    )
+    if (enableScoreLog) {
+        log.debug(
+            String.format(
+                "CONF ▶ RH=%.2f Dew=%.2f VPD=%.2f Wind=%.2f P=%.2f Sun=%.2f | ΔT=%.2f°C ΔP=%.2f inHg VPD=%.2f kPa Solar=%.0f W/m² → %.1f%%",
+                sRH, sDew, sVPD, sWind, sPress, sSolar,
+                dewPointSpread, pressureDrop, vpd, solar, score
+            )
+        ) 
+    }
 
     return clamp(score, 0.0, 100.0)
 }
@@ -536,13 +548,15 @@ def probabilityScore(rh) {
             0.10 * sPressTrend
         )
 
-    logDebug(
-        String.format(
-            "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f P↓=%.2f | ΔRH=%.2f%% ΔVPD=%.3f kPa ΔWind=%.2f m/s ΔP=%.2f inHg → %.1f%%",
-            sRHabs, sRHtrend, sVPDtrend, sWindTrend, sPressTrend,
-            humidityRise, vpdDrop, windIncrease, pressureDrop, score
+    if (enableScoreLog) {
+        log.debug(
+            String.format(
+                "PROB ▶ RH=%.2f RH↑=%.2f VPD↓=%.2f Wind↑=%.2f P↓=%.2f | ΔRH=%.2f%% ΔVPD=%.3f kPa ΔWind=%.2f m/s ΔP=%.2f inHg → %.1f%%",
+                sRHabs, sRHtrend, sVPDtrend, sWindTrend, sPressTrend,
+                humidityRise, vpdDrop, windIncrease, pressureDrop, score
+            )
         )
-    )
+    }
 
     return clamp(score, 0.0, 100.0)
 }
@@ -591,7 +605,9 @@ def checkForNullData() {
 
 def checkForStaleness(ts) {
     if (ts == null) {
-        logDebug("Staleness check ▶ timestamp missing")
+        if (enableStalenessLog) {
+            log.debug("Staleness check ▶ timestamp missing")
+        }
         return false
     }
 
@@ -600,7 +616,9 @@ def checkForStaleness(ts) {
     def now = new Date().time
     
     def ageMinutes = (now - ts) / 60000.0
-    logDebug("Staleness check ▶ age=${ageMinutes} minutes")
+    if (enableStalenessLog) {
+        log.debug("Staleness check ▶ age=${ageMinutes} minutes")
+    }
     
     def staleNow = ageMinutes >= cfg.staleThresholdMinutes
 
@@ -648,6 +666,8 @@ def clearTrendState() {
 }
 
 def scheduleCheck_Staleness() {
+    logDebug("scheduleCheck_Staleness")
+    
     def lastTs = state.lastProcessedTimestamp
     if (lastTs != null) { 
         checkForStaleness(lastTs)
