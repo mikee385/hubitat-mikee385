@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.52.0" }
+String getAppVersion() { return "0.53.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -70,11 +70,11 @@ def initialize() {
         // Relative Humidity thresholds (% RH)
         // Used for absolute humidity scoring
         // ─────────────────────────────────────────────
-        rhConfMin  : 60.0,   // % RH where confidence begins contributing
-        rhConfSpan : 30.0,   // % RH span to reach full confidence
+        rhConfMin  : 72.0,   // % RH where confidence begins contributing
+        rhConfSpan : 25.0,   // % RH span to reach full confidence
 
-        rhProbMin  : 70.0,   // % RH where probability begins contributing
-        rhProbSpan : 25.0,   // % RH span to reach full probability
+        rhProbMin  : 78.0,   // % RH where probability begins contributing
+        rhProbSpan : 20.0,   // % RH span to reach full probability
 
 
         // ─────────────────────────────────────────────
@@ -90,8 +90,8 @@ def initialize() {
         // Vapor Pressure Deficit thresholds (kPa)
         // Lower VPD = wetter air
         // ─────────────────────────────────────────────
-        vpdWet : 0.30,   // kPa → surfaces stay wet
-        vpdDry : 1.00,   // kPa → rapid drying
+        vpdWet : 0.25,   // kPa → surfaces stay wet
+        vpdDry : 1.75,   // kPa → rapid drying
 
 
         // ─────────────────────────────────────────────
@@ -114,7 +114,7 @@ def initialize() {
         // ─────────────────────────────────────────────
         // Wind normalization thresholds
         // ─────────────────────────────────────────────
-        windConfMax : 2.0,  // m/s → caps wind plausibility benefit
+        windConfMax : 3.0,  // m/s → caps wind plausibility benefit
 
 
         // ─────────────────────────────────────────────
@@ -164,7 +164,7 @@ def initialize() {
         // Applied AFTER raw probability score
         // ─────────────────────────────────────────────
         probCoolBoost : 1.15,  // Cold rain more trustworthy
-        probHotDampen : 0.85,  // Hot rain needs stronger signals
+        probHotDampen : 0.92,  // Hot rain needs stronger signals
 
 
         // ─────────────────────────────────────────────
@@ -172,7 +172,7 @@ def initialize() {
         // Applied AFTER raw confidence score
         // ─────────────────────────────────────────────
         confCoolBoost : 1.10,  // Cold drizzle persists
-        confHotDampen : 0.90,  // Hot rain dries faster
+        confHotDampen : 0.95,  // Hot rain dries faster
     ]
     
     // Initialize State
@@ -500,11 +500,11 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
 
     def score =
         100.0 * (
-            0.38 * sRH +
-            0.30 * sDew +
-            0.15 * sVPD +
-            0.05 * sWind +
-            0.10 * sPress +
+            0.35 * sRH +
+            0.32 * sDew +
+            0.21 * sVPD +
+            0.04 * sWind +
+            0.06 * sPress +
             0.02 * sSolar
         )
     
@@ -541,11 +541,11 @@ def probabilityScore(rh) {
 
     def score =
         100.0 * (
-            0.35 * sRHabs +
-            0.25 * sRHtrend +
-            0.20 * sVPDtrend +
-            0.10 * sWindTrend +
-            0.10 * sPressTrend
+            0.30 * sRHabs +
+            0.34 * sRHtrend +
+            0.23 * sVPDtrend +
+            0.08 * sWindTrend +
+            0.05 * sPressTrend
         )
 
     if (enableScoreLog) {
