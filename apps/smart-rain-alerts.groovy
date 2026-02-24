@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.53.0" }
+String getAppVersion() { return "0.54.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -482,7 +482,7 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
         (vpd >= cfg.vpdDry) ? 0.0 :
         (cfg.vpdDry - vpd) / (cfg.vpdDry - cfg.vpdWet)
 
-    def sWind = clamp(wind / cfg.windConfMax, 0.8, 1.0)
+    def sWind = 0.8 + 0.2 * clamp(wind / cfg.windConfMax, 0.0, 1.0)
     
     def sPress =
         (pressureDrop < cfg.pressureConfStart) ? 0.0 :
