@@ -482,6 +482,7 @@ def confidenceScore(tempC, rh, wind, vpd, solar) {
         (vpd >= cfg.vpdDry) ? 0.0 :
         (cfg.vpdDry - vpd) / (cfg.vpdDry - cfg.vpdWet)
 
+    // Wind acts as mild plausibility booster (does not penalize calm air)
     def sWind = 0.8 + 0.2 * clamp(wind / cfg.windConfMax, 0.0, 1.0)
     
     def sPress =
