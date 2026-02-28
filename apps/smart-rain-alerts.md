@@ -19,7 +19,7 @@ This separation avoids overfitting, reduces alert noise, and keeps alerts aligne
    - If the rain sensor reports rain, rain *may* be occurring.
    - If the rain sensor reports zero, rain *may still* be occurring (e.g., drizzle).
 
-2. **Environmental data cannot detect rain**
+2. **Environmental data cannot reliably detect rain without a precipitation sensor.**
 
    - Temperature, pressure, humidity, dew point, wind, solar radiation, and vapor pressure deficit (VPD) describe *conditions*, not precipitation.
    - These values are useful only as **context** or **sanity checks**.
@@ -84,6 +84,7 @@ This prevents false “sensor disagreement” alerts during fast-onset or convec
 
 - The rain sensor is *usually* correct but can glitch.
 - Environmental conditions can **invalidate** a rain reading but cannot replace it.
+- A sufficiently high measured rain rate is treated as definitive evidence of rain, regardless of environmental confidence.
 - Confidence decay is intentionally **disabled** to keep semantics clean and predictable.
 - Confidence reflects current environmental conditions and is seasonally scaled by temperature.
 
@@ -260,10 +261,10 @@ $$
 
 Default values:
 
-- $RH_{min} = 60\%$
-- $RH_{span} = 30\%$
+- $RH_{min} = 72\%$
+- $RH_{span} = 25\%$
 
-Below ~60% RH, rain is implausible. Above ~90%, additional RH adds little information.
+Below ~72% RH, sustained rain is typically implausible. Above ~90%, additional RH adds little information.
 
 ---
 
@@ -281,21 +282,21 @@ Dew point proximity reflects how close the air is to condensation:
 
 VPD contributes inversely:
 
-- $s_{VPD} = 1.0$ when $VPD \le 0.30\ \text{kPa}$
-- $s_{VPD} = 0.0$ when $VPD \ge 1.00\ \text{kPa}$
+- $s_{VPD} = 1.0$ when $VPD \le 0.25\ \text{kPa}$
+- $s_{VPD} = 0.0$ when $VPD \ge 1.75\ \text{kPa}$
 - Linear interpolation otherwise
 
 ---
 
 #### Wind Speed
 
-Wind is a weak modifier reflecting rain survivability:
+Wind does not penalize calm conditions; it only slightly boosts plausibility under moderate airflow:
 
-$$
-s_{Wind} = \mathrm{clamp}\left(\frac{Wind_{m/s}}{2.0}, 0.8, 1.0\right)
-$$
+- $s_{Wind} = 0.8$ when $Wind \le 0$
+- $s_{Wind} = 1.0$ when $Wind \ge 3.0\ \text{m/s}$
+- Linear interpolation between 0.8 and 1.0 otherwise
 
-Higher wind slightly improves plausibility by reducing evaporation near surfaces.
+Increasing wind often accompanies dynamic weather systems and convective development. Calm, stagnant air is more consistent with overnight saturation than active rainfall.
 
 ---
 
@@ -338,11 +339,11 @@ Solar radiation cannot invalidate rain by itself but meaningfully reduces confid
 $$
 Confidence =
 100 \cdot \left(
-0.38 \cdot s_{RH} +
-0.30 \cdot s_{Dew} +
-0.15 \cdot s_{VPD} +
-0.05 \cdot s_{Wind} +
-0.10 \cdot s_{Pressure} +
+0.35 \cdot s_{RH} +
+0.32 \cdot s_{Dew} +
+0.21 \cdot s_{VPD} +
+0.04 \cdot s_{Wind} +
+0.06 \cdot s_{Pressure} +
 0.02 \cdot s_{Solar}
 \right)
 $$
@@ -362,7 +363,7 @@ Probability answers:
 Probability does **not** represent a transition from “dry” to “wet,” and it does not measure environmental wetness.
 
 The environment can become wetter (e.g., rising humidity, lower VPD) without ever producing a high Probability score.  
-Probability increases only when **specific short-term atmospheric trends** commonly associated with imminent rainfall are present.
+Probability increases only when **specific short-term atmospheric trends** commonly associated with imminent rainfall are present. These trends are necessary but not sufficient for rainfall.
 
 However, it is **not** a precipitation forecast and is not expected to predict all rain events.
 
@@ -386,8 +387,8 @@ $$
 
 Defaults:
 
-- $RH_{min} = 70\%$
-- $RH_{span} = 25\%$
+- $RH_{min} = 78\%$
+- $RH_{span} = 20\%$
 
 ---
 
@@ -461,11 +462,11 @@ Defaults assume ~5-minute sampling:
 $$
 Probability =
 100 \cdot \left(
-0.35 \cdot s_{RH,abs} +
-0.25 \cdot s_{RH,trend} +
-0.20 \cdot s_{VPD,trend} +
-0.10 \cdot s_{Wind,trend} +
-0.10 \cdot s_{Pressure,trend}
+0.30 \cdot s_{RH,abs} +
+0.34 \cdot s_{RH,trend} +
+0.23 \cdot s_{VPD,trend} +
+0.08 \cdot s_{Wind,trend} +
+0.05 \cdot s_{Pressure,trend}
 \right)
 $$
 
@@ -529,6 +530,7 @@ Rationale:
 
 - Cold drizzle can persist under marginal conditions
 - Hot rain requires stronger signals and dries faster
+- Temperature scaling adjusts sensitivity at seasonal extremes rather than shifting detection thresholds
 
 ---
 
