@@ -363,7 +363,7 @@ Probability answers:
 Probability does **not** represent a transition from “dry” to “wet,” and it does not measure environmental wetness.
 
 The environment can become wetter (e.g., rising humidity, lower VPD) without ever producing a high Probability score.  
-Probability increases only when **specific short-term atmospheric trends** commonly associated with imminent rainfall are present. These trends are necessary but not sufficient for rainfall.
+Probability increases only when **specific short-term atmospheric trends** commonly associated with rain onset are present. These trends are necessary but not sufficient for rainfall.
 
 However, it is **not** a precipitation forecast and is not expected to predict all rain events.
 
@@ -462,11 +462,11 @@ Defaults assume ~5-minute sampling:
 $$
 Probability =
 100 \cdot \left(
-0.30 \cdot s_{RH,abs} +
-0.34 \cdot s_{RH,trend} +
-0.23 \cdot s_{VPD,trend} +
-0.08 \cdot s_{Wind,trend} +
-0.05 \cdot s_{Pressure,trend}
+0.29 \cdot s_{RH,abs} +
+0.33 \cdot s_{RH,trend} +
+0.16 \cdot s_{VPD,trend} +
+0.16 \cdot s_{Wind,trend} +
+0.06 \cdot s_{Pressure,trend}
 \right)
 $$
 
@@ -484,7 +484,12 @@ Once Probability later falls below the lower threshold, **no alert is generated*
 
 Probability alerts are suppressed while rain is confirmed to avoid redundant or confusing notifications during an active rain event.
 
-This reflects that Probability is a *pattern-detection signal*, not a weather state, and avoids misleading “all clear” messages. Hysteresis prevents alert flapping.
+This reflects that Probability is a *pattern-detection signal*, not a weather state, and avoids misleading “all clear” messages. The default thresholds are:
+
+- **Upper threshold:** 40
+- **Lower threshold:** 30
+
+This hysteresis prevents alert flapping when the probability signal oscillates near the activation threshold.
 
 ---
 
@@ -555,12 +560,35 @@ Rationale:
 
 ---
 
+## Empirical Weight Tuning
+
+The Probability score weights were empirically tuned using a full year of personal weather station data.
+
+Dataset characteristics:
+
+- **Time range:** Feb 23, 2025 – Feb 22, 2026
+- **Total rain onset events:** 152
+- **Sampling interval:** ~5 minutes
+- **Optimization target:** maximize F1 score for early rain onset detection
+
+The optimizer searched millions of weight combinations along with alert thresholds and hysteresis windows. The final weight set reflects the strongest predictors of rain onset in this dataset.
+
+While tuned using a single station, the selected predictors are based on well-established meteorological relationships and are expected to generalize reasonably across similar mid-latitude climates.
+
+Typical performance from the tuning dataset:
+
+- Mean lead time: ~21 minutes before rain onset
+- Recall: ~40% of rain events detected
+- Precision: ~27% (alerts intentionally conservative)
+
+---
+
 ## Known Limitations & Gotchas
 
 ### Drizzle Detection
 
 - Very light drizzle may not register on the rain sensor.
-- Environmental conditions alone cannot confirm drizzle.
+- Environmental conditions alone cannot reliably confirm drizzle.
 - The app intentionally avoids “drizzle guessing” to prevent stuck states.
 
 ### Long Wet Periods

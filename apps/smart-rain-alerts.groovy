@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.54.0" }
+String getAppVersion() { return "0.55.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -145,8 +145,8 @@ def initialize() {
         // Alert thresholds (% score)
         // Hysteresis prevents alert flapping
         // ─────────────────────────────────────────────
-        wetTrendOn  : 75.0,  // % probability → rain likely soon
-        wetTrendOff : 60.0,  // % probability → clear prediction
+        wetTrendOn  : 40.0,  // % probability → rain likely soon
+        wetTrendOff : 30.0,  // % probability → clear prediction
 
         wetConfMin  : 75.0,  // % confidence → rain confirmed
         
@@ -542,11 +542,11 @@ def probabilityScore(rh) {
 
     def score =
         100.0 * (
-            0.30 * sRHabs +
-            0.34 * sRHtrend +
-            0.23 * sVPDtrend +
-            0.08 * sWindTrend +
-            0.05 * sPressTrend
+            0.29 * sRHabs +
+            0.33 * sRHtrend +
+            0.16 * sVPDtrend +
+            0.16 * sWindTrend +
+            0.06 * sPressTrend
         )
 
     if (enableScoreLog) {
