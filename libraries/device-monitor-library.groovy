@@ -1,13 +1,13 @@
 /**
  *  name: Device Monitor Library
  *  author: Michael Pierce
- *  version: 4.6.0
+ *  version: 4.6.1
  *  minimumHEVersion: 2.2.8
  *  licenseFile: https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE
- *  releaseNotes: Exclude NUT Child UPS from unchanged device checks
- *  dateReleased: 2023-02-08
+ *  releaseNotes: Change device check to avoid blocked use of metaClass
+ *  dateReleased: 2026-09-24
  *
- *  Copyright 2023 Michael Pierce
+ *  Copyright 2026 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -129,14 +129,14 @@ def getDevicesFromSettings() {
     for (setting in settings) {
         if (setting.value instanceof List) {
             for (item in setting.value) {
-                if (item.metaClass.respondsTo(item, 'getDeviceNetworkId')) {
+                if (item instanceof com.hubitat.app.DeviceWrapper) {
                     if (!isVirtualDevice(item)) {
                         devices[item.id] = item
                     } 
                 }
             }
         } else {
-            if (setting.value.metaClass.respondsTo(setting.value, 'getDeviceNetworkId')) {
+            if (setting.value instanceof com.hubitat.app.DeviceWrapper) {
                 if (!isVirtualDevice(setting.value)) {
                     devices[setting.value.id] = setting.value
                 } 
