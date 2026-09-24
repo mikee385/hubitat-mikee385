@@ -15,7 +15,7 @@
  */
  
 String getAppName() { return "Smart Rain Alerts" }
-String getAppVersion() { return "0.55.0" }
+String getAppVersion() { return "0.56.0" }
 String getAppTitle() { return "${getAppName()}, version ${getAppVersion()}" }
 
 #include mikee385.debug-library
@@ -244,12 +244,12 @@ def calculate() {
     def prevSolar      = state.prevSolar
     
     // Current Sensor Data
-    def tempF        = weatherStation.currentValue("temperature")
-    def pressInHg    = weatherStation.currentValue("pressure")
-    def rh           = weatherStation.currentValue("humidity")
-    def rainRateInHr = weatherStation.currentValue("precip_1hr")
-    def windMPH      = weatherStation.currentValue("wind")
-    def solarWm2     = weatherStation.currentValue("solarradiation")
+    def tempF        = weatherStation.currentValue("temperature")?.toBigDecimal()
+    def pressInHg    = weatherStation.currentValue("pressure")?.toBigDecimal()
+    def rh           = weatherStation.currentValue("humidity")?.toBigDecimal()
+    def rainRateInHr = weatherStation.currentValue("precip_1hr")?.toBigDecimal()
+    def windMPH      = weatherStation.currentValue("wind")?.toBigDecimal()
+    def solarWm2     = weatherStation.currentValue("solarradiation")?.toBigDecimal()
     
     if (enableSensorLog) {
         log.debug(
