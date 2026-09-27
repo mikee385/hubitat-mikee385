@@ -1,7 +1,7 @@
 /**
  *  Echo Glow Routines Device Handler
  *
- *  Copyright 2023 Michael Pierce
+ *  Copyright 2026 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "2.1.0" }
+String getVersionNum() { return "2.2.0" }
 String getVersionLabel() { return "Echo Glow Routines, version ${getVersionNum()} on ${getPlatform()}" }
 
 metadata {
@@ -93,8 +93,14 @@ def bedtimeSoon() {
     
     bedtimeSoonDevice().sendEvent(name: "contact", value: "open")
     runIn(1, bedtimeSoonClosed)
+    runIn(5, bedtimeSoonOpen)
+    runIn(6, bedtimeSoonClosed)
     
     sendEvent(name: "lastRoutine", value: "bedtimeSoon", isStateChange: true)
+}
+
+def bedtimeSoonOpen() {
+    bedtimeSoonDevice().sendEvent(name: "contact", value: "open")
 }
 
 def bedtimeSoonClosed() {
@@ -108,8 +114,14 @@ def bedtimeNow() {
     
     bedtimeNowDevice().sendEvent(name: "contact", value: "open")
     runIn(1, bedtimeNowClosed)
+    runIn(5, bedtimeNowOpen)
+    runIn(6, bedtimeNowClosed)
     
     sendEvent(name: "lastRoutine", value: "bedtimeNow", isStateChange: true)
+}
+
+def bedtimeNowOpen() {
+    bedtimeNowDevice().sendEvent(name: "contact", value: "open")
 }
 
 def bedtimeNowClosed() {
@@ -123,8 +135,14 @@ def wakeUp() {
     
     wakeUpDevice().sendEvent(name: "contact", value: "open")
     runIn(1, wakeUpClosed)
+    runIn(5, wakeUpOpen)
+    runIn(6, wakeUpClosed)
     
     sendEvent(name: "lastRoutine", value: "wakeUp", isStateChange: true)
+}
+
+def wakeUpOpen() {
+    wakeUpDevice().sendEvent(name: "contact", value: "open")
 }
 
 def wakeUpClosed() {
@@ -138,8 +156,14 @@ def glowsOff() {
     
     sendEvent(name: "contact", value: "open")
     runIn(1, glowsOffClosed)
+    runIn(5, glowsOffOpen)
+    runIn(6, glowsOffClosed)
     
     sendEvent(name: "lastRoutine", value: "glowsOff", isStateChange: true)
+}
+
+def glowsOffOpen() {
+    sendEvent(name: "contact", value: "open")
 }
 
 def glowsOffClosed() {

@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "1.0.0",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change contact behavior to represent a momentary device",
-    "dateReleased": "2023-03-12",
+    "releaseNotes": "Send extra changes to Amazon, as it has not been responding well lately",
+    "dateReleased": "2026-09-26",
     "drivers": [
         {
             "id": "0a3389a1-772e-4ea6-8400-29e550dc4c6d",
             "name": "Echo Glow Routines",
-            "version": "2.1.0",
+            "version": "2.2.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/echo-glow-routines.groovy",
             "required": true
